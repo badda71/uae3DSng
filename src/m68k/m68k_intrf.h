@@ -16,7 +16,9 @@ void m68k_go(int may_quit);
 
 
 #include "m68k/fame/fame.h"
+#ifndef __PSP2__
 #include "memory.h"
+#endif
 
 extern M68K_CONTEXT M68KCONTEXT;
 

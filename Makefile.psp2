@@ -1,0 +1,184 @@
+PREFIX	=/usr
+
+#SDL_BASE = $(PREFIX)/bin/
+SDL_BASE = 
+MORE_CFLAGS += -DGP2X -DPANDORA
+#-DUSE_ARMNEON -DUSE_ARMV7 
+
+NAME   = uae4all
+O      = o
+RM     = rm -f
+CC     = arm-vita-eabi-gcc
+CXX    = arm-vita-eabi-g++
+STRIP  = arm-vita-eabi-strip
+AS     = arm-vita-eabi-as
+
+PROG   = $(NAME)
+
+all: $(PROG)
+	rm -f uae4all-*
+	rm -f uae4all.*
+	rm -rf vpk
+	mkdir -p vpk/sce_sys
+	vita-elf-create uae4all uae4all.velf
+	vita-make-fself uae4all.velf vpk/eboot.bin
+	vita-mksfoex -s TITLE_ID=UAE4ALL00 "UAE4ALL2" vpk/sce_sys/param.sfo
+	cp -r psp2data/* vpk
+	cd vpk && zip -r ../uae4all-`date +%y-%m-%d`.vpk . && cd ..
+
+FAME_CORE=1
+FAME_CORE_C=1
+#GUICHAN_GUI=1
+PANDORA=1
+#SDLSOUND=1
+NEWSDLSOUND=1
+
+DEFAULT_CFLAGS = -D__PSP2__ -Wl,-q -I$(VITASDK)/arm-vita-eabi/include \
+			-I$(VITASDK)/arm-vita-eabi/include/SDL \
+			-Isrc/psp2
+LDFLAGS = -lpsp2shell -lSDL -lSDL_image \
+		-lvita2d -lSceDisplay_stub -lSceGxm_stub \
+		-lSceSysmodule_stub -lSceCtrl_stub -lScePgf_stub -lSceNetCtl_stub \
+		-lSceNet_stub -lScePower_stub -lSceKernel_stub -lSceCommonDialog_stub \
+		-lSceAppUtil_stub -lSceAudio_stub -lSceAppMgr_stub -lpng -ljpeg -lz -lm -lc
+
+MORE_CFLAGS +=   -Isrc -Isrc/gp2x -Isrc/menu -Isrc/include -Isrc/gp2x/menu -fomit-frame-pointer -Wno-unused -Wno-format \
+	-DUSE_SDL -DGCCCONSTFUNC="__attribute__((const))" -DUSE_UNDERSCORE \
+	-DSHM_SUPPORT_LINKS=0 -DUNALIGNED_PROFITABLE -DOPTIMIZED_FLAGS -DOS_WITHOUT_MEMORY_MANAGEMENT
+#-Isrc/vkbd  -DVKBD_ALWAYS -DUSE_UAE4ALL_VKBD
+ifdef GUICHAN_GUI
+LDFLAGS +=  -lSDL_ttf -lguichan_sdl -lguichan
+MORE_CFLAGS += -fexceptions
+else
+MORE_CFLAGS += -fno-exceptions
+endif
+
+
+MORE_CFLAGS += -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"ux0:/app/UAE4ALL00/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
+
+MORE_CFLAGS += -ffast-math
+
+ifndef DEBUG
+MORE_CFLAGS += -O3
+MORE_CFLAGS += -fstrict-aliasing -mstructure-size-boundary=32 -fexpensive-optimizations
+MORE_CFLAGS += -fweb -frename-registers -fomit-frame-pointer
+#MORE_CFLAGS += -falign-functions=32 -falign-loops -falign-labels -falign-jumps
+MORE_CFLAGS += -falign-functions=32
+MORE_CFLAGS += -finline -finline-functions -fno-builtin
+MORE_CFLAGS += -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfloat-abi=hard -mfpu=neon
+#MORE_CFLAGS += -S
+else
+MORE_CFLAGS += -ggdb
+endif
+
+ASFLAGS += -mfloat-abi=hard -mfpu=neon
+
+MORE_CFLAGS+= -DUSE_AUTOCONFIG
+MORE_CFLAGS+= -DUSE_ZFILE
+# Turrican3 becomes unstable if this is not enabled
+#MORE_CFLAGS+= -DSAFE_MEMORY_ACCESS
+#MORE_CFLAGS+= -DDEBUG_SAVESTATE
+
+CFLAGS  = $(DEFAULT_CFLAGS) $(MORE_CFLAGS)
+
+OBJS =	\
+	src/psp2/psp2_input.o \
+	src/psp2/psp2-dirent.o \
+	src/vkbd/vkbd.o \
+	src/audio.o \
+	src/autoconf.o \
+	src/blitfunc.o \
+	src/blittable.o \
+	src/blitter.o \
+	src/cfgfile.o \
+	src/cia.o \
+	src/savedisk.o \
+	src/savestate.o \
+	src/custom.o \
+	src/disk.o \
+	src/drawing.o \
+	src/ersatz.o \
+	src/expansion.o \
+	src/filesys.o \
+	src/fsdb.o \
+	src/fsdb_unix.o \
+	src/fsusage.o \
+	src/gfxutil.o \
+	src/hardfile.o \
+	src/keybuf.o \
+	src/main.o \
+	src/memory.o \
+	src/missing.o \
+	src/native2amiga.o \
+	src/neon_helper.o \
+	src/gui.o \
+	src/od-joy.o \
+	src/scsi-none.o \
+	src/sdlgfx.o \
+	src/writelog.o \
+	src/zfile.o \
+	src/menu/fade.o \
+	src/gp2x/memcpy.o \
+	src/gp2x/memset.o \
+	src/gp2x/gp2x.o \
+	src/gp2x/inputmode.o \
+	src/gp2x/menu/menu_helper.o \
+	src/gp2x/menu/menu_config.o \
+	src/gp2x/menu/menu.o
+ifdef GUICHAN_GUI
+CFLAGS+= -DUSE_GUICHAN
+OBJS += src/menu_guichan/menu_guichan.o \
+	src/menu_guichan/menuTabMain.o \
+	src/menu_guichan/menuTabFloppy.o \
+	src/menu_guichan/menuTabHD.o \
+	src/menu_guichan/menuTabDisplaySound.o \
+	src/menu_guichan/menuTabSavestates.o \
+	src/menu_guichan/menuTabControl.o \
+	src/menu_guichan/menuTabCustomCtrl.o \
+	src/menu_guichan/menuMessage.o \
+	src/menu_guichan/menuLoad_guichan.o \
+	src/menu_guichan/menuConfigManager.o \
+	src/menu_guichan/uaeradiobutton.o \
+	src/menu_guichan/uaedropdown.o
+ifdef PANDORA
+OBJS += src/menu_guichan/sdltruetypefont.o
+endif
+else
+OBJS += src/gp2x/menu/menu_fileinfo.o \
+	src/gp2x/menu/menu_load.o \
+	src/gp2x/menu/menu_main.o \
+	src/gp2x/menu/menu_savestates.o \
+	src/gp2x/menu/menu_misc.o \
+	src/gp2x/menu/menu_controls.o \
+	src/gp2x/menu/menu_display.o \
+	src/gp2x/menu/menu_memory_disk.o
+endif
+
+ifdef NEWSDLSOUND
+OBJS += src/sound_sdl_new.o
+else
+CFLAGS+= -DUSE_SDLSOUND
+OBJS += src/sound.o
+endif
+
+CFLAGS+= -DUSE_FAME_CORE -DUSE_FAME_CORE_C -DFAME_IRQ_CLOCKING -DFAME_CHECK_BRANCHES -DFAME_EMULATE_TRACE -DFAME_DIRECT_MAPPING -DFAME_BYPASS_TAS_WRITEBACK -DFAME_ACCURATE_TIMING -DFAME_GLOBAL_CONTEXT -DFAME_FETCHBITS=8 -DFAME_DATABITS=8 -DFAME_NO_RESTORE_PC_MASKED_BITS
+CFLAGS+= -DWITH_TESTMODE
+
+src/m68k/fame/famec.o: src/m68k/fame/famec.cpp
+OBJS += src/m68k/fame/famec.o
+OBJS += src/m68k/fame/m68k_intrf.o
+OBJS += src/m68k/m68k_cmn_intrf.o
+
+CPPFLAGS  = $(CFLAGS)
+
+src/neon_helper.o: src/neon_helper.s
+	$(CXX) -O3 -pipe -falign-functions=32 -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard -Wall -o src/neon_helper.o -c src/neon_helper.s
+
+$(PROG): $(OBJS)
+	$(CXX) $(CFLAGS) -o $(PROG) $(OBJS) $(LDFLAGS)
+#ifndef DEBUG
+#	$(STRIP) $(PROG)
+#endif
+
+clean:
+	$(RM) $(PROG) $(OBJS)

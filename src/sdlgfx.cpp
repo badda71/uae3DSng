@@ -114,7 +114,9 @@ static unsigned long next_synctime = 0;
 
 void flush_block ()
 {
+#ifndef __PSP2__
 	SDL_UnlockSurface (prSDLScreen);
+#endif
 #ifdef USE_UAE4ALL_VKBD
 	if (vkbd_mode)
 		vkbd_key=vkbd_process();		
@@ -130,7 +132,11 @@ void flush_block ()
 #endif
     unsigned long start = read_processor_time();
     if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
+#ifdef __PSP2__
+		SDL_Delay(((next_synctime - start) - 1000) / 1000);
+#else
       usleep((next_synctime - start) - 1000);
+#endif
     SDL_Flip(prSDLScreen);
 	  last_synctime = read_processor_time();
     
@@ -144,8 +150,9 @@ void flush_block ()
     else
       next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
 	}
+#ifndef __PSP2__
 	SDL_LockSurface (prSDLScreen);
-
+#endif
 	if(stylusClickOverride)
 	{
 		justClicked = 0;

@@ -56,6 +56,11 @@ extern SDL_Surface *current_screenshot;
 #ifdef GP2X
 #include "gp2xutil.h"
 #endif
+
+#ifdef __PSP2__
+#include <psp2shell.h>
+#endif
+
 long int version = 256*65536L*UAEMAJOR + 65536L*UAEMINOR + UAESUBREV;
 
 struct uae_prefs currprefs, changed_prefs; 
@@ -92,6 +97,20 @@ void default_prefs ()
     strcpy (prefs_df[0], ROM_PATH_PREFIX "df0.adf");
     strcpy (prefs_df[1], ROM_PATH_PREFIX "df1.adf");
 
+#ifdef __PSP2__
+	snprintf(romfile, 256, "ux0:/app/UAE4ALL00/kickstarts/%s",kickstarts_rom_names[kickstart]);
+	if(strlen(extended_rom_names[kickstart]) == 0)
+	  snprintf(extfile, 256, "");
+	else
+	  snprintf(extfile, 256, "ux0:/app/UAE4ALL00/kickstarts/%s",extended_rom_names[kickstart]);
+	FILE *f=fopen (romfile, "r" );
+	if(!f){
+		strcpy (romfile, "kick.rom");
+	}
+	else fclose(f);
+
+	snprintf(romkeyfile, 256, "ux0:/app/UAE4ALL00/kickstarts/%s","rom.key");
+#else
 	snprintf(romfile, 256, "%s/kickstarts/%s",launchDir,kickstarts_rom_names[kickstart]);
 	if(strlen(extended_rom_names[kickstart]) == 0)
 	  snprintf(extfile, 256, "");
@@ -104,6 +123,7 @@ void default_prefs ()
 	else fclose(f);
 	
 	snprintf(romkeyfile, 256, "%s/kickstarts/%s",launchDir,"rom.key");	
+#endif
 	f=fopen (romkeyfile, "r" );
 	if(!f)
 	{
@@ -205,6 +225,12 @@ void leave_program (void)
 
 void real_main (int argc, char **argv)
 {
+#ifdef __PSP2__
+	scePowerSetGpuClockFrequency(222);
+	scePowerSetArmClockFrequency(444);
+	//psp2shell_init(3333, 0);
+#endif
+
 #ifdef USE_SDL
     SDL_Init (SDL_INIT_VIDEO | SDL_INIT_JOYSTICK 
 #if !defined(NO_SOUND) && !defined(GP2X)
@@ -216,7 +242,15 @@ void real_main (int argc, char **argv)
   g_uae_epoch = read_processor_time();
   syncbase = 1000000; // Microseconds
 
+#ifdef __PSP2__
+	mkdir("ux0:/data/uae4all", 0777);
+	mkdir("ux0:/data/uae4all/roms", 0777);
+	mkdir("ux0:/data/uae4all/saves", 0777);
+	mkdir("ux0:/data/uae4all/conf", 0777);
+	strcpy(launchDir, "ux0:/data/uae4all");
+#else
 	getcwd(launchDir,250);
+#endif
     /* PocketUAE prefs */
     default_prefs_uae (&currprefs);
     default_prefs();
@@ -226,7 +260,6 @@ void real_main (int argc, char **argv)
 		// Set everthing to default and clear HD settings
 		SetDefaultMenuSettings(1);
     loadconfig (1);
-
     if (! graphics_setup ()) {
 		exit (1);
     }
@@ -270,6 +303,7 @@ void real_main (int argc, char **argv)
     DISK_init ();
 
     m68k_init(0);
+
     gui_update ();
 
 #ifdef GP2X

@@ -15,6 +15,10 @@
 #include <SDL_ttf.h>
 #include "savestate.h"
 
+#ifdef __PSP2__
+#define SDL_PollEvent PSP2_PollEvent
+#endif
+
 static const char *text_str_title="SaveStates";
 static const char *text_str_savestate="SaveState";
 static const char *text_str_0="0";

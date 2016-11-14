@@ -7,7 +7,11 @@
 #include "menu.h"
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef __PSP2__
+#include "psp2-dirent.h"
+#else
 #include <dirent.h>
+#endif
 #include "uae.h"
 #include "options.h"
 #include "sound.h"
@@ -15,6 +19,10 @@
 #include "gp2x.h"
 #include <SDL_ttf.h>
 #include "menu_config.h"
+
+#ifdef __PSP2__
+#define SDL_PollEvent PSP2_PollEvent
+#endif
 
 const char *text_str_display_separator="----------------------------------";
 const char *text_str_display_title=    "   Display and Sound Settings    ";

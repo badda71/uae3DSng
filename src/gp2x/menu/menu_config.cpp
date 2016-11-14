@@ -26,7 +26,11 @@ extern int timeslice_mode;
 extern char launchDir[300];
 extern char currentDir[300];
 extern int nr_drives;
+#ifdef __PSP2__
+static char config_filename[255] = "uae4all.cfg";
+#else
 extern char *config_filename;
+#endif
 
 extern void extractFileName(char * str,char *buffer);
 

@@ -502,6 +502,30 @@ void getMapping(int customId)
 void gui_handle_events (void)
 {
 	Uint8 *keystate = SDL_GetKeyState(NULL);
+#ifdef __PSP2__
+	SDL_JoystickUpdate();
+	
+	dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
+		|| (SDL_JoystickGetAxis(uae4all_joy0, 0) > 1024*10) ? 1 : 0;
+	dpadLeft  = SDL_JoystickGetButton(uae4all_joy0, 7)
+		|| (SDL_JoystickGetAxis(uae4all_joy0, 0) < -1024*10) ? 1 : 0;
+	dpadUp  = SDL_JoystickGetButton(uae4all_joy0, 8)
+		|| (SDL_JoystickGetAxis(uae4all_joy0, 1) < -1024*10) ? 1 : 0;
+	dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
+		|| (SDL_JoystickGetAxis(uae4all_joy0, 1) > 1024*10) ? 1 : 0;
+	
+	buttonA = SDL_JoystickGetButton(uae4all_joy0, 3);
+	buttonB = SDL_JoystickGetButton(uae4all_joy0, 1);
+	buttonX = SDL_JoystickGetButton(uae4all_joy0, 2);
+	buttonY = SDL_JoystickGetButton(uae4all_joy0, 0);
+	triggerL = SDL_JoystickGetButton(uae4all_joy0, 4);
+	triggerR = SDL_JoystickGetButton(uae4all_joy0, 5);
+	buttonSelect = SDL_JoystickGetButton(uae4all_joy0, 10);
+	buttonStart = SDL_JoystickGetButton(uae4all_joy0, 11);
+	
+	if(buttonSelect)
+		goMenu();
+#else
 	dpadUp = keystate[SDLK_UP];
 	dpadDown = keystate[SDLK_DOWN];
 	dpadLeft = keystate[SDLK_LEFT];
@@ -530,6 +554,7 @@ void gui_handle_events (void)
 	if(keystate[SDLK_F12])
 		goMenu();
 #endif
+#endif // __PSP2__
 
 #ifdef ANDROIDSDL
 

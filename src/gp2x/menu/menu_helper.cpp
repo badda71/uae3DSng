@@ -135,12 +135,28 @@ void update_display()
 	update_onscreen();
 #endif
 
+#ifdef __PSP2__
+	if(prSDLScreen != NULL) {
+		black_screen_now();
+		SDL_FreeSurface(prSDLScreen);
+	}
+	prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
+	printf("SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
+	int sh = 544;
+	int sw = (float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines);
+	int x = (960-sw)/2;
+	int y = 0;
+	SDL_SetVideoModeScaling(x, 0, sw, sh);
+	printf("SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, sw, sh);
+	SDL_SetVideoModeSync(0);
+#else
 #if defined(PANDORA) && !(defined(WIN32) || defined(AROS))
 	prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF);
 #elif defined(PANDORA) && (defined(WIN32) || defined(AROS))
 	prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_SWSURFACE|SDL_DOUBLEBUF);
 #else
 	prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_SWSURFACE|SDL_FULLSCREEN);
+#endif
 #endif
   SDL_ShowCursor(SDL_DISABLE);
 

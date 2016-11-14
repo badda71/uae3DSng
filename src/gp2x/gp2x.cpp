@@ -1,20 +1,20 @@
 #include <sys/file.h>
 
-#ifndef WIN32
+#if !( defined(WIN32) || defined(__PSP2__))
 #include <sys/ioctl.h>
 #endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if !( defined(WIN32) || defined(AROS) )
+#if !( defined(WIN32) || defined(AROS) || defined(__PSP2__))
 #include <sys/mman.h>
 #endif
 
 #include <unistd.h>
 #include <fcntl.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS))
+#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__))
 #include <sys/soundcard.h>
 #endif
 
@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS))
+#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__))
 #include <linux/soundcard.h>
 #endif
 
@@ -112,8 +112,13 @@ void gp2x_init(int argc, char **argv)
 #endif
 	
 	SDL_ShowCursor(SDL_DISABLE);
+#ifdef __PSP2__
+	strcpy(launchDir, "ux0:/data/uae4all");
+	strcpy(currentDir, "ux0:/data/uae4all");
+#else
 	getcwd(launchDir, 250);
 	getcwd(currentDir, 250);
+#endif
 	strcat(currentDir,"/roms/");
 }
 
@@ -160,7 +165,11 @@ void switch_to_hw_sdl(int first_time)
 {
 	GFXVIDINFO_HEIGHT=240;
 	SDL_ShowCursor(SDL_DISABLE);
+#ifdef __PSP2__
+	SDL_Delay(100);
+#else
 	usleep(100*1000);
+#endif
 
 	// reinit video
 	graphics_init();

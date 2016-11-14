@@ -244,7 +244,11 @@ extern "C" {
 #else
 
 /* 4-byte alignment */
+#ifdef __PSP2__
+#define UAE4ALL_ALIGN __attribute__ ((__aligned__ (16)))
+#else
 #define UAE4ALL_ALIGN __attribute__ ((__aligned__ (4)))
+#endif
 #define uae4all_memcpy memcpy
 #define uae4all_memclr(p,l) memset(p, 0, l)
 

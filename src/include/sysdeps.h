@@ -80,7 +80,11 @@
 #endif
 
 #if HAVE_DIRENT_H
+#ifdef __PSP2__
+# include "psp2-dirent.h"
+#else
 # include <dirent.h>
+#endif
 #else
 # define dirent direct
 # if HAVE_SYS_NDIR_H

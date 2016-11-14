@@ -427,7 +427,9 @@ static void uae4all_disk_real_write(int num)
 			uae4all_disk_actual_crc[num]=new_crc;
 // FIXME - error: 'sync' was not declared in this scope
 #ifndef WIN32
+#ifndef __PSP2__
 			sync();
+#endif
 #endif
 		}
 	}

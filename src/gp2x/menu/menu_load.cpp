@@ -5,12 +5,17 @@
 #include "sysdeps.h"
 #include "config.h"
 #include "menu.h"
+#ifdef __PSP2__
+#include <unistd.h>
+#include "psp2-dirent.h"
+#else
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#endif
 #include "uae.h"
 #include "options.h"
 #include "sound.h"
@@ -22,6 +27,10 @@
 
 #ifndef PATH_MAX
 	#define PATH_MAX 256
+#endif
+
+#ifdef __PSP2__
+#define SDL_PollEvent PSP2_PollEvent
 #endif
 
 char romFileName[PATH_MAX];
@@ -46,6 +55,8 @@ extern int run_menuFileinfo(char* fileName);
 static int min_in_dir=0, max_in_dir=SHOW_MAX_FILES;
 
 extern int current_drive;
+
+#ifndef __PSP2__
 #ifdef PANDORA
 static int scandir_cmp(const void *p1, const void *p2)
 {
@@ -60,6 +71,7 @@ static int scandir_cmp(const dirent **p1, const dirent **p2)
 	if ((*d2)->d_type == DT_DIR) return  1;
 	return alphasort(d1, d2);
 }
+#endif
 
 static const char *filter_exts[] = {
 	".adf", ".gz",".rom",".adf.gz"
@@ -161,6 +173,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 static int menuLoadLoop(char *curr_path)
 {
 	char *ret = NULL, *fname = NULL;
+
 	struct dirent **namelist;
 	DIR *dir;
 	int n, sel = 0;
@@ -170,6 +183,41 @@ static int menuLoadLoop(char *curr_path)
 	min_in_dir=0;
 	max_in_dir=SHOW_MAX_FILES;
 
+#ifdef __PSP2__
+	if ((dir = opendir(curr_path)) == NULL)
+	{
+		char *p;
+		for (p = curr_path + strlen(curr_path) - 1; p > curr_path && *p != '/'; p--);
+		*p = 0;
+		fname = p+1;
+	}
+
+	struct dirent *ent = NULL;
+	n = 0;
+	namelist =  (struct dirent **)malloc(1024 * sizeof(struct dirent *)); // < 1024 files
+	namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
+	strcpy(namelist[0]->d_name, ".");
+	namelist[0]->d_type = DT_DIR; n++;
+	namelist[1] = (struct dirent *)malloc(sizeof(struct dirent));
+	strcpy(namelist[1]->d_name, "..");
+	namelist[1]->d_type = DT_DIR; n++;
+	
+	while ((ent = readdir (dir)) != NULL) {
+		if(n >= 1023)
+			break;
+		namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
+		memcpy(namelist[n], ent, sizeof(struct dirent));
+		n++;
+	}
+	closedir(dir);
+
+	if(n <= 0) {
+		return 0;
+	}
+	
+	if (n<10) SDL_Delay(70);
+	else SDL_Delay(40);
+#else
 	// is this a dir or a full path?
 	if ((dir = opendir(curr_path)))
 		closedir(dir);
@@ -197,6 +245,7 @@ static int menuLoadLoop(char *curr_path)
 	}
 	if (n<10) usleep(70*1024);
 	else usleep(40*1024);
+#endif
 	// try to find sel
 	if (fname != NULL) 
 	{

@@ -378,3 +378,13 @@
 	 */
 #	define uae_malloc(len) malloc((len + 1) & ~1);
 #endif
+
+#ifdef __PSP2__
+#undef HAVE_SYS_MOUNT_H
+#undef HAVE_SYS_VFS_H
+#undef HAVE_SYS_STATFS_H
+#include <psp2/power.h>
+#include "psp2_input.h"
+//#include <psp2shell.h>
+//#define printf psp2shell_print
+#endif

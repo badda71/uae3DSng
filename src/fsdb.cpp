@@ -102,7 +102,9 @@ void fsdb_clean_dir (a_inode *dir)
 	pos1 += sizeof buf;
     }
     fclose (f);
+#ifndef __PSP2__
     truncate (n, pos1);
+#endif
     free (n);
 }
 

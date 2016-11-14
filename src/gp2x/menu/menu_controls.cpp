@@ -9,7 +9,11 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef __PSP2__
+#include "psp2-dirent.h"
+#else
 #include <dirent.h>
+#endif
 
 #include "uae.h"
 #include "options.h"
@@ -18,6 +22,10 @@
 #include "gp2x.h"
 #include <SDL_ttf.h>
 #include "menu_config.h"
+
+#ifdef __PSP2__
+#define SDL_PollEvent PSP2_PollEvent
+#endif
 
 #define MAX_CUSTOM_ID 96
 #define MIN_CUSTOM_ID -8

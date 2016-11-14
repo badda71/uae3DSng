@@ -126,6 +126,39 @@ safe_read
   return n_chars;
 }
 
+#ifdef __PSP2__
+#include <psp2/io/devctl.h>
+
+typedef struct {
+    uint64_t max_size;
+    uint64_t free_size;
+    uint32_t cluster_size;
+    void *unk;
+} SceIoDevInfo;
+
+int
+get_fs_usage
+	(const char *path,
+	const char *disk,
+	struct fs_usage *fsp)
+{
+	fsp->fsu_blocks = 507289;
+	fsp->fsu_bfree = 3435973;
+	fsp->fsu_bavail = 507289 / 2;
+	fsp->fsu_files = 3435973;
+	fsp->fsu_ffree = 3435973;
+
+/*
+	SceIoDevInfo info;
+	memset(&info, 0, sizeof(SceIoDevInfo));
+	int res = sceIoDevctl("ux0:", 0x3001, 0, 0, &info, sizeof(SceIoDevInfo));
+	if (res >= 0) {
+	}
+*/
+	return 0;
+}
+#else
+
 /* Fill in the fields of FSP with information about space usage for
    the filesystem on which PATH resides.
    DISK is the device on which PATH is mounted, for space-getting
@@ -291,3 +324,4 @@ get_fs_usage
 
   return 0;
 }
+#endif // __PSP2__

@@ -144,7 +144,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	}
 	else if (!triggerR /*R+dpad = arrow keys*/ && !(mainMenu_customControls && !mainMenu_custom_dpad))
 	{
-#ifndef AROS
+#if !defined(AROS) && !defined(__PSP2__) 
 		if (dpadRight || SDL_JoystickGetAxis(joy, 0) > 0) right=1;
 		if (dpadLeft || SDL_JoystickGetAxis(joy, 0) < 0) left=1;
 		if (dpadUp || SDL_JoystickGetAxis(joy, 1) < 0) top=1;

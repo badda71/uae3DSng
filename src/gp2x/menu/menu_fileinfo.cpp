@@ -8,7 +8,11 @@
 #include<SDL.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef __PSP2__
+#include "psp2-dirent.h"
+#else
 #include<dirent.h>
+#endif
 #include "uae.h"
 #include "options.h"
 #include "sound.h"

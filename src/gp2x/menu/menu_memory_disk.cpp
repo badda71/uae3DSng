@@ -10,7 +10,11 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
-#include<dirent.h>
+#ifdef __PSP2__
+#include "psp2-dirent.h"
+#else
+#include <dirent.h>
+#endif
 
 #include "autoconf.h"
 #include "uae.h"
@@ -23,6 +27,10 @@
 
 /* PocketUAE config file. Used for parsing PocketUAE-like options. */
 #include "cfgfile.h" 
+
+#ifdef __PSP2__
+#define SDL_PollEvent PSP2_PollEvent
+#endif
 
 const char *text_str_memdisk_separator="--------------------------------------";
 static const char *text_str_memdisk_title=    "     Memory and Disk Options     -";
