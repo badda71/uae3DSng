@@ -11,6 +11,8 @@
 
 #if defined(DEBUG_UAE4ALL) && defined(UAE_CONSOLE)
 
+#ifndef __PSP2__
+
 void write_log_standard (const char *fmt, ...)
 {
     va_list ap;
@@ -33,6 +35,8 @@ void write_log_standard (const char *fmt, ...)
     }
 #endif
 }
+
+#endif // __PSP2__
 
 #endif
 

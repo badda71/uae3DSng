@@ -873,11 +873,7 @@ int run_mainMenu()
 			if (kickstart!=oldkickstart) 
 			{
 				oldkickstart=kickstart;
-#ifdef __PSP2__
-				snprintf(romfile, 256, "ux0:/app/UAE4ALL00/kickstarts/%s",kickstarts_rom_names[kickstart]);
-#else
 				snprintf(romfile, 256, "%s/kickstarts/%s",launchDir,kickstarts_rom_names[kickstart]);
-#endif
 				bReloadKickstart=1;
 				uae4all_init_rom(romfile);
 #ifdef ANDROIDSDL

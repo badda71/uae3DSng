@@ -385,6 +385,8 @@
 #undef HAVE_SYS_STATFS_H
 #include <psp2/power.h>
 #include "psp2_input.h"
-//#include <psp2shell.h>
-//#define printf psp2shell_print
+#ifdef DEBUG_UAE4ALL
+#include <psp2shell.h>
+#define printf psp2shell_print
+#endif
 #endif

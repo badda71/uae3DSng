@@ -161,7 +161,9 @@ static char *drive_id_name (drive *drv)
     switch (drv->drive_id)
     {
     case DRIVE_ID_35HD : return "3.5HD";
+#ifndef __PSP2__
     case DRIVE_ID_525DD: return "5.25DD";
+#endif
     case DRIVE_ID_35DD : return "3.5DD";
     }
     return "UNKNOWN";

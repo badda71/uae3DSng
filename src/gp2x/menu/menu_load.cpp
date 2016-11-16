@@ -184,12 +184,17 @@ static int menuLoadLoop(char *curr_path)
 	max_in_dir=SHOW_MAX_FILES;
 
 #ifdef __PSP2__
+	if(strcmp(curr_path, "/") == 0)
+		strcpy(curr_path, "ux0:/");
+
 	if ((dir = opendir(curr_path)) == NULL)
 	{
+		printf("opendir failed: %s\n", curr_path);
 		char *p;
 		for (p = curr_path + strlen(curr_path) - 1; p > curr_path && *p != '/'; p--);
 		*p = 0;
 		fname = p+1;
+		dir = opendir(curr_path);
 	}
 
 	struct dirent *ent = NULL;

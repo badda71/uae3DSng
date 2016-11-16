@@ -378,7 +378,11 @@ extern void mallocemu_free (void *ptr);
 
 #ifdef UAE_CONSOLE
 #undef write_log
+#ifdef __PSP2__
+#define write_log psp2shell_print
+#else
 #define write_log write_log_standard
+#endif
 #else
 #undef write_log
 #define write_log(FORMATO, RESTO...)

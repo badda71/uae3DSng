@@ -26,6 +26,7 @@ all: $(PROG)
 	cp -r psp2data/* vpk
 	cd vpk && zip -r ../uae4all-`date +%y-%m-%d`.vpk . && cd ..
 
+DEBUG=1
 FAME_CORE=1
 FAME_CORE_C=1
 #GUICHAN_GUI=1
@@ -36,11 +37,10 @@ NEWSDLSOUND=1
 DEFAULT_CFLAGS = -D__PSP2__ -Wl,-q -I$(VITASDK)/arm-vita-eabi/include \
 			-I$(VITASDK)/arm-vita-eabi/include/SDL \
 			-Isrc/psp2
-LDFLAGS = -lpsp2shell -lSDL -lSDL_image \
-		-lvita2d -lSceDisplay_stub -lSceGxm_stub \
-		-lSceSysmodule_stub -lSceCtrl_stub -lScePgf_stub -lSceNetCtl_stub \
-		-lSceNet_stub -lScePower_stub -lSceKernel_stub -lSceCommonDialog_stub \
-		-lSceAppUtil_stub -lSceAudio_stub -lSceAppMgr_stub -lpng -ljpeg -lz -lm -lc
+LDFLAGS = -lSDL -lSDL_image \
+		-lvita2d -lSceSysmodule_stub -lSceDisplay_stub -lSceGxm_stub \
+		-lSceCtrl_stub -lScePgf_stub -lScePower_stub -lSceCommonDialog_stub \
+		-lSceAudio_stub -lpng -ljpeg -lz -lm -lc
 
 MORE_CFLAGS +=   -Isrc -Isrc/gp2x -Isrc/menu -Isrc/include -Isrc/gp2x/menu -fomit-frame-pointer -Wno-unused -Wno-format \
 	-DUSE_SDL -DGCCCONSTFUNC="__attribute__((const))" -DUSE_UNDERSCORE \
@@ -68,7 +68,12 @@ MORE_CFLAGS += -finline -finline-functions -fno-builtin
 MORE_CFLAGS += -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfloat-abi=hard -mfpu=neon
 #MORE_CFLAGS += -S
 else
-MORE_CFLAGS += -ggdb
+MORE_CFLAGS += -DDEBUG -DDEBUG_UAE4ALL -DUAE_CONSOLE \
+			#-DDEBUG_DISK -DDEBUG_DRIVE_ID -DDEBUG_SOUND \
+			#-DDEBUG_FRAMERATE -DDEBUG_GFX
+			#-DDEBUG_SAVESTATE -DDEBUG_M68K
+LDFLAGS += -lpsp2shell -lSceSysmodule_stub -lSceNetCtl_stub \
+		-lSceNet_stub -lSceAppUtil_stub -lSceAppMgr_stub
 endif
 
 ASFLAGS += -mfloat-abi=hard -mfpu=neon
@@ -181,4 +186,5 @@ $(PROG): $(OBJS)
 #endif
 
 clean:
-	$(RM) $(PROG) $(OBJS)
+	$(RM) $(PROG) $(OBJS) uae4all-* uae4all.velf
+	rm -rf vpk

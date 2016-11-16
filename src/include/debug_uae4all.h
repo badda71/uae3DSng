@@ -5,6 +5,14 @@
 
 #ifdef DEBUG_UAE4ALL
 
+#ifdef __PSP2__
+#include <psp2shell.h>
+#define puts psp2shell_print
+#define printf psp2shell_print
+
+#define dbg psp2shell_print
+#define dbgf psp2shell_print
+#else
 
 #ifdef DEBUG_UAE4ALL_FFLUSH
 #define UAE4ALL_FFLUSH fflush(stdout);
@@ -45,7 +53,7 @@ static __inline__ void dbgsum(char *str, void *buff, unsigned len)
 	}
 }
 
-
+#endif // __PSP2__
 #else
 
 #define dbg(TEXTO)
