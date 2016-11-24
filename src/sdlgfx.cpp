@@ -47,6 +47,10 @@
 #include "rpt.h"
 #include "events.h"
 
+#ifdef __PSP2__
+#define SDL_PollEvent PSP2_PollEvent
+#endif
+
 bool mouse_state = true;
 bool slow_mouse = false;
 extern int moved_x;

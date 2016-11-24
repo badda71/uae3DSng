@@ -6,3 +6,4 @@ src-x86
 src-mips
 *.o
 libapplication*.so
+.idea

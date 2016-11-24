@@ -121,14 +121,18 @@ void update_display()
 	snprintf(layersize, 20, "%dx480", screenWidth);
 
 #ifndef WIN32
+#ifndef __PSP2__
 	setenv("SDL_OMAP_LAYER_SIZE",layersize,1);
+#endif
 #endif
 
 	char bordercut[20];
 	snprintf(bordercut, 20, "%d,%d,0,0", mainMenu_cutLeft, mainMenu_cutRight);
 
 #ifndef WIN32
+#ifndef __PSP2__
 	setenv("SDL_OMAP_BORDER_CUT",bordercut,1);
+#endif
 #endif
 
 #ifdef ANDROIDSDL
@@ -143,7 +147,7 @@ void update_display()
 	prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
 	int sh = 544;
-	int sw = (float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines);
+	int sw = (int)((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
 	int x = (960-sw)/2;
 	int y = 0;
 	SDL_SetVideoModeScaling(x, 0, sw, sh);
@@ -171,6 +175,7 @@ static bool cpuSpeedChanged = false;
 
 void setCpuSpeed()
 {
+#ifndef __PSP2__
 	char speedCmd[128];
 
 	if(mainMenu_cpuSpeed != lastCpuSpeed)
@@ -189,6 +194,7 @@ void setCpuSpeed()
 			system("sudo /usr/pandora/scripts/op_lcdrate.sh 50");
 	}
 	update_display();
+#endif
 }
 
 

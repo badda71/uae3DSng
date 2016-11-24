@@ -118,7 +118,11 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	r.x=80-64; r.y=0; r.w=150-24+64+64; r.h=240;
 	text_draw_background();
 	if (menu_load_type == MENU_LOAD_HD_DIR)
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"  Press SELECT to load HD-dir  ");
+#else
 		text_draw_window(2,2,41,25,"  Press L-key to load HD-dir  ");
+#endif
 	else if (menu_load_type == MENU_LOAD_HDF)
 		text_draw_window(2,2,41,25,"       Select .HDF-file       ");
 	else if (current_drive==0)
@@ -289,11 +293,17 @@ static int menuLoadLoop(char *curr_path)
 					case SDLK_PAGEDOWN: hit0=1; break;
 					case SDLK_HOME: hit0=1; break;
 					case SDLK_LALT: hit1=1; break;
+#ifndef __PSP2__
 					case SDLK_LCTRL: hit2=1; break;
+#endif
 					case SDLK_RSHIFT: hit3=1; break;
 					case SDLK_RCTRL: hit4=1; break;
 					case SDLK_END: hit0=1; break;
+#ifdef __PSP2__
+					case SDLK_LCTRL: hitL=1; break;
+#else
 					case SDLK_PAGEUP: hit0=1; break;
+#endif
 					case SDLK_l: hitL=1;
 				}
 			}

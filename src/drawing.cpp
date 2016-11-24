@@ -59,11 +59,11 @@
 
 #define GFXVIDINFO_PIXBYTES 2
 //#define GFXVIDINFO_WIDTH 320
-#ifdef __PSP2__
-#define GFXVIDINFO_HEIGHT 240
-#else
+//#ifdef __PSP2__
+//#define GFXVIDINFO_HEIGHT 240
+//#else
 #define GFXVIDINFO_HEIGHT 270
-#endif
+//#endif
 #define MAXBLOCKLINES 270
 //#define VISIBLE_LEFT_BORDER 72
 //#define VISIBLE_RIGHT_BORDER 392

@@ -514,14 +514,14 @@ void gui_handle_events (void)
 	dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
 		|| (SDL_JoystickGetAxis(uae4all_joy0, 1) > 1024*10) ? 1 : 0;
 	
-	buttonA = SDL_JoystickGetButton(uae4all_joy0, 3);
-	buttonB = SDL_JoystickGetButton(uae4all_joy0, 1);
-	buttonX = SDL_JoystickGetButton(uae4all_joy0, 2);
-	buttonY = SDL_JoystickGetButton(uae4all_joy0, 0);
-	triggerL = SDL_JoystickGetButton(uae4all_joy0, 4);
-	triggerR = SDL_JoystickGetButton(uae4all_joy0, 5);
-	buttonSelect = SDL_JoystickGetButton(uae4all_joy0, 10);
-	buttonStart = SDL_JoystickGetButton(uae4all_joy0, 11);
+	buttonA = SDL_JoystickGetButton(uae4all_joy0, PAD_SQUARE);
+	buttonB = SDL_JoystickGetButton(uae4all_joy0, PAD_CIRCLE);
+	buttonX = SDL_JoystickGetButton(uae4all_joy0, PAD_CROSS);
+	buttonY = SDL_JoystickGetButton(uae4all_joy0, PAD_TRIANGLE);
+	triggerL = SDL_JoystickGetButton(uae4all_joy0, PAD_L);
+	triggerR = SDL_JoystickGetButton(uae4all_joy0, PAD_R);
+	buttonSelect = SDL_JoystickGetButton(uae4all_joy0, PAD_SELECT);
+	buttonStart = SDL_JoystickGetButton(uae4all_joy0, PAD_START);
 	
 	if(buttonSelect)
 		goMenu();

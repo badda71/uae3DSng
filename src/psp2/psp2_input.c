@@ -17,22 +17,22 @@ SDLKey getKey(Uint8 button) {
 		return SDLK_LEFT;
 
 		case PAD_START:
-		return SDLK_END;
+		return SDLK_LALT;
 
 		case PAD_SELECT:
-		return SDLK_PAGEUP;
+		return SDLK_LCTRL;
 
 		case PAD_CROSS:
 		return SDLK_PAGEDOWN;
 
 		case PAD_CIRCLE:
-		return SDLK_HOME;
+		return SDLK_END;
 
 		case PAD_TRIANGLE:
-		return SDLK_LALT;
+		return SDLK_PAGEUP;
 
 		case PAD_SQUARE:
-		return SDLK_LCTRL;
+		return SDLK_HOME;
 
 		case PAD_L:
 		return SDLK_RSHIFT;

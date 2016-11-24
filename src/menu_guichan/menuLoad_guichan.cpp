@@ -345,7 +345,7 @@ public:
 
         Uint8 *keystate;
         gcn::Key key = keyEvent.getKey();
-        if (key.getValue() == gcn::Key::UP) {
+        if (key.getValue() == gcn::Key::Up) {
             keystate = SDL_GetKeyState(NULL);
             if(keystate[SDLK_RSHIFT]) {
                 int selected = listBox->getSelected() - 10;
@@ -355,7 +355,7 @@ public:
                 bHandled = true;
             }
         }
-        if (key.getValue() == gcn::Key::DOWN) {
+        if (key.getValue() == gcn::Key::Down) {
             keystate = SDL_GetKeyState(NULL);
             if(keystate[SDLK_RSHIFT]) {
                 int selected = listBox->getSelected() + 10;
