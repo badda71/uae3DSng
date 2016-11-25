@@ -11,6 +11,8 @@ set(CMAKE_CXX_COMPILER "${VITASDK}/bin/arm-vita-eabi-g++")
 set(CMAKE_C_FLAGS "-Wl,-q" CACHE STRING "C flags")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "C++ flags")
 
+execute_process(COMMAND "date" "+%Y.%m.%d" OUTPUT_VARIABLE BUILD_DATE OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 project(uae4all2)
 set(TITLE_ID "UAE4ALL00")
 
@@ -120,10 +122,12 @@ target_link_libraries(${PROJECT_NAME}.elf
         )
 add_custom_target(${PROJECT_NAME}.vpk
         DEPENDS ${PROJECT_NAME}.elf
+        COMMAND rm -rf vpk && mkdir -p vpk/sce_sys
         COMMAND ${VITASDK}/bin/vita-elf-create ${PROJECT_NAME}.elf ${PROJECT_NAME}.velf
-        COMMAND ${VITASDK}/bin/vita-make-fself -s ${PROJECT_NAME}.velf eboot.bin
-        COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLE_ID} "${PROJECT_NAME}" param.sfo
-        COMMAND ${VITASDK}/bin/vita-pack-vpk -s param.sfo -b eboot.bin ${PROJECT_NAME}.vpk
+        COMMAND ${VITASDK}/bin/vita-make-fself -s ${PROJECT_NAME}.velf vpk/eboot.bin
+        COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLE_ID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
+        COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
+        COMMAND cd vpk && zip -r ../uae4all-${BUILD_DATE}.vpk . && cd ..
         )
 
 add_executable(${PROJECT_NAME}-debug.elf ${SRC_FILES})
@@ -139,8 +143,10 @@ target_link_libraries(${PROJECT_NAME}-debug.elf
         )
 add_custom_target(${PROJECT_NAME}-debug.vpk
         DEPENDS ${PROJECT_NAME}-debug.elf
+        COMMAND rm -rf vpk && mkdir -p vpk/sce_sys
         COMMAND ${VITASDK}/bin/vita-elf-create ${PROJECT_NAME}-debug.elf ${PROJECT_NAME}-debug.velf
-        COMMAND ${VITASDK}/bin/vita-make-fself ${PROJECT_NAME}-debug.velf eboot.bin
-        COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLE_ID} "${PROJECT_NAME}" param.sfo
-        COMMAND ${VITASDK}/bin/vita-pack-vpk -s param.sfo -b eboot.bin ${PROJECT_NAME}-debug.vpk
+        COMMAND ${VITASDK}/bin/vita-make-fself ${PROJECT_NAME}-debug.velf vpk/eboot.bin
+        COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLE_ID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
+        COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
+        COMMAND cd vpk && zip -r ../uae4all-debug-${BUILD_DATE}.vpk . && cd ..
         )
