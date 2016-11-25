@@ -36,7 +36,7 @@ set(FLAGS
         -DGP2X -DPANDORA -D__PSP2__ -DUSE_AUTOCONFIG -DUSE_ZFILE -DUSE_FAME_CORE -DWITH_TESTMODE
         -DUSE_SDL -DGCCCONSTFUNC="__attribute__\(\(const\)\)" -DUSE_UNDERSCORE
         -DSHM_SUPPORT_LINKS=0 -DUNALIGNED_PROFITABLE -DOPTIMIZED_FLAGS -DOS_WITHOUT_MEMORY_MANAGEMENT
-        -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"ux0:/app/UAE4ALL00/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
+        -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"app0:/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
         -fomit-frame-pointer -Wno-unused -Wno-format
         -ffast-math -fstrict-aliasing -mstructure-size-boundary=32 -fexpensive-optimizations
         -fweb -frename-registers -fomit-frame-pointer
@@ -51,7 +51,7 @@ set(DEBUG_FLAGS
         -DGP2X -DPANDORA -D__PSP2__ -DUSE_AUTOCONFIG -DUSE_ZFILE -DUSE_FAME_CORE -DWITH_TESTMODE
         -DUSE_SDL -DGCCCONSTFUNC="__attribute__\(\(const\)\)" -DUSE_UNDERSCORE
         -DSHM_SUPPORT_LINKS=0 -DUNALIGNED_PROFITABLE -DOPTIMIZED_FLAGS -DOS_WITHOUT_MEMORY_MANAGEMENT
-        -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"ux0:/app/UAE4ALL00/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
+        -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"app0:/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
         -DDEBUG -DDEBUG_UAE4ALL -DUAE_CONSOLE
         )
 

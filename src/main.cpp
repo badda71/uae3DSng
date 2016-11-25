@@ -212,8 +212,10 @@ void leave_program (void)
 void real_main (int argc, char **argv)
 {
 #ifdef __PSP2__
-	scePowerSetGpuClockFrequency(222);
 	scePowerSetArmClockFrequency(444);
+    scePowerSetGpuClockFrequency(222);
+    scePowerSetBusClockFrequency(222);
+    scePowerSetGpuXbarClockFrequency(222);
 #ifdef DEBUG_UAE4ALL
 	psp2shell_init(3333, 5);
 #endif
