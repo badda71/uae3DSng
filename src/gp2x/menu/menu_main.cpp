@@ -756,8 +756,8 @@ static void raise_mainMenu()
 		SDL_FreeSurface(prSDLScreen);
 	}
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
-	int sh = 544;
-	int sw = (float)320*((float)544/(float)240);
+	int sh = 480;
+	int sw = (float)320*((float)480/(float)240);
 	int x = (960-sw)/2;
 	int y = 0;
 	SDL_SetVideoModeScaling(x, y, sw, sh);
@@ -769,6 +769,7 @@ static void raise_mainMenu()
 #else
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE|SDL_FULLSCREEN);
 #endif
+
 
 	int i;
 
@@ -930,6 +931,7 @@ int run_mainMenu()
 
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
-
+	
+	update_display();
 	return mainMenu_case;
 }

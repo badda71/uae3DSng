@@ -146,9 +146,11 @@ void update_display()
 	}
 	prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
-	int sh = 544;
-	int sw = (int)((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
-	int x = (960-sw)/2;
+//	int sh = 540;
+	int sh = 2 * (int) mainMenu_displayedLines;
+// int sw = (int)((float)visibleAreaWidth*((float)540/(float)mainMenu_displayedLines));
+	int sw = 2 * (int) visibleAreaWidth;
+   int x = (960-sw)/2;
 	int y = 0;
 	SDL_SetVideoModeScaling(x, 0, sw, sh);
 	printf("SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, sw, sh);
