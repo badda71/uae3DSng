@@ -755,11 +755,13 @@ static void raise_mainMenu()
 		SDL_Flip(prSDLScreen);
 		SDL_FreeSurface(prSDLScreen);
 	}
+	
+	//for some reason the max texture size is 320 by 240
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	int sh = 480;
 	int sw = (float)320*((float)480/(float)240);
 	int x = (960-sw)/2;
-	int y = 0;
+	int y = 0;		
 	SDL_SetVideoModeScaling(x, y, sw, sh);
 	printf("SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, sw, sh);
 #elif PANDORA

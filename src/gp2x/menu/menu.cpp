@@ -289,10 +289,7 @@ void text_draw_background()
 void text_flip(void)
 {
 	SDL_Delay(10);
-	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);	
-	//DEBUG
-	//SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 255, 255, 255))
-
+	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);		
 	SDL_Flip(prSDLScreen);
 }
 
