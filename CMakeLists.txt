@@ -56,6 +56,7 @@ set(DEBUG_FLAGS
         )
 
 set(SRC_FILES
+        src/psp2/psp2_shader.cpp
         src/psp2/psp2_input.c
         src/psp2/psp2-dirent.c
         src/vkbd/vkbd.cpp
@@ -116,6 +117,7 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE ${INC_FILES})
 target_link_libraries(${PROJECT_NAME}.elf
         -Wl,-q
         SDL SDL_image vita2d
+        ${CMAKE_SOURCE_DIR}/src/psp2/vita-shader-collection/lib/libvitashaders.a
         SceSysmodule_stub SceDisplay_stub SceGxm_stub
         SceCtrl_stub ScePgf_stub ScePower_stub SceCommonDialog_stub
         SceAudio_stub png jpeg z m c
@@ -124,7 +126,7 @@ add_custom_target(${PROJECT_NAME}.vpk
         DEPENDS ${PROJECT_NAME}.elf
         COMMAND rm -rf vpk && mkdir -p vpk/sce_sys
         COMMAND ${VITASDK}/bin/vita-elf-create ${PROJECT_NAME}.elf ${PROJECT_NAME}.velf
-        COMMAND ${VITASDK}/bin/vita-make-fself -s ${PROJECT_NAME}.velf vpk/eboot.bin
+        COMMAND ${VITASDK}/bin/vita-make-fself -s -c ${PROJECT_NAME}.velf vpk/eboot.bin
         COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLE_ID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
         COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
         COMMAND cd vpk && zip -r ../uae4all-${BUILD_DATE}.vpk . && cd ..
@@ -136,6 +138,7 @@ target_include_directories(${PROJECT_NAME}-debug.elf PRIVATE ${INC_FILES})
 target_link_libraries(${PROJECT_NAME}-debug.elf
         -Wl,-q
         SDL SDL_image vita2d
+        ${CMAKE_SOURCE_DIR}/src/psp2/vita-shader-collection/lib/libvitashaders.a
         SceSysmodule_stub SceDisplay_stub SceGxm_stub
         SceCtrl_stub ScePgf_stub ScePower_stub SceCommonDialog_stub
         SceAudio_stub png jpeg z m c
@@ -145,7 +148,7 @@ add_custom_target(${PROJECT_NAME}-debug.vpk
         DEPENDS ${PROJECT_NAME}-debug.elf
         COMMAND rm -rf vpk && mkdir -p vpk/sce_sys
         COMMAND ${VITASDK}/bin/vita-elf-create ${PROJECT_NAME}-debug.elf ${PROJECT_NAME}-debug.velf
-        COMMAND ${VITASDK}/bin/vita-make-fself ${PROJECT_NAME}-debug.velf vpk/eboot.bin
+        COMMAND ${VITASDK}/bin/vita-make-fself -c ${PROJECT_NAME}-debug.velf vpk/eboot.bin
         COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLE_ID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
         COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
         COMMAND cd vpk && zip -r ../uae4all-debug-${BUILD_DATE}.vpk . && cd ..

@@ -347,14 +347,15 @@ void init_text(int splash)
 		SDL_FreeSurface(prSDLScreen);
 	};	
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
-	
+	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", 320, 240);
+
 	float sh = (float) 480;
 	float sw = (float)320*((float)480/(float)240);
 	int x = (960-sw)/2;
-	int y = 0;
+	int y = (544-sh)/2;
 		
 	SDL_SetVideoModeScaling(x, y, sw, sh);
-	printf("SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, sw, sh);
+	printf("init_text: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
 #elif PANDORA
 	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);
 	setenv("SDL_OMAP_BORDER_CUT","0,0,0,30",1);
