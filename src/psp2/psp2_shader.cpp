@@ -5,6 +5,7 @@
 // use https://github.com/frangarcj/vita2dlib/commits/fbo
 // and https://github.com/frangarcj/vita-shader-collection/releases
 
+#include <sysconfig.h>
 #include "psp2_shader.h"
 
 #include "vita-shader-collection/includes/lcd3x_v.h"
@@ -33,6 +34,8 @@
 
 PSP2Shader::PSP2Shader(Shader shaderType) {
 
+    printf("PSP2Shader: %i\n", shaderType);
+
     switch (shaderType) {
 
         case Shader::LCD3X:
@@ -59,6 +62,13 @@ PSP2Shader::PSP2Shader(Shader shaderType) {
     vita2d_texture_set_wvp(shader->wvpParam);
     vita2d_texture_set_vertexInput(&shader->vertexInput);
     vita2d_texture_set_fragmentInput(&shader->fragmentInput);
+
+    for(int i=0; i<3; i++) {
+        vita2d_start_drawing();
+        vita2d_clear_screen();
+        vita2d_wait_rendering_done();
+        vita2d_swap_buffers();
+    }
 }
 
 PSP2Shader::~PSP2Shader() {

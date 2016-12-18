@@ -106,6 +106,10 @@ int mainMenu_scanlines = 0;
 int mainMenu_enableScreenshots = DEFAULT_ENABLESCREENSHOTS;
 int mainMenu_enableScripts = DEFAULT_ENABLESCRIPTS;
 
+#ifdef __PSP2__
+int mainMenu_shader = 0;
+#endif
+
 #ifdef ANDROIDSDL
 int mainMenu_onScreen = 1;
 int mainMenu_onScreen_textinput = 1;
@@ -794,6 +798,10 @@ int saveconfig(int general)
     snprintf((char*)buffer, 255, "scaling=%d\n",mainMenu_enableHWscaling);
 #endif
     fputs(buffer,f);
+#ifdef __PSP2__
+    snprintf((char*)buffer, 255, "shader=%d\n",mainMenu_shader);
+    fputs(buffer,f);
+#endif
     snprintf((char*)buffer, 255, "showstatus=%d\n",mainMenu_showStatus);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "mousemultiplier=%d\n",mainMenu_mouseMultiplier);
@@ -1090,6 +1098,9 @@ void loadconfig(int general)
         fscanf(f,"scaling=%d\n",&dummy);
 #else
         fscanf(f,"scaling=%d\n",&mainMenu_enableHWscaling);
+#endif
+#ifdef __PSP2__
+        fscanf(f,"shader=%d\n",&mainMenu_shader);
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
         fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier );

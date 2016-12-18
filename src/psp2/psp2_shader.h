@@ -24,7 +24,7 @@ public:
     ~PSP2Shader();
 
 private:
-    vita2d_shader *shader;
+    vita2d_shader *shader = NULL;
 };
 
 #endif //UAE4ALL2_PSP2_SHADER_H

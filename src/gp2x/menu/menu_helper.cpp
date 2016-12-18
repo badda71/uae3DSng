@@ -21,6 +21,7 @@
 #ifdef __PSP2__
 #include "psp2_shader.h"
 PSP2Shader *shader = NULL;
+extern int mainMenu_shader;
 #endif
 
 extern int screenWidth;
@@ -160,13 +161,12 @@ void update_display() {
     printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
     SDL_SetVideoModeSync(0);
 
-    /* disabled until we add a config option for this
     // set vita2d shader
     if(shader != NULL) {
         delete(shader);
+        shader = NULL;
     }
-    shader = new PSP2Shader(PSP2Shader::Shader::SHARP_BILINEAR);
-    */
+    shader = new PSP2Shader((PSP2Shader::Shader)mainMenu_shader);
 #else
 #if defined(PANDORA) && !(defined(WIN32) || defined(AROS))
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF);
