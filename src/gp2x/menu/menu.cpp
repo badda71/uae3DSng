@@ -289,7 +289,7 @@ void text_draw_background()
 void text_flip(void)
 {
 	SDL_Delay(10);
-	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);	
+	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);		
 	SDL_Flip(prSDLScreen);
 }
 
@@ -339,6 +339,31 @@ void init_kickstart()
 
 void init_text(int splash)
 {
+#ifdef __PSP2__
+	//Display menu always in 320*240 on Vita
+	if(prSDLScreen != NULL) {
+		SDL_FillRect(prSDLScreen,NULL,0);
+		SDL_Flip(prSDLScreen);
+		SDL_FreeSurface(prSDLScreen);
+	};	
+	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
+	
+	float sh = (float) 480;
+	float sw = (float)320*((float)480/(float)240);
+	int x = (960-sw)/2;
+	int y = 0;
+		
+	SDL_SetVideoModeScaling(x, y, sw, sh);
+	printf("SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, sw, sh);
+#elif PANDORA
+	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);
+	setenv("SDL_OMAP_BORDER_CUT","0,0,0,30",1);
+	prSDLScreen = SDL_SetVideoMode(320, 270, 16, SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF);
+#else
+	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE|SDL_FULLSCREEN);
+#endif
+
+	
 	char fname[256];
 	
 	SDL_Surface *tmp;
@@ -347,6 +372,7 @@ void init_text(int splash)
 	{
 		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w,prSDLScreen->h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w,prSDLScreen->h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+
 		tmp=SDL_LoadBMP(MENU_FILE_TEXT);
 		if (text_screen==NULL || tmp==NULL)
 			exit(-1);
@@ -445,6 +471,8 @@ void quit_text(void)
 	text_window_background = NULL;
 	SDL_FreeSurface(text_screen);
 	text_screen = NULL;
+	SDL_FreeSurface(window_screen);
+	window_screen = NULL;
 }
 
 void write_text_pos(int x, int y, char * str)

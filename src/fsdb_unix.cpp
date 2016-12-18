@@ -40,7 +40,7 @@ void fsdb_fill_file_attrs (a_inode *aino)
     			  | (S_IWUSR & statbuf.st_mode ? 0 : A_FIBF_WRITE)
     			  | (S_IRUSR & statbuf.st_mode ? 0 : A_FIBF_READ));
 
-#if defined(WIN32) || defined(ANDROIDSDL)
+#if defined(WIN32) || defined(ANDROIDSDL) || defined(__PSP2__)
     // Always give execute & read permission
     aino->amigaos_mode &= ~A_FIBF_EXECUTE;
     aino->amigaos_mode &= ~A_FIBF_READ;

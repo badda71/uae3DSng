@@ -90,8 +90,6 @@ int current_drive=0;
 int lastCpuSpeed=600;
 int ntsc=0;
 
-extern SDL_Surface *prSDLScreen;
-
 static void adjustToWindow(char *str, char* buffer)
 {
 	if (strlen(str)<33) return;
@@ -748,30 +746,8 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 }
 
 static void raise_mainMenu()
-{
-#ifdef __PSP2__
-	if(prSDLScreen != NULL) {
-		SDL_FillRect(prSDLScreen,NULL,0);
-		SDL_Flip(prSDLScreen);
-		SDL_FreeSurface(prSDLScreen);
-	}
-	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
-	int sh = 544;
-	int sw = (float)320*((float)544/(float)240);
-	int x = (960-sw)/2;
-	int y = 0;
-	SDL_SetVideoModeScaling(x, y, sw, sh);
-	printf("SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, sw, sh);
-#elif PANDORA
-	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);
-	setenv("SDL_OMAP_BORDER_CUT","0,0,0,30",1);
-	prSDLScreen = SDL_SetVideoMode(320, 270, 16, SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF);
-#else
-	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE|SDL_FULLSCREEN);
-#endif
-
+{	
 	int i;
-
 	text_draw_background();
 	text_flip();
 	for(i=0;i<10;i++)
@@ -930,6 +906,7 @@ int run_mainMenu()
 
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
-
+	
+	update_display();
 	return mainMenu_case;
 }

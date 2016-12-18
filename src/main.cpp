@@ -250,7 +250,8 @@ void real_main (int argc, char **argv)
 #endif
 		// Set everthing to default and clear HD settings
 		SetDefaultMenuSettings(1);
-    loadconfig (1);
+    
+     loadconfig (1);
     if (! graphics_setup ()) {
 		exit (1);
     }

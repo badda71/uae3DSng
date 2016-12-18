@@ -140,7 +140,7 @@ void flush_block ()
 		SDL_Delay(((next_synctime - start) - 1000) / 1000);
 #else
       usleep((next_synctime - start) - 1000);
-#endif
+#endif    
     SDL_Flip(prSDLScreen);
 	  last_synctime = read_processor_time();
     

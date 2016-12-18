@@ -40,7 +40,6 @@ int saveAdfDir()
 	return 1;
 }
 
-
 void extractFileName(char * str,char *buffer)
 {
 	char *p=str+strlen(str)-1;
@@ -146,9 +145,14 @@ void update_display()
 	}
 	prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
-	int sh = 544;
-	int sw = (int)((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
-	int x = (960-sw)/2;
+	//the commented out scaling fills the screen better 
+	//but looks horrible, due to the current lack of a good shader sharp bilinear scaler
+	//so stick with simple 2* point filtering for now.
+//	float sh = 544;
+	float sh = (float) (2 * mainMenu_displayedLines);
+// float sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
+	float sw = (float) (2 * visibleAreaWidth);
+   int x = (960-sw)/2;
 	int y = 0;
 	SDL_SetVideoModeScaling(x, 0, sw, sh);
 	printf("SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, sw, sh);
