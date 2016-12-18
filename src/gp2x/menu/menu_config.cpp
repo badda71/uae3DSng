@@ -1021,6 +1021,19 @@ int saveconfig(int general)
 
 void loadconfig(int general)
 {
+#ifdef __PSP2__
+//first time opening the screen on Vita, somehow this sets the max possible resolution,
+//so open it with 320*270. Even 800*600 would work, but only a width of 320 is supported by the current
+//drawing routines
+	int visibleAreaWidth_old = visibleAreaWidth;
+	int mainMenu_displayedLines_old = mainMenu_displayedLines;
+	visibleAreaWidth = 320;
+	mainMenu_displayedLines = 270;
+	update_display();
+	visibleAreaWidth=visibleAreaWidth_old;
+	mainMenu_displayedLines = mainMenu_displayedLines_old;
+#endif
+
     char path[300];
 
     if(general == 1) {
