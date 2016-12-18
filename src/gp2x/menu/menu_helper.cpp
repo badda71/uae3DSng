@@ -159,7 +159,7 @@ void update_display() {
     int y = (544 - sh) / 2;
     SDL_SetVideoModeScaling(x, y, sw, sh);
     printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
-    SDL_SetVideoModeSync(0);
+    SDL_SetVideoModeSync(1);
 
     // set vita2d shader
     if(shader != NULL) {
