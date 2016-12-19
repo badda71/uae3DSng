@@ -29,3 +29,9 @@ F11 - change input method
 
 Please put kickstarts files in android/data/pandora.uae4all.sdl/kickstarts directory.
 Files must be named as kick13.rom kick20.rom kick31.rom
+
+VITA controls:
+
+L+R+dpad up down - Change Screen vertical position
+Start - toggle between gp2x style mouse mode, joystick mode and stylus mode (stylus mode not working yet). Press multiple times to change behaviour between the three modes.
+Select - toggle menu
