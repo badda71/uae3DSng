@@ -146,19 +146,38 @@ void update_display() {
         black_screen_now();
         SDL_FreeSurface(prSDLScreen);
     }
+    
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
     printf("update_display: SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
-    //the commented out scaling fills the screen better
-    //but looks horrible, due to the current lack of a good shader sharp bilinear scaler
-    //so stick with simple 2* point filtering for now.
-    float sh = 544;
-    //float sh = (float) (2 * mainMenu_displayedLines);
-    float sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
-    //float sw = (float) (2 * visibleAreaWidth);
-    int x = (960 - sw) / 2;
-    int y = (544 - sh) / 2;
-    SDL_SetVideoModeScalingBilinear(x, y, sw, sh);
-    printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
+    
+    float sh;
+    float sw;
+    int x;
+    int y;
+
+    //is the sharp_bilinear_simple shader active?
+    if (mainMenu_shader == 5) 
+    {
+    	sh = 544;
+      sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
+    	x = (960 - sw) / 2;
+    	y = (544 - sh) / 2;
+    	
+    	//This requires SDL-Vita branch SDL12 for example 
+    	//https://github.com/rsn8887/SDL-Vita/tree/SDL12
+    	//to compile
+   	SDL_SetVideoModeScalingBilinear(x, y, sw, sh);
+    }
+    else //otherwise do regular integer 2* scaling to ensure good picture quality
+    {
+    	sh = (float) (2 * mainMenu_displayedLines);
+    	sw = (float) (2 * visibleAreaWidth);
+    	x = (960 - sw) / 2;
+      y = (544 - sh) / 2;
+      SDL_SetVideoModeScaling(x, y, sw, sh);
+	 }    
+	 printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
+
     SDL_SetVideoModeSync(1);
 
     // set vita2d shader
