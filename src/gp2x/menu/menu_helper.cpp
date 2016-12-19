@@ -151,13 +151,13 @@ void update_display() {
     //the commented out scaling fills the screen better
     //but looks horrible, due to the current lack of a good shader sharp bilinear scaler
     //so stick with simple 2* point filtering for now.
-    //	float sh = 544;
-    float sh = (float) (2 * mainMenu_displayedLines);
-    // float sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
-    float sw = (float) (2 * visibleAreaWidth);
+    float sh = 544;
+    //float sh = (float) (2 * mainMenu_displayedLines);
+    float sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
+    //float sw = (float) (2 * visibleAreaWidth);
     int x = (960 - sw) / 2;
     int y = (544 - sh) / 2;
-    SDL_SetVideoModeScaling(x, y, sw, sh);
+    SDL_SetVideoModeScalingBilinear(x, y, sw, sh);
     printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
     SDL_SetVideoModeSync(1);
 
