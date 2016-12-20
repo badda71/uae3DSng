@@ -26,6 +26,8 @@
 #include "vita-shader-collection/includes/scale2x_v.h"
 #include "vita-shader-collection/includes/sharp_bilinear_f.h"
 #include "vita-shader-collection/includes/sharp_bilinear_v.h"
+#include "vita-shader-collection/includes/sharp_bilinear_simple_f.h"
+#include "vita-shader-collection/includes/sharp_bilinear_simple_v.h"
 //#include "xbr_2x_noblend_f.h"
 //#include "xbr_2x_noblend_v.h"
 #include "vita-shader-collection/includes/fxaa_v.h"
@@ -49,6 +51,9 @@ PSP2Shader::PSP2Shader(Shader shaderType) {
             break;
         case Shader::SHARP_BILINEAR:
             shader = vita2d_create_shader((SceGxmProgram *) sharp_bilinear_v, (SceGxmProgram *) sharp_bilinear_f);
+            break;
+            case Shader::SHARP_BILINEAR_SIMPLE:
+            shader = vita2d_create_shader((SceGxmProgram *) sharp_bilinear_simple_v, (SceGxmProgram *) sharp_bilinear_simple_f);
             break;
         case Shader::FXAA:
             shader = vita2d_create_shader((SceGxmProgram *) fxaa_v, (SceGxmProgram *) fxaa_f);

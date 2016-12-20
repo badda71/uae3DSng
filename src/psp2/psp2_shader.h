@@ -17,6 +17,7 @@ public:
         SCALE2X,
         AAA,
         SHARP_BILINEAR,
+        SHARP_BILINEAR_SIMPLE,
         FXAA,
     };
 
