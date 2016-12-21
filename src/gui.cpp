@@ -105,6 +105,14 @@ int triggerL=0;
 int triggerR=0;
 int buttonSelect=0;
 int buttonStart=0;
+#ifdef __PSP2__
+//right analog stick values for mouse emulation on Vita
+int lAnalogX=0;
+int lAnalogY=0;
+int rAnalogX=0;
+int rAnalogY=0;
+extern int mainMenu_leftStickMouse;
+#endif
 
 extern int mainMenu_case;
 #ifdef WITH_TESTMODE
@@ -505,14 +513,34 @@ void gui_handle_events (void)
 #ifdef __PSP2__
 	SDL_JoystickUpdate();
 	
-	dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
-		|| (SDL_JoystickGetAxis(uae4all_joy0, 0) > 1024*10) ? 1 : 0;
-	dpadLeft  = SDL_JoystickGetButton(uae4all_joy0, 7)
-		|| (SDL_JoystickGetAxis(uae4all_joy0, 0) < -1024*10) ? 1 : 0;
-	dpadUp  = SDL_JoystickGetButton(uae4all_joy0, 8)
-		|| (SDL_JoystickGetAxis(uae4all_joy0, 1) < -1024*10) ? 1 : 0;
-	dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
-		|| (SDL_JoystickGetAxis(uae4all_joy0, 1) > 1024*10) ? 1 : 0;
+	//On Vita, always use either the left of right analog for mouse pointer movement
+	//the other stick replicates the dpad inputs
+	lAnalogX=SDL_JoystickGetAxis(uae4all_joy0, 0);
+	lAnalogY=SDL_JoystickGetAxis(uae4all_joy0, 1);
+	rAnalogX=SDL_JoystickGetAxis(uae4all_joy0, 2);
+	rAnalogY=SDL_JoystickGetAxis(uae4all_joy0, 3);
+	
+	if (mainMenu_leftStickMouse) {
+		dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
+			|| (rAnalogX > 1024*10) ? 1 : 0;
+		dpadLeft  = SDL_JoystickGetButton(uae4all_joy0, 7)
+			|| (rAnalogX < -1024*10) ? 1 : 0;
+		dpadUp  = SDL_JoystickGetButton(uae4all_joy0, 8)
+			|| (rAnalogY < -1024*10) ? 1 : 0;
+		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
+			|| (rAnalogY > 1024*10) ? 1 : 0;
+	} 
+	else
+	{
+		dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
+			|| (lAnalogX > 1024*10) ? 1 : 0;
+		dpadLeft  = SDL_JoystickGetButton(uae4all_joy0, 7)
+			|| (lAnalogX < -1024*10) ? 1 : 0;
+		dpadUp  = SDL_JoystickGetButton(uae4all_joy0, 8)
+			|| (lAnalogY < -1024*10) ? 1 : 0;
+		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
+			|| (lAnalogY > 1024*10) ? 1 : 0;
+	}
 	
 	buttonA = SDL_JoystickGetButton(uae4all_joy0, PAD_SQUARE);
 	buttonB = SDL_JoystickGetButton(uae4all_joy0, PAD_CIRCLE);
@@ -644,8 +672,13 @@ void gui_handle_events (void)
 if(!vkbd_mode)
 #endif
 {
+#ifdef __PSP2__
+	//holding start on Vita to move screen, L/R are used for mousebuttons.
+	if(buttonStart)
+#else
 	//L + R
 	if(triggerL && triggerR)
+#endif
 	{
 		//up
 		if(dpadUp)
@@ -1530,6 +1563,47 @@ if(!vkbd_mode)
 			justMovedRight=0;
 		}
 	}
+	
+#ifdef __PSP2__
+	//VITA Controls: If no using custom controls, use L=right mouse, R=left mouse because 
+	//because analog stick = mouse movement is always on for Vita
+	if(!mainMenu_customControls)
+	{
+		//(R) button
+		if(triggerR)
+		{
+			if(!justPressedR)
+			{
+				//left mouse-button down
+				buttonstate[0] = 1;
+				justPressedR=1;
+			}
+		}
+		else if(justPressedR)
+		{
+			//left mouse-button up
+			buttonstate[0] = 0;
+			justPressedR=0;
+		}
+		//(L) button
+		if(triggerL)
+		{
+			if(!justPressedL)
+			{
+				//right mouse-button down
+				buttonstate[2] = 1;
+				justPressedL=1;
+			}
+		}
+		else if(justPressedL)
+		{
+			//right mouse-button up
+			buttonstate[2] = 0;
+			justPressedL=0;
+		}
+	}
+#endif // __PSP2__
+
 } // if(!vkbd_mode)
 
 #ifdef USE_UAE4ALL_VKBD

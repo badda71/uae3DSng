@@ -92,6 +92,9 @@ int visibleAreaWidth = 320;
 
 int saveMenu_n_savestate = 0;
 
+#ifdef __PSP2__
+int mainMenu_leftStickMouse = 0;
+#endif
 
 // The following params in use, but can't be changed with gui
 int mainMenu_autosave = DEFAULT_AUTOSAVE;
@@ -100,15 +103,15 @@ int mainMenu_button2 = GP2X_BUTTON_A;
 int mainMenu_autofireButton1 = GP2X_BUTTON_B;
 int mainMenu_jump = -1;
 
+#ifdef __PSP2__
+int mainMenu_shader = 5;
+#endif
+
 // The following params not in use, but stored to write them back to the config file
 int gp2xClockSpeed = -1;
 int mainMenu_scanlines = 0;
 int mainMenu_enableScreenshots = DEFAULT_ENABLESCREENSHOTS;
 int mainMenu_enableScripts = DEFAULT_ENABLESCRIPTS;
-
-#ifdef __PSP2__
-int mainMenu_shader = 0;
-#endif
 
 #ifdef ANDROIDSDL
 int mainMenu_onScreen = 1;
@@ -187,7 +190,6 @@ void SetDefaultMenuSettings(int general)
     mainMenu_CPU_speed = 0;
 
     mainMenu_cpuSpeed = 600;
-
     mainMenu_joyConf = 0;
     mainMenu_joyPort = 0;
     mainMenu_autofireRate = 8;
@@ -216,6 +218,11 @@ void SetDefaultMenuSettings(int general)
     mainMenu_ntsc = DEFAULT_NTSC;
     mainMenu_frameskip = 0;
     mainMenu_autofire = DEFAULT_AUTOFIRE;
+
+#ifdef __PSP2__
+    mainMenu_shader = 5;
+    mainMenu_leftStickMouse = 0;
+#endif
 
     // The following params can't be changed in gui
     skipintro = DEFAULT_SKIPINTRO;
@@ -801,6 +808,8 @@ int saveconfig(int general)
 #ifdef __PSP2__
     snprintf((char*)buffer, 255, "shader=%d\n",mainMenu_shader);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "leftstickmouse=%d\n",mainMenu_leftStickMouse);
+    fputs(buffer,f);
 #endif
     snprintf((char*)buffer, 255, "showstatus=%d\n",mainMenu_showStatus);
     fputs(buffer,f);
@@ -1101,6 +1110,7 @@ void loadconfig(int general)
 #endif
 #ifdef __PSP2__
         fscanf(f,"shader=%d\n",&mainMenu_shader);
+        fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);        
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
         fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier );

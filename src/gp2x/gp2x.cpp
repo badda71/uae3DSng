@@ -54,7 +54,7 @@ int flashLED;
 
 int gp2xMouseEmuOn=0;
 int gp2xButtonRemappingOn=0;
-#ifndef PANDORA
+#if !defined(PANDORA) && !defined(__PSP2__)
 int hasGp2xButtonRemapping=1;
 #endif
 int GFXVIDINFO_HEIGHT=240;

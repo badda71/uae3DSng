@@ -30,8 +30,29 @@ F11 - change input method
 Please put kickstarts files in android/data/pandora.uae4all.sdl/kickstarts directory.
 Files must be named as kick13.rom kick20.rom kick31.rom
 
-VITA controls:
+Vita Controls:
 
-L+R+dpad up down - Change Screen vertical position
-Start - toggle between gp2x style mouse mode, joystick mode and stylus mode (stylus mode not working yet). Press multiple times to change behaviour between the three modes.
-Select - toggle menu
+A=square
+B=circle
+X=cross
+Y=triangle
+
+Vita controls:
+
+Select = toggle menu
+Start+dpad = move screen
+right analog stick = analog mouse (can switch this to left in menu)
+left analog stick = acts as amiga joystick
+
+Only when custom controls are off:
+L/R=mousebuttons
+R+Square = CTRL
+R+Circle = LALT
+R+Cross = HELP
+L+Square = left mouse
+L+Circle = right mouse
+R+dpad = arrow keys
+
+When custom mouse controls are on:
+Dpad = digital mouse
+Triangle = slow mouse down

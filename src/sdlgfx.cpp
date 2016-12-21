@@ -157,6 +157,7 @@ void flush_block ()
 #ifndef __PSP2__
 	SDL_LockSurface (prSDLScreen);
 #endif
+#ifndef __PSP2__
 	if(stylusClickOverride)
 	{
 		justClicked = 0;
@@ -190,6 +191,7 @@ void flush_block ()
 			fcounter++;
 		}
 	}
+#endif __PSP2__
 	init_row_map();
 }
 
@@ -549,6 +551,7 @@ void handle_events (void)
 				}
 			}
 
+#ifndef __PSP2__ //Skip input mode cycling for Vita. The mouse is always available already and the stylus mode never worked. Also the start button is repurposed for screen moving.
 #ifdef ANDROIDSDL
 			if (rEvent.key.keysym.sym==SDLK_F11)
 #else
@@ -566,6 +569,7 @@ void handle_events (void)
 					// if specified:
 					// remapping mode (with whatever's been supplied)
 					// back to start of state
+					
 #ifndef PANDORA
 					if (!hasGp2xButtonRemapping)
 					{
@@ -598,7 +602,6 @@ void handle_events (void)
 #ifndef PANDORA
 					}
 #endif
-
 				show_inputmode = 1;
 				}
 			}
@@ -611,6 +614,7 @@ void handle_events (void)
 					break;
 			}
 #endif
+#endif //__PSP2__
 #ifndef PANDORA
 			if (gp2xButtonRemappingOn)
 #endif
