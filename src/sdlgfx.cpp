@@ -157,6 +157,7 @@ void flush_block ()
 #ifndef __PSP2__
 	SDL_LockSurface (prSDLScreen);
 #endif
+#ifndef __PSP2__
 	if(stylusClickOverride)
 	{
 		justClicked = 0;
@@ -190,6 +191,7 @@ void flush_block ()
 			fcounter++;
 		}
 	}
+#endif __PSP2__
 	init_row_map();
 }
 
@@ -549,6 +551,7 @@ void handle_events (void)
 				}
 			}
 
+#ifndef __PSP2__ //Skip input mode cycling for Vita. The mouse is always available already and the stylus mode never worked. Also the start button is repurposed for screen moving.
 #ifdef ANDROIDSDL
 			if (rEvent.key.keysym.sym==SDLK_F11)
 #else
@@ -566,6 +569,7 @@ void handle_events (void)
 					// if specified:
 					// remapping mode (with whatever's been supplied)
 					// back to start of state
+					
 #ifndef PANDORA
 					if (!hasGp2xButtonRemapping)
 					{
@@ -598,7 +602,6 @@ void handle_events (void)
 #ifndef PANDORA
 					}
 #endif
-
 				show_inputmode = 1;
 				}
 			}
@@ -611,6 +614,7 @@ void handle_events (void)
 					break;
 			}
 #endif
+#endif //__PSP2__
 #ifndef PANDORA
 			if (gp2xButtonRemappingOn)
 #endif
@@ -759,27 +763,27 @@ void handle_events (void)
 			mouse_state = true;
 			if(gp2xButtonRemappingOn)
 			{
-				lastmx = rEvent.motion.x*2 - mainMenu_stylusOffset + moved_x + stylusAdjustX >> 1;
-				lastmy = rEvent.motion.y*2 - mainMenu_stylusOffset + moved_y + stylusAdjustY >> 1;
+				lastmx = 16 * (rEvent.motion.x*2 - mainMenu_stylusOffset + moved_x + stylusAdjustX >> 1);
+				lastmy = 16 * (rEvent.motion.y*2 - mainMenu_stylusOffset + moved_y + stylusAdjustY >> 1);
 				//mouseMoving = 1;
 			}
 			else if(slow_mouse)
 			{
-				lastmx += rEvent.motion.xrel;
-				lastmy += rEvent.motion.yrel;
+				lastmx += 16 * rEvent.motion.xrel;
+				lastmy += 16 * rEvent.motion.yrel;
 				if(rEvent.motion.x == 0)
-					lastmx -= 2;
+					lastmx -= 2*16;
 				if(rEvent.motion.y == 0)
-					lastmy -= 2;
+					lastmy -= 2*16;
 				if(rEvent.motion.x == visibleAreaWidth-1)
-					lastmx += 2;
+					lastmx += 2*16;
 				if(rEvent.motion.y == mainMenu_displayedLines-1)
-					lastmy += 2;
+					lastmy += 2*16;
 			}
 			else
 			{
-				int mouseScale = mainMenu_mouseMultiplier * 4;
-				if (mouseScale > 99)
+				int mouseScale = mainMenu_mouseMultiplier * 4 *16;
+				if (mouseScale > 99*16)
 					mouseScale /= 100;
 
 				lastmx += rEvent.motion.xrel * mouseScale;

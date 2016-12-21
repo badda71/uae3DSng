@@ -2092,7 +2092,7 @@ static _INLINE_ void mousehack_setdontcare (void)
 
     write_log ("Don't care mouse mode set\n");
     mousestate = dont_care_mouse;
-    lastspr0x = lastmx; lastspr0y = lastmy;
+    lastspr0x = lastmx/16; lastspr0y = lastmy/16;
     mstepx = defstepx; mstepy = defstepy;
 }
 
@@ -2114,16 +2114,16 @@ static _INLINE_ uae_u32 mousehack_helper (void)
     {
 	/* @@@ This isn't completely right, it doesn't deal with virtual
 	   screen sizes larger than physical very well.  */
-	if (lastmy >= PREFS_GFX_HEIGHT)
-	    lastmy = PREFS_GFX_HEIGHT - 1;
+	if (lastmy/16 >= PREFS_GFX_HEIGHT)
+	    lastmy = 16 * (PREFS_GFX_HEIGHT - 1);
 	if (lastmy < 0)
 	    lastmy = 0;
 	if (lastmx < 0)
 	    lastmx = 0;
-	if (lastmx >= PREFS_GFX_WIDTH)
-	    lastmx = PREFS_GFX_WIDTH - 1;
-	mouseypos = coord_native_to_amiga_y (lastmy) << 1;
-	mousexpos = coord_native_to_amiga_x (lastmx);
+	if (lastmx/16 >= PREFS_GFX_WIDTH)
+	    lastmx = 16 * (PREFS_GFX_WIDTH - 1);
+	mouseypos = coord_native_to_amiga_y (lastmy/16) << 1;
+	mousexpos = coord_native_to_amiga_x (lastmx/16);
     }
 
     switch (_68k_dreg (0)) {
@@ -2171,8 +2171,8 @@ static _INLINE_ void do_mouse_hack (void)
   switch (mousestate) 
   {
     case normal_mouse:
-	    diffx = lastmx - lastsampledmx;
-	    diffy = lastmy - lastsampledmy;
+	    diffx = lastmx/16 - lastsampledmx;
+	    diffy = lastmy/16 - lastsampledmy;
 	    if (!newmousecounters) 
 	    {
 	      if (diffx > 127) 
@@ -2190,10 +2190,10 @@ static _INLINE_ void do_mouse_hack (void)
 	    break;
 
     case dont_care_mouse:
-	    diffx = adjust (((lastmx - lastspr0x) * mstepx) >> 16);
-	    diffy = adjust (((lastmy - lastspr0y) * mstepy) >> 16);
-	    lastspr0x = lastmx; 
-	    lastspr0y = lastmy;
+	    diffx = adjust (((lastmx/16 - lastspr0x) * mstepx) >> 16);
+	    diffy = adjust (((lastmy/16 - lastspr0y) * mstepy) >> 16);
+	    lastspr0x = lastmx/16; 
+	    lastspr0y = lastmy/16;
 	    mouse_x += diffx;
 	    mouse_y += diffy;
 	    break;
@@ -2205,8 +2205,8 @@ static _INLINE_ void do_mouse_hack (void)
 	    if (sprvbfl && (sprvbfl-- > 1)) 
       {
         int stylusxpos, stylusypos;          
-	      stylusxpos = coord_native_to_amiga_x (lastmx);
-	      stylusypos = coord_native_to_amiga_y (lastmy) << 1;
+	      stylusxpos = coord_native_to_amiga_x (lastmx/16);
+	      stylusypos = coord_native_to_amiga_y (lastmy/16) << 1;
 	      if(stylusxpos != spr0x || stylusypos != spr0y)
         {
           diffx = (stylusxpos - spr0x);

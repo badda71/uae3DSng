@@ -356,6 +356,12 @@ void init_text(int splash)
 		
 	SDL_SetVideoModeScaling(x, y, sw, sh);
 	printf("init_text: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
+	
+	//This requires a recent SDL-Vita branch SDL12 for example 
+   //https://github.com/rsn8887/SDL-Vita/tree/SDL12
+   //to compile
+	SDL_SetVideoModeBilinear(0);
+	
 #elif PANDORA
 	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);
 	setenv("SDL_OMAP_BORDER_CUT","0,0,0,30",1);

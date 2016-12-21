@@ -48,6 +48,13 @@ extern int triggerR;
 extern int buttonSelect;
 extern int buttonStart;
 #endif
+#ifdef __PSP2__
+extern int rAnalogX;
+extern int rAnalogY;
+extern int lAnalogX;
+extern int lAnalogY;
+extern int mainMenu_leftStickMouse;
+#endif
 
 extern char launchDir[300];
 bool switch_autofire=false;
@@ -91,18 +98,24 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 }
 #endif
 */
-	int mouseScale = mainMenu_mouseMultiplier * 4;
-	if (mouseScale > 99)
+	int mouseScale = mainMenu_mouseMultiplier * 4 * 16;
+	if (mouseScale > (99*16))
 		mouseScale /= 100;
 
 #ifdef USE_UAE4ALL_VKBD
 	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL && !triggerR && !gp2xButtonRemappingOn)))
 #else
+#ifdef __PSP2__
+	//on Vita, the L trigger is by default mapped to a mousebutton
+	//so remove the hard coded LTrigger here that was enabling the digital mouse
+	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn))
+#else
 	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL && !triggerR && !gp2xButtonRemappingOn)))
-#endif
+#endif __PSP2__
+#endif 
 	{
 		if (buttonY)
-			mouseScale = mainMenu_mouseMultiplier;
+			mouseScale = mainMenu_mouseMultiplier * 16;
 #if defined(PANDORA) || defined(ANDROIDSDL)
 		if (dpadLeft)
 #else
@@ -166,6 +179,41 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				top = 1;
 		}
 	}
+
+#ifdef __PSP2__
+	//VITA: always use an analog stick (default: right stick) for mouse pointer movements
+	//here we are using a small deadzone
+	int analogX;
+	int analogY;
+		
+	if (mainMenu_leftStickMouse) {
+		analogX=lAnalogX;
+		analogY=lAnalogY;
+	}
+	else 
+	{
+		analogX=rAnalogX;
+		analogY=rAnalogY;
+	}
+		
+	if (analogX<100 && analogX>-100) 
+	{
+		analogX=0;
+	}
+	if (analogY<100 && analogY>-100)
+	{
+		analogY=0;
+	}
+	if (analogX != 0 || analogY != 0 ) 
+	{
+		//max movement is mouseScale.
+		//that way, when in one of the other mouse modes, 
+		//the Y button to change scale still works
+		lastmx += (int) (analogX/32769.0f * mouseScale);
+		lastmy += (int) (analogY/32769.0f * mouseScale);
+		newmousecounters=1;
+	}
+#endif //__PSP2__
 
 #ifdef USE_UAE4ALL_VKBD
 	if(mainMenu_customControls && !vkbd_mode)

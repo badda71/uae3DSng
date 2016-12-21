@@ -57,13 +57,27 @@ enum {
 	MENUDISPLAY_CUTRIGHT,
 	MENUDISPLAY_FRAMESKIP,
 	MENUDISPLAY_REFRESHRATE,
+#ifdef __PSP2__
+	MENUDISPLAY_SHADER,
+#endif
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
 	MENUDISPLAY_STEREO,
 	MENUDISPLAY_END
 };
 
-
+#ifdef __PSP2__
+enum {
+	SHADER_NONE = 0,
+	SHADER_LCD3X,
+	SHADER_AAA,
+	SHADER_SCALE2X,
+	SHADER_SHARP_BILINEAR,
+	SHADER_SHARP_BILINEAR_SIMPLE,
+	SHADER_FXAA,
+	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
+};
+#endif
 
 static void draw_displayMenu(int c)
 {
@@ -83,7 +97,7 @@ static void draw_displayMenu(int c)
 	int bb=(b%6)/3;
 	SDL_Rect r;
 	extern SDL_Surface *text_screen;
-	char value[20]="";
+	char value[25]="";
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
@@ -228,6 +242,43 @@ static void draw_displayMenu(int c)
 		write_text_inv(tabstop3+1,menuLine,"60Hz");
 	else
 		write_text(tabstop3+1,menuLine,"60Hz");
+#ifdef __PSP2__	
+	//Shader settings on Vita
+	//MENUDISPLAY_SHADER
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Shader");
+  
+  	switch (mainMenu_shader)
+  	{
+		case SHADER_NONE:
+			snprintf((char*)value, 25, "NONE (perfect 2x)");
+			break;
+		case SHADER_LCD3X:
+			snprintf((char*)value, 25, "LCD3X");
+			break;
+		case SHADER_SCALE2X:
+			snprintf((char*)value, 25, "SCALE2X");
+			break;
+		case SHADER_AAA:
+			snprintf((char*)value, 25, "AAA");
+			break;
+		case SHADER_SHARP_BILINEAR:
+			snprintf((char*)value, 25, "SHARP_BILINEAR");
+			break;
+		case SHADER_SHARP_BILINEAR_SIMPLE:
+			snprintf((char*)value, 25, "SHARP_BILINEAR_SIMPL");
+			break;
+		case SHADER_FXAA:
+			snprintf((char*)value, 25, "FXAA");
+			break;
+		default:
+			break;
+	}
+	if ((menuDisplay!=MENUDISPLAY_SHADER)||(bb))
+		write_text_inv(tabstop3-2,menuLine,value);
+	else
+		write_text(tabstop3-2,menuLine,value);
+#endif
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
@@ -479,6 +530,24 @@ static int key_displayMenu(int *c)
 			if ((left)||(right))
 					mainMenu_ntsc = !mainMenu_ntsc;
 			break;
+#ifdef __PSP2__ //shader choice on VITA
+				case MENUDISPLAY_SHADER:
+            if (left)
+				{
+					if (mainMenu_shader <= 0)
+						mainMenu_shader = 0;
+					else 
+						mainMenu_shader -= 1;
+				}
+				else if (right)
+				{
+					if (mainMenu_shader >= NUM_SHADERS-1)
+						mainMenu_shader = NUM_SHADERS-1;
+					else
+						mainMenu_shader +=1;
+				}
+				break;
+#endif			
 			
 		case MENUDISPLAY_SOUND:
 				if (left)

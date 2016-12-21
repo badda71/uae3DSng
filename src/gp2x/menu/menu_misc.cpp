@@ -61,6 +61,9 @@ enum {
 #ifdef PANDORA
 	MENUMISC_PANDORASPEED,
 #endif
+#ifdef __PSP2__
+	MENUMISC_LEFTSTICKMOUSE,
+#endif
 #ifdef ANDROIDSDL
 	MENUMISC_ONSCREEN,
 #endif
@@ -73,7 +76,7 @@ enum {
 	MENUMISC_TAPDELAY,
 	MENUMISC_END
 };
-
+	
 static void draw_miscMenu(int c)
 {
 	int leftMargin=3;
@@ -93,6 +96,7 @@ static void draw_miscMenu(int c)
 	SDL_Rect r;
 	extern SDL_Surface *text_screen;
 	char cpuSpeed[8];
+	
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
@@ -191,6 +195,26 @@ static void draw_miscMenu(int c)
 		write_text(tabstop4-1,menuLine,cpuSpeed);
 	write_text(tabstop6-1,menuLine,"MHz");
 #endif
+#ifdef __PSP2__
+  // MENUMISC_LEFTSTICKMOUSE
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Mouse Control:");	
+	if (mainMenu_leftStickMouse==0)
+	{
+		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
+			write_text_inv(tabstop4-1,menuLine,"Right Stick");
+		else
+			write_text(tabstop4-1,menuLine,"Right Stick  ");
+	}
+	else if (mainMenu_leftStickMouse==1) 
+	{
+		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
+			write_text_inv(tabstop4-1,menuLine,"Left Stick");
+		else
+			write_text(tabstop4-1,menuLine,"Left Stick  ");
+	}
+#endif
+
 #ifdef ANDROIDSDL
   // MENUMISC_ONSCREEN
 	menuLine+=2;
@@ -347,8 +371,7 @@ static void draw_miscMenu(int c)
 	if ((mainMenu_stylusOffset==16)&&((menuMisc!=MENUMISC_STYLUSOFFSET)||(bb)))
 		write_text_inv(tabstop9,menuLine,text_str_8px);
 	else
-		write_text(tabstop9,menuLine,text_str_8px);
-
+		write_text(tabstop9,menuLine,text_str_8px);	
 	// MENUMISC_TAPDELAY
 	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_tap_delay);
@@ -496,6 +519,13 @@ static int key_miscMenu(int *c)
 					mainMenu_cpuSpeed+=10;
         break;
 #endif
+#ifdef __PSP2__
+      case MENUMISC_LEFTSTICKMOUSE:
+				if ((left)||(right))
+						mainMenu_leftStickMouse = !mainMenu_leftStickMouse;
+        break;
+#endif
+
 #ifdef ANDROIDSDL
 			case MENUMISC_ONSCREEN:
 				if ((left)||(right))

@@ -102,3 +102,8 @@ extern int mainMenu_vsync;
 #endif
 extern char custom_kickrom[256];
 #endif
+
+#ifdef __PSP2__
+extern int mainMenu_leftStickMouse;
+extern int mainMenu_shader;
+#endif

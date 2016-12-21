@@ -449,10 +449,11 @@ static int key_controlsMenu(int *c)
 	static int delay=0;
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0;
 	SDL_Event event;
+#ifndef __PSP2__	// this can be snappy on Vita no need to worry about touch
 	delay ++;
 	if (delay<5) return end;
 	delay=0;
-
+#endif
 	while (SDL_PollEvent(&event) > 0)
 	{
 		if (event.type == SDL_KEYDOWN)
