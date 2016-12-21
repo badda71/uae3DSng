@@ -155,26 +155,28 @@ void update_display() {
     int x;
     int y;
 
-    //is the sharp_bilinear_simple shader active?
-    if (mainMenu_shader == 5) 
+    //is a shader active?
+    if (mainMenu_shader != 0) 
     {
     	sh = 544;
       sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
     	x = (960 - sw) / 2;
     	y = (544 - sh) / 2;
     	
-    	//This requires SDL-Vita branch SDL12 for example 
+    	//This requires a recent SDL-Vita branch SDL12 for example 
     	//https://github.com/rsn8887/SDL-Vita/tree/SDL12
     	//to compile
-   	SDL_SetVideoModeScalingBilinear(x, y, sw, sh);
+   	SDL_SetVideoModeScaling(x, y, sw, sh);
+   	SDL_SetVideoModeBilinear(1);
     }
-    else //otherwise do regular integer 2* scaling to ensure good picture quality
+    else //otherwise do regular integer 2* scaling without filtering to ensure good picture quality
     {
     	sh = (float) (2 * mainMenu_displayedLines);
     	sw = (float) (2 * visibleAreaWidth);
     	x = (960 - sw) / 2;
       y = (544 - sh) / 2;
       SDL_SetVideoModeScaling(x, y, sw, sh);
+      SDL_SetVideoModeBilinear(0);
 	 }    
 	 printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
 

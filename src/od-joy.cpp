@@ -209,8 +209,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		//max movement is mouseScale.
 		//that way, when in one of the other mouse modes, 
 		//the Y button to change scale still works
-		lastmx += (int) (analogX/32768.0f * mouseScale);
-		lastmy += (int) (analogY/32768.0f * mouseScale);
+		lastmx += (int) (analogX/32769.0f * mouseScale);
+		lastmy += (int) (analogY/32769.0f * mouseScale);
 		newmousecounters=1;
 	}
 #endif //__PSP2__

@@ -73,26 +73,9 @@ enum {
 	MENUMISC_STATUSLINE,
 	MENUMISC_MOUSEMULTIPLIER,
 	MENUMISC_STYLUSOFFSET,
-#ifdef __PSP2__
-	MENUMISC_SHADER,
-#else
 	MENUMISC_TAPDELAY,
-#endif
 	MENUMISC_END
 };
-
-#ifdef __PSP2__
-enum {
-	SHADER_NONE = 0,
-	SHADER_LCD3X,
-	SHADER_AAA,
-	SHADER_SCALE2X,
-	SHADER_SHARP_BILINEAR,
-	SHADER_SHARP_BILINEAR_SIMPLE,
-	SHADER_FXAA,
-	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
-};
-#endif
 	
 static void draw_miscMenu(int c)
 {
@@ -113,10 +96,6 @@ static void draw_miscMenu(int c)
 	SDL_Rect r;
 	extern SDL_Surface *text_screen;
 	char cpuSpeed[8];
-
-#ifdef __PSP2__
-	char shaderName[25];
-#endif
 	
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
@@ -392,8 +371,7 @@ static void draw_miscMenu(int c)
 	if ((mainMenu_stylusOffset==16)&&((menuMisc!=MENUMISC_STYLUSOFFSET)||(bb)))
 		write_text_inv(tabstop9,menuLine,text_str_8px);
 	else
-		write_text(tabstop9,menuLine,text_str_8px);
-#ifndef __PSP2__	
+		write_text(tabstop9,menuLine,text_str_8px);	
 	// MENUMISC_TAPDELAY
 	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_tap_delay);
@@ -412,43 +390,6 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop9,menuLine,text_str_none);
 	else
 		write_text(tabstop9,menuLine,text_str_none);
-#else
-	//Shader settings on Vita
-	//MENUMISC_SHADER
-	menuLine+=2;
-	write_text(leftMargin,menuLine,"Shader");
-  
-  	switch (mainMenu_shader)
-  	{
-		case SHADER_NONE:
-			snprintf((char*)shaderName, 25, "NONE (perfect 2*)");
-			break;
-		case SHADER_LCD3X:
-			snprintf((char*)shaderName, 25, "LCD3X");
-			break;
-		case SHADER_SCALE2X:
-			snprintf((char*)shaderName, 25, "SCALE2X");
-			break;
-		case SHADER_AAA:
-			snprintf((char*)shaderName, 25, "AAA");
-			break;
-		case SHADER_SHARP_BILINEAR:
-			snprintf((char*)shaderName, 25, "SHARP_BILINEAR");
-			break;
-		case SHADER_SHARP_BILINEAR_SIMPLE:
-			snprintf((char*)shaderName, 25, "SHARP_BILNEAR_SIMPLE");
-			break;
-		case SHADER_FXAA:
-			snprintf((char*)shaderName, 25, "FXAA");
-			break;
-		default:
-			break;
-	}
-	if ((menuMisc!=MENUMISC_SHADER)||(bb))
-		write_text_inv(tabstop3-2,menuLine,shaderName);
-	else
-		write_text(tabstop3-2,menuLine,shaderName);
-#endif
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_misc_separator);
@@ -704,24 +645,6 @@ static int key_miscMenu(int *c)
 						mainMenu_stylusOffset = 0;
 				}
 				break;
-#ifdef __PSP2__ //shader choice on VITA
-				case MENUMISC_SHADER:
-            if (left)
-				{
-					if (mainMenu_shader <= 0)
-						mainMenu_shader = 0;
-					else 
-						mainMenu_shader -= 1;
-				}
-				else if (right)
-				{
-					if (mainMenu_shader >= NUM_SHADERS-1)
-						mainMenu_shader = NUM_SHADERS-1;
-					else
-						mainMenu_shader +=1;
-				}
-				break;
-#else
 			case MENUMISC_TAPDELAY:
 				if (left)
 				{
@@ -742,7 +665,6 @@ static int key_miscMenu(int *c)
 						mainMenu_tapDelay = 10;
 				}
 				break;
-#endif //__PSP2__
 		}
 	}
 
