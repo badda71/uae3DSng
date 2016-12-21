@@ -763,27 +763,27 @@ void handle_events (void)
 			mouse_state = true;
 			if(gp2xButtonRemappingOn)
 			{
-				lastmx = rEvent.motion.x*2 - mainMenu_stylusOffset + moved_x + stylusAdjustX >> 1;
-				lastmy = rEvent.motion.y*2 - mainMenu_stylusOffset + moved_y + stylusAdjustY >> 1;
+				lastmx = 16 * (rEvent.motion.x*2 - mainMenu_stylusOffset + moved_x + stylusAdjustX >> 1);
+				lastmy = 16 * (rEvent.motion.y*2 - mainMenu_stylusOffset + moved_y + stylusAdjustY >> 1);
 				//mouseMoving = 1;
 			}
 			else if(slow_mouse)
 			{
-				lastmx += rEvent.motion.xrel;
-				lastmy += rEvent.motion.yrel;
+				lastmx += 16 * rEvent.motion.xrel;
+				lastmy += 16 * rEvent.motion.yrel;
 				if(rEvent.motion.x == 0)
-					lastmx -= 2;
+					lastmx -= 2*16;
 				if(rEvent.motion.y == 0)
-					lastmy -= 2;
+					lastmy -= 2*16;
 				if(rEvent.motion.x == visibleAreaWidth-1)
-					lastmx += 2;
+					lastmx += 2*16;
 				if(rEvent.motion.y == mainMenu_displayedLines-1)
-					lastmy += 2;
+					lastmy += 2*16;
 			}
 			else
 			{
-				int mouseScale = mainMenu_mouseMultiplier * 4;
-				if (mouseScale > 99)
+				int mouseScale = mainMenu_mouseMultiplier * 4 *16;
+				if (mouseScale > 99*16)
 					mouseScale /= 100;
 
 				lastmx += rEvent.motion.xrel * mouseScale;

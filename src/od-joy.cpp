@@ -98,8 +98,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 }
 #endif
 */
-	int mouseScale = mainMenu_mouseMultiplier * 4;
-	if (mouseScale > 99)
+	int mouseScale = mainMenu_mouseMultiplier * 4 * 16;
+	if (mouseScale > (99*16))
 		mouseScale /= 100;
 
 #ifdef USE_UAE4ALL_VKBD
@@ -115,7 +115,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 #endif 
 	{
 		if (buttonY)
-			mouseScale = mainMenu_mouseMultiplier;
+			mouseScale = mainMenu_mouseMultiplier * 16;
 #if defined(PANDORA) || defined(ANDROIDSDL)
 		if (dpadLeft)
 #else
@@ -204,7 +204,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	{
 		analogY=0;
 	}
-	if (analogX != 0 && analogY != 0 ) 
+	if (analogX != 0 || analogY != 0 ) 
 	{
 		//max movement is mouseScale.
 		//that way, when in one of the other mouse modes, 
