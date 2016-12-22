@@ -93,7 +93,9 @@ int visibleAreaWidth = 320;
 int saveMenu_n_savestate = 0;
 
 #ifdef __PSP2__
+int mainMenu_shader = 5;
 int mainMenu_leftStickMouse = 0;
+int mainMenu_deadZone = 100;
 #endif
 
 // The following params in use, but can't be changed with gui
@@ -102,10 +104,6 @@ int mainMenu_button1 = GP2X_BUTTON_X;
 int mainMenu_button2 = GP2X_BUTTON_A;
 int mainMenu_autofireButton1 = GP2X_BUTTON_B;
 int mainMenu_jump = -1;
-
-#ifdef __PSP2__
-int mainMenu_shader = 5;
-#endif
 
 // The following params not in use, but stored to write them back to the config file
 int gp2xClockSpeed = -1;
@@ -222,6 +220,7 @@ void SetDefaultMenuSettings(int general)
 #ifdef __PSP2__
     mainMenu_shader = 5;
     mainMenu_leftStickMouse = 0;
+    mainMenu_deadZone = 100;
 #endif
 
     // The following params can't be changed in gui
@@ -810,6 +809,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "leftstickmouse=%d\n",mainMenu_leftStickMouse);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "deadzone=%d\n",mainMenu_deadZone);
+    fputs(buffer,f);
 #endif
     snprintf((char*)buffer, 255, "showstatus=%d\n",mainMenu_showStatus);
     fputs(buffer,f);
@@ -1110,7 +1111,8 @@ void loadconfig(int general)
 #endif
 #ifdef __PSP2__
         fscanf(f,"shader=%d\n",&mainMenu_shader);
-        fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);        
+        fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);
+        fscanf(f,"deadzone=%d\n",&mainMenu_deadZone);        
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
         fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier );

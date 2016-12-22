@@ -74,6 +74,45 @@ extern SDL_Surface *prSDLScreen;
 
 extern SDL_Joystick *uae4all_joy0, *uae4all_joy1;
 
+#ifdef __PSP2__
+//Predefined quick switch resolutions to select via START+DPAD LEFT/RIGHT
+int quickSwitchModeID=8;
+struct myRes
+{
+		int num_lines;
+		int top_pos;
+};
+myRes quickSwitchModes[] = {
+    {192, 0},
+    {200, 0},
+    {216, 0},
+    {224, 0},
+    {240, 0},
+    {256, 0},
+    {270, 0},
+    {192, 14},
+    {200, 14},
+    {216, 14},
+    {224, 14},
+    {240, 14},
+    {256, 14},
+    {270, 14},
+};
+extern int moveY;
+
+//analog stick values for mouse emulation on Vita
+int lAnalogX=0;
+int lAnalogY=0;
+int rAnalogX=0;
+int rAnalogY=0;
+int lAnalogXCenter=0;
+int lAnalogYCenter=0;
+int rAnalogXCenter=0;
+int rAnalogYCenter=0;
+int haveJoysticksBeenCentered=0;
+extern int mainMenu_leftStickMouse;
+#endif // __PSP2__
+
 #ifdef USE_UAE4ALL_VKBD
 extern int keycode2amiga(SDL_keysym *prKeySym);
 #endif
@@ -105,14 +144,6 @@ int triggerL=0;
 int triggerR=0;
 int buttonSelect=0;
 int buttonStart=0;
-#ifdef __PSP2__
-//right analog stick values for mouse emulation on Vita
-int lAnalogX=0;
-int lAnalogY=0;
-int rAnalogX=0;
-int rAnalogY=0;
-extern int mainMenu_leftStickMouse;
-#endif
 
 extern int mainMenu_case;
 #ifdef WITH_TESTMODE
@@ -133,7 +164,7 @@ static void getChanges(void)
 	    changed_produce_sound=0;
     changed_gfx_framerate=mainMenu_frameskip;
 }
-
+	
 int gui_init (void)
 {
     SDL_ShowCursor(SDL_DISABLE);
@@ -520,6 +551,18 @@ void gui_handle_events (void)
 	rAnalogX=SDL_JoystickGetAxis(uae4all_joy0, 2);
 	rAnalogY=SDL_JoystickGetAxis(uae4all_joy0, 3);
 	
+	//Is this the first time this routine is called when the program has just been launched? 
+	//If yes, center the joysticks now
+	//After that, center the joysticks everytime we open the menu with "select"
+	if (!haveJoysticksBeenCentered) {	
+		lAnalogXCenter=lAnalogX;
+		lAnalogYCenter=lAnalogY;
+		rAnalogXCenter=rAnalogX;
+		rAnalogYCenter=rAnalogY;
+		//From now on only center when entering menu
+		haveJoysticksBeenCentered=1;
+	}
+	
 	if (mainMenu_leftStickMouse) {
 		dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
 			|| (rAnalogX > 1024*10) ? 1 : 0;
@@ -529,6 +572,8 @@ void gui_handle_events (void)
 			|| (rAnalogY < -1024*10) ? 1 : 0;
 		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
 			|| (rAnalogY > 1024*10) ? 1 : 0;
+		lAnalogX=lAnalogX-lAnalogXCenter;
+		lAnalogY=lAnalogY-lAnalogYCenter;
 	} 
 	else
 	{
@@ -540,6 +585,8 @@ void gui_handle_events (void)
 			|| (lAnalogY < -1024*10) ? 1 : 0;
 		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
 			|| (lAnalogY > 1024*10) ? 1 : 0;
+		rAnalogX=rAnalogX-rAnalogXCenter;
+		rAnalogY=rAnalogY-rAnalogYCenter;
 	}
 	
 	buttonA = SDL_JoystickGetButton(uae4all_joy0, PAD_SQUARE);
@@ -552,7 +599,15 @@ void gui_handle_events (void)
 	buttonStart = SDL_JoystickGetButton(uae4all_joy0, PAD_START);
 	
 	if(buttonSelect)
+	{
+		//re-center the Joysticks when the user opens the menu
+		SDL_JoystickUpdate();
+		lAnalogXCenter=SDL_JoystickGetAxis(uae4all_joy0, 0);
+		lAnalogYCenter=SDL_JoystickGetAxis(uae4all_joy0, 1);
+		rAnalogXCenter=SDL_JoystickGetAxis(uae4all_joy0, 2);
+		rAnalogYCenter=SDL_JoystickGetAxis(uae4all_joy0, 3);
 		goMenu();
+	}
 #else
 	dpadUp = keystate[SDLK_UP];
 	dpadDown = keystate[SDLK_DOWN];
@@ -695,18 +750,56 @@ if(!vkbd_mode)
 		//left
 		else if(dpadLeft)
 		{
+#ifdef __PSP2__
+// Change zoom:
+// quickSwitch resolution presets
+			if (quickSwitchModeID==0)
+			{
+				quickSwitchModeID=sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1;
+			}
+			else
+			{
+				quickSwitchModeID--;
+			}
+			mainMenu_displayedLines = 
+				quickSwitchModes[quickSwitchModeID].num_lines;	
+			moveY = 
+				quickSwitchModes[quickSwitchModeID].top_pos;
+			getChanges();
+			check_all_prefs();
+			update_display();	
+#else
 			screenWidth -=10;
 			if(screenWidth<200)
 				screenWidth = 200;
 			update_display();
+#endif
 		}
 		//right
 		else if(dpadRight)
 		{
+#ifdef __PSP2__
+			if (quickSwitchModeID==sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1)
+			{
+				quickSwitchModeID=0;
+			}
+			else
+			{
+				quickSwitchModeID++;
+			}
+			mainMenu_displayedLines = 
+				quickSwitchModes[quickSwitchModeID].num_lines;	
+			moveY = 
+				quickSwitchModes[quickSwitchModeID].top_pos;
+			getChanges();
+			check_all_prefs();
+			update_display();
+#else
 			screenWidth +=10;
 			if(screenWidth>800)
 				screenWidth = 800;
 			update_display();
+#endif
 		}
 		//1
 		else if(keystate[SDLK_1])

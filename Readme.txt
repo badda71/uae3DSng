@@ -32,15 +32,14 @@ Files must be named as kick13.rom kick20.rom kick31.rom
 
 Vita Controls:
 
-A=square
-B=circle
-X=cross
-Y=triangle
-
-Vita controls:
+square=A
+circle=B
+cross=X
+triangle=Y
 
 Select = toggle menu
-Start+dpad = move screen
+Start+dpad up/down = move screen up down
+Start+dpad left/right = change screenmode (to zoom in on games with borders)
 right analog stick = analog mouse (can switch this to left in menu)
 left analog stick = acts as amiga joystick
 
