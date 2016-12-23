@@ -54,6 +54,7 @@ extern int rAnalogY;
 extern int lAnalogX;
 extern int lAnalogY;
 extern int mainMenu_leftStickMouse;
+extern int mainMenu_deadZone;
 #endif
 
 extern char launchDir[300];
@@ -102,16 +103,20 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if (mouseScale > (99*16))
 		mouseScale /= 100;
 
-#ifdef USE_UAE4ALL_VKBD
+#if !defined(__PSP2__) && defined(USE_UAE4ALL_VKBD)
 	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL && !triggerR && !gp2xButtonRemappingOn)))
 #else
-#ifdef __PSP2__
+#if defined(__PSP2__) && defined(USE_UAE4ALL_VKBD)
 	//on Vita, the L trigger is by default mapped to a mousebutton
 	//so remove the hard coded LTrigger here that was enabling the digital mouse
-	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn))
+	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn))
+#else
+#if defined(__PSP2__)
+	if ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn)
 #else
 	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL && !triggerR && !gp2xButtonRemappingOn)))
-#endif __PSP2__
+#endif
+#endif
 #endif 
 	{
 		if (buttonY)
@@ -180,13 +185,17 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		}
 	}
 
+#ifdef USE_UAE4ALL_VKBD
+	if (!vkbd_mode) {
+#endif
 #ifdef __PSP2__
 	//VITA: always use an analog stick (default: right stick) for mouse pointer movements
 	//here we are using a small deadzone
-	int analogX;
-	int analogY;
+	int analogX=0;
+	int analogY=0;
 		
-	if (mainMenu_leftStickMouse) {
+	if (mainMenu_leftStickMouse)
+	{
 		analogX=lAnalogX;
 		analogY=lAnalogY;
 	}
@@ -195,25 +204,24 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		analogX=rAnalogX;
 		analogY=rAnalogY;
 	}
-		
-	if (analogX<100 && analogX>-100) 
+	//Deadzone	
+	//max movement is mouseScale.
+	//that way, when in one of the other mouse modes, 
+	//the Y button to change scale still works
+	if (!(analogX<mainMenu_deadZone && analogX>-mainMenu_deadZone)) 
 	{
-		analogX=0;
-	}
-	if (analogY<100 && analogY>-100)
-	{
-		analogY=0;
-	}
-	if (analogX != 0 || analogY != 0 ) 
-	{
-		//max movement is mouseScale.
-		//that way, when in one of the other mouse modes, 
-		//the Y button to change scale still works
 		lastmx += (int) (analogX/32769.0f * mouseScale);
+		newmousecounters=1;
+	}
+	if (!(analogY<mainMenu_deadZone && analogY>-mainMenu_deadZone))
+	{	
 		lastmy += (int) (analogY/32769.0f * mouseScale);
 		newmousecounters=1;
 	}
 #endif //__PSP2__
+#ifdef USE_UAE4ALL_VKBD
+	}
+#endif
 
 #ifdef USE_UAE4ALL_VKBD
 	if(mainMenu_customControls && !vkbd_mode)

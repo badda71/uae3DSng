@@ -73,7 +73,11 @@ enum {
 	MENUMISC_STATUSLINE,
 	MENUMISC_MOUSEMULTIPLIER,
 	MENUMISC_STYLUSOFFSET,
+#ifdef __PSP2__
+	MENUMISC_DEADZONE,
+#else
 	MENUMISC_TAPDELAY,
+#endif
 	MENUMISC_END
 };
 	
@@ -371,7 +375,18 @@ static void draw_miscMenu(int c)
 	if ((mainMenu_stylusOffset==16)&&((menuMisc!=MENUMISC_STYLUSOFFSET)||(bb)))
 		write_text_inv(tabstop9,menuLine,text_str_8px);
 	else
-		write_text(tabstop9,menuLine,text_str_8px);	
+		write_text(tabstop9,menuLine,text_str_8px);
+#ifdef __PSP2__
+	//Analog Stick Deadzone settings on Vita
+	//MENUMISC_DEADZONE
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Mouse Deadzone");
+  	snprintf((char*)cpuSpeed, 8, "%d", mainMenu_deadZone);
+  	if ((menuMisc!=MENUMISC_DEADZONE)||(bb))
+		write_text_inv(tabstop3-2,menuLine,cpuSpeed);
+	else
+		write_text(tabstop3-2,menuLine,cpuSpeed);
+#else
 	// MENUMISC_TAPDELAY
 	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_tap_delay);
@@ -390,7 +405,7 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop9,menuLine,text_str_none);
 	else
 		write_text(tabstop9,menuLine,text_str_none);
-
+#endif
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_misc_separator);
 	menuLine++;
@@ -645,6 +660,36 @@ static int key_miscMenu(int *c)
 						mainMenu_stylusOffset = 0;
 				}
 				break;
+#ifdef __PSP2__
+			case MENUMISC_DEADZONE:
+				if (left)
+				{
+					if (mainMenu_deadZone <= 0)
+						mainMenu_deadZone=0;
+					else if (mainMenu_deadZone >= 2000)
+						mainMenu_deadZone-=1000;
+					else if (mainMenu_deadZone >= 200)
+						mainMenu_deadZone-=100;
+					else if (mainMenu_deadZone >= 20)
+						mainMenu_deadZone-=10;
+					else if (mainMenu_deadZone >= 1)
+						mainMenu_deadZone-=1;
+				}
+				else if (right)
+				{
+					if (mainMenu_deadZone >= 10000)
+						mainMenu_deadZone=10000;
+					else if (mainMenu_deadZone>=1000)
+						mainMenu_deadZone+=1000;
+					else if (mainMenu_deadZone>=100)
+						mainMenu_deadZone+=100;
+					else if (mainMenu_deadZone>=10)
+						mainMenu_deadZone+=10;
+					else if (mainMenu_deadZone>=0)
+						mainMenu_deadZone+=1;
+				}
+				break;
+#else
 			case MENUMISC_TAPDELAY:
 				if (left)
 				{
@@ -665,6 +710,7 @@ static int key_miscMenu(int *c)
 						mainMenu_tapDelay = 10;
 				}
 				break;
+#endif
 		}
 	}
 

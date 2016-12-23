@@ -391,7 +391,11 @@ static void draw_controlsMenu(int c)
 
 	// MENUCONTROLS_A
 	menuLine+=3;
+#ifdef __PSP2__
+	write_text(leftMargin,menuLine,"(Square)");
+#else
 	write_text(leftMargin,menuLine,"   (A)");
+#endif
 	getMapping(mainMenu_custom_A);
 	if ((menuControls!=MENUCONTROLS_A)||(bb))
 		write_text_inv(tabstop1-4,menuLine,mapping);
@@ -399,7 +403,11 @@ static void draw_controlsMenu(int c)
 		write_text(tabstop1-4,menuLine,mapping);
 	// MENUCONTROLS_B
 	menuLine+=2;
+#ifdef __PSP2__
+	write_text(leftMargin,menuLine,"(Circle)");
+#else
 	write_text(leftMargin,menuLine,"   (B)");
+#endif
 	getMapping(mainMenu_custom_B);
 	if ((menuControls!=MENUCONTROLS_B)||(bb))
 		write_text_inv(tabstop1-4,menuLine,mapping);
@@ -407,7 +415,11 @@ static void draw_controlsMenu(int c)
 		write_text(tabstop1-4,menuLine,mapping);
 	// MENUCONTROLS_X
 	menuLine+=2;
+#ifdef __PSP2__
+	write_text(leftMargin,menuLine,"(Cross)");
+#else
 	write_text(leftMargin,menuLine,"   (X)");
+#endif
 	getMapping(mainMenu_custom_X);
 	if ((menuControls!=MENUCONTROLS_X)||(bb))
 		write_text_inv(tabstop1-4,menuLine,mapping);
@@ -415,7 +427,11 @@ static void draw_controlsMenu(int c)
 		write_text(tabstop1-4,menuLine,mapping);
 	// MENUCONTROLS_Y
 	menuLine+=2;
+#ifdef __PSP2__
+	write_text(leftMargin,menuLine,"(Triangle)");
+#else
 	write_text(leftMargin,menuLine,"   (Y)");
+#endif
 	getMapping(mainMenu_custom_Y);
 	if ((menuControls!=MENUCONTROLS_Y)||(bb))
 		write_text_inv(tabstop1-4,menuLine,mapping);

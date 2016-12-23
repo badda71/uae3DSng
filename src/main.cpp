@@ -186,6 +186,11 @@ void do_start_program (void)
 void do_leave_program (void)
 {
 #ifdef USE_SDL
+#ifdef __PSP2__ //On Vita, only remove keyboard graphics from memory when quitting the emu
+#ifdef USE_UAE4ALL_VKBD
+	vkbd_quit();
+#endif
+#endif
   if(current_screenshot != NULL)
     SDL_FreeSurface(current_screenshot);
 #endif
