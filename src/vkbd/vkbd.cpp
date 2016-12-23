@@ -4,6 +4,8 @@
 
 #include "vkbd.h"
 
+#define MENU_FILE_BACKGROUND DATA_PREFIX "background.bmp"
+
 #define MIN_VKBD_TIME 100
 
 int vkbd_mode=0;
@@ -12,7 +14,7 @@ SDLKey vkbd_key=(SDLKey)0;
 SDLKey vkbd_button2=(SDLKey)0;
 int vkbd_keysave=-1234567;
 
-#if !defined (DREAMCAST) && !defined (GP2X) && !defined (PSP) && !defined (GIZMONDO)
+#if !defined (DREAMCAST) && !defined (GP2X) && !defined (PSP) && !defined (GIZMONDO) 
 
 int vkbd_init(void) { return 0; }
 void vkbd_init_button2(void) { }
@@ -140,7 +142,6 @@ static t_vkbd_rect vkbd_rect[]=
 	{{ 80,34,10, 5 },84, 8,90,92, SDLK_RCTRL},	// 91
 	{{131,34,12, 5 },86,28,91,93, SDLK_KP0},	// 92
 	{{145,34, 6, 5 },87,29,92,88, SDLK_KP_PERIOD},	// 93
-
 };
 
 void vkbd_init_button2(void)
@@ -148,11 +149,17 @@ void vkbd_init_button2(void)
 	vkbd_button2=(SDLKey)0;
 }
 
-
 int vkbd_init(void)
 {
 	int i;
 	char tmpchar[256];
+#ifdef __PSP2__
+//	if (!vkbd_screen)
+//	{			//vkbd_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w,prSDLScreen->h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+//	}
+	SDL_Surface *tmp=SDL_LoadBMP(DATA_PREFIX "vkbd.bmp");
+//	SDL_Surface *tmp=SDL_LoadBMP("app0:/data/vkbd.bmp");
+#else
 #ifdef GP2X
 	snprintf(tmpchar, 256, "%s/data/vkbd.bmp", launchDir);
 	SDL_Surface *tmp = SDL_LoadBMP(tmpchar);
@@ -163,6 +170,7 @@ int vkbd_init(void)
 	SDL_Surface *tmp=SDL_LoadBMP(DATA_PREFIX "vkbd.bmp");
 #endif
 #endif
+#endif //__PSP2__
 	if (tmp==NULL)
 	{
 		printf("Virtual Keyboard Bitmap Error: %s\n",SDL_GetError());
@@ -174,6 +182,9 @@ int vkbd_init(void)
 		vkey[i]=NULL;
 	for(i=0;i<MAX_KEY;i++)
 	{
+#ifdef __PSP2__
+		snprintf(tmpchar, 256, "app0:/data/key%i.bmp", i);
+#else
 #ifdef GP2X
 		snprintf(tmpchar, 256, "%s/data/key%i.bmp", launchDir, i);
 #else
@@ -183,6 +194,7 @@ int vkbd_init(void)
 		snprintf(tmpchar, 256, DATA_PREFIX "key%i.bmp", i);
 #endif
 #endif
+#endif //__PSP2__
 		tmp=SDL_LoadBMP(tmpchar);
 		if (tmp==NULL)
 			break;
@@ -190,7 +202,9 @@ int vkbd_init(void)
 		SDL_FreeSurface(tmp);
 	}
 	vkbd_actual=0;
+#ifndef __PSP2__ //no need to show keyboard on first startup
 	vkbd_redraw();
+#endif
 	vkbd_mode=0;
 	vkbd_move=0;
 	vkbd_key=(SDLKey)0;
@@ -198,7 +212,6 @@ int vkbd_init(void)
 	vkbd_keysave=-1234567;
 	return 0;
 }
-
 
 void vkbd_quit(void)
 {
@@ -225,10 +238,11 @@ SDLKey vkbd_process(void)
 	Uint32 now=SDL_GetTicks();
 	SDL_Rect r;
 	int canmove=(now-last_time>MIN_VKBD_TIME);
+
 #ifndef VKBD_ALWAYS
-	if (vkbd_move) 
+	if (vkbd_move)
 #endif
-		vkbd_redraw();
+	vkbd_redraw();
 	if (vkbd_move&VKBD_BUTTON)
 	{
 		vkbd_move=0;
@@ -275,5 +289,4 @@ SDLKey vkbd_process(void)
 #endif
 	return (SDLKey)0;
 }
-
 #endif

@@ -253,9 +253,11 @@ static void goMenu(void)
 	if (quit_program != 0)
 		return;
 	emulating=1;
+#ifndef __PSP2__ //no need to erase all the vkbd graphics from memory on Vita
 #ifdef USE_UAE4ALL_VKBD
 	vkbd_quit();
 #endif	
+#endif
 	pause_sound();
 #ifdef USE_GUICHAN
 	running=true;
@@ -276,7 +278,9 @@ static void goMenu(void)
 	quit_text();
 #endif
 #ifdef USE_UAE4ALL_VKBD
+#ifndef __PSP2__ //no need to reload all the vkbd graphics everytime on Vita
 	vkbd_init();
+#endif
 #endif
     getChanges();
 #ifdef USE_UAE4ALL_VKBD
@@ -598,7 +602,7 @@ void gui_handle_events (void)
 	buttonSelect = SDL_JoystickGetButton(uae4all_joy0, PAD_SELECT);
 	buttonStart = SDL_JoystickGetButton(uae4all_joy0, PAD_START);
 	
-	if(buttonSelect)
+	if(buttonSelect && !buttonStart) //start+select = virtual keyboard vkbd
 	{
 		//re-center the Joysticks when the user opens the menu
 		SDL_JoystickUpdate();
@@ -1700,8 +1704,13 @@ if(!vkbd_mode)
 } // if(!vkbd_mode)
 
 #ifdef USE_UAE4ALL_VKBD
+#ifdef __PSP2__
+	//on Vita Start+Select (in this order) brings up the  virtual keyboard
+	if(buttonStart && buttonSelect)
+#else
 	//L+K: virtual keyboard
 	if(triggerL && keystate[SDLK_k])
+#endif
 	{
 		if(!justLK)
 		{

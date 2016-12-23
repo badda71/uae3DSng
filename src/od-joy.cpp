@@ -103,16 +103,20 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if (mouseScale > (99*16))
 		mouseScale /= 100;
 
-#ifdef USE_UAE4ALL_VKBD
+#if !defined(__PSP2__) && defined(USE_UAE4ALL_VKBD)
 	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL && !triggerR && !gp2xButtonRemappingOn)))
 #else
-#ifdef __PSP2__
+#if defined(__PSP2__) && defined(USE_UAE4ALL_VKBD)
 	//on Vita, the L trigger is by default mapped to a mousebutton
 	//so remove the hard coded LTrigger here that was enabling the digital mouse
-	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn))
+	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn))
+#else
+#if defined(__PSP2__)
+	if ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn)
 #else
 	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL && !triggerR && !gp2xButtonRemappingOn)))
-#endif //__PSP2__
+#endif
+#endif
 #endif 
 	{
 		if (buttonY)
@@ -181,6 +185,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		}
 	}
 
+#ifdef USE_UAE4ALL_VKBD
+	if (!vkbd_mode) {
+#endif
 #ifdef __PSP2__
 	//VITA: always use an analog stick (default: right stick) for mouse pointer movements
 	//here we are using a small deadzone
@@ -212,6 +219,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		newmousecounters=1;
 	}
 #endif //__PSP2__
+#ifdef USE_UAE4ALL_VKBD
+	}
+#endif
 
 #ifdef USE_UAE4ALL_VKBD
 	if(mainMenu_customControls && !vkbd_mode)

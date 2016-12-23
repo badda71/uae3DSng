@@ -60,7 +60,11 @@ int mainMenu_CPU_speed = 0;
 int mainMenu_cpuSpeed = 600;
 
 int mainMenu_joyConf = 0;
+#ifdef __PSP2__
+int mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
+#else
 int mainMenu_joyPort = 0; // Both ports
+#endif
 int mainMenu_autofireRate = 8;
 int mainMenu_showStatus = DEFAULT_STATUSLN;
 int mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
@@ -95,7 +99,7 @@ int saveMenu_n_savestate = 0;
 #ifdef __PSP2__
 int mainMenu_shader = 5;
 int mainMenu_leftStickMouse = 0;
-int mainMenu_deadZone = 100;
+int mainMenu_deadZone = 1000;
 #endif
 
 // The following params in use, but can't be changed with gui
@@ -189,7 +193,11 @@ void SetDefaultMenuSettings(int general)
 
     mainMenu_cpuSpeed = 600;
     mainMenu_joyConf = 0;
+#ifdef __PSP2__
+    mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
+#else
     mainMenu_joyPort = 0;
+#endif
     mainMenu_autofireRate = 8;
     mainMenu_showStatus = DEFAULT_STATUSLN;
     mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
@@ -220,7 +228,7 @@ void SetDefaultMenuSettings(int general)
 #ifdef __PSP2__
     mainMenu_shader = 5;
     mainMenu_leftStickMouse = 0;
-    mainMenu_deadZone = 100;
+    mainMenu_deadZone = 1000;
 #endif
 
     // The following params can't be changed in gui
