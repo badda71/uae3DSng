@@ -261,10 +261,17 @@ static void draw_miscMenu(int c)
 		write_text(tabstop8,menuLine,"4");
 
 	menuLine+=2;
+#ifdef __PSP2__
+	if (mainMenu_joyConf==0) write_text(5,menuLine,"Sq=Autofire X=Fire Tr=Space O=2nd");
+	else if (mainMenu_joyConf==1) write_text(5,menuLine,"Sq=Fire X=Autofire Tr=Space O=2nd");
+	else if (mainMenu_joyConf==2) write_text(5,menuLine,"Sq=Autofire X=Jump Tr=Fire O=2nd");
+	else if (mainMenu_joyConf==3) write_text(5,menuLine,"Sq=Fire X=Jump Tr=Autofire O=2nd");
+#else
 	if (mainMenu_joyConf==0) write_text(5,menuLine,"A=Autofire X=Fire Y=Space B=2nd");
 	else if (mainMenu_joyConf==1) write_text(5,menuLine,"A=Fire X=Autofire Y=Space B=2nd");
 	else if (mainMenu_joyConf==2) write_text(5,menuLine,"A=Autofire X=Jump Y=Fire B=2nd");
 	else if (mainMenu_joyConf==3) write_text(5,menuLine,"A=Fire X=Jump Y=Autofire B=2nd");
+#endif
 
   // MENUMISC_JOYSTICK
 	menuLine+=2;
