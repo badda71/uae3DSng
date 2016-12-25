@@ -314,32 +314,51 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if (vkbd_mode && nr)
 	{
 		// move around the virtual keyboard instead
-		if (left)
-			vkbd_move |= VKBD_LEFT;
-		else
+		
+		// if Start+up or Start+down is pressed: move the keyboard itself
+		if (buttonStart && (dpadUp || top))
 		{
-			vkbd_move &= ~VKBD_LEFT;
-			if (right)
-				vkbd_move |= VKBD_RIGHT;
+			vkbd_displace_up();
+		}
+		else if (buttonStart && (dpadDown || bot))
+		{
+			vkbd_displace_down();
+		}
+		
+		else 
+		{
+			if (left || dpadLeft)
+				vkbd_move |= VKBD_LEFT;
 			else
-				vkbd_move &= ~VKBD_RIGHT;
-		}
-		if (top)
-			vkbd_move |= VKBD_UP;
-		else
-		{
-			vkbd_move &= ~VKBD_UP;
-			if (bot)
-				vkbd_move |= VKBD_DOWN;
+			{
+				vkbd_move &= ~VKBD_LEFT;
+				if (right || dpadRight)
+					vkbd_move |= VKBD_RIGHT;
+				else
+					vkbd_move &= ~VKBD_RIGHT;
+			}
+			if (top || dpadUp)
+				vkbd_move |= VKBD_UP;
 			else
-				vkbd_move &= ~VKBD_DOWN;
+			{
+				vkbd_move &= ~VKBD_UP;
+				if (bot || dpadDown)
+					vkbd_move |= VKBD_DOWN;
+				else
+					vkbd_move &= ~VKBD_DOWN;
+			}
+		
+			if (*button || buttonX)
+			{
+				vkbd_move=VKBD_BUTTON;
+				*button=0;
+			}
+			else //button release, make shift toggle possible again.
+			{ 
+		   	vkbd_can_switch_shift=1;
+			}
+			// TODO: add vkbd_button2 mapped to button2
 		}
-		if (*button)
-		{
-			vkbd_move=VKBD_BUTTON;
-			*button=0;
-		}
-		// TODO: add vkbd_button2 mapped to button2
 	}
 	else
 #endif

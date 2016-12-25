@@ -1742,27 +1742,40 @@ if(!vkbd_mode)
 	}
 
 #ifdef USE_UAE4ALL_VKBD
-	if (vkbd_key)
+	if (vkbd_key!=-1234567) // This means key was selected by user. We cannot test for zero, because that is a valid Amiga keycode
 	{
-		if (vkbd_keysave==-1234567)
+		if (vkbd_keysave==-1234567) // the previous vkbd key was released. Press the new key for one frame
 		{
-			SDL_keysym ks;
-			ks.sym=vkbd_key;
-			vkbd_keysave=keycode2amiga(&ks);
+			vkbd_keysave=vkbd_key;	// remember which key we are pressing so we can release it later
 			if (vkbd_keysave >= 0)
 			{
 				if (!uae4all_keystate[vkbd_keysave])
 				{
+					if ((vkbd_shift) && uae4all_keystate[AK_LSH] == 0)
+					{
+						uae4all_keystate[AK_LSH]=1;
+						record_key(AK_LSH<<1);
+					}
+					if (!(vkbd_shift) && uae4all_keystate[AK_LSH] == 1)
+					{
+						uae4all_keystate[AK_LSH]=0;
+						record_key((AK_LSH<<1)|1);
+					}
 					uae4all_keystate[vkbd_keysave]=1;
-					record_key(vkbd_keysave<<1);
+					record_key(vkbd_keysave<<1);					
 				}
 			}
 		}
 	}
 	else if (vkbd_keysave!=-1234567)
 	{
-		if (vkbd_keysave >= 0)
+		if (vkbd_keysave >= 0) //turn off shift together with any other key release if it was on
 		{
+			if (uae4all_keystate[AK_LSH] == 1)
+			{
+				uae4all_keystate[AK_LSH]=0;
+				record_key((AK_LSH<<1)|1);
+			}
 			uae4all_keystate[vkbd_keysave]=0;
 			record_key((vkbd_keysave << 1) | 1);
 		}
