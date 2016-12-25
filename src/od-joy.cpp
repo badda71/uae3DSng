@@ -324,7 +324,14 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		{
 			vkbd_displace_down();
 		}
-		
+		else if (buttonStart && (dpadLeft || left))
+		{
+			vkbd_transparency_up();
+		}
+		else if (buttonStart && (dpadRight || right))
+		{
+			vkbd_transparency_down();
+		}
 		else 
 		{
 			if (left || dpadLeft)

@@ -13,6 +13,7 @@ extern int keycode2amiga(SDL_keysym *prKeySym);
 
 static int vkbd_x=VKBD_X;
 static int vkbd_y=VKBD_Y;
+static int vkbd_transparency=255;
 static int vkbd_just_blinked=0;
 
 int vkbd_shift=0;
@@ -31,6 +32,8 @@ void vkbd_quit(void) { }
 int vkbd_process(void) { return -1234567; }
 void vkbd_displace_up(void) { };
 void vkbd_displace_down(void) { };
+void vkbd_transparency_up(void) { };
+void vkbd_transparency_down(void) { };
 #else
 
 #define MAX_KEY 110
@@ -338,9 +341,10 @@ int vkbd_init(void)
 	}
 	ksurShift=SDL_DisplayFormat(tmp);
 	SDL_FreeSurface(tmp);
-
-	SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, 125);		
-	SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, 125);	
+	
+	vkbd_transparency=128; //default transparency is 128 for LARGEKEYBOARD
+	SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+	SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);	
 #else //LARGEKEYBOARD
 //if using the small keyboard, load in the zoomed keys instead
 	for(i=0;i<MAX_KEY;i++)
@@ -383,7 +387,7 @@ int vkbd_init(void)
 #endif
 	vkbd_mode=0;
 	vkbd_move=0;
-	vkbd_key=0;
+	vkbd_key=-1234567;
 	vkbd_button2=(SDLKey)0;
 	vkbd_keysave=-1234567;
 	return 0;
@@ -424,6 +428,39 @@ void vkbd_redraw(void)
 	SDL_BlitSurface(ksur,NULL,prSDLScreen,&r);
 #endif
 }
+
+void vkbd_transparency_up(void)
+{
+	if (vkbd_transparency>53)
+	 	vkbd_transparency-=4;
+	else
+	 	vkbd_transparency=50;
+	SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+#ifdef LARGEKEYBOARD
+	SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
+#endif
+}	
+
+void vkbd_transparency_down(void)
+{
+	if (vkbd_transparency<252)
+	{
+	 	vkbd_transparency+=4; //some transparency
+		SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+#ifdef LARGEKEYBOARD
+		SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
+#endif
+	}
+	else
+	{
+	 	vkbd_transparency=255; //fully opaque
+	 	SDL_SetAlpha(ksur, 0, vkbd_transparency);		
+#ifdef LARGEKEYBOARD
+		SDL_SetAlpha(ksurShift, 0, vkbd_transparency);
+#endif
+	}
+}	
+
 
 void vkbd_displace_up(void)
 {

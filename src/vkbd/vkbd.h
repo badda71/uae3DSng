@@ -17,6 +17,8 @@ int vkbd_process(void);
 void vkbd_init_button2(void);
 void vkbd_displace_up(void);
 void vkbd_displace_down(void);
+void vkbd_transparency_up(void);
+void vkbd_transparency_down(void);
 
 extern int vkbd_mode;
 extern int vkbd_move;
