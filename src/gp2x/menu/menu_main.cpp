@@ -60,11 +60,15 @@ extern char filename0[256];
 extern char filename1[256];
 extern char filename2[256];
 extern char filename3[256];
+#ifdef __PSP2__
+static const char *text_str_title=    "----- UAE4All Vita -----";
+#else
 #ifdef PANDORA
 static const char *text_str_title=    "----- UAE4All Pandora -----";
 #else
 static const char *text_str_title=    "----- UAE4All Android -----";
 #endif
+#endif // __PSP2__
 static const char *text_str_df0=		"DF0:";
 static const char *text_str_df1=		"DF1:";
 static const char *text_str_df2=		"DF2:";

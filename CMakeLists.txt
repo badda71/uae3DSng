@@ -40,6 +40,7 @@ set(FLAGS
         -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"app0:/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
 -DUSE_UAE4ALL_VKBD
 -DVKBD_ALWAYS
+-DLARGEKEYBOARD
         -fomit-frame-pointer -Wno-unused -Wno-format
         -ffast-math -fstrict-aliasing -mstructure-size-boundary=32 -fexpensive-optimizations
         -fweb -frename-registers -fomit-frame-pointer
