@@ -356,16 +356,29 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			}
 #ifdef __PSP2__ //we know the Vita has many buttons available so use those
 			if (buttonX)
+			{
 				vkbd_move=VKBD_BUTTON;
+				buttonX = 0;
+				*button = 0;
+			}
 			else if (buttonY)
+			{
 				vkbd_move=VKBD_BUTTON_SHIFT;
+				buttonY = 0;
+				*button = 0;
+			}
 			else if (buttonA)
-				vkbd_move=VKBD_BUTTON_BACKSPACE;			
+			{
+				vkbd_move=VKBD_BUTTON_BACKSPACE;
+				buttonA = 0;
+				*button = 0;
+			}
 #else // in other cases where those buttons might not be available, use the amiga joystick
 			if (*button || buttonX )
 			{
 				vkbd_move=VKBD_BUTTON;
-				*button=0;
+				buttonX = 0;
+				*button = 0;
 			}
 #endif
 			else //button release, make shift toggle possible again.
