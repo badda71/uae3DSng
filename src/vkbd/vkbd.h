@@ -8,7 +8,9 @@
 #define VKBD_UP		4
 #define VKBD_DOWN	8
 #define VKBD_BUTTON	16
-#define VKBD_BUTTON2	32
+#define VKBD_BUTTON_BACKSPACE	32
+#define VKBD_BUTTON_SHIFT	64
+#define VLBD_BUTTON2 128
 
 int vkbd_init(void);
 void vkbd_quit(void);

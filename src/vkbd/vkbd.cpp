@@ -7,7 +7,8 @@
 #include "keyboard.h"
 
 
-#define MIN_VKBD_TIME 100
+#define VKBD_MIN_HOLDING_TIME 200
+#define VKBD_MOVE_DELAY 50
 
 extern int keycode2amiga(SDL_keysym *prKeySym);
 
@@ -15,9 +16,12 @@ static int vkbd_x=VKBD_X;
 static int vkbd_y=VKBD_Y;
 static int vkbd_transparency=255;
 static int vkbd_just_blinked=0;
+static Uint32 vkbd_last_press_time=0;
+static Uint32 vkbd_last_move_time=0;
 
 int vkbd_shift=0;
 int vkbd_can_switch_shift=0;
+int vkbd_let_go_of_direction=0;
 int vkbd_mode=0;
 int vkbd_move=0;
 int vkbd_key=-1234567;
@@ -387,6 +391,8 @@ int vkbd_init(void)
 #endif
 	vkbd_mode=0;
 	vkbd_move=0;
+	vkbd_last_press_time=0;
+	vkbd_last_move_time=0;
 	vkbd_key=-1234567;
 	vkbd_button2=(SDLKey)0;
 	vkbd_keysave=-1234567;
@@ -480,11 +486,9 @@ void vkbd_displace_down(void)
 
 int vkbd_process(void)
 {
-	static Uint32 last_time=0;
 	Uint32 now=SDL_GetTicks();
 	SDL_Rect r;
-	int canmove=(now-last_time>MIN_VKBD_TIME);
-
+	
 #ifndef VKBD_ALWAYS
 	if (vkbd_move)
 #endif
@@ -507,27 +511,50 @@ int vkbd_process(void)
 		return amigaKeyCode;
 #endif
 	}
-	/*
-	else
-	if (vkbd_move&VKBD_BUTTON2) // not implemented yet
+	
+	if (vkbd_move&VKBD_BUTTON_BACKSPACE)
 	{
 		vkbd_move=0;
-		vkbd_button2=vkbd_rect[vkbd_actual].key;
-		return (SDLKey)0;
+		return AK_BS;
 	}
-	*/
-	if (canmove)
+	if (vkbd_move&VKBD_BUTTON_SHIFT)
 	{
-		last_time=now;
-		if (vkbd_move&VKBD_LEFT)
-			vkbd_actual=vkbd_rect[vkbd_actual].left;
-		else if (vkbd_move&VKBD_RIGHT)
-			vkbd_actual=vkbd_rect[vkbd_actual].right;
-		if (vkbd_move&VKBD_UP)
-			vkbd_actual=vkbd_rect[vkbd_actual].up;
-		else if (vkbd_move&VKBD_DOWN)
-			vkbd_actual=vkbd_rect[vkbd_actual].down;
+		vkbd_move=0;
+		if (vkbd_can_switch_shift)
+		{
+			vkbd_shift=!vkbd_shift;
+			vkbd_can_switch_shift=0;
+		}
+		return(-1234567); //shift is handled as part of the other keypress
 	}
+
+	if (vkbd_move&VKBD_LEFT || vkbd_move&VKBD_RIGHT || vkbd_move&VKBD_UP || vkbd_move&VKBD_DOWN) 
+	{
+		if (vkbd_let_go_of_direction) //just pressing down
+			vkbd_last_press_time=now;
+		if (
+				(
+				now-vkbd_last_press_time>VKBD_MIN_HOLDING_TIME 
+				&& now-vkbd_last_move_time>VKBD_MOVE_DELAY
+				) 
+				|| vkbd_let_go_of_direction
+			) 
+		{
+			vkbd_last_move_time=now;
+			if (vkbd_move&VKBD_LEFT)
+				vkbd_actual=vkbd_rect[vkbd_actual].left;
+			else if (vkbd_move&VKBD_RIGHT)
+				vkbd_actual=vkbd_rect[vkbd_actual].right;
+			if (vkbd_move&VKBD_UP)
+				vkbd_actual=vkbd_rect[vkbd_actual].up;
+			else if (vkbd_move&VKBD_DOWN)
+				vkbd_actual=vkbd_rect[vkbd_actual].down;
+		}
+		vkbd_let_go_of_direction=0;
+	}
+	else
+		vkbd_let_go_of_direction=1;
+		
 	r.x=vkbd_x+vkbd_rect[vkbd_actual].rect.x;
 	r.y=vkbd_y+vkbd_rect[vkbd_actual].rect.y;
 	r.w=vkbd_rect[vkbd_actual].rect.w;
