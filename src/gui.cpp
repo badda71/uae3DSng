@@ -566,6 +566,11 @@ void gui_handle_events (void)
 		//From now on only center when entering menu
 		haveJoysticksBeenCentered=1;
 	}
+
+	lAnalogX=lAnalogX-lAnalogXCenter;
+	lAnalogY=lAnalogY-lAnalogYCenter;
+	rAnalogX=rAnalogX-rAnalogXCenter;
+	rAnalogY=rAnalogY-rAnalogYCenter;
 	
 	if (mainMenu_leftStickMouse) {
 		dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
@@ -576,8 +581,6 @@ void gui_handle_events (void)
 			|| (rAnalogY < -1024*10) ? 1 : 0;
 		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
 			|| (rAnalogY > 1024*10) ? 1 : 0;
-		lAnalogX=lAnalogX-lAnalogXCenter;
-		lAnalogY=lAnalogY-lAnalogYCenter;
 	} 
 	else
 	{
@@ -589,8 +592,6 @@ void gui_handle_events (void)
 			|| (lAnalogY < -1024*10) ? 1 : 0;
 		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
 			|| (lAnalogY > 1024*10) ? 1 : 0;
-		rAnalogX=rAnalogX-rAnalogXCenter;
-		rAnalogY=rAnalogY-rAnalogYCenter;
 	}
 	
 	buttonA = SDL_JoystickGetButton(uae4all_joy0, PAD_SQUARE);
