@@ -51,6 +51,8 @@ static const char *text_str_4x="4x";
 int menuMisc = 0;
 
 extern int kickstart;
+extern int quit_pressed_in_submenu;
+extern int emulating;
 
 enum { 
 	MENUMISC_RETURNMAIN = 0,
@@ -424,7 +426,7 @@ static void draw_miscMenu(int c)
 static int key_miscMenu(int *c)
 {
 	int end=0;
-	int left=0, right=0, up=0, down=0, hit0=0, hit1=0;
+	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0;
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event) > 0)
@@ -443,10 +445,19 @@ static int key_miscMenu(int *c)
 			case SDLK_LALT: hit1=1; break;
 			case SDLK_END: hit0=1; break;
 			case SDLK_PAGEUP: hit0=1;
+			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
+				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 			}
 		}
-
-		if (hit0)
+		if (hit2) //Does the user want to cancel the menu completely?
+		{
+			if (emulating)
+			{
+				end = -1; 
+				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+			}
+		}	
+		else if (hit0)
 		{
 			end = -1;
 		}

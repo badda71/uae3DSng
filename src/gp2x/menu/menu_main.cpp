@@ -87,6 +87,7 @@ static const char *text_str_exit= "Quit (Q)";
 
 int mainMenu_case=-1;
 int mainMenu_system=-1;
+int quit_pressed_in_submenu=0;
 
 int nr_drives=DEFAULT_DRIVES;
 int current_drive=0;
@@ -821,7 +822,19 @@ int run_mainMenu()
 			break;
 		case MAIN_MENU_CASE_MEMDISK:
 			run_menuMemDisk();
-			mainMenu_case=-1;
+			if (quit_pressed_in_submenu) //User quit menu while in sub-menu
+			{
+				if (emulating)
+				{
+					setCpuSpeed();
+					mainMenu_case=1;
+				}
+				else
+					mainMenu_case=-1;
+				quit_pressed_in_submenu=0;
+			}
+			else
+				mainMenu_case=-1;
 			break;
 		case MAIN_MENU_CASE_SAVESTATES:
 			run_menuSavestates();
@@ -829,6 +842,17 @@ int run_mainMenu()
 			{
 				setCpuSpeed();
 				mainMenu_case=1;
+			}
+			else if (quit_pressed_in_submenu) //User quit menu while in sub-menu
+			{
+				if (emulating)
+				{
+					setCpuSpeed();
+					mainMenu_case=1;
+				}
+				else
+					mainMenu_case=-1;
+				quit_pressed_in_submenu=0;
 			}
 			else
 				mainMenu_case=-1;
@@ -877,19 +901,55 @@ int run_mainMenu()
 		case MAIN_MENU_CASE_CONTROLS:
 			{
 				run_menuControls();
-				mainMenu_case=-1;
+				if (quit_pressed_in_submenu) //User quit menu while in sub-menu
+				{
+					if (emulating)
+					{
+						setCpuSpeed();
+						mainMenu_case=1;
+					}
+					else
+						mainMenu_case=-1;
+					quit_pressed_in_submenu=0;
+				}
+				else
+					mainMenu_case=-1;
 			}
 			break;
 		case MAIN_MENU_CASE_DISPLAY:
 			{
 				run_menuDisplay();
-				mainMenu_case=-1;
+				if (quit_pressed_in_submenu) //User quit menu while in sub-menu
+				{
+					if (emulating)
+					{
+						setCpuSpeed();
+						mainMenu_case=1;
+					}
+					else
+						mainMenu_case=-1;
+					quit_pressed_in_submenu=0;
+				}
+				else
+					mainMenu_case=-1;
 			}
 			break;
 		case MAIN_MENU_CASE_MISC:
 			{
 				run_menuMisc();
-				mainMenu_case=-1;
+				if (quit_pressed_in_submenu) //User quit menu while in sub-menu
+				{
+					if (emulating)
+					{
+						setCpuSpeed();
+						mainMenu_case=1;
+					}
+					else
+						mainMenu_case=-1;
+					quit_pressed_in_submenu=0;
+				}
+				else
+					mainMenu_case=-1;
 			}
 			break;
 		case MAIN_MENU_CASE_QUIT:
