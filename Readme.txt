@@ -38,9 +38,9 @@ cross=X
 triangle=Y
 
 Select = toggle menu
-Start + Select (in this order) = toggle virtual keyboard
-Start+dpad up/down = move screen up down
-Start+dpad left/right = change screenmode (to zoom games with large black borders)
+Start = toggle virtual keyboard
+R+Start+dpad up/down = move screen up down
+R+Start+dpad left/right = change screenmode (to zoom games with large black borders)
 right analog stick = analog mouse (can switch this to left in menu)
 left analog stick = acts as amiga joystick
 
@@ -56,3 +56,9 @@ R+dpad = arrow keys
 When custom mouse controls are on:
 Dpad = digital mouse
 Triangle = slow mouse down
+
+When virtual keyboard is on:
+Right analog stick up/down = move virtual keyboard up/down
+Right analog stick left/right = change virtual keyboard transparency
+Square = backspace
+Triangle = toggle shift

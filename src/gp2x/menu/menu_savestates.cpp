@@ -32,6 +32,7 @@ static const char *text_str_exit="Back to Main Menu";
 
 extern int emulating;
 extern int saveMenu_n_savestate;
+extern int quit_pressed_in_submenu;
 
 int saveMenu_case=-1;
 
@@ -128,10 +129,20 @@ static inline int key_saveMenu(int *cp)
 			case SDLK_LALT: hit1=1; break;
 			case SDLK_END: hit0=1; break;
 			case SDLK_PAGEUP: hit0=1;
+			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
+			//note SDLK_CTRL corresponds to ButtonSelect on Vita
 			}
 		}
-
-		if (up)
+		if (hit2) // does the user want to shut-down the whole menu?
+		{
+			if (emulating)
+			{
+				saveMenu_case=SAVE_MENU_CASE_CANCEL; // quit this menu
+				end=1;
+				quit_pressed_in_submenu=1; //also change mainMenu state so that it automatically exits
+			}
+		}
+		else if (up)
 		{
 			if (c>0) c=(c-1)%4;
 			else c=3;

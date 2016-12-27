@@ -315,20 +315,37 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	{
 		// move around the virtual keyboard instead
 		
-		// if Start+up or Start+down is pressed: move the keyboard itself
+		// if Start+Dpad is used (or right analog stick on Vita)
+		// move the keyboard itself and/or change transparency
+#ifdef __PSP2__
+		if (rAnalogY < -1024*10)
+#else
 		if (buttonStart && (dpadUp || top))
+#endif
 		{
 			vkbd_displace_up();
 		}
+#ifdef __PSP2__
+		else if (rAnalogY > 1024*10)
+#else
 		else if (buttonStart && (dpadDown || bot))
+#endif
 		{
 			vkbd_displace_down();
 		}
+#ifdef __PSP2__		
+		else if (rAnalogX < -1024*10)
+#else
 		else if (buttonStart && (dpadLeft || left))
+#endif
 		{
 			vkbd_transparency_up();
 		}
+#ifdef __PSP2__
+		else if (rAnalogX > 1024*10)
+#else
 		else if (buttonStart && (dpadRight || right))
+#endif
 		{
 			vkbd_transparency_down();
 		}

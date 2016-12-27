@@ -44,6 +44,8 @@ const char *text_str_4M="4M";
 const char *text_str_8M="8M";
 
 int menuMemDisk = 0;
+extern int quit_pressed_in_submenu;
+extern int emulating;
 
 enum { 
 	MENUDISK_RETURNMAIN = 0,
@@ -278,7 +280,7 @@ static int key_memDiskMenu(int *c)
 {
 	int end=0;
 	int left=0, right=0, up=0, down=0;
-	int hit0=0, hit1=0;
+	int hit0=0, hit1=0, hit2=0;
 	int del=0;
 
 	SDL_Event event;
@@ -299,19 +301,27 @@ static int key_memDiskMenu(int *c)
 				case SDLK_PAGEDOWN: hit0=1; break;
 				case SDLK_HOME: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
-				case SDLK_LCTRL: hit0=1; break;
 				case SDLK_RSHIFT: hit0=1; break;
 				case SDLK_RCTRL: hit0=1; break;
 				case SDLK_END: hit0=1; break;
 				case SDLK_PAGEUP: hit0=1; break;
 				case SDLK_DELETE: case SDLK_BACKSPACE: case SDLK_ESCAPE: del=1; break;
+				case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
+				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 				default:
 					break;
 			}
 		}
 	}
-
-	if (hit1)
+	if (hit2) //Does the user want to cancel the menu completely?
+	{
+		if (emulating)
+		{
+			end = -1; 
+			quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+		}
+	}	
+	else if (hit1)
 	{
 		end=-1;
 	}
