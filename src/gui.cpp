@@ -75,7 +75,7 @@ extern SDL_Surface *prSDLScreen;
 extern SDL_Joystick *uae4all_joy0, *uae4all_joy1;
 
 #ifdef __PSP2__
-//Predefined quick switch resolutions to select via START+DPAD LEFT/RIGHT
+//Predefined quick switch resolutions to select via TRIGGER R+START+DPAD LEFT/RIGHT
 int quickSwitchModeID=8;
 struct myRes
 {
@@ -602,7 +602,7 @@ void gui_handle_events (void)
 	buttonSelect = SDL_JoystickGetButton(uae4all_joy0, PAD_SELECT);
 	buttonStart = SDL_JoystickGetButton(uae4all_joy0, PAD_START);
 	
-	if(buttonSelect && !buttonStart) //start+select = virtual keyboard vkbd
+	if(buttonSelect)
 	{
 		//re-center the Joysticks when the user opens the menu
 		SDL_JoystickUpdate();
@@ -733,7 +733,7 @@ if(!vkbd_mode)
 {
 #ifdef __PSP2__
 	//holding start on Vita to move screen, L/R are used for mousebuttons.
-	if(buttonStart)
+	if(buttonStart && triggerR)
 #else
 	//L + R
 	if(triggerL && triggerR)
@@ -1705,8 +1705,9 @@ if(!vkbd_mode)
 
 #ifdef USE_UAE4ALL_VKBD
 #ifdef __PSP2__
-	//on Vita Start+Select (in this order) brings up the  virtual keyboard
-	if(buttonStart && buttonSelect)
+	//on Vita, Start brings up the  virtual keyboard, but Trigger R + Start is used for
+	//quickswitch resolution etc. 
+	if(buttonStart && !triggerR)
 #else
 	//L+K: virtual keyboard
 	if(triggerL && keystate[SDLK_k])
