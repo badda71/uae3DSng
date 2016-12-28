@@ -76,13 +76,14 @@ extern SDL_Joystick *uae4all_joy0, *uae4all_joy1;
 
 #ifdef __PSP2__
 //Predefined quick switch resolutions to select via TRIGGER R+START+DPAD LEFT/RIGHT
-int quickSwitchModeID=8;
+static int can_change_quickSwitchModeID = 1;
+static int quickSwitchModeID=1;
 struct myRes
 {
 		int num_lines;
 		int top_pos;
 };
-myRes quickSwitchModes[] = {
+static myRes quickSwitchModes[] = {
     {192, 0},
     {200, 0},
     {216, 0},
@@ -758,21 +759,25 @@ if(!vkbd_mode)
 #ifdef __PSP2__
 // Change zoom:
 // quickSwitch resolution presets
-			if (quickSwitchModeID==0)
+			if (can_change_quickSwitchModeID)
 			{
-				quickSwitchModeID=sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1;
+				if (quickSwitchModeID==0)
+				{
+					quickSwitchModeID=sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1;
+				}
+				else
+				{
+					quickSwitchModeID--;
+				}
+				mainMenu_displayedLines = 
+					quickSwitchModes[quickSwitchModeID].num_lines;	
+				moveY = 
+					quickSwitchModes[quickSwitchModeID].top_pos;
+				getChanges();
+				check_all_prefs();
+				update_display();
+				can_change_quickSwitchModeID=0;
 			}
-			else
-			{
-				quickSwitchModeID--;
-			}
-			mainMenu_displayedLines = 
-				quickSwitchModes[quickSwitchModeID].num_lines;	
-			moveY = 
-				quickSwitchModes[quickSwitchModeID].top_pos;
-			getChanges();
-			check_all_prefs();
-			update_display();	
 #else
 			screenWidth -=10;
 			if(screenWidth<200)
@@ -784,27 +789,36 @@ if(!vkbd_mode)
 		else if(dpadRight)
 		{
 #ifdef __PSP2__
-			if (quickSwitchModeID==sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1)
-			{
-				quickSwitchModeID=0;
+			if (can_change_quickSwitchModeID)
+				{
+			
+				if (quickSwitchModeID==sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1)
+				{
+					quickSwitchModeID=0;
+				}
+				else
+				{
+					quickSwitchModeID++;
+				}
+				mainMenu_displayedLines = 
+					quickSwitchModes[quickSwitchModeID].num_lines;	
+				moveY = 
+					quickSwitchModes[quickSwitchModeID].top_pos;
+				getChanges();
+				check_all_prefs();
+				update_display();
+				can_change_quickSwitchModeID = 0;
 			}
-			else
-			{
-				quickSwitchModeID++;
-			}
-			mainMenu_displayedLines = 
-				quickSwitchModes[quickSwitchModeID].num_lines;	
-			moveY = 
-				quickSwitchModes[quickSwitchModeID].top_pos;
-			getChanges();
-			check_all_prefs();
-			update_display();
 #else
 			screenWidth +=10;
 			if(screenWidth>800)
 				screenWidth = 800;
 			update_display();
 #endif
+		}
+		else if (!can_change_quickSwitchModeID)
+		{
+			can_change_quickSwitchModeID = 1;
 		}
 		//1
 		else if(keystate[SDLK_1])

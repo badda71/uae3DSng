@@ -23,6 +23,7 @@
 
 #ifdef USE_UAE4ALL_VKBD
 #include "vkbd.h"
+static int can_change_vkbd_transparency=1;
 #endif
 
 #ifdef ANDROIDSDL
@@ -339,7 +340,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		else if (buttonStart && (dpadLeft || left))
 #endif
 		{
-			vkbd_transparency_up();
+			if (can_change_vkbd_transparency)
+			{
+				vkbd_transparency_up();
+				can_change_vkbd_transparency=0;
+			}
 		}
 #ifdef __PSP2__
 		else if (rAnalogX > 1024*10)
@@ -347,10 +352,15 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		else if (buttonStart && (dpadRight || right))
 #endif
 		{
-			vkbd_transparency_down();
+			if (can_change_vkbd_transparency)
+			{
+				vkbd_transparency_down();
+				can_change_vkbd_transparency=0;
+			}
 		}
 		else 
 		{
+			can_change_vkbd_transparency=1;
 			if (left || dpadLeft)
 				vkbd_move |= VKBD_LEFT;
 			else

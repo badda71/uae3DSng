@@ -437,32 +437,72 @@ void vkbd_redraw(void)
 
 void vkbd_transparency_up(void)
 {
-	if (vkbd_transparency>53)
-	 	vkbd_transparency-=4;
-	else
-	 	vkbd_transparency=50;
-	SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
-#ifdef LARGEKEYBOARD
-	SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
-#endif
-}	
-
-void vkbd_transparency_down(void)
-{
-	if (vkbd_transparency<252)
+	switch (vkbd_transparency) 
 	{
-	 	vkbd_transparency+=4; //some transparency
+		case 255:
+			vkbd_transparency=192;
+			break;
+		case 192:
+			vkbd_transparency=128;
+			break;
+		case 128: 
+			vkbd_transparency=64;
+			break;
+		case 64: 
+			vkbd_transparency=255;
+			break;
+		default:
+			vkbd_transparency=64;
+			break;
+	}		
+	if (vkbd_transparency != 255)
+	{
 		SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
 #ifdef LARGEKEYBOARD
 		SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
 #endif
 	}
-	else
+	else //fully opague
 	{
-	 	vkbd_transparency=255; //fully opaque
-	 	SDL_SetAlpha(ksur, 0, vkbd_transparency);		
+	 	SDL_SetAlpha(ksur, 0, 255);		
 #ifdef LARGEKEYBOARD
-		SDL_SetAlpha(ksurShift, 0, vkbd_transparency);
+		SDL_SetAlpha(ksurShift, 0, 255);
+#endif
+	}
+}	
+
+void vkbd_transparency_down(void)
+{
+	switch (vkbd_transparency) 
+	{
+		case 255:
+			vkbd_transparency=64;
+			break;
+		case 192:
+			vkbd_transparency=255;
+			break;
+		case 128: 
+			vkbd_transparency=192;
+			break;
+	 	case 64:
+			vkbd_transparency=128;
+			break;
+		default:
+			vkbd_transparency=255;
+			break;
+	}		
+	if (vkbd_transparency != 255)
+	{
+		SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+#ifdef LARGEKEYBOARD
+		SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
+#endif
+	}
+	else //fully opague
+	{
+	 	SDL_SetAlpha(ksur, 0, 255);		
+#ifdef LARGEKEYBOARD
+		SDL_SetAlpha(ksurShift, 0, 255);
 #endif
 	}
 }	
