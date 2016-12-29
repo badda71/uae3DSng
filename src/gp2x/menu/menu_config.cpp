@@ -1185,13 +1185,13 @@ void loadconfig(int general)
     //so open it with 320*270. Even 800*600 would work, 
     //but only a width of 320 is supported by the current
     //emulator drawing routines
-		int visibleAreaWidth_old = visibleAreaWidth;
-		int mainMenu_displayedLines_old = mainMenu_displayedLines;
-		visibleAreaWidth = 320;
-		mainMenu_displayedLines = 270;
-		update_display();
-		visibleAreaWidth=visibleAreaWidth_old;
-		mainMenu_displayedLines = mainMenu_displayedLines_old;
+	 int visibleAreaWidth_old = visibleAreaWidth;
+	 int mainMenu_displayedLines_old = mainMenu_displayedLines;
+	 visibleAreaWidth = 320;
+	 mainMenu_displayedLines = 200;
+	 update_display();
+	 visibleAreaWidth=visibleAreaWidth_old;
+	 mainMenu_displayedLines = mainMenu_displayedLines_old;
 	}
 #endif
 

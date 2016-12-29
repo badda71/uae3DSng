@@ -204,6 +204,7 @@ static inline void raise_saveMenu()
 
 	text_draw_background();
 	text_flip();
+#ifndef __PSP2__
 	for(i=0;i<8;i++)
 	{
 		text_draw_background();
@@ -211,12 +212,13 @@ static inline void raise_saveMenu()
 		text_flip();
 		SDL_Delay(15);
 	}
+#endif
 }
 
 static inline void unraise_saveMenu()
 {
 	int i;
-
+#ifndef __PSP2__
 	for(i=7;i>=0;i--)
 	{
 		text_draw_background();
@@ -224,6 +226,7 @@ static inline void unraise_saveMenu()
 		text_flip();
 		SDL_Delay(15);
 	}
+#endif
 	text_draw_background();
 	text_flip();
 }

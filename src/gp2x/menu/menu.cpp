@@ -18,6 +18,17 @@
 
 #include <SDL_gp2x.h>
 
+#ifdef __PSP2__
+#include "psp2_shader.h"
+#include "vita2d.h"
+extern PSP2Shader *shader;
+extern int mainMenu_shader;
+typedef struct private_hwdata {
+	vita2d_texture *texture;
+	SDL_Rect dst;
+} private_hwdata;
+#endif
+
 extern int bReloadKickstart;
 #ifdef USE_GUICHAN
 extern int mainMenu_displayHires;
@@ -192,6 +203,7 @@ int save_thumb(int code,char *path)
 
 void menu_raise(void)
 {
+#ifndef __PSP2__
 	int i;
 	for(i=80;i>=0;i-=16)
 	{
@@ -203,10 +215,16 @@ void menu_raise(void)
 		text_flip();
 		SDL_Delay(10);
 	}
+#else
+	text_draw_background();
+	text_flip();
+	SDL_Delay(10);
+#endif
 }
 
 void menu_unraise(void)
 {
+#ifndef __PSP2__
 	int i;
 	for(i=0;i<=80;i+=16)
 	{
@@ -218,6 +236,11 @@ void menu_unraise(void)
 		text_flip();
 		SDL_Delay(10);
 	}
+#else
+	text_draw_background();
+	text_flip();
+	SDL_Delay(10);
+#endif
 }
 
 static void update_window_color(void)
@@ -342,9 +365,19 @@ void init_text(int splash)
 #ifdef __PSP2__
 	//Display menu always in 320*240 on Vita
 	if(prSDLScreen != NULL) {
-		SDL_FillRect(prSDLScreen,NULL,0);
-		SDL_Flip(prSDLScreen);
+		for (int i=0; i<10; i++)
+		{
+			SDL_FillRect(prSDLScreen,NULL,0);
+			SDL_Flip(prSDLScreen);
+		}
+		private_hwdata *myhwdata=prSDLScreen->hwdata;
+      vita2d_wait_rendering_done();
+		vita2d_free_texture(prSDLScreen->hwdata->texture);
+		SDL_free(prSDLScreen->hwdata);
+		prSDLScreen->hwdata = NULL;
+		prSDLScreen->pixels = NULL;
 		SDL_FreeSurface(prSDLScreen);
+      prSDLScreen = NULL; 
 	};	
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", 320, 240);
@@ -361,6 +394,11 @@ void init_text(int splash)
    //https://github.com/rsn8887/SDL-Vita/tree/SDL12
    //to compile
 	SDL_SetVideoModeBilinear(0);
+	
+//	if(shader != NULL) {
+//        delete(shader);
+//        shader = NULL;
+//    }
 	
 #elif PANDORA
 	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);
@@ -460,7 +498,9 @@ void init_text(int splash)
 	}
 	else
 	{
+#ifndef __PSP2__
 		SDL_FillRect(text_screen,NULL,0xFFFFFFFF);
+#endif
 		text_flip();
 		uae4all_resume_music();
 	}

@@ -741,24 +741,27 @@ static void raise_miscMenu()
 
 	text_draw_background();
 	text_flip();
+#ifndef __PSP2__
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
 		text_draw_window(80-64,(10-i)*24,160+64+64,220,text_str_misc_title);
 		text_flip();
 	}
+#endif
 }
 
 static void unraise_miscMenu()
 {
 	int i;
-
+#ifndef __PSP2__
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();
 		text_draw_window(80-64,(10-i)*24,160+64+64,220,text_str_misc_title);
 		text_flip();
 	}
+#endif
 	text_draw_background();
 	text_flip();
 }

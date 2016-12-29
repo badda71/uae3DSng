@@ -199,7 +199,6 @@ static void draw_mainMenu(int c)
 
 	text_draw_background();
 	text_draw_window(leftMargin-1,menuLine-1,34,40,text_str_title);
-
 	// 1
 	if ((c==0)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_df0);
@@ -755,24 +754,27 @@ static void raise_mainMenu()
 	int i;
 	text_draw_background();
 	text_flip();
+#ifndef __PSP2__
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
 		text_draw_window(40,(10-i)*24,260,200,text_str_title);
 		text_flip();
 	}
+#endif
 }
 
 static void unraise_mainMenu()
 {
 	int i;
-
+#ifndef __PSP2__
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();
 		text_draw_window(40,(10-i)*24,260,200,text_str_title);
 		text_flip();
 	}
+#endif
 	text_draw_background();
 	text_flip();
 }

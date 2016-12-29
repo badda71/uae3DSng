@@ -12,6 +12,8 @@
 
 extern int keycode2amiga(SDL_keysym *prKeySym);
 
+extern int mainMenu_displayHires;
+
 static int vkbd_x=VKBD_X;
 static int vkbd_y=VKBD_Y;
 static int vkbd_transparency=255;
@@ -45,8 +47,10 @@ void vkbd_transparency_down(void) { };
 extern SDL_Surface *prSDLScreen;
 
 static SDL_Surface *ksur;
+static SDL_Surface *ksurHires;
 #ifdef LARGEKEYBOARD // The new larger keyboard uses transparency and supports shift.
 static SDL_Surface *ksurShift;
+static SDL_Surface *ksurShiftHires;
 #else
 static SDL_Surface *vkey[MAX_KEY];
 #endif
@@ -193,7 +197,7 @@ static t_vkbd_rect vkbd_rect[]=
 	{{241,  1, 14, 11 },92,32,12,14, AK_NPLPAREN},	// 13
 	{{256,  1, 14, 11 },69,33,13,15, AK_NPRPAREN},	// 14
 	{{271,  1, 13, 11 },69,34,14,16, AK_NPDIV},	// 15
-	{{286,  1, 13, 11 },69,35,15,0, AK_NPMUL},	// 16
+	{{285,  1, 13, 11 },69,35,15,0, AK_NPMUL},	// 16
 	
 	{{  1, 13, 29, 11 }, 0,36,35,18, AK_QUOTE}, // 17, row 2 start 
 	{{ 31, 13, 14, 11 }, 1,37,17,19, AK_1},	// 18
@@ -287,23 +291,31 @@ int vkbd_init(void)
 {
 	int i;
 	char tmpchar[256];
+	char tmpchar2[256];
 	char vkbdFileName[256];
+	char vkbdHiresFileName[256];
 #ifdef LARGEKEYBOARD
 	snprintf(vkbdFileName, 256, "vkbdLarge.bmp");
+	snprintf(vkbdHiresFileName, 256, "vkbdLargeHires.bmp");
 #else
 	snprintf(vkbdFileName, 256, "vkbd.bmp");
+	snprintf(vkbdFileName, 256, "vkbdHires.bmp");
 #endif
 		
 #ifdef __PSP2__
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdFileName);
+	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdHiresFileName);
 #else
 #ifdef GP2X
 	snprintf(tmpchar, 256, "%s/data/%s", launchDir, vkbdFileName);
+	snprintf(tmpchar2, 256, "%s/data/%s", launchDir, vkbdHiresFileName);
 #else
 #ifdef GIZMONDO
 	snprintf(tmpchar, 256, "%s", "\\SD Card\\uae4all\\data\\%s",vkbdFileName);
+	snprintf(tmpchar2, 256, "%s", "\\SD Card\\uae4all\\data\\%s",vkbdHiresFileName);
 #else
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdFileName);
+	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdHiresFileName);
 #endif
 #endif
 #endif //__PSP2__
@@ -318,20 +330,36 @@ int vkbd_init(void)
 	ksur=SDL_DisplayFormat(tmp);
 	SDL_FreeSurface(tmp);
 
+	tmp = SDL_LoadBMP(tmpchar2);
+	
+	if (tmp==NULL)
+	{
+		printf("Virtual Keyboard Bitmap Error: %s\n",SDL_GetError());
+		return -1;
+	}
+	ksurHires=SDL_DisplayFormat(tmp);
+	SDL_FreeSurface(tmp);
+
 //for large keyboard, use another image for shifted keys, and transparency
 #ifdef LARGEKEYBOARD 
 	char vkbdShiftFileName[256];
+	char vkbdShiftHiresFileName[256];
    snprintf(vkbdShiftFileName, 256, "vkbdLargeShift.bmp");
+   snprintf(vkbdShiftHiresFileName, 256, "vkbdLargeShiftHires.bmp");
 #ifdef __PSP2__
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdShiftFileName);
+	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdShiftHiresFileName);
 #else
 #ifdef GP2X
 	snprintf(tmpchar, 256, "%s/data/%s", launchDir, vkbdShiftFileName);
+	snprintf(tmpchar2, 256, "%s/data/%s", launchDir, vkbdShiftHiresFileName);
 #else
 #ifdef GIZMONDO
 	snprintf(tmpchar, 256, "%s", "\\SD Card\\uae4all\\data\\%s",vkbdShiftFileName);
+	snprintf(tmpchar2, 256, "%s", "\\SD Card\\uae4all\\data\\%s",vkbdShiftHiresFileName);
 #else
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdShiftFileName);
+	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdShiftHiresFileName);
 #endif
 #endif
 #endif //__PSP2__
@@ -344,6 +372,16 @@ int vkbd_init(void)
 		return -1;
 	}
 	ksurShift=SDL_DisplayFormat(tmp);
+	SDL_FreeSurface(tmp);
+	
+	tmp = SDL_LoadBMP(tmpchar2);
+
+	if (tmp==NULL)
+	{
+		printf("Virtual Keyboard Bitmap Error: %s\n",SDL_GetError());
+		return -1;
+	}
+	ksurShiftHires=SDL_DisplayFormat(tmp);
 	SDL_FreeSurface(tmp);
 	
 	vkbd_transparency=128; //default transparency is 128 for LARGEKEYBOARD
@@ -404,11 +442,13 @@ void vkbd_quit(void)
 	int i;
 #ifdef LARGEKEYBOARD
 	SDL_FreeSurface(ksurShift);
+	SDL_FreeSurface(ksurShiftHires);
 #else
 	for(i=0;i<MAX_KEY;i++)
 		SDL_FreeSurface(vkey[i]);
 #endif
 	SDL_FreeSurface(ksur);
+	SDL_FreeSurface(ksurHires);
 	vkbd_mode=0;
 	vkbd_shift=0;
 }
@@ -416,23 +456,37 @@ void vkbd_quit(void)
 void vkbd_redraw(void)
 {
 	SDL_Rect r;
-	
-	if (vkbd_y>prSDLScreen->h-ksur->h) 
-		vkbd_y=prSDLScreen->h-ksur->h;
+	SDL_Surface *todraw;
+	if (mainMenu_displayHires)
+	{
+#ifdef LARGEKEYBOARD
+		if (vkbd_shift)
+			todraw=ksurShiftHires;
+		else
+#endif
+			todraw=ksurHires;
+	}
+	else
+	{
+#ifdef LARGEKEYBOARD
+		if (vkbd_shift)
+			todraw=ksurShift;
+		else
+#endif
+			todraw=ksur;
+	}
+		
+	if (vkbd_y>prSDLScreen->h-todraw->h) 
+		vkbd_y=prSDLScreen->h-todraw->h;
+		
+	vkbd_x=(prSDLScreen->w-todraw->w)/2;
 	
 	r.x=vkbd_x;	
 	r.y=vkbd_y;	
-	r.w=ksur->w;
-	r.h=ksur->h;
+	r.w=todraw->w;
+	r.h=todraw->h;
 	
-#ifdef LARGEKEYBOARD
-	if (!vkbd_shift)
-		SDL_BlitSurface(ksur,NULL,prSDLScreen,&r);
-	else
-		SDL_BlitSurface(ksurShift,NULL,prSDLScreen,&r);
-#else
-	SDL_BlitSurface(ksur,NULL,prSDLScreen,&r);
-#endif
+	SDL_BlitSurface(todraw,NULL,prSDLScreen,&r);
 }
 
 void vkbd_transparency_up(void)
@@ -458,15 +512,19 @@ void vkbd_transparency_up(void)
 	if (vkbd_transparency != 255)
 	{
 		SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+		SDL_SetAlpha(ksurHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
 #ifdef LARGEKEYBOARD
 		SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
+		SDL_SetAlpha(ksurShiftHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
 #endif
 	}
 	else //fully opague
 	{
-	 	SDL_SetAlpha(ksur, 0, 255);		
+	 	SDL_SetAlpha(ksur, 0, 255);
+	 	SDL_SetAlpha(ksurHires, 0, 255);				
 #ifdef LARGEKEYBOARD
 		SDL_SetAlpha(ksurShift, 0, 255);
+		SDL_SetAlpha(ksurShiftHires, 0, 255);
 #endif
 	}
 }	
@@ -494,15 +552,19 @@ void vkbd_transparency_down(void)
 	if (vkbd_transparency != 255)
 	{
 		SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+		SDL_SetAlpha(ksurHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
 #ifdef LARGEKEYBOARD
 		SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
+		SDL_SetAlpha(ksurShiftHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
 #endif
 	}
 	else //fully opague
 	{
-	 	SDL_SetAlpha(ksur, 0, 255);		
+	 	SDL_SetAlpha(ksur, 0, 255);
+	 	SDL_SetAlpha(ksurHires, 0, 255);				
 #ifdef LARGEKEYBOARD
 		SDL_SetAlpha(ksurShift, 0, 255);
+		SDL_SetAlpha(ksurShiftHires, 0, 255);
 #endif
 	}
 }	
@@ -595,9 +657,17 @@ int vkbd_process(void)
 	else
 		vkbd_let_go_of_direction=1;
 		
-	r.x=vkbd_x+vkbd_rect[vkbd_actual].rect.x;
+	if (mainMenu_displayHires)
+	{
+		r.x=vkbd_x+2*vkbd_rect[vkbd_actual].rect.x;
+		r.w=2*vkbd_rect[vkbd_actual].rect.w;
+	}
+	else
+	{
+		r.x=vkbd_x+vkbd_rect[vkbd_actual].rect.x;
+		r.w=vkbd_rect[vkbd_actual].rect.w;
+	}
 	r.y=vkbd_y+vkbd_rect[vkbd_actual].rect.y;
-	r.w=vkbd_rect[vkbd_actual].rect.w;
 	r.h=vkbd_rect[vkbd_actual].rect.h;
 	if (!vkbd_just_blinked)
 	{	
@@ -615,7 +685,10 @@ int vkbd_process(void)
 	if (vkbd_move && vkey[vkbd_actual]!=NULL)
 	{
 #endif
-		r.x=VKBD_X+ksur->w+2;
+		if (mainMenu_displayHires)
+			r.x=VKBD_X+ksurHires->w+2;
+		else
+			r.x=VKBD_X+ksur->w+2;
 		r.y=prSDLScreen->h-40+2;
 		r.w=vkey[vkbd_actual]->w;
 		r.h=vkey[vkbd_actual]->h;

@@ -20,8 +20,13 @@
 
 #ifdef __PSP2__
 #include "psp2_shader.h"
+#include "vita2d.h"
 PSP2Shader *shader = NULL;
 extern int mainMenu_shader;
+typedef struct private_hwdata {
+	vita2d_texture *texture;
+	SDL_Rect dst;
+} private_hwdata;
 #endif
 
 extern int screenWidth;
@@ -143,8 +148,18 @@ void update_display() {
 
 #ifdef __PSP2__
     if (prSDLScreen != NULL) {
-        black_screen_now();
-        SDL_FreeSurface(prSDLScreen);
+		for (int i=0; i<10; i++)
+		{
+			SDL_FillRect(prSDLScreen,NULL,0);
+			SDL_Flip(prSDLScreen);
+		}
+		vita2d_wait_rendering_done();
+		vita2d_free_texture(prSDLScreen->hwdata->texture);
+		SDL_free(prSDLScreen->hwdata);
+		prSDLScreen->hwdata = NULL;
+		prSDLScreen->pixels = NULL;
+		SDL_FreeSurface(prSDLScreen);
+      prSDLScreen = NULL; 
     }
     
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
@@ -159,7 +174,10 @@ void update_display() {
     if (mainMenu_shader != 0) 
     {
     	sh = 544;
-      sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
+      if (mainMenu_displayHires)
+      	sw = (0.5f*(float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
+      else
+      	sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
     	x = (960 - sw) / 2;
     	y = (544 - sh) / 2;
     	
@@ -172,7 +190,10 @@ void update_display() {
     else //otherwise do regular integer 2* scaling without filtering to ensure good picture quality
     {
     	sh = (float) (2 * mainMenu_displayedLines);
-    	sw = (float) (2 * visibleAreaWidth);
+    	if (mainMenu_displayHires)
+    		sw = (float) (1 * visibleAreaWidth);
+    	else
+    		sw = (float) (2 * visibleAreaWidth);
     	x = (960 - sw) / 2;
       y = (544 - sh) / 2;
       SDL_SetVideoModeScaling(x, y, sw, sh);
