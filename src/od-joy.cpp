@@ -230,36 +230,73 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if(mainMenu_customControls)
 #endif
 	{
-		if((mainMenu_custom_A==-5 && buttonA) || (mainMenu_custom_B==-5 && buttonB) || (mainMenu_custom_X==-5 && buttonX) || (mainMenu_custom_Y==-5 && buttonY) || (mainMenu_custom_L==-5 && triggerL) || (mainMenu_custom_R==-5 && triggerR))
-			top = 1;
-		else if(mainMenu_custom_dpad == 0)
-		{
-			if((mainMenu_custom_up==-5 && dpadUp) || (mainMenu_custom_down==-5 && dpadDown) || (mainMenu_custom_left==-5 && dpadLeft) || (mainMenu_custom_right==-5 && dpadRight))
+		if ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) 
+  		{
+			if((mainMenu_custom_A==-5 && buttonA) || (mainMenu_custom_B==-5 && buttonB) || (mainMenu_custom_X==-5 && buttonX) || (mainMenu_custom_Y==-5 && buttonY) || (mainMenu_custom_L==-5 && triggerL) || (mainMenu_custom_R==-5 && triggerR))
 				top = 1;
-		}
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-5 && dpadUp) || (mainMenu_custom_down==-5 && dpadDown) || (mainMenu_custom_left==-5 && dpadLeft) || (mainMenu_custom_right==-5 && dpadRight))
+					top = 1;
+			}
 
-		if((mainMenu_custom_A==-6 && buttonA) || (mainMenu_custom_B==-6 && buttonB) || (mainMenu_custom_X==-6 && buttonX) || (mainMenu_custom_Y==-6 && buttonY) || (mainMenu_custom_L==-6 && triggerL) || (mainMenu_custom_R==-6 && triggerR))
-			bot = 1;
-		else if(mainMenu_custom_dpad == 0)
-		{
-			if((mainMenu_custom_up==-6 && dpadUp) || (mainMenu_custom_down==-6 && dpadDown) || (mainMenu_custom_left==-6 && dpadLeft) || (mainMenu_custom_right==-6 && dpadRight))
+			if((mainMenu_custom_A==-6 && buttonA) || (mainMenu_custom_B==-6 && buttonB) || (mainMenu_custom_X==-6 && buttonX) || (mainMenu_custom_Y==-6 && buttonY) || (mainMenu_custom_L==-6 && triggerL) || (mainMenu_custom_R==-6 && triggerR))
 				bot = 1;
-		}
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-6 && dpadUp) || (mainMenu_custom_down==-6 && dpadDown) || (mainMenu_custom_left==-6 && dpadLeft) || (mainMenu_custom_right==-6 && dpadRight))
+					bot = 1;
+			}
 
-		if((mainMenu_custom_A==-7 && buttonA) || (mainMenu_custom_B==-7 && buttonB) || (mainMenu_custom_X==-7 && buttonX) || (mainMenu_custom_Y==-7 && buttonY) || (mainMenu_custom_L==-7 && triggerL) || (mainMenu_custom_R==-7 && triggerR))
-			left = 1;
-		else if(mainMenu_custom_dpad == 0)
-		{
-			if((mainMenu_custom_up==-7 && dpadUp) || (mainMenu_custom_down==-7 && dpadDown) || (mainMenu_custom_left==-7 && dpadLeft) || (mainMenu_custom_right==-7 && dpadRight))
+			if((mainMenu_custom_A==-7 && buttonA) || (mainMenu_custom_B==-7 && buttonB) || (mainMenu_custom_X==-7 && buttonX) || (mainMenu_custom_Y==-7 && buttonY) || (mainMenu_custom_L==-7 && triggerL) || (mainMenu_custom_R==-7 && triggerR))
 				left = 1;
-		}
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-7 && dpadUp) || (mainMenu_custom_down==-7 && dpadDown) || (mainMenu_custom_left==-7 && dpadLeft) || (mainMenu_custom_right==-7 && dpadRight))
+					left = 1;
+			}
 
-		if((mainMenu_custom_A==-8 && buttonA) || (mainMenu_custom_B==-8 && buttonB) || (mainMenu_custom_X==-8 && buttonX) || (mainMenu_custom_Y==-8 && buttonY) || (mainMenu_custom_L==-8 && triggerL) || (mainMenu_custom_R==-8 && triggerR))
-			right = 1;
-		else if(mainMenu_custom_dpad == 0)
-		{
-			if((mainMenu_custom_up==-8 && dpadUp) || (mainMenu_custom_down==-8 && dpadDown) || (mainMenu_custom_left==-8 && dpadLeft) || (mainMenu_custom_right==-8 && dpadRight))
+			if((mainMenu_custom_A==-8 && buttonA) || (mainMenu_custom_B==-8 && buttonB) || (mainMenu_custom_X==-8 && buttonX) || (mainMenu_custom_Y==-8 && buttonY) || (mainMenu_custom_L==-8 && triggerL) || (mainMenu_custom_R==-8 && triggerR))
 				right = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-8 && dpadUp) || (mainMenu_custom_down==-8 && dpadDown) || (mainMenu_custom_left==-8 && dpadLeft) || (mainMenu_custom_right==-8 && dpadRight))
+					right = 1;
+			}
+		}
+		else if ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
+  		{
+			if((mainMenu_custom_A==-9 && buttonA) || (mainMenu_custom_B==-9 && buttonB) || (mainMenu_custom_X==-9 && buttonX) || (mainMenu_custom_Y==-9 && buttonY) || (mainMenu_custom_L==-9 && triggerL) || (mainMenu_custom_R==-9 && triggerR))
+				top = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-9 && dpadUp) || (mainMenu_custom_down==-9 && dpadDown) || (mainMenu_custom_left==-9 && dpadLeft) || (mainMenu_custom_right==-9 && dpadRight))
+					top = 1;
+			}
+
+			if((mainMenu_custom_A==-10 && buttonA) || (mainMenu_custom_B==-10 && buttonB) || (mainMenu_custom_X==-10 && buttonX) || (mainMenu_custom_Y==-10 && buttonY) || (mainMenu_custom_L==-10 && triggerL) || (mainMenu_custom_R==-10 && triggerR))
+				bot = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-10 && dpadUp) || (mainMenu_custom_down==-10 && dpadDown) || (mainMenu_custom_left==-10 && dpadLeft) || (mainMenu_custom_right==-10 && dpadRight))
+					bot = 1;
+			}
+
+			if((mainMenu_custom_A==-11 && buttonA) || (mainMenu_custom_B==-11 && buttonB) || (mainMenu_custom_X==-11 && buttonX) || (mainMenu_custom_Y==-11 && buttonY) || (mainMenu_custom_L==-11 && triggerL) || (mainMenu_custom_R==-11 && triggerR))
+				left = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-11 && dpadUp) || (mainMenu_custom_down==-11 && dpadDown) || (mainMenu_custom_left==-11 && dpadLeft) || (mainMenu_custom_right==-11 && dpadRight))
+					left = 1;
+			}
+
+			if((mainMenu_custom_A==-12 && buttonA) || (mainMenu_custom_B==-12 && buttonB) || (mainMenu_custom_X==-12 && buttonX) || (mainMenu_custom_Y==-12 && buttonY) || (mainMenu_custom_L==-12 && triggerL) || (mainMenu_custom_R==-12 && triggerR))
+				right = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up==-12 && dpadUp) || (mainMenu_custom_down==-12 && dpadDown) || (mainMenu_custom_left==-12 && dpadLeft) || (mainMenu_custom_right==-12 && dpadRight))
+					right = 1;
+			}
 		}
 	}
 
@@ -278,20 +315,41 @@ void read_joystick(int nr, unsigned int *dir, int *button)
   	else if(mainMenu_customControls)
 #endif
   	{
-  		if((mainMenu_custom_A==-3 && buttonA) || (mainMenu_custom_B==-3 && buttonB) || (mainMenu_custom_X==-3 && buttonX) || (mainMenu_custom_Y==-3 && buttonY) || (mainMenu_custom_L==-3 && triggerL) || (mainMenu_custom_R==-3 && triggerR))
-  			*button = 1;
-  		else if(mainMenu_custom_dpad == 0)
+  		if ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) 
   		{
-  			if((mainMenu_custom_up==-3 && dpadUp) || (mainMenu_custom_down==-3 && dpadDown) || (mainMenu_custom_left==-3 && dpadLeft) || (mainMenu_custom_right==-3 && dpadRight))
+  			if((mainMenu_custom_A==-3 && buttonA) || (mainMenu_custom_B==-3 && buttonB) || (mainMenu_custom_X==-3 && buttonX) || (mainMenu_custom_Y==-3 && buttonY) || (mainMenu_custom_L==-3 && triggerL) || (mainMenu_custom_R==-3 && triggerR))
   				*button = 1;
-  		}
+  			else if(mainMenu_custom_dpad == 0)
+  			{
+  				if((mainMenu_custom_up==-3 && dpadUp) || (mainMenu_custom_down==-3 && dpadDown) || (mainMenu_custom_left==-3 && dpadLeft) || (mainMenu_custom_right==-3 && dpadRight))
+  					*button = 1;
+  			}
   
-  		if((mainMenu_custom_A==-4 && buttonA) || (mainMenu_custom_B==-4 && buttonB) || (mainMenu_custom_X==-4 && buttonX) || (mainMenu_custom_Y==-4 && buttonY) || (mainMenu_custom_L==-4 && triggerL) || (mainMenu_custom_R==-4 && triggerR))
-  			*button |= 1 << 1;
-  		else if(mainMenu_custom_dpad == 0)
-  		{
-  			if((mainMenu_custom_up==-4 && dpadUp) || (mainMenu_custom_down==-4 && dpadDown) || (mainMenu_custom_left==-4 && dpadLeft) || (mainMenu_custom_right==-4 && dpadRight))
+  			if((mainMenu_custom_A==-4 && buttonA) || (mainMenu_custom_B==-4 && buttonB) || (mainMenu_custom_X==-4 && buttonX) || (mainMenu_custom_Y==-4 && buttonY) || (mainMenu_custom_L==-4 && triggerL) || (mainMenu_custom_R==-4 && triggerR))
   				*button |= 1 << 1;
+  			else if(mainMenu_custom_dpad == 0)
+  			{
+  				if((mainMenu_custom_up==-4 && dpadUp) || (mainMenu_custom_down==-4 && dpadDown) || (mainMenu_custom_left==-4 && dpadLeft) || (mainMenu_custom_right==-4 && dpadRight))
+  					*button |= 1 << 1;
+  			}
+  		}
+  		else if ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
+  		{
+  			if((mainMenu_custom_A==-1 && buttonA) || (mainMenu_custom_B==-1 && buttonB) || (mainMenu_custom_X==-1 && buttonX) || (mainMenu_custom_Y==-1 && buttonY) || (mainMenu_custom_L==-1 && triggerL) || (mainMenu_custom_R==-1 && triggerR))
+  				*button = 1;
+  			else if(mainMenu_custom_dpad == 0)
+  			{
+  				if((mainMenu_custom_up==-1 && dpadUp) || (mainMenu_custom_down==-1 && dpadDown) || (mainMenu_custom_left==-1 && dpadLeft) || (mainMenu_custom_right==-1 && dpadRight))
+  					*button = 1;
+  			}
+  
+  			if((mainMenu_custom_A==-2 && buttonA) || (mainMenu_custom_B==-2 && buttonB) || (mainMenu_custom_X==-2 && buttonX) || (mainMenu_custom_Y==-2 && buttonY) || (mainMenu_custom_L==-2 && triggerL) || (mainMenu_custom_R==-2 && triggerR))
+  				*button |= 1 << 1;
+  			else if(mainMenu_custom_dpad == 0)
+  			{
+  				if((mainMenu_custom_up==-2 && dpadUp) || (mainMenu_custom_down==-2 && dpadDown) || (mainMenu_custom_left==-2 && dpadLeft) || (mainMenu_custom_right==-2 && dpadRight))
+  					*button |= 1 << 1;
+  			}
   		}
   		delay++;
   	}
@@ -424,14 +482,17 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	*dir = bot | (right << 1) | (top << 8) | (left << 9);
     }
 
-  if(mainMenu_joyPort != 0)
+  if (!mainMenu_customControls)
   {
-    // Only one joystick active    
-    if((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
-    {
-      *dir = 0;
-      *button = 0;
-    }
+  	if(mainMenu_joyPort != 0)
+  	{
+   	 // Only one joystick active    
+    	if((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
+    	{
+      	*dir = 0;
+      	*button = 0;
+    	}
+  	}
   }
 #endif
 }

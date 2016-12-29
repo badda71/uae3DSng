@@ -4,6 +4,9 @@ extern void UpdateCPUModelSettings();
 extern void UpdateChipsetSettings();
 extern void SetPresetMode(int mode);
 extern void reset_hdConf(void);
+#ifdef __PSP2__
+extern void remap_custom_controls();
+#endif
 
 #ifndef _MENU_CONFIG_CPP
 
@@ -101,10 +104,42 @@ extern int mainMenu_FloatingJoystick;
 extern int mainMenu_vsync;
 #endif
 extern char custom_kickrom[256];
-#endif
 
 #ifdef __PSP2__
 extern int mainMenu_leftStickMouse;
 extern int mainMenu_shader;
 extern int mainMenu_deadZone;
+extern int mainMenu_custom_controlSet;
+extern int mainMenu_custom1_up;
+extern int mainMenu_custom1_down;
+extern int mainMenu_custom1_left;
+extern int mainMenu_custom1_right;
+extern int mainMenu_custom1_A;
+extern int mainMenu_custom1_B;
+extern int mainMenu_custom1_X;
+extern int mainMenu_custom1_Y;
+extern int mainMenu_custom1_L;
+extern int mainMenu_custom1_R;
+extern int mainMenu_custom2_up;
+extern int mainMenu_custom2_down;
+extern int mainMenu_custom2_left;
+extern int mainMenu_custom2_right;
+extern int mainMenu_custom2_A;
+extern int mainMenu_custom2_B;
+extern int mainMenu_custom2_X;
+extern int mainMenu_custom2_Y;
+extern int mainMenu_custom2_L;
+extern int mainMenu_custom2_R;
+extern int mainMenu_custom3_up;
+extern int mainMenu_custom3_down;
+extern int mainMenu_custom3_left;
+extern int mainMenu_custom3_right;
+extern int mainMenu_custom3_A;
+extern int mainMenu_custom3_B;
+extern int mainMenu_custom3_X;
+extern int mainMenu_custom3_Y;
+extern int mainMenu_custom3_L;
+extern int mainMenu_custom3_R;
+#endif
+
 #endif

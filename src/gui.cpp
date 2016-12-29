@@ -77,6 +77,7 @@ extern SDL_Joystick *uae4all_joy0, *uae4all_joy1;
 #ifdef __PSP2__
 //Predefined quick switch resolutions to select via TRIGGER R+START+DPAD LEFT/RIGHT
 static int can_change_quickSwitchModeID = 1;
+static int can_change_custom_controlSet = 1;
 static int quickSwitchModeID=1;
 struct myRes
 {
@@ -149,6 +150,53 @@ int buttonStart=0;
 extern int mainMenu_case;
 #ifdef WITH_TESTMODE
 int no_limiter = 0;
+#endif
+
+#ifdef __PSP2__
+void remap_custom_controls() // assign custom 1-3 to currently used custom set
+{
+	switch (mainMenu_custom_controlSet)
+	{
+		case 0:
+			mainMenu_custom_up = mainMenu_custom1_up;
+			mainMenu_custom_down = mainMenu_custom1_down;
+			mainMenu_custom_left = mainMenu_custom1_left;
+			mainMenu_custom_right = mainMenu_custom1_right;
+			mainMenu_custom_A = mainMenu_custom1_A;
+			mainMenu_custom_B = mainMenu_custom1_B;
+			mainMenu_custom_X = mainMenu_custom1_X;
+			mainMenu_custom_Y = mainMenu_custom1_Y;
+			mainMenu_custom_L = mainMenu_custom1_L;
+			mainMenu_custom_R = mainMenu_custom1_R;
+			break;
+		case 1:
+			mainMenu_custom_up = mainMenu_custom2_up;
+			mainMenu_custom_down = mainMenu_custom2_down;
+			mainMenu_custom_left = mainMenu_custom2_left;
+			mainMenu_custom_right = mainMenu_custom2_right;
+			mainMenu_custom_A = mainMenu_custom2_A;
+			mainMenu_custom_B = mainMenu_custom2_B;
+			mainMenu_custom_X = mainMenu_custom2_X;
+			mainMenu_custom_Y = mainMenu_custom2_Y;
+			mainMenu_custom_L = mainMenu_custom2_L;
+			mainMenu_custom_R = mainMenu_custom2_R;
+			break;
+		case 2:
+			mainMenu_custom_up = mainMenu_custom3_up;
+			mainMenu_custom_down = mainMenu_custom3_down;
+			mainMenu_custom_left = mainMenu_custom3_left;
+			mainMenu_custom_right = mainMenu_custom3_right;
+			mainMenu_custom_A = mainMenu_custom3_A;
+			mainMenu_custom_B = mainMenu_custom3_B;
+			mainMenu_custom_X = mainMenu_custom3_X;
+			mainMenu_custom_Y = mainMenu_custom3_Y;
+			mainMenu_custom_L = mainMenu_custom3_L;
+			mainMenu_custom_R = mainMenu_custom3_R;
+			break;
+		default:
+			break;
+	}
+}		
 #endif
 
 static void getChanges(void)
@@ -734,8 +782,47 @@ if(!vkbd_mode)
 #endif
 {
 #ifdef __PSP2__
-	//holding start on Vita to move screen, L/R are used for mousebuttons.
-	if(buttonStart && triggerR)
+	if(buttonStart && triggerL) //toggle custom control config 1-3
+	{
+		if (can_change_custom_controlSet)
+		{
+			if (mainMenu_customControls)
+			{
+				switch (mainMenu_custom_controlSet)
+				{
+					case 0:
+						mainMenu_custom_controlSet = 1;
+						break;
+					case 1:
+						mainMenu_custom_controlSet = 2;
+						break;
+					case 2:
+						mainMenu_custom_controlSet = 0;
+						break;
+					default:
+						mainMenu_custom_controlSet = 0;
+						break;
+				}
+				// zero triggerL before the control config switches
+				if(mainMenu_custom_L == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_L == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_L > 0)
+				{		
+					getMapping(mainMenu_custom_L);
+					uae4all_keystate[customKey] = 0;
+					record_key((customKey << 1) | 1);
+				}
+				remap_custom_controls();
+				can_change_custom_controlSet = 0;
+			}
+		}
+	}
+	else if (!can_change_custom_controlSet)
+	{
+		can_change_custom_controlSet = 1;
+	}
+	//holding R + start on Vita to move screen, L/R are used for mousebuttons.
+	else if(buttonStart && triggerR)
 #else
 	//L + R
 	if(triggerL && triggerR)
@@ -1721,8 +1808,9 @@ if(!vkbd_mode)
 #ifdef USE_UAE4ALL_VKBD
 #ifdef __PSP2__
 	//on Vita, Start brings up the  virtual keyboard, but Trigger R + Start is used for
-	//quickswitch resolution etc. 
-	if(buttonStart && !triggerR)
+	//quickswitch resolution etc. and Trigger L + Start is used for switching between
+	//custom control configs
+	if(buttonStart && !triggerR && !triggerL)
 #else
 	//L+K: virtual keyboard
 	if(triggerL && keystate[SDLK_k])

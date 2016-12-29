@@ -82,6 +82,39 @@ int mainMenu_custom_X = 0;
 int mainMenu_custom_Y = 0;
 int mainMenu_custom_L = 0;
 int mainMenu_custom_R = 0;
+#ifdef __PSP2__
+int mainMenu_custom_controlSet = 0; //This controls which custom config is used
+int mainMenu_custom1_up = 0;
+int mainMenu_custom1_down = 0;
+int mainMenu_custom1_left = 0;
+int mainMenu_custom1_right = 0;
+int mainMenu_custom1_A = 0;
+int mainMenu_custom1_B = 0;
+int mainMenu_custom1_X = 0;
+int mainMenu_custom1_Y = 0;
+int mainMenu_custom1_L = 0;
+int mainMenu_custom1_R = 0;
+int mainMenu_custom2_up = 0;
+int mainMenu_custom2_down = 0;
+int mainMenu_custom2_left = 0;
+int mainMenu_custom2_right = 0;
+int mainMenu_custom2_A = 0;
+int mainMenu_custom2_B = 0;
+int mainMenu_custom2_X = 0;
+int mainMenu_custom2_Y = 0;
+int mainMenu_custom2_L = 0;
+int mainMenu_custom2_R = 0;
+int mainMenu_custom3_up = 0;
+int mainMenu_custom3_down = 0;
+int mainMenu_custom3_left = 0;
+int mainMenu_custom3_right = 0;
+int mainMenu_custom3_A = 0;
+int mainMenu_custom3_B = 0;
+int mainMenu_custom3_X = 0;
+int mainMenu_custom3_Y = 0;
+int mainMenu_custom3_L = 0;
+int mainMenu_custom3_R = 0;
+#endif
 int mainMenu_autofire = DEFAULT_AUTOFIRE;
 
 int mainMenu_displayedLines = 240;
@@ -215,7 +248,39 @@ void SetDefaultMenuSettings(int general)
     mainMenu_custom_Y = 0;
     mainMenu_custom_L = 0;
     mainMenu_custom_R = 0;
-
+#ifdef __PSP2__
+	 mainMenu_custom_controlSet = 0;
+	 mainMenu_custom1_up = 0;
+    mainMenu_custom1_down = 0;
+    mainMenu_custom1_left = 0;
+    mainMenu_custom1_right = 0;
+    mainMenu_custom1_A = 0;
+    mainMenu_custom1_B = 0;
+    mainMenu_custom1_X = 0;
+    mainMenu_custom1_Y = 0;
+    mainMenu_custom1_L = 0;
+    mainMenu_custom1_R = 0;
+	 mainMenu_custom2_up = 0;
+    mainMenu_custom2_down = 0;
+    mainMenu_custom2_left = 0;
+    mainMenu_custom2_right = 0;
+    mainMenu_custom2_A = 0;
+    mainMenu_custom2_B = 0;
+    mainMenu_custom2_X = 0;
+    mainMenu_custom2_Y = 0;
+    mainMenu_custom2_L = 0;
+    mainMenu_custom2_R = 0;
+	 mainMenu_custom3_up = 0;
+    mainMenu_custom3_down = 0;
+    mainMenu_custom3_left = 0;
+    mainMenu_custom3_right = 0;
+    mainMenu_custom3_A = 0;
+    mainMenu_custom3_B = 0;
+    mainMenu_custom3_X = 0;
+    mainMenu_custom3_Y = 0;
+    mainMenu_custom3_L = 0;
+    mainMenu_custom3_R = 0;
+#endif //__PSP2__
     SetPresetMode(2);
     moveX = 0;
     moveY = 0;
@@ -890,6 +955,7 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "customControls=%d\n",mainMenu_customControls);
     fputs(buffer,f);
+#ifndef __PSP2__    
     snprintf((char*)buffer, 255, "custom_dpad=%d\n",mainMenu_custom_dpad);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "custom_up=%d\n",mainMenu_custom_up);
@@ -912,6 +978,70 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "custom_R=%d\n",mainMenu_custom_R);
     fputs(buffer,f);
+#else
+    snprintf((char*)buffer, 255, "custom_controlSet=%d\n",mainMenu_custom_controlSet);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_up=%d\n",mainMenu_custom1_up);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_down=%d\n",mainMenu_custom1_down);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_left=%d\n",mainMenu_custom1_left);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_right=%d\n",mainMenu_custom1_right);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_A=%d\n",mainMenu_custom1_A);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_B=%d\n",mainMenu_custom1_B);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_X=%d\n",mainMenu_custom1_X);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_Y=%d\n",mainMenu_custom1_Y);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_L=%d\n",mainMenu_custom1_L);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom1_R=%d\n",mainMenu_custom1_R);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_up=%d\n",mainMenu_custom2_up);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_down=%d\n",mainMenu_custom2_down);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_left=%d\n",mainMenu_custom2_left);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_right=%d\n",mainMenu_custom2_right);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_A=%d\n",mainMenu_custom2_A);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_B=%d\n",mainMenu_custom2_B);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_X=%d\n",mainMenu_custom2_X);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_Y=%d\n",mainMenu_custom2_Y);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_L=%d\n",mainMenu_custom2_L);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom2_R=%d\n",mainMenu_custom2_R);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_up=%d\n",mainMenu_custom3_up);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_down=%d\n",mainMenu_custom3_down);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_left=%d\n",mainMenu_custom3_left);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_right=%d\n",mainMenu_custom3_right);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_A=%d\n",mainMenu_custom3_A);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_B=%d\n",mainMenu_custom3_B);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_X=%d\n",mainMenu_custom3_X);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_Y=%d\n",mainMenu_custom3_Y);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_L=%d\n",mainMenu_custom3_L);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "custom3_R=%d\n",mainMenu_custom3_R);
+    fputs(buffer,f);
+#endif
     snprintf((char*)buffer, 255, "cpu=%d\n",mainMenu_CPU_model);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "chipset=%d\n",mainMenu_chipset);
@@ -1048,16 +1178,21 @@ int saveconfig(int general)
 void loadconfig(int general)
 {
 #ifdef __PSP2__
-    //first time opening the screen on Vita, somehow this sets the max possible resolution,
-    //so open it with 320*270. Even 800*600 would work, but only a width of 320 is supported by the current
-    //drawing routines
-	int visibleAreaWidth_old = visibleAreaWidth;
-	int mainMenu_displayedLines_old = mainMenu_displayedLines;
-	visibleAreaWidth = 320;
-	mainMenu_displayedLines = 270;
-	update_display();
-	visibleAreaWidth=visibleAreaWidth_old;
-	mainMenu_displayedLines = mainMenu_displayedLines_old;
+	if (general == 1)
+	{
+    //first time opening the screen on Vita, somehow 
+    //this sets the max possible resolution,
+    //so open it with 320*270. Even 800*600 would work, 
+    //but only a width of 320 is supported by the current
+    //emulator drawing routines
+		int visibleAreaWidth_old = visibleAreaWidth;
+		int mainMenu_displayedLines_old = mainMenu_displayedLines;
+		visibleAreaWidth = 320;
+		mainMenu_displayedLines = 270;
+		update_display();
+		visibleAreaWidth=visibleAreaWidth_old;
+		mainMenu_displayedLines = mainMenu_displayedLines_old;
+	}
 #endif
 
     char path[300];
@@ -1168,6 +1303,7 @@ void loadconfig(int general)
         fscanf(f,"cutLeft=%d\n",&mainMenu_cutLeft);
         fscanf(f,"cutRight=%d\n",&mainMenu_cutRight);
         fscanf(f,"customControls=%d\n",&mainMenu_customControls);
+#ifndef __PSP2__
         fscanf(f,"custom_dpad=%d\n",&mainMenu_custom_dpad);
         fscanf(f,"custom_up=%d\n",&mainMenu_custom_up);
         fscanf(f,"custom_down=%d\n",&mainMenu_custom_down);
@@ -1179,6 +1315,40 @@ void loadconfig(int general)
         fscanf(f,"custom_Y=%d\n",&mainMenu_custom_Y);
         fscanf(f,"custom_L=%d\n",&mainMenu_custom_L);
         fscanf(f,"custom_R=%d\n",&mainMenu_custom_R);
+#else
+		  fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
+        fscanf(f,"custom1_up=%d\n",&mainMenu_custom1_up);
+        fscanf(f,"custom1_down=%d\n",&mainMenu_custom1_down);
+        fscanf(f,"custom1_left=%d\n",&mainMenu_custom1_left);
+        fscanf(f,"custom1_right=%d\n",&mainMenu_custom1_right);
+        fscanf(f,"custom1_A=%d\n",&mainMenu_custom1_A);
+        fscanf(f,"custom1_B=%d\n",&mainMenu_custom1_B);
+        fscanf(f,"custom1_X=%d\n",&mainMenu_custom1_X);
+        fscanf(f,"custom1_Y=%d\n",&mainMenu_custom1_Y);
+        fscanf(f,"custom1_L=%d\n",&mainMenu_custom1_L);
+        fscanf(f,"custom1_R=%d\n",&mainMenu_custom1_R);
+        fscanf(f,"custom2_up=%d\n",&mainMenu_custom2_up);
+        fscanf(f,"custom2_down=%d\n",&mainMenu_custom2_down);
+        fscanf(f,"custom2_left=%d\n",&mainMenu_custom2_left);
+        fscanf(f,"custom2_right=%d\n",&mainMenu_custom2_right);
+        fscanf(f,"custom2_A=%d\n",&mainMenu_custom2_A);
+        fscanf(f,"custom2_B=%d\n",&mainMenu_custom2_B);
+        fscanf(f,"custom2_X=%d\n",&mainMenu_custom2_X);
+        fscanf(f,"custom2_Y=%d\n",&mainMenu_custom2_Y);
+        fscanf(f,"custom2_L=%d\n",&mainMenu_custom2_L);
+        fscanf(f,"custom2_R=%d\n",&mainMenu_custom2_R);
+        fscanf(f,"custom3_up=%d\n",&mainMenu_custom3_up);
+        fscanf(f,"custom3_down=%d\n",&mainMenu_custom3_down);
+        fscanf(f,"custom3_left=%d\n",&mainMenu_custom3_left);
+        fscanf(f,"custom3_right=%d\n",&mainMenu_custom3_right);
+        fscanf(f,"custom3_A=%d\n",&mainMenu_custom3_A);
+        fscanf(f,"custom3_B=%d\n",&mainMenu_custom3_B);
+        fscanf(f,"custom3_X=%d\n",&mainMenu_custom3_X);
+        fscanf(f,"custom3_Y=%d\n",&mainMenu_custom3_Y);
+        fscanf(f,"custom3_L=%d\n",&mainMenu_custom3_L);
+        fscanf(f,"custom3_R=%d\n",&mainMenu_custom3_R);
+        remap_custom_controls(); // update the custom variables with the appropriate set.
+#endif //__PSP2__
         fscanf(f,"cpu=%d\n",&mainMenu_CPU_model);
         fscanf(f,"chipset=%d\n",&mainMenu_chipset);
         fscanf(f,"cpu=%d\n",&mainMenu_CPU_speed);
@@ -1307,7 +1477,9 @@ void loadconfig(int general)
     if (running==false)
 #endif
     {
+#ifndef __PSP2__
         update_display();
+#endif
     }
     UpdateMemorySettings();
     set_joyConf();
