@@ -54,3 +54,7 @@ extern char uae4all_hard_file[256];
 /* Functions to be called when prefs are changed by non-gui code.  */
 extern void uae4all_update_time(void);
 extern void uae4all_show_time(void);
+
+/* Function to update the custom key config to one of three presets on Vita */
+extern void remap_custom_controls();
+

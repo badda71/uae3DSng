@@ -11,6 +11,20 @@ set(CMAKE_CXX_COMPILER "${VITASDK}/bin/arm-vita-eabi-g++")
 set(CMAKE_C_FLAGS "-Wl,-q" CACHE STRING "C flags")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "C++ flags")
 
+#There are two optional assembler optimizations that were used on the Pandora:
+#-DUSE_ARMV7
+#(use assembler-optimized "arm_memset" and "arm_memcpy" routines 
+#in "gp2x/memset.s" and "gp2x/memcpy.s")
+#-DUSE_ARMNEON
+#(use assembler-optimized drawing routines for the line drawing of Amiga screens
+#in "neon_helper.s")
+#Currently, these compile for the Vita but cause a crash on first leaving the menu
+#I suspect these have to be re-written for the Vita CPU to make use of asm-optimization
+#
+#enable_language(ASM)
+#set(CMAKE_ASM_COMPILER "${VITASDK}/bin/arm-vita-eabi-g++")
+#set(CMAKE_ASM_FLAGS "${CMAKE_CXX_FLAGS}" CACHE STRING "ASM flags")
+
 execute_process(COMMAND "date" "+%Y.%m.%d" OUTPUT_VARIABLE BUILD_DATE OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 project(uae4all2)
@@ -41,6 +55,8 @@ set(FLAGS
 -DUSE_UAE4ALL_VKBD
 -DVKBD_ALWAYS
 -DLARGEKEYBOARD
+#-DUSE_ARMV7
+#-DUSE_ARMNEON 
         -fomit-frame-pointer -Wno-unused -Wno-format
         -ffast-math -fstrict-aliasing -mstructure-size-boundary=32 -fexpensive-optimizations
         -fweb -frename-registers -fomit-frame-pointer
@@ -56,6 +72,9 @@ set(DEBUG_FLAGS
         -DUSE_SDL -DGCCCONSTFUNC="__attribute__\(\(const\)\)" -DUSE_UNDERSCORE
         -DSHM_SUPPORT_LINKS=0 -DUNALIGNED_PROFITABLE -DOPTIMIZED_FLAGS -DOS_WITHOUT_MEMORY_MANAGEMENT
         -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"app0:/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
+-DUSE_UAE4ALL_VKBD
+-DVKBD_ALWAYS
+-DLARGEKEYBOARD
         -DDEBUG -DDEBUG_UAE4ALL -DUAE_CONSOLE
         )
 
@@ -64,6 +83,9 @@ set(SRC_FILES
         src/psp2/psp2_input.c
         src/psp2/psp2-dirent.c
         src/vkbd/vkbd.cpp
+#       src/neon_helper.s
+#       src/gp2x/memset.s
+#       src/gp2x/memcpy.s
         src/audio.cpp
         src/autoconf.cpp
         src/blitfunc.cpp
