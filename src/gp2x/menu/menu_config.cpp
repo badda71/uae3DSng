@@ -193,24 +193,31 @@ void SetDefaultMenuSettings(int general)
     mainMenu_fastMemory = 0;	/* off */
     UpdateMemorySettings();
 
-    if(general < 2) {
-        mainMenu_bootHD=DEFAULT_ENABLE_HD;
-        if (hd_dir_unit_nr >= 0) {
-            kill_filesys_unit(currprefs.mountinfo, 0);
-            hd_dir_unit_nr = -1;
-        }
-        if (hd_file_unit_nr >= 0) {
-            kill_filesys_unit(currprefs.mountinfo, 0);
-            hd_file_unit_nr = -1;
-        }
-        mainMenu_filesysUnits = 0;
+	if(general < 2) 
+	{
+		mainMenu_bootHD=DEFAULT_ENABLE_HD;
+		if (hd_dir_unit_nr >= 0) 
+   	{
+			kill_filesys_unit(currprefs.mountinfo, 0);
+			hd_dir_unit_nr = -1;
+		}
+		if (hd_file_unit_nr >= 0) 
+		{
+			for (int i=hd_file_unit_nr; i>=0; i--)
+			kill_filesys_unit(currprefs.mountinfo, i); 
+    	}
+    	hd_file_unit_nr = -1;
+    	mainMenu_filesysUnits = 0;
+
     }
 
     if(general > 0) {
+			// hdf0
         uae4all_image_file0[0] = '\0';
         uae4all_image_file1[0] = '\0';
         uae4all_image_file2[0] = '\0';
         uae4all_image_file3[0] = '\0';
+
         mainMenu_drives = DEFAULT_DRIVES;
     }
     mainMenu_floppyspeed = 100;
@@ -754,14 +761,17 @@ void set_joyConf()
 void reset_hdConf()
 {
     /* Reset HD config */
-    if (hd_dir_unit_nr >= 0) {
+    if (hd_dir_unit_nr >= 0) 
+    {
         kill_filesys_unit(currprefs.mountinfo, 0);
         hd_dir_unit_nr = -1;
     }
-    if (hd_file_unit_nr >= 0) {
-        kill_filesys_unit(currprefs.mountinfo, 0);
-        hd_file_unit_nr = -1;
+    if (hd_file_unit_nr >= 0) 
+    {
+    	for (int i=hd_file_unit_nr; i>=0; i--)
+        kill_filesys_unit(currprefs.mountinfo, i); 
     }
+    hd_file_unit_nr = -1;
     mainMenu_filesysUnits = 0;
 
     switch (mainMenu_bootHD) {
@@ -772,27 +782,61 @@ void reset_hdConf()
         if (hd_dir_unit_nr < 0) {
             if (uae4all_hard_dir[0] != '\0') {
                 parse_filesys_spec(0, uae4all_hard_dir);
-                hd_dir_unit_nr = mainMenu_filesysUnits++;
+                hd_dir_unit_nr++;
+                mainMenu_filesysUnits++;
             }
         }
         if (hd_file_unit_nr < 0) {
-            if (uae4all_hard_file[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file);
-                hd_file_unit_nr = mainMenu_filesysUnits++;
+            if (uae4all_hard_file0[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file0);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
+            }
+            if (uae4all_hard_file1[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file1);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
+            }
+            if (uae4all_hard_file2[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file2);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
+            }
+            if (uae4all_hard_file3[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file3);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
             }
         }
         break;
     case 2:
         if (hd_file_unit_nr < 0) {
-            if (uae4all_hard_file[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file);
-                hd_file_unit_nr = mainMenu_filesysUnits++;
+            if (uae4all_hard_file0[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file0);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
+            }
+            if (uae4all_hard_file1[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file1);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
+            }
+            if (uae4all_hard_file2[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file2);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
+            }
+            if (uae4all_hard_file3[0] != '\0') {
+                parse_hardfile_spec(uae4all_hard_file3);
+                hd_file_unit_nr++;
+                mainMenu_filesysUnits++;
             }
         }
         if (hd_dir_unit_nr < 0) {
             if (uae4all_hard_dir[0] != '\0') {
                 parse_filesys_spec(0, uae4all_hard_dir);
-                hd_dir_unit_nr = mainMenu_filesysUnits++;
+                hd_dir_unit_nr++;
+                mainMenu_filesysUnits++;
             }
         }
         break;
@@ -855,8 +899,8 @@ int saveconfig(int general)
         path[0] = '\0';
         if(mainMenu_bootHD == 1 && uae4all_hard_dir[0] != '\0')
             create_configfilename(path, uae4all_hard_dir, 1);
-        if(mainMenu_bootHD == 2 && uae4all_hard_file[0] != '\0')
-            create_configfilename(path, uae4all_hard_file, 0);
+        if(mainMenu_bootHD == 2 && uae4all_hard_file0[0] != '\0')
+            create_configfilename(path, uae4all_hard_file0, 0);
         if(path[0] == '\0')
             return 0;
         break;
@@ -1087,10 +1131,29 @@ int saveconfig(int general)
         else
             snprintf((char*)buffer, 255, "hard_disk_dir=%s\n",uae4all_hard_dir);
         fputs(buffer,f);
-        if (uae4all_hard_file[0] == '\0')
-            snprintf((char*)buffer, 255, "hard_disk_file=%s\n","*");
+        //HDF0
+        if (uae4all_hard_file0[0] == '\0')
+            snprintf((char*)buffer, 255, "hard_disk_file0=%s\n","*");
         else
-            snprintf((char*)buffer, 255, "hard_disk_file=%s\n",uae4all_hard_file);
+        	snprintf((char*)buffer, 255, "hard_disk_file0=%s\n",uae4all_hard_file0);
+        fputs(buffer,f);
+        //HDF1
+        if (uae4all_hard_file1[0] == '\0')
+            snprintf((char*)buffer, 255, "hard_disk_file1=%s\n","*");
+        else
+            snprintf((char*)buffer, 255, "hard_disk_file1=%s\n",uae4all_hard_file1);
+        fputs(buffer,f);
+        //HDF2
+        if (uae4all_hard_file2[0] == '\0')
+            snprintf((char*)buffer, 255, "hard_disk_file2=%s\n","*");
+        else
+            snprintf((char*)buffer, 255, "hard_disk_file2=%s\n",uae4all_hard_file2);
+        fputs(buffer,f);
+        //HDF3
+        if (uae4all_hard_file3[0] == '\0')
+            snprintf((char*)buffer, 255, "hard_disk_file3=%s\n","*");
+        else
+            snprintf((char*)buffer, 255, "hard_disk_file3=%s\n",uae4all_hard_file3);
         fputs(buffer,f);
     }
     snprintf((char*)buffer, 255, "chipmemory=%d\n",mainMenu_chipMemory);
@@ -1229,8 +1292,8 @@ void loadconfig(int general)
         path[0] = '\0';
         if(mainMenu_bootHD == 1 && uae4all_hard_dir[0] != '\0')
             create_configfilename(path, uae4all_hard_dir, 1);
-        if(mainMenu_bootHD == 2 && uae4all_hard_file[0] != '\0')
-            create_configfilename(path, uae4all_hard_file, 0);
+        if(mainMenu_bootHD == 2 && uae4all_hard_file0[0] != '\0')
+            create_configfilename(path, uae4all_hard_file0, 0);
         if(path[0] == '\0')
             return;
     }
@@ -1408,19 +1471,58 @@ void loadconfig(int general)
             }
             if (uae4all_hard_dir[0] == '*')
                 uae4all_hard_dir[0] = '\0';
-
-            fscanf(f,"hard_disk_file=",uae4all_hard_file);
-            uae4all_hard_file[0] = '\0';
+				//HDF0
+            fscanf(f,"hard_disk_file0=",uae4all_hard_file0);
+            uae4all_hard_file0[0] = '\0';
             {
                 char c[2] = {0, 0};
                 *c = fgetc(f);
                 while (*c && (*c != '\n')) {
-                    strcat(uae4all_hard_file, c);
+                    strcat(uae4all_hard_file0, c);
                     *c = fgetc(f);
                 }
             }
-            if (uae4all_hard_file[0] == '*')
-                uae4all_hard_file[0] = '\0';
+            if (uae4all_hard_file0[0] == '*')
+                uae4all_hard_file0[0] = '\0';
+            //HDF1
+            fscanf(f,"hard_disk_file1=",uae4all_hard_file1);
+            uae4all_hard_file1[0] = '\0';
+            {
+                char c[2] = {0, 0};
+                *c = fgetc(f);
+                while (*c && (*c != '\n')) {
+                    strcat(uae4all_hard_file1, c);
+                    *c = fgetc(f);
+                }
+            }
+            if (uae4all_hard_file1[0] == '*')
+                uae4all_hard_file1[0] = '\0';
+            //HDF2
+            fscanf(f,"hard_disk_file2=",uae4all_hard_file2);
+            uae4all_hard_file2[0] = '\0';
+            {
+                char c[2] = {0, 0};
+                *c = fgetc(f);
+                while (*c && (*c != '\n')) {
+                    strcat(uae4all_hard_file2, c);
+                    *c = fgetc(f);
+                }
+            }
+            if (uae4all_hard_file2[0] == '*')
+                uae4all_hard_file2[0] = '\0';
+            //HDF3
+            fscanf(f,"hard_disk_file3=",uae4all_hard_file3);
+            uae4all_hard_file3[0] = '\0';
+            {
+                char c[2] = {0, 0};
+                *c = fgetc(f);
+                while (*c && (*c != '\n')) {
+                    strcat(uae4all_hard_file3, c);
+                    *c = fgetc(f);
+                }
+            }
+            if (uae4all_hard_file3[0] == '*')
+                uae4all_hard_file3[0] = '\0';
         }
         mainMenu_drives=nr_drives;
 

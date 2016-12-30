@@ -592,8 +592,8 @@ void checkfilename (char *currentfilename)
         closedir(dir);
     } else {
         if (menu_load_type == MENU_LOAD_HDF) {
-            strcpy(uae4all_hard_file, currentfilename);
-            make_hard_file_cfg_line(uae4all_hard_file);
+            strcpy(uae4all_hard_file0, currentfilename);
+            make_hard_file_cfg_line(uae4all_hard_file0);
             reset_hdConf();
             mainMenu_bootHD = 2;
             loadconfig(2);

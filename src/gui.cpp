@@ -127,7 +127,10 @@ char uae4all_image_file2[256]  = { 0, };
 char uae4all_image_file3[256] = { 0, };
 
 char uae4all_hard_dir[256] = { 0, };
-char uae4all_hard_file[256] = { 0, };
+char uae4all_hard_file0[256] = { 0, };
+char uae4all_hard_file1[256] = { 0, };
+char uae4all_hard_file2[256] = { 0, };
+char uae4all_hard_file3[256] = { 0, };
 
 int drawfinished=0;
 
