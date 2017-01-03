@@ -208,10 +208,10 @@ void show_settings_TabHD()
         textField_hddir->setText(tmpHDDir);
     }
 
-    if (strcmp(uae4all_hard_file, "")==0)
+    if (strcmp(uae4all_hard_file0, "")==0)
         textField_hdfile->setText("not selected");
     else {
-        extractFileName(uae4all_hard_file, tmpHDFile);
+        extractFileName(uae4all_hard_file0, tmpHDFile);
         textField_hdfile->setText(tmpHDFile);
     }
 }

@@ -23,10 +23,13 @@
 #include "vita2d.h"
 extern PSP2Shader *shader;
 extern int mainMenu_shader;
+#ifndef PRIVATE_HWDATA
+#define PRIVATE_HWDATA
 typedef struct private_hwdata {
 	vita2d_texture *texture;
 	SDL_Rect dst;
 } private_hwdata;
+#endif //PRIVATE_HWDATA
 #endif
 
 extern int bReloadKickstart;
@@ -395,10 +398,11 @@ void init_text(int splash)
    //to compile
 	SDL_SetVideoModeBilinear(0);
 	
-//	if(shader != NULL) {
-//        delete(shader);
-//        shader = NULL;
-//    }
+	if(shader != NULL) {
+        delete(shader);
+        shader = NULL;
+   }
+   shader = new PSP2Shader((PSP2Shader::Shader)0);
 	
 #elif PANDORA
 	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);

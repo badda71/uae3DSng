@@ -20,6 +20,7 @@
 #include "gui.h"
 
 
+
 char * make_hard_dir_cfg_line (char *dst) {
 	char buffer[256];
 	int i;
@@ -40,15 +41,32 @@ char * make_hard_dir_cfg_line (char *dst) {
 	return dst;
 }
 
+
 char * make_hard_file_cfg_line (char *dst) {
-	char buffer[256];
+	char buffer[256];		
 	
-	if (uae4all_hard_file[0] != 0) {
-		strcpy(buffer, "32:1:2:512:");
-		strncat(buffer, uae4all_hard_file, 256 - strlen(buffer));
+	if (dst[0] != 0) {
+	
+		int surfaces = 1;
+		int sectors = 32;
+		int reserved = 2;
+		int blocksize = 512;
+	
+		FILE *myFile = fopen(dst, "rb");
+		if (myFile == 0)
+			return 0;
+		fseek(myFile, 0, SEEK_END);
+		long mySize = ftell(myFile);
+		fclose(myFile);
+		if (mySize >= 1073741824L && mySize < 2147483648L)
+			surfaces = 2; //>1 Gb HDF but surfaces only equal to 1, change it to two.
+		else if (mySize >= 2147483648L)
+			surfaces = 4; //>2 Gb HDF (DOES NOT WORK YET FOR SOME REASON) 
+		sprintf(buffer, "%d:%d:%d:%d:", sectors, surfaces, reserved, blocksize);
+		//strcpy(buffer, "32:1:2:512:");
+		strncat(buffer, dst, 256 - strlen(buffer));
 		strcpy(dst, buffer);
-	}
-	
+	}	
 	return dst;
 }
 

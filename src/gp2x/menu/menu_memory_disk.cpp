@@ -44,6 +44,7 @@ const char *text_str_4M="4M";
 const char *text_str_8M="8M";
 
 int menuMemDisk = 0;
+int current_hdf = 0;
 extern int quit_pressed_in_submenu;
 extern int emulating;
 
@@ -188,9 +189,9 @@ static void draw_memDiskMenu(int c)
 		write_text(tabstop3 + 7,menuLine,"Dir");
 	
 	if ((mainMenu_bootHD==2)&&((c!=MENUDISK_BOOTHD)||(!bb)))
-		write_text_inv(tabstop3 + 12,menuLine,"File");
+		write_text_inv(tabstop3 + 12,menuLine,"File1");
 	else
-		write_text(tabstop3 + 12,menuLine,"File");
+		write_text(tabstop3 + 12,menuLine,"File1");
 	
 	menuLine+=2;
 
@@ -216,25 +217,84 @@ static void draw_memDiskMenu(int c)
 		
 		menuLine += 2;
 		
-		strcpy(str, "HD File");
-		if ((c==MENUDISK_HDFILE)&&(bb))
+		strcpy(str, "HD File1");
+		if ((c==MENUDISK_HDFILE)&&(bb)&&current_hdf==0)
 			write_text_inv(leftMargin + 2,menuLine,str);
 		else
 			write_text(leftMargin + 2,menuLine,str);
-		for (i = strlen(uae4all_hard_file); i > 0; i--)
-			if ((uae4all_hard_file[i] == '/') || (uae4all_hard_file[i] == '\\'))
+		for (i = strlen(uae4all_hard_file0); i > 0; i--)
+			if ((uae4all_hard_file0[i] == '/') || (uae4all_hard_file0[i] == '\\'))
 				break;
 		if (i > 0) {
-			strcpy(str, &uae4all_hard_file[i+1]);
+			strcpy(str, &uae4all_hard_file0[i+1]);
 			if (strlen(str) > MENU_MEMDISK_WINDOW_WIDTH - tabstop1)
 				str[MENU_MEMDISK_WINDOW_WIDTH - tabstop1] = '\0';
 			write_text(tabstop1,menuLine,str);
 		} else
 			write_text(tabstop1,menuLine,"");
+
+		menuLine += 2;
+
+		strcpy(str, "HD File2");
+		if ((c==MENUDISK_HDFILE)&&(bb)&&current_hdf==1)
+			write_text_inv(leftMargin + 2,menuLine,str);
+		else
+			write_text(leftMargin + 2,menuLine,str);
+		for (i = strlen(uae4all_hard_file1); i > 0; i--)
+			if ((uae4all_hard_file1[i] == '/') || (uae4all_hard_file1[i] == '\\'))
+				break;
+		if (i > 0) {
+			strcpy(str, &uae4all_hard_file1[i+1]);
+			if (strlen(str) > MENU_MEMDISK_WINDOW_WIDTH - tabstop1)
+				str[MENU_MEMDISK_WINDOW_WIDTH - tabstop1] = '\0';
+			write_text(tabstop1,menuLine,str);
+		} else
+			write_text(tabstop1,menuLine,"");
+
+		menuLine += 2;
+
+		strcpy(str, "HD File3");
+		if ((c==MENUDISK_HDFILE)&&(bb)&&current_hdf==2)
+			write_text_inv(leftMargin + 2,menuLine,str);
+		else
+			write_text(leftMargin + 2,menuLine,str);
+		for (i = strlen(uae4all_hard_file2); i > 0; i--)
+			if ((uae4all_hard_file2[i] == '/') || (uae4all_hard_file2[i] == '\\'))
+				break;
+		if (i > 0) {
+			strcpy(str, &uae4all_hard_file2[i+1]);
+			if (strlen(str) > MENU_MEMDISK_WINDOW_WIDTH - tabstop1)
+				str[MENU_MEMDISK_WINDOW_WIDTH - tabstop1] = '\0';
+			write_text(tabstop1,menuLine,str);
+		} else
+			write_text(tabstop1,menuLine,"");
+			
+				menuLine += 2;
+
+		strcpy(str, "HD File4");
+		if ((c==MENUDISK_HDFILE)&&(bb)&&current_hdf==3)
+			write_text_inv(leftMargin + 2,menuLine,str);
+		else
+			write_text(leftMargin + 2,menuLine,str);
+		for (i = strlen(uae4all_hard_file3); i > 0; i--)
+			if ((uae4all_hard_file3[i] == '/') || (uae4all_hard_file3[i] == '\\'))
+				break;
+		if (i > 0) {
+			strcpy(str, &uae4all_hard_file3[i+1]);
+			if (strlen(str) > MENU_MEMDISK_WINDOW_WIDTH - tabstop1)
+				str[MENU_MEMDISK_WINDOW_WIDTH - tabstop1] = '\0';
+			write_text(tabstop1,menuLine,str);
+		} else
+			write_text(tabstop1,menuLine,"");
+
 	}
 
 	menuLine += 2;
-
+	
+	write_text(3, menuLine, "(Press triangle to eject HD)");
+	
+	menuLine += 2;
+		
 	if ((c==MENUDISK_SAVEHDCONF)&&(bb))
 		write_text_inv(3, menuLine, "Save Config for current HD");
 	else
@@ -303,9 +363,10 @@ static int key_memDiskMenu(int *c)
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_RSHIFT: hit0=1; break;
 				case SDLK_RCTRL: hit0=1; break;
-				case SDLK_END: hit0=1; break;
-				case SDLK_PAGEUP: hit0=1; break;
-				case SDLK_DELETE: case SDLK_BACKSPACE: case SDLK_ESCAPE: del=1; break;
+				case SDLK_END: hit1=1; break;
+				case SDLK_DELETE: case SDLK_BACKSPACE: 
+				case SDLK_ESCAPE: case SDLK_PAGEUP: del=1; break;
+				//note SDLK_PAGEUP corresponds to PAD_Triangle on Vita
 				case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 				default:
@@ -328,12 +389,18 @@ static int key_memDiskMenu(int *c)
 	else if (up)
 	{
 		if (menuMemDisk==MENUDISK_RETURNMAIN) menuMemDisk=MENUDISK_END - 1;
-		else menuMemDisk--;
+		else if (menuMemDisk==MENUDISK_HDFILE && current_hdf>0) 
+				current_hdf--;
+		else
+			menuMemDisk--;
 	}
 	else if (down)
 	{
 		if (menuMemDisk==MENUDISK_END - 1) menuMemDisk=MENUDISK_RETURNMAIN;
-		else menuMemDisk++;	
+		else if (menuMemDisk==MENUDISK_HDFILE && current_hdf<3) 
+				current_hdf++;
+		else
+			menuMemDisk++;	
 	}
 
 	switch (menuMemDisk)
@@ -433,13 +500,27 @@ static int key_memDiskMenu(int *c)
 		case MENUDISK_HDFILE:
 			if (hit0) {
 				if (run_menuLoad(currentDir, MENU_LOAD_HDF)) {
-					make_hard_file_cfg_line(uae4all_hard_file);
+					if (current_hdf==0)
+						make_hard_file_cfg_line(uae4all_hard_file0);
+					else if (current_hdf==1)
+						make_hard_file_cfg_line(uae4all_hard_file1);
+					else if (current_hdf==2)
+						make_hard_file_cfg_line(uae4all_hard_file2);
+					else if (current_hdf==3)
+						make_hard_file_cfg_line(uae4all_hard_file3);
 					reset_hdConf();
 					mainMenu_bootHD = 2;
 					loadconfig(2);
 				}
 			} else if (del) {
-				uae4all_hard_file[0] = '\0';
+				if (current_hdf==0)
+					uae4all_hard_file0[0] = '\0';
+				else if (current_hdf==1)
+					uae4all_hard_file1[0] = '\0';
+				else if (current_hdf==2)
+					uae4all_hard_file2[0] = '\0';
+				else if (current_hdf==3)
+					uae4all_hard_file3[0] = '\0';
 				reset_hdConf();
 			}
 			break;

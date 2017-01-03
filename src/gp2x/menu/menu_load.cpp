@@ -55,6 +55,7 @@ extern int run_menuFileinfo(char* fileName);
 static int min_in_dir=0, max_in_dir=SHOW_MAX_FILES;
 
 extern int current_drive;
+extern int current_hdf;
 
 #ifndef __PSP2__
 #ifdef PANDORA
@@ -342,7 +343,14 @@ static int menuLoadLoop(char *curr_path)
 							if (strstr(filename, ".hdf") == NULL)
 								showWarning("HDF file must be selected");
 							else
-								strcpy(uae4all_hard_file, filename);
+								if (current_hdf==0)
+									strcpy(uae4all_hard_file0, filename);
+								else if (current_hdf==1)
+									strcpy(uae4all_hard_file1, filename);
+								else if (current_hdf==2)
+									strcpy(uae4all_hard_file2, filename);
+								else if (current_hdf==3)
+									strcpy(uae4all_hard_file3, filename);
 							break;
 					}
 					loaded=1;

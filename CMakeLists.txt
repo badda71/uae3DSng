@@ -146,7 +146,7 @@ target_link_libraries(${PROJECT_NAME}.elf
         ${CMAKE_SOURCE_DIR}/src/psp2/vita-shader-collection/lib/libvitashaders.a
         SceSysmodule_stub SceDisplay_stub SceGxm_stub
         SceCtrl_stub ScePgf_stub ScePower_stub SceCommonDialog_stub
-        SceAudio_stub png jpeg z m c
+        SceAudio_stub SceShellSvc_stub png jpeg z m c
         )
 add_custom_target(${PROJECT_NAME}.vpk
         DEPENDS ${PROJECT_NAME}.elf
@@ -168,7 +168,7 @@ target_link_libraries(${PROJECT_NAME}-debug.elf
         SceSysmodule_stub SceDisplay_stub SceGxm_stub
         SceCtrl_stub ScePgf_stub ScePower_stub SceCommonDialog_stub
         SceAudio_stub png jpeg z m c
-        psp2shell SceSysmodule_stub SceNetCtl_stub SceNet_stub SceAppUtil_stub SceAppMgr_stub
+        psp2shell SceSysmodule_stub SceNetCtl_stub SceNet_stub SceAppUtil_stub SceAppMgr_stub SceShellSvc_stub
         )
 add_custom_target(${PROJECT_NAME}-debug.vpk
         DEPENDS ${PROJECT_NAME}-debug.elf
