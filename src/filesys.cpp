@@ -155,7 +155,7 @@ int is_hardfile (struct uaedev_mount_info *mountinfo, int unit_no)
 static void close_filesys_unit (UnitInfo *uip)
 {
     if (uip->hf.fd != 0)
-	fclose (uip->hf.fd);
+ 	fclose (uip->hf.fd);
     if (uip->volname != 0)
 	free (uip->volname);
     if (uip->devname != 0)

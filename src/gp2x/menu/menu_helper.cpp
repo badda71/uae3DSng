@@ -23,10 +23,13 @@
 #include "vita2d.h"
 PSP2Shader *shader = NULL;
 extern int mainMenu_shader;
+#ifndef PRIVATE_HW_DATA
+#define PRIVATE_HW_DATA
 typedef struct private_hwdata {
 	vita2d_texture *texture;
 	SDL_Rect dst;
 } private_hwdata;
+#endif //PRIVATE_HW_DATA
 #endif
 
 extern int screenWidth;

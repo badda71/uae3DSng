@@ -293,8 +293,8 @@ static void draw_memDiskMenu(int c)
 	
 	write_text(3, menuLine, "(Press triangle to eject HD)");
 	
-	menuLine +=2;
-	
+	menuLine += 2;
+		
 	if ((c==MENUDISK_SAVEHDCONF)&&(bb))
 		write_text_inv(3, menuLine, "Save Config for current HD");
 	else

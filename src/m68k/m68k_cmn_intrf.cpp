@@ -136,39 +136,42 @@ static void m68k_run (void)
 
 void m68k_go (int may_quit)
 {
-    gui_purge_events();
+	gui_purge_events();
 
-    if (in_m68k_go || !may_quit) {
-        return;
-    }
+	if (in_m68k_go || !may_quit) 
+	{
+   	return;
+	}
 
-    in_m68k_go++;
-    quit_program = 2;
-    for (;;) {
-        if (quit_program > 0) {
-            if (quit_program == 1)
-                break;
-            quit_program = 0;
-	    if (savestate_state == STATE_RESTORE)
-	    {
-		restore_state (savestate_filename);
-		mispcflags = 0;
-	    }
-            reset_all_systems ();
-            customreset ();
-	    sound_default_evtime ();
-            /* We may have been restoring state, but we're done now.  */
-            handle_active_events ();
-            if (mispcflags)
-                do_specialties (0);
-        }
+	in_m68k_go++;
+	quit_program = 2;
+	for (;;) 
+	{
+		if (quit_program > 0) 
+		{
+			if (quit_program == 1)
+         	break;
+         quit_program = 0;
+			if (savestate_state == STATE_RESTORE)
+	    	{
+				restore_state (savestate_filename);
+				mispcflags = 0;
+	    	}
+			reset_all_systems ();
+			customreset ();
+			sound_default_evtime ();
+         /* We may have been restoring state, but we're done now.  */
+         handle_active_events ();
+         if (mispcflags)
+         	do_specialties (0);
+      }
 
-	if(!savestate_state)
-	    uae4all_reset();
-	savestate_restore_finish();
-        m68k_run();
-    }
-    in_m68k_go--;
+		if(!savestate_state)
+	   	uae4all_reset();
+		savestate_restore_finish();
+      m68k_run();
+	}
+	in_m68k_go--;
 }
 
 /* CPU save/restore code */

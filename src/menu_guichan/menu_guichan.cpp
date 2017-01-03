@@ -1019,7 +1019,7 @@ int run_mainMenuGuichan()
                 }
             }
         }
-        reset_hdConf();
+		  reset_hdConf();
         update_display();
         if (emulating) {
             mainMenu_case = 2;

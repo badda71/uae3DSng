@@ -4,6 +4,7 @@ extern void UpdateCPUModelSettings();
 extern void UpdateChipsetSettings();
 extern void SetPresetMode(int mode);
 extern void reset_hdConf(void);
+extern void kill_hd_configs();
 #ifdef __PSP2__
 extern void remap_custom_controls();
 #endif

@@ -196,19 +196,7 @@ void SetDefaultMenuSettings(int general)
 	if(general < 2) 
 	{
 		mainMenu_bootHD=DEFAULT_ENABLE_HD;
-		if (hd_dir_unit_nr >= 0) 
-   	{
-			kill_filesys_unit(currprefs.mountinfo, 0);
-			hd_dir_unit_nr = -1;
-		}
-		if (hd_file_unit_nr >= 0) 
-		{
-			for (int i=hd_file_unit_nr; i>=0; i--)
-			kill_filesys_unit(currprefs.mountinfo, i); 
-    	}
-    	hd_file_unit_nr = -1;
-    	mainMenu_filesysUnits = 0;
-
+		kill_hd_configs();
     }
 
     if(general > 0) {
@@ -757,10 +745,9 @@ void set_joyConf()
     }
 }
 
-
-void reset_hdConf()
+void kill_hd_configs()
 {
-    /* Reset HD config */
+	 //properly close all open hdf and hd dirs
     if (hd_dir_unit_nr >= 0) 
     {
         kill_filesys_unit(currprefs.mountinfo, 0);
@@ -773,6 +760,12 @@ void reset_hdConf()
     }
     hd_file_unit_nr = -1;
     mainMenu_filesysUnits = 0;
+}
+
+void reset_hdConf()
+{
+	 kill_hd_configs();
+    /* Reset HD config */
 
     switch (mainMenu_bootHD) {
     case 0:
@@ -1243,11 +1236,7 @@ void loadconfig(int general)
 #ifdef __PSP2__
 	if (general == 1)
 	{
-    //first time opening the screen on Vita, somehow 
-    //this sets the max possible resolution,
-    //so open it with 320*270. Even 800*600 would work, 
-    //but only a width of 320 is supported by the current
-    //emulator drawing routines
+    //first time opening the screen on Vita
 	 int visibleAreaWidth_old = visibleAreaWidth;
 	 int mainMenu_displayedLines_old = mainMenu_displayedLines;
 	 visibleAreaWidth = 320;

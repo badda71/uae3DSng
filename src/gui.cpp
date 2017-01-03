@@ -42,6 +42,10 @@
 #include "gp2x.h"
 #include "gp2xutil.h"
 
+#ifdef __PSP2__
+#include <psp2/shellutil.h>
+#endif
+
 #ifdef ANDROIDSDL
 #include <android/log.h>
 #endif
@@ -59,6 +63,7 @@ int stylusClickOverride=0;
 int stylusAdjustX=0, stylusAdjustY=0;
 int screenWidth = 640;
 
+extern struct gui_info gui_data;
 
 static char _show_message_str[40]={
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -229,6 +234,12 @@ int gui_init (void)
 		emulating=0;
 		uae4all_init_sound();
 		init_kickstart();
+
+#ifdef __PSP2__
+			//Lock PS Button to prevent file corruption
+			sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
+#endif
+
 #ifdef USE_GUICHAN
 		if (!uae4all_image_file0[0])
 			run_mainMenuGuichan();
@@ -317,6 +328,7 @@ static void goMenu(void)
 #else
 	init_text(0);
 	menu_raise();
+	
 	exitmode=run_mainMenu();
 #endif
 
@@ -474,14 +486,14 @@ static void goMenu(void)
     {
 	    if (autosave!=mainMenu_autosave)
 	    {
-	    	prefs_df[0][0]=0;
-	   		prefs_df[1][0]=0;
+			prefs_df[0][0]=0;
+	   	prefs_df[1][0]=0;
 			prefs_df[2][0]=0;
-	   		prefs_df[3][0]=0;
+	   	prefs_df[3][0]=0;
 	    }
 		if(gp2xButtonRemappingOn)
 			togglemouse();
-	    uae_reset ();
+	   uae_reset ();
     }
     check_all_prefs();
     gui_purge_events();

@@ -2269,8 +2269,6 @@ static _INLINE_ void finish_drawing_frame (void)
 		pfield_draw_line (active_line, where);
 	}
 
-	if (mainMenu_showStatus)
-	{
 		/* HD LED off delay */
 		static int countdown = HDLED_TIMEOUT;
 		if (gui_data.hdled != HDLED_OFF) 
@@ -2282,6 +2280,9 @@ static _INLINE_ void finish_drawing_frame (void)
 		} else {
 			countdown = HDLED_TIMEOUT;
 		}
+
+	if (mainMenu_showStatus)
+	{
 
 		for (i = 0; i < TD_TOTAL_HEIGHT; i++) {
 			int line = mainMenu_displayedLines - TD_TOTAL_HEIGHT + i;

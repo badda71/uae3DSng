@@ -30,6 +30,8 @@
 #include "savestate.h"
 
 #ifdef __PSP2__
+#include <psp2/shellutil.h>
+#include <psp2/io/fcntl.h> 
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
@@ -52,6 +54,7 @@ extern void extractFileName(char * str,char *buffer);
 extern void update_display(void);
 extern int saveAdfDir(void);
 extern void setCpuSpeed(void);
+extern void show_error(const char *);
 
 extern char launchDir[300];
 extern char currentDir[300];
@@ -73,9 +76,15 @@ static const char *text_str_df0=		"DF0:";
 static const char *text_str_df1=		"DF1:";
 static const char *text_str_df2=		"DF2:";
 static const char *text_str_df3=		"DF3:";
+#ifdef __PSP2__
+static const char* text_str_hdnmem="Harddisk and Memory Options";
+static const char *text_str_display="Display and Sound";
+static const char *text_str_savestates="Savestates";
+#else
 static const char* text_str_hdnmem="Harddisk and Memory Options (H)";
 static const char *text_str_display="Display and Sound (L-trigger)";
 static const char *text_str_savestates="Savestates (S)";
+#endif
 static const char *text_str_eject="Eject All Drives";
 const char *text_str_separator="--------------------------------";
 #ifdef PANDORA
@@ -83,7 +92,11 @@ static const char *text_str_reset="Reset (R-trigger)";
 #else
 static const char *text_str_reset="Reset (Start Emulator)";
 #endif
+#ifdef __PSP2__
+static const char *text_str_exit= "Quit (L-trigger)";
+#else
 static const char *text_str_exit= "Quit (Q)";
+#endif
 
 int mainMenu_case=-1;
 int mainMenu_system=-1;
@@ -92,8 +105,14 @@ int quit_pressed_in_submenu=0;
 int nr_drives=DEFAULT_DRIVES;
 int current_drive=0;
 
+int force_quit=0;
+
 int lastCpuSpeed=600;
 int ntsc=0;
+
+#ifdef __PSP2__
+int ps_button_locked = 0;
+#endif
 
 static void adjustToWindow(char *str, char* buffer)
 {
@@ -439,6 +458,8 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0, hit3=0, hit4=0, hit5=0, hit6=0, hitH=0, hitS=0, hitQ=0, hitN1=0, hitN2=0, hitN3=0, hitN4=0;
 	SDL_Event event;
 	int info=0;
+	
+	force_quit=0;
 
 	while (SDL_PollEvent(&event) > 0)
 	{
@@ -460,7 +481,11 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				case SDLK_HOME: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_LCTRL: hit2=1; break;
+#ifdef __PSP2__ //RSHIFT is PAD_L on Vita
+				case SDLK_RSHIFT: hitQ=1; break;
+#else
 				case SDLK_RSHIFT: hit3=1; break;
+#endif
 				case SDLK_RCTRL: hit4=1; break;
 				case SDLK_END: hit5=1; break;
 				case SDLK_PAGEUP: hit6=1; break;
@@ -474,7 +499,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				case SDLK_4: hitN4=1;
 			}
 		}
-
+				
 		if (info)
 			showInfo();
 		else if (hit1)
@@ -521,6 +546,12 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 		else if (hitS)
 		{
 			mainMenu_case=MAIN_MENU_CASE_SAVESTATES;
+			end=1;
+		}
+		else if (hitQ && right)
+		{
+			force_quit=1;
+			mainMenu_case=MAIN_MENU_CASE_QUIT;
 			end=1;
 		}
 		else if (hitQ)
@@ -731,12 +762,17 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				}
 				break;
 			case 15:
-				if (hit0)
+				if (hit0 && right)
+				{
+					force_quit=1;
+					mainMenu_case=MAIN_MENU_CASE_QUIT;
+					end=1;
+				}
+				else if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_QUIT;
 					end=1;
 				}
-				break;
 		}
 		if (back_c>=0)
 		{
@@ -792,7 +828,7 @@ int run_mainMenu()
 	SDL_Event event;
 	while (SDL_PollEvent(&event) > 0);
 #endif
-
+   	
 	while(mainMenu_case<0)
 	{
 		raise_mainMenu();
@@ -890,7 +926,6 @@ int run_mainMenu()
 				} 				
 #endif
 			}
-			reset_hdConf();
 			if (emulating)
 			{
 				mainMenu_case=2;	
@@ -955,11 +990,22 @@ int run_mainMenu()
 			}
 			break;
 		case MAIN_MENU_CASE_QUIT:
+			if (gui_data.hdled == HDLED_WRITE && force_quit == 0) 
+			{
+				show_error("Amiga is writing to HDF. Press PAD_right+L to force quit.");
+				break;
+		   }
 #ifndef USE_SDLSOUND
 			gp2x_stop_sound();
 #endif
-			saveAdfDir();
-      leave_program();
+			saveAdfDir();	
+
+#ifdef __PSP2__
+			//unlock PS Button
+			sceShellUtilUnlock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
+#endif
+
+      	leave_program();
 #ifndef __PSP2__
 			sync();
 #endif
@@ -972,7 +1018,7 @@ int run_mainMenu()
 
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
-	
+				
 	update_display();
 	return mainMenu_case;
 }

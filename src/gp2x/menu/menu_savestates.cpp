@@ -231,7 +231,7 @@ static inline void unraise_saveMenu()
 	text_flip();
 }
 
-static void show_error(const char *str)
+void show_error(const char *str)
 {
 	int i;
 

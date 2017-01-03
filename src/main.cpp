@@ -58,7 +58,11 @@ extern SDL_Surface *current_screenshot;
 #endif
 
 #ifdef __PSP2__
+//Allow locking PS Button
+#include <psp2/shellutil.h>
+#ifdef DEBUG_UAE4ALL
 #include <psp2shell.h>
+#endif
 #endif
 
 long int version = 256*65536L*UAEMAJOR + 65536L*UAEMINOR + UAESUBREV;
@@ -194,6 +198,7 @@ void do_leave_program (void)
   if(current_screenshot != NULL)
     SDL_FreeSurface(current_screenshot);
 #endif
+	     
     graphics_leave ();
     close_joystick ();
     close_sound ();
@@ -224,6 +229,11 @@ void real_main (int argc, char **argv)
 #ifdef DEBUG_UAE4ALL
 	psp2shell_init(3333, 5);
 #endif
+#endif
+
+#ifdef __PSP2__
+//Initialize ShellUtil to allow us to disable "PS" Button (corrupts hdf files)
+sceShellUtilInitEvents(0);
 #endif
 
 #ifdef USE_SDL
