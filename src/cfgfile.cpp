@@ -60,7 +60,7 @@ char * make_hard_file_cfg_line (char *dst) {
 		fclose(myFile);
 		if (mySize >= 1073741824L && mySize < 2147483648L)
 			surfaces = 2; //>1 Gb HDF but surfaces only equal to 1, change it to two.
-		else if (mySize > 2147483648L)
+		else if (mySize >= 2147483648L)
 			surfaces = 4; //>2 Gb HDF (DOES NOT WORK YET FOR SOME REASON) 
 		sprintf(buffer, "%d:%d:%d:%d:", sectors, surfaces, reserved, blocksize);
 		//strcpy(buffer, "32:1:2:512:");
