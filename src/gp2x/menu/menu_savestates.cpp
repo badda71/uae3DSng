@@ -33,6 +33,7 @@ static const char *text_str_exit="Back to Main Menu";
 extern int emulating;
 extern int saveMenu_n_savestate;
 extern int quit_pressed_in_submenu;
+extern int mainMenu_bootHD;
 
 int saveMenu_case=-1;
 
@@ -246,6 +247,88 @@ void show_error(const char *str)
 }
 
 
+void make_savestate_filenames(char *save, char *thumb)
+{
+	save[0]='\0';
+	if (thumb!=NULL)
+		thumb[0]='\0';
+	int i=0;
+	char *hd_name=NULL;
+	// savestate is named by boot unit
+	// use first floppy as filename, if empty, use boot hdf/hd dir
+	if (uae4all_image_file0[0]!='\0')
+	{
+		strcpy(save,uae4all_image_file0);
+	}
+	else 
+	{
+		if (mainMenu_bootHD == 2)
+		{
+			if (uae4all_hard_file0[0]!='\0')
+				hd_name=uae4all_hard_file0;
+			else if (uae4all_hard_file1[0]!='\0')
+				hd_name=uae4all_hard_file1;
+			else if (uae4all_hard_file2[0]!='\0')
+				hd_name=uae4all_hard_file2;
+			else if (uae4all_hard_file3[0]!='\0')
+				hd_name=uae4all_hard_file3;
+		} else if (mainMenu_bootHD == 1 && uae4all_hard_dir[0]!='\0')
+				hd_name=uae4all_hard_dir;				
+		if (hd_name!=NULL && hd_name[0]!='\0') 
+		{
+			int oneColonFound=0;
+			for (i = strlen(hd_name); i > 0; i--)
+				if (hd_name[i] == ':' && !oneColonFound)
+					oneColonFound=1;
+				else if (hd_name[i] == ':' && oneColonFound)
+					break;
+			if (i > 0) 
+			{
+				strcpy(save, &hd_name[i+1]);
+				if (strlen(save) > 255 - 2)
+					save[255 - 2] = '\0';
+			} 
+			else
+			{
+				save[0]='\0';
+			}
+		} 
+	} //Still nothing? Use floppy numbers 2,3,4
+	if (save[0]=='\0')
+	{
+		if (uae4all_image_file1[0]!='\0')
+			strcpy(save,uae4all_image_file1);
+		else if	(uae4all_image_file2[0]!='\0')
+			strcpy(save,uae4all_image_file2);
+		else if	(uae4all_image_file3[0]!='\0')
+			strcpy(save,uae4all_image_file3);
+	}
+	if (thumb!=NULL)
+		strcpy(thumb, save);
+	switch(saveMenu_n_savestate)
+	{
+		case 1:
+			strcat(save,"-1.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-1.png"); 
+			break;
+		case 2:
+			strcat(save,"-2.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-2.png"); 
+			break;
+		case 3:
+			strcat(save,"-3.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-3.png"); 
+			break;
+		default: 
+			strcat(save,".asf");
+			if (thumb!=NULL)
+				strcat(thumb,".png"); 
+	}
+}
+
 int run_menuSavestates()
 {
 	static int c=0;
@@ -272,18 +355,7 @@ int run_menuSavestates()
 		{
 			case SAVE_MENU_CASE_LOAD_MEM:
 				{
-				strcpy(savestate_filename,uae4all_image_file0);
-				switch(saveMenu_n_savestate)
-				{
-					case 1:
-						strcat(savestate_filename,"-1.asf"); break;
-					case 2:
-						strcat(savestate_filename,"-2.asf"); break;
-					case 3:
-						strcat(savestate_filename,"-3.asf"); break;
-					default: 
-						strcat(savestate_filename,".asf");
-				}
+				make_savestate_filenames(savestate_filename,NULL);
 				FILE *f=fopen(savestate_filename,"rb");
 				if (f)
 				{

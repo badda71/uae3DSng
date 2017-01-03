@@ -489,7 +489,6 @@ static int key_memDiskMenu(int *c)
 				if (run_menuLoad(currentDir, MENU_LOAD_HD_DIR)) {
 					make_hard_dir_cfg_line(uae4all_hard_dir);
 					reset_hdConf();
-					mainMenu_bootHD = 1;
 					loadconfig(2);
 				}
 			} else if (del) {
@@ -509,7 +508,6 @@ static int key_memDiskMenu(int *c)
 					else if (current_hdf==3)
 						make_hard_file_cfg_line(uae4all_hard_file3);
 					reset_hdConf();
-					mainMenu_bootHD = 2;
 					loadconfig(2);
 				}
 			} else if (del) {

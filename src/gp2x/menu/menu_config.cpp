@@ -200,7 +200,7 @@ void SetDefaultMenuSettings(int general)
     }
 
     if(general > 0) {
-			// hdf0
+		  //reset floppies
         uae4all_image_file0[0] = '\0';
         uae4all_image_file1[0] = '\0';
         uae4all_image_file2[0] = '\0';
