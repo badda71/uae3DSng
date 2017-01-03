@@ -372,13 +372,16 @@ void UpdateChipsetSettings()
     }
     switch (mainMenu_chipset & 0xff00) {
     case 0x100:
+    //Immediate Blitter
         changed_prefs.immediate_blits = true;
         blitter_in_partial_mode = 0;
         break;
+    //Improved Blitter
     case 0x200:
         changed_prefs.immediate_blits = false;
         blitter_in_partial_mode = 1;
         break;
+    //Normal Blitter
     default:
         changed_prefs.immediate_blits = false;
         blitter_in_partial_mode = 0;
