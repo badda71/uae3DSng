@@ -55,6 +55,7 @@ int mainMenu_CPU_model = DEFAULT_CPU_MODEL;
 int mainMenu_chipset = DEFAULT_CHIPSET_SELECT;
 int mainMenu_sound = DEFAULT_SOUND;
 int mainMenu_soundStereo = 1; // Default is stereo
+int mainMenu_soundStereoSep = 3; // Default is 100% stereo separation
 int mainMenu_CPU_speed = 0;
 
 int mainMenu_cpuSpeed = 600;
@@ -217,6 +218,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_sound = DEFAULT_SOUND;
     sound_rate = DEFAULT_SOUND_FREQ;
     mainMenu_soundStereo = 1; // Default is stereo
+    mainMenu_soundStereoSep = 3; // Default is 100% stereo separation
     mainMenu_CPU_speed = 0;
 
     mainMenu_cpuSpeed = 600;
@@ -942,6 +944,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "sound=%d\n",mainMenu_sound + mainMenu_soundStereo * 10);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "soundstereosep=%d\n",mainMenu_soundStereoSep);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "soundrate=%d\n",sound_rate);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "autosave=%d\n",mainMenu_autosave);
@@ -1320,11 +1324,12 @@ void loadconfig(int general)
 #endif
         fscanf(f,"frameskip=%d\n",&mainMenu_frameskip);
         fscanf(f,"sound=%d\n",&mainMenu_sound );
-        if(mainMenu_sound >= 10) {
+        if (mainMenu_sound >= 10) {
             mainMenu_soundStereo = 1;
             mainMenu_sound -= 10;
         } else
             mainMenu_soundStereo = 0;
+        fscanf(f,"soundstereosep=%d\n",&mainMenu_soundStereoSep );
         fscanf(f,"soundrate=%d\n",&sound_rate);
         fscanf(f,"autosave=%d\n",&mainMenu_autosave);
         fscanf(f,"gp2xclock=%d\n", &gp2xClockSpeed);
