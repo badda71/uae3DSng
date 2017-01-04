@@ -139,12 +139,17 @@ static int gp2x_start_sound(int rate, int bits, int stereo)
 
 	// if no settings change, we don't need to do anything
 	if (rate == s_oldrate && s_oldbits == bits && s_oldstereo == stereo)
-	    return 0;
+	   return 0;
 
 	if( audioOpened ) {
 		// __android_log_print(ANDROID_LOG_INFO, "UAE4ALL2", "UAE tries to open SDL sound device 2 times, ignoring that.");
-		//	SDL_CloseAudio();
+#ifdef __PSP2__
+			//this allows the user to change sound settings on the fly
+			//without having to save config and restart
+			SDL_CloseAudio();
+#else
 		return 0;
+#endif
 	}
 
 	SDL_AudioSpec as;

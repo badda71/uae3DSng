@@ -162,9 +162,9 @@ static void draw_miscMenu(int c)
 		write_text(tabstop1,menuLine,"Normal");
 
 	if (((mainMenu_chipset & 0xff00)==0x100)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
-		write_text_inv(tabstop5-1,menuLine,"Immediate");
+		write_text_inv(tabstop5-2,menuLine,"Immediate");
 	else
-		write_text(tabstop5-1,menuLine,"Immediate");
+		write_text(tabstop5-2,menuLine,"Immediate");
 
 	if (((mainMenu_chipset & 0xff00)==0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
 		write_text_inv(tabstop9,menuLine,"Improved");

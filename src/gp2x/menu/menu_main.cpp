@@ -26,6 +26,8 @@
 #include "cpuspeed/cpuctrl.h"
 #include "custom.h"
 
+
+
 /* PocketUAE config file. Used for parsing PocketUAE-like options. */
 #include "savestate.h"
 
@@ -1028,7 +1030,7 @@ int run_mainMenu()
 
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
-				
+
 	update_display();
 	return mainMenu_case;
 }
