@@ -53,7 +53,9 @@ enum {
 	MENUDISPLAY_PRESETWIDTH,
 	MENUDISPLAY_PRESETHEIGHT,
 	MENUDISPLAY_DISPLINES,
+#ifndef __PSP2__ //screenwidth has no meaning on Vita and is never used
 	MENUDISPLAY_SCREENWIDTH,
+#endif
 	MENUDISPLAY_VERTPOS,
 	MENUDISPLAY_CUTLEFT,
 	MENUDISPLAY_CUTRIGHT,
@@ -146,7 +148,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-
+#ifndef __PSP2__
 	// MENUDISPLAY_SCREENWIDTH
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Screen Width");
@@ -155,7 +157,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-
+#endif
 	// MENUDISPLAY_VERTPOS
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Vertical Position");
@@ -481,6 +483,7 @@ static int key_displayMenu(int *c)
 					mainMenu_displayedLines++;
 			}
 			break;
+#ifndef __PSP2__
 		case MENUDISPLAY_SCREENWIDTH:
 			if (left)
 			{
@@ -495,6 +498,7 @@ static int key_displayMenu(int *c)
 					screenWidth=800;
 			}
 			break;
+#endif
 		case MENUDISPLAY_VERTPOS:
 			if (left)
 			{

@@ -77,7 +77,9 @@ enum {
 	MENUMISC_AUTOFIRE,
 	MENUMISC_STATUSLINE,
 	MENUMISC_MOUSEMULTIPLIER,
+#ifndef __PSP2__ // No stylus on Vita
 	MENUMISC_STYLUSOFFSET,
+#endif
 #ifdef __PSP2__
 	MENUMISC_DEADZONE,
 #else
@@ -380,7 +382,7 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop9,menuLine,text_str_4x);
 	else
 		write_text(tabstop9,menuLine,text_str_4x);
-
+#ifndef __PSP2__
 	// MENUMISC_STYLUSOFFSET
 	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_stylus_offset);
@@ -409,6 +411,7 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop9,menuLine,text_str_8px);
 	else
 		write_text(tabstop9,menuLine,text_str_8px);
+#endif //__PSP2__
 #ifdef __PSP2__
 	//Analog Stick Deadzone settings on Vita
 	//MENUMISC_DEADZONE
@@ -739,6 +742,7 @@ static int key_miscMenu(int *c)
 						mainMenu_mouseMultiplier = 50;
 				}
 				break;
+#ifndef __PSP2__
 			case MENUMISC_STYLUSOFFSET:
 				if (left)
 				{
@@ -767,6 +771,8 @@ static int key_miscMenu(int *c)
 						mainMenu_stylusOffset = 0;
 				}
 				break;
+#endif //__PSP2__
+
 #ifdef __PSP2__
 			case MENUMISC_DEADZONE:
 				if (left)
