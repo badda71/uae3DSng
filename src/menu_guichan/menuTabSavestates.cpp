@@ -81,20 +81,8 @@ public:
     void action(const gcn::ActionEvent& actionEvent) {
         if(emulating) {
             mainMenu_case = MAIN_MENU_CASE_SAVESTATES;
-            strcpy(savestate_filename,uae4all_image_file0);
-            switch(saveMenu_n_savestate) {
-            case 1:
-                strcat(savestate_filename,"-1.asf");
-                break;
-            case 2:
-                strcat(savestate_filename,"-2.asf");
-                break;
-            case 3:
-                strcat(savestate_filename,"-3.asf");
-                break;
-            default:
-                strcat(savestate_filename,".asf");
-            }
+				make_savestate_filenames(savestate_filename, NULL);
+
             FILE *f = fopen(savestate_filename,"rb");
             if (f) {
                 fclose(f);

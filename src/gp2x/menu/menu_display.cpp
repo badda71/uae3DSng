@@ -334,17 +334,32 @@ static void draw_displayMenu(int c)
 
 	// MENUDISPLAY_STEREO
 	menuLine+=2;
-	write_text(leftMargin,menuLine,"Sound mode");
+	write_text(leftMargin,menuLine,"Stereo Sep.");
 	if ((mainMenu_soundStereo==0)&&((menuDisplay!=MENUDISPLAY_STEREO)||(bb)))
-		write_text_inv(tabstop1,menuLine,"mono");
+		write_text_inv(tabstop1,menuLine,"0");
 	else
-		write_text(tabstop1,menuLine,"mono");
+		write_text(tabstop1,menuLine,"0");
+		
+	if ((mainMenu_soundStereo==1)&&(mainMenu_soundStereoSep==0)&&((menuDisplay!=MENUDISPLAY_STEREO)||(bb)))
+		write_text_inv(tabstop3,menuLine,"25");
+	else
+		write_text(tabstop3,menuLine,"25");
+		
+	if ((mainMenu_soundStereo==1)&&(mainMenu_soundStereoSep==1)&&((menuDisplay!=MENUDISPLAY_STEREO)||(bb)))
+		write_text_inv(tabstop5,menuLine,"50");
+	else
+		write_text(tabstop5,menuLine,"50");
 
-	if ((mainMenu_soundStereo==1)&&((menuDisplay!=MENUDISPLAY_STEREO)||(bb)))
-		write_text_inv(tabstop5,menuLine,"stereo");
+	if ((mainMenu_soundStereo==1)&&(mainMenu_soundStereoSep==2)&&((menuDisplay!=MENUDISPLAY_STEREO)||(bb)))
+		write_text_inv(tabstop7,menuLine,"75");
 	else
-		write_text(tabstop5,menuLine,"stereo");
+		write_text(tabstop7,menuLine,"75");
 	
+		if ((mainMenu_soundStereo==1)&&(mainMenu_soundStereoSep==3)&&((menuDisplay!=MENUDISPLAY_STEREO)||(bb)))
+		write_text_inv(tabstop9,menuLine,"100");
+	else
+		write_text(tabstop9,menuLine,"100");
+
 	text_flip();
 	b++;
 }
@@ -594,15 +609,41 @@ static int key_displayMenu(int *c)
 				}
 				break;
       
-      case MENUDISPLAY_STEREO:
-				if (left || right)
+			case MENUDISPLAY_STEREO:
+				if (left)
 				{
-				  if(mainMenu_soundStereo == 0)
-				    mainMenu_soundStereo = 1;
-				  else
-				    mainMenu_soundStereo = 0;
-        }
-        break;
+					if(mainMenu_soundStereo == 0)
+					{
+						mainMenu_soundStereo=1;
+						mainMenu_soundStereoSep=3;
+					}
+					else if (mainMenu_soundStereoSep > 0)
+						mainMenu_soundStereoSep--;
+					else 
+					{	
+						mainMenu_soundStereo=0;
+						mainMenu_soundStereoSep=3;
+					}
+				}		
+				if (right)
+				{
+					if(mainMenu_soundStereo == 0)
+					{
+						mainMenu_soundStereo=1;
+						mainMenu_soundStereoSep=0;
+					}
+					else if (mainMenu_soundStereoSep < 3)
+					{
+						mainMenu_soundStereoSep++;
+					}
+					else 
+					{	
+						mainMenu_soundStereo=0;
+						mainMenu_soundStereoSep=3;
+					}
+				}		
+				
+				break;
 	}
 
 	return end;

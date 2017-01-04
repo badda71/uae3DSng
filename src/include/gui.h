@@ -61,3 +61,6 @@ extern void uae4all_show_time(void);
 /* Function to update the custom key config to one of three presets on Vita */
 extern void remap_custom_controls();
 
+/* Function to create savestate filename
+and screenshot filename if USE_GUICHAN is defined */
+extern void make_savestate_filenames(char *save, char *thumb);

@@ -58,11 +58,14 @@ enum {
 	MENUMISC_RETURNMAIN = 0,
 	MENUMISC_CPU,
 	MENUMISC_CHIPSET,
+	MENUMISC_BLITTER,
 	MENUMISC_KICKSTART,
 	MENUMISC_CPUSPEED,
+#ifndef __PSP2__
 #ifdef PANDORA
 	MENUMISC_PANDORASPEED,
 #endif
+#endif // __PSP2__
 #ifdef __PSP2__
 	MENUMISC_LEFTSTICKMOUSE,
 #endif
@@ -134,21 +137,40 @@ static void draw_miscMenu(int c)
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Chipset");
 	
-	if ((mainMenu_chipset==0)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
+	if (((mainMenu_chipset & 0xff)==0)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
 		write_text_inv(tabstop1,menuLine,"OCS");
 	else
 		write_text(tabstop1,menuLine,"OCS");
 	
-	if ((mainMenu_chipset==1)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
+	if (((mainMenu_chipset & 0xff)==1)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
 		write_text_inv(tabstop3,menuLine,"ECS");
 	else
 		write_text(tabstop3,menuLine,"ECS");
 	
-	if ((mainMenu_chipset==2)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
+	if (((mainMenu_chipset & 0xff)==2)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
 		write_text_inv(tabstop5,menuLine,"AGA");
 	else
 		write_text(tabstop5,menuLine,"AGA");
+		
+	// MENUMISC_BLITTER
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Blitter");
+	
+	if (((mainMenu_chipset & 0xff00)!=0x100 && (mainMenu_chipset & 0xff00)!=0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
+		write_text_inv(tabstop1,menuLine,"Normal");
+	else
+		write_text(tabstop1,menuLine,"Normal");
 
+	if (((mainMenu_chipset & 0xff00)==0x100)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
+		write_text_inv(tabstop5-1,menuLine,"Immediate");
+	else
+		write_text(tabstop5-1,menuLine,"Immediate");
+
+	if (((mainMenu_chipset & 0xff00)==0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
+		write_text_inv(tabstop9,menuLine,"Improved");
+	else
+		write_text(tabstop9,menuLine,"Improved");
+		
 	// MENUMISC_KICKSTART
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Kickstart");
@@ -190,6 +212,7 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop8,menuLine,"28MHz");
 
+#ifndef __PSP2__
 #ifdef PANDORA
   // MENUMISC_PANDORASPEED
 	menuLine+=2;
@@ -201,6 +224,7 @@ static void draw_miscMenu(int c)
 		write_text(tabstop4-1,menuLine,cpuSpeed);
 	write_text(tabstop6-1,menuLine,"MHz");
 #endif
+#endif // __PSP2__
 #ifdef __PSP2__
   // MENUMISC_LEFTSTICKMOUSE
 	menuLine+=2;
@@ -497,20 +521,83 @@ static int key_miscMenu(int *c)
 			case MENUMISC_CHIPSET:
 				if (left)
 				{
-					if (mainMenu_chipset > 0)
-						mainMenu_chipset--;
-					else
-						mainMenu_chipset=2;
+					switch (mainMenu_chipset & 0xff) //low is chipset, high is blitter
+					{
+						case 1:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 0;
+							break;
+						case 2:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 1;
+							break;
+						case 0:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 2;
+							break;
+						default:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 0;
+							break;
+					}
 				}
 				else if (right)
 				{
-					if (mainMenu_chipset < 2)
-						mainMenu_chipset++;
-					else
-						mainMenu_chipset=0;
+					switch (mainMenu_chipset & 0xff) 
+					{
+						case 0:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 1;
+							break;
+						case 1:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 2;
+							break;
+						case 2:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 0;
+							break;
+						default:
+							mainMenu_chipset=(mainMenu_chipset & 0xff00) | 0;
+							break;
+					}
 				}
 				UpdateChipsetSettings();
 				break;
+			
+			case MENUMISC_BLITTER:
+				if (left)
+				{
+					switch (mainMenu_chipset & 0xff00) //low is chipset, high is blitter
+					{
+						case 0x200:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0x100;
+							break;
+						case 0x100:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0;
+							break;
+						case 0:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0x200;
+							break;
+						default:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0;
+							break;
+					}
+				}
+				else if (right)
+				{
+					switch (mainMenu_chipset & 0xff00)
+					{
+						case 0x200:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0;
+							break;
+						case 0x100:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0x200;
+							break;
+						case 0:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0x100;
+							break;
+						default:
+							mainMenu_chipset=(mainMenu_chipset & 0xff) | 0;
+							break;
+					}
+				}
+				UpdateChipsetSettings();
+				break;
+					
 			case MENUMISC_KICKSTART:
 				if (left)
 				{
@@ -544,6 +631,7 @@ static int key_miscMenu(int *c)
 				}
 				break;
       
+#ifndef __PSP2__
 #ifdef PANDORA
       case MENUMISC_PANDORASPEED:
 				if(left)
@@ -552,6 +640,7 @@ static int key_miscMenu(int *c)
 					mainMenu_cpuSpeed+=10;
         break;
 #endif
+#endif //__PSP2__
 #ifdef __PSP2__
       case MENUMISC_LEFTSTICKMOUSE:
 				if ((left)||(right))

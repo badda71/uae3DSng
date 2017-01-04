@@ -97,6 +97,16 @@ static const char *text_str_exit= "Quit (L-trigger)";
 #else
 static const char *text_str_exit= "Quit (Q)";
 #endif
+#ifdef __PSP2__
+static const char *text_str_custom= "Custom Control Config";
+#else
+static const char *text_str_custom= "Custom Control Config (Y)";
+#endif
+#ifdef __PSP2__
+static const char *text_str_more= "More Options";
+#else
+static const char *text_str_more= "More Options (B)";
+#endif
 
 int mainMenu_case=-1;
 int mainMenu_system=-1;
@@ -348,16 +358,16 @@ static void draw_mainMenu(int c)
 	// 11
 	menuLine+=2;
 	if ((c==10)&&(bb))
-		write_text_inv(leftMargin,menuLine,"Custom Control Config (Y)");
+		write_text_inv(leftMargin,menuLine,text_str_custom);
 	else
-		write_text(leftMargin,menuLine,"Custom Control Config (Y)");
+		write_text(leftMargin,menuLine,text_str_custom);
 
 	// 12
 	menuLine+=2;
 	if ((c==11)&&(bb))
-		write_text_inv(leftMargin,menuLine,"More Options (B)");
+		write_text_inv(leftMargin,menuLine,text_str_more);
 	else
-		write_text(leftMargin,menuLine,"More Options (B)");
+		write_text(leftMargin,menuLine,text_str_more);
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);

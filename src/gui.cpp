@@ -90,20 +90,20 @@ struct myRes
 		int top_pos;
 };
 static myRes quickSwitchModes[] = {
-    {192, 0},
-    {200, 0},
-    {216, 0},
-    {224, 0},
-    {240, 0},
-    {256, 0},
-    {270, 0},
-    {192, 14},
-    {200, 14},
-    {216, 14},
-    {224, 14},
-    {240, 14},
-    {256, 14},
-    {270, 14},
+    {192, 2},
+    {200, 2},
+    {216, 2},
+    {224, 2},
+    {240, 2},
+    {256, 2},
+    {270, 2},
+    {192, 16},
+    {200, 16},
+    {216, 16},
+    {224, 16},
+    {240, 16},
+    {256, 16},
+    {270, 16},
 };
 extern int moveY;
 
@@ -267,41 +267,14 @@ int gui_update (void)
     extern char *savestate_filename;
 #ifdef USE_GUICHAN
     extern char *screenshot_filename;
+#else
+	 char *screenshot_filename=NULL;
 #endif
     strcpy(changed_df[0],uae4all_image_file0);
     strcpy(changed_df[1],uae4all_image_file1);
     strcpy(changed_df[2],uae4all_image_file2);
     strcpy(changed_df[3],uae4all_image_file3);
-    strcpy(savestate_filename,uae4all_image_file0);
-#ifdef USE_GUICHAN
-    strcpy(screenshot_filename,uae4all_image_file0);
-#endif
-    switch(saveMenu_n_savestate)
-    {
-	    case 1:
-    		strcat(savestate_filename,"-1.asf");
-#ifdef USE_GUICHAN
-		strcat(screenshot_filename,"-1.png");
-#endif
-		break;
-	    case 2:
-    		strcat(savestate_filename,"-2.asf");
-#ifdef USE_GUICHAN
-		strcat(screenshot_filename,"-2.png");
-#endif
-		break;
-	    case 3:
-    		strcat(savestate_filename,"-3.asf");
-#ifdef USE_GUICHAN
-		strcat(screenshot_filename,"-3.png");
-#endif
-		break;
-	    default: 
-    	   	strcat(savestate_filename,".asf");
-#ifdef USE_GUICHAN
-		strcat(screenshot_filename,".png");
-#endif
-    }
+    make_savestate_filenames(savestate_filename, screenshot_filename);
     real_changed_df[0]=1;
     real_changed_df[1]=1;
     real_changed_df[2]=1;
@@ -355,6 +328,8 @@ static void goMenu(void)
 		extern char *savestate_filename;
 #ifdef USE_GUICHAN
 		extern char *screenshot_filename;
+#else
+		char *screenshot_filename = NULL;
 #endif
 		extern int saveMenu_n_savestate;
 		for(int i=0;i<mainMenu_drives;i++)
@@ -376,44 +351,16 @@ static void goMenu(void)
 				real_changed_df[3]=1;
 			}
 	    }
-		strcpy(savestate_filename,uae4all_image_file0);
-#ifdef USE_GUICHAN
-		strcpy(screenshot_filename,uae4all_image_file0);
-#endif
-	    switch(saveMenu_n_savestate)
-		{
-			case 1:
-				strcat(savestate_filename,"-1.asf");
-#ifdef USE_GUICHAN
-				strcat(screenshot_filename,"-1.png");
-#endif
-				break;
-			case 2:
-				strcat(savestate_filename,"-2.asf");
-#ifdef USE_GUICHAN
-				strcat(screenshot_filename,"-2.png");
-#endif
-				break;
-			case 3:
-				strcat(savestate_filename,"-3.asf");
-#ifdef USE_GUICHAN
-				strcat(screenshot_filename,"-3.png");
-#endif
-				break;
-			default: 
-				strcat(savestate_filename,".asf");
-#ifdef USE_GUICHAN
-				strcat(screenshot_filename,".png");
-#endif
-		}
+		make_savestate_filenames(savestate_filename, screenshot_filename);
     }
     if (exitmode==3)
     {
 		extern char *savestate_filename;
 #ifdef USE_GUICHAN
 		extern char *screenshot_filename;
+#else
+		char *screenshot_filename = NULL;
 #endif
-		extern int saveMenu_n_savestate;
 		for(int i=0;i<mainMenu_drives;i++)
 		{
 			changed_df[i][0]=0;
@@ -451,36 +398,10 @@ static void goMenu(void)
 			}
 			disk_eject(i);
 		}
-		strcpy(savestate_filename,uae4all_image_file0);
+		make_savestate_filenames(savestate_filename, screenshot_filename);
 #ifdef USE_GUICHAN
 		strcpy(screenshot_filename,uae4all_image_file0);
 #endif
-		switch(saveMenu_n_savestate)
-		{
-		case 1:
-    			strcat(savestate_filename,"-1.asf");
-#ifdef USE_GUICHAN
-			strcat(screenshot_filename,"-1.png");
-#endif
-			break;
-	    	case 2:
-    			strcat(savestate_filename,"-2.asf");
-#ifdef USE_GUICHAN
-			strcat(screenshot_filename,"-2.png");
-#endif
-			break;
-	    	case 3:
-    			strcat(savestate_filename,"-3.asf");
-#ifdef USE_GUICHAN
-			strcat(screenshot_filename,"-3.png");
-#endif
-			break;
-	    	default: 
-    	  	 	strcat(savestate_filename,".asf");
-#ifdef USE_GUICHAN
-			strcat(screenshot_filename,".png");
-#endif
-		}
     }
     if (exitmode==2)
     {
