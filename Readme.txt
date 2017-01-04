@@ -8,7 +8,7 @@ Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGu
 
 Android port by Lubomyr, android libSDL by pelya 
 
-Vita port by Cpasjuste, with additional features by rsn8887 and ScHlAuChi, VitaSDL by Cpasjuste based on Vita2D by Xerpi and frangarCJ and others, shader support by Cpasjuste and frangarcj, VitaSDK by The VITASDK Team
+Vita port by Cpasjuste, additional features by rsn8887 with help from ScHlAuChi, VitaSDL by Cpasjuste based on Vita2D by Xerpi and frangarCJ and others, shader support by Cpasjuste and frangarcj, VitaSDK by The VITASDK Team
 
 Android-port info
 -----------------
