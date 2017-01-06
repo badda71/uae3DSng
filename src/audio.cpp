@@ -65,7 +65,7 @@ typedef uae_s8 sample8_t;
     } else { \
       if ((unsigned)sndbufpt - (unsigned)render_sndbuff >= SNDBUFFER_LEN) { \
   	    finish_sound_buffer (); } \
-  	} \
+  	 } \
 } \
       
 
@@ -84,30 +84,30 @@ typedef uae_s8 sample8_t;
 		d2 &= audio_channel_adk_mask[2]; \
 		d3 &= audio_channel_adk_mask[3]; \
 		if (mainMenu_soundStereo) { \
-		   	switch (mainMenu_soundStereoSep) \
-		   	{ \
-		   		case 3: \
-		   		PUT_SOUND_WORD (d0+d3) \
-		   		PUT_SOUND_WORD (d1+d2) \
-		   		break; \
-		   		case 2: \
-		   		PUT_SOUND_WORD (((d0+d3)*28+(d1+d2)*4)/32) \
-		   		PUT_SOUND_WORD (((d1+d2)*28+(d0+d3)*4)/32) \
-		   		break; \
-	   			case 1: \
-		   		PUT_SOUND_WORD (((d0+d3)*24+(d1+d2)*8)/32) \
-		   		PUT_SOUND_WORD (((d1+d2)*24+(d0+d3)*8)/32) \
-		   		break; \
-		   		case 0: \
+			switch (mainMenu_soundStereoSep) { \
+				case 3: \
+					PUT_SOUND_WORD (d0+d3) \
+					PUT_SOUND_WORD (d1+d2) \
+					break; \
+				case 2: \
+					PUT_SOUND_WORD (((d0+d3)*28+(d1+d2)*4)/32) \
+					PUT_SOUND_WORD (((d1+d2)*28+(d0+d3)*4)/32) \
+					break; \
+				case 1: \
+					PUT_SOUND_WORD (((d0+d3)*24+(d1+d2)*8)/32) \
+					PUT_SOUND_WORD (((d1+d2)*24+(d0+d3)*8)/32) \
+					break; \
+				case 0: \
 					PUT_SOUND_WORD (((d0+d3)*20+(d1+d2)*12)/32) \
-		   		PUT_SOUND_WORD (((d1+d2)*20+(d0+d3)*12)/32) \
-					default: \
-		   		PUT_SOUND_WORD (d0+d3) \
-		   		PUT_SOUND_WORD (d1+d2) \
-		   	} \
+					PUT_SOUND_WORD (((d1+d2)*20+(d0+d3)*12)/32) \
+					break; \
+				default: \
+					PUT_SOUND_WORD (d0+d3) \
+					PUT_SOUND_WORD (d1+d2) \
+					break; } \
 		} else { \
-		   PUT_SOUND_WORD (d0+d1+d2+d3) } \
-    CHECK_SOUND_BUFFERS(); \
+			PUT_SOUND_WORD (d0+d1+d2+d3) } \
+		CHECK_SOUND_BUFFERS(); \
 	} \
 
 
