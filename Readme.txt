@@ -81,6 +81,9 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.41
+
+- assembler optimizations, emulator is slightly faster now (CPasjuste)
 
 1.40
 
