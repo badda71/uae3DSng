@@ -1563,7 +1563,7 @@ void loadconfig(int general)
         memset(filebuffer, 0, 256);
         fscanf(f,"custom_kickrom=%s\n",&filebuffer);
         replace(filebuffer,' ','|');
-        if (filebuffer[0]!=NULL) {
+        if (filebuffer[0]) {
             strcpy(custom_kickrom, filebuffer);
         }
         fclose(f);

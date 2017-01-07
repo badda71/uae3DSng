@@ -165,8 +165,6 @@ void flush_block ()
 	}
 #ifndef __PSP2__
 	SDL_LockSurface (prSDLScreen);
-#endif
-#ifndef __PSP2__
 	if(stylusClickOverride)
 	{
 		justClicked = 0;
@@ -200,7 +198,7 @@ void flush_block ()
 			fcounter++;
 		}
 	}
-#endif __PSP2__
+#endif // __PSP2__
 	init_row_map();
 }
 

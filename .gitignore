@@ -7,4 +7,4 @@ src-mips
 *.o
 libapplication*.so
 .idea
-cmake-build-debug
+cmake-build*
