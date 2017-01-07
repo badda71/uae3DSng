@@ -83,7 +83,7 @@ Triangle = Toggle Shift
 CHANGELOG:
 1.41
 
-- assembler optimizations, emulator is slightly faster now (CPasjuste)
+- assembler optimizations by Cpasjuste, emulator is faster now!
 
 1.40
 
