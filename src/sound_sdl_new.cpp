@@ -45,6 +45,8 @@ unsigned n_callback_sndbuff, n_render_sndbuff;
 uae_u16 *sndbufpt = sndbuffer[0];
 uae_u16 *render_sndbuff = sndbuffer[0];
 
+extern void gp2x_stop_sound();
+
 #ifdef NO_SOUND
 
 
@@ -144,9 +146,15 @@ static int gp2x_start_sound(int rate, int bits, int stereo)
 	if( audioOpened ) {
 		// __android_log_print(ANDROID_LOG_INFO, "UAE4ALL2", "UAE tries to open SDL sound device 2 times, ignoring that.");
 #ifdef __PSP2__
-			//this allows the user to change sound settings on the fly
-			//without having to save config and restart
-			SDL_CloseAudio();
+		//this allows the user to change sound settings on the fly
+		//without having to save config and restart
+		//safely stop sound
+		SDL_PauseAudio(1);
+		sound_thread_exit = 1;
+		uae_sem_post(&sound_sem);
+		SDL_Delay(333);
+		SDL_CloseAudio();
+		sound_thread_exit=0;
 #else
 		return 0;
 #endif
