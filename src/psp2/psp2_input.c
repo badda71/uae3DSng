@@ -59,13 +59,19 @@ int PSP2_PollEvent(SDL_Event *event) {
 			break;
 			 
 			case SDL_JOYBUTTONDOWN:
-				event->type = SDL_KEYDOWN;
-				event->key.keysym.sym = getKey(event->jbutton.button);
+				if (event->jbutton.which==0) // Only Joystick 0 controls the menu
+				{
+					event->type = SDL_KEYDOWN;
+					event->key.keysym.sym = getKey(event->jbutton.button);
+				}
 			break;
 			 
 			 case SDL_JOYBUTTONUP:
-				event->type = SDL_KEYUP;
-				event->key.keysym.sym = getKey(event->jbutton.button);
+			 	if (event->jbutton.which==0)
+				{
+					event->type = SDL_KEYUP;
+					event->key.keysym.sym = getKey(event->jbutton.button);
+				}
 			 break;
 			 
 			 default:

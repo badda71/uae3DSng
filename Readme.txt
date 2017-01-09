@@ -39,6 +39,8 @@ NOTES:
 
 - Bios: Please put kickstart files in "ux0:/data/uae4all/kickstarts" directory. Files must be named as kick13.rom, kick20.rom, kick31.rom
 
+- Speed: Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are also fixed by this.
+
 - Config File: If you have problems with settings not saving etc, please delete or rename your config file in the folder "ux0:/data/uae4all" and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
 
 - Blitter: The Blitter settings can help with graphics glitches in some games. For example, Rick Dangerous graphics are fixed by setting Blitter to "immediate" instead of the default "normal," and rebooting the game.
@@ -81,6 +83,14 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.42
+
+- added two player support on Vita TV, second paired Dualshock controller controls the 'other' joystick, only works if port is not set to 'both' 
+- fixed a crash bug when changing audio parameters while sound was playing
+
+1.41
+
+- assembler optimizations enabled by Cpasjuste, emulator is faster now!
 
 1.40
 

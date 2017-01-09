@@ -56,6 +56,20 @@ extern int lAnalogX;
 extern int lAnalogY;
 extern int mainMenu_leftStickMouse;
 extern int mainMenu_deadZone;
+extern int lAnalogXPly2;
+extern int lAnalogYPly2;
+extern int dpadUpPly2;
+extern int dpadDownPly2;
+extern int dpadLeftPly2;
+extern int dpadRightPly2;
+extern int buttonAPly2;
+extern int buttonBPly2;
+extern int buttonXPly2;
+extern int buttonYPly2;
+extern int triggerLPly2;
+extern int triggerRPly2;
+extern int buttonSelectPly2;
+extern int buttonStartPly2;
 #endif
 
 extern char launchDir[300];
@@ -82,6 +96,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
     nr = (~nr)&0x1;
 
+	// are we trying to figure out the regular GP2X controls for the primary (or both) joysticks?
+	int usingRegularControls = (!mainMenu_customControls) && ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1));
+    
     SDL_JoystickUpdate ();
 /* Temporary disabled
 #ifdef ANDROIDSDL
@@ -104,6 +121,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if (mouseScale > (99*16))
 		mouseScale /= 100;
 
+//Digital mouseemu hotkeys: Triangle changes mouse speed etc.
 #if !defined(__PSP2__) && defined(USE_UAE4ALL_VKBD)
 	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL && !triggerR && !gp2xButtonRemappingOn)))
 #else
@@ -161,8 +179,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			newmousecounters=1;
 		}
 	}
-	else if (!triggerR /*R+dpad = arrow keys*/ && !(mainMenu_customControls && !mainMenu_custom_dpad))
+	else if (!triggerR /*R+dpad = arrow keys*/ && !(mainMenu_customControls && mainMenu_custom_dpad==0) && usingRegularControls)
 	{
+//regular direction controls for main Joystick (or both if "both" is set.)
 #if !defined(AROS) && !defined(__PSP2__) 
 		if (dpadRight || SDL_JoystickGetAxis(joy, 0) > 0) right=1;
 		if (dpadLeft || SDL_JoystickGetAxis(joy, 0) < 0) left=1;
@@ -185,7 +204,60 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				top = 1;
 		}
 	}
+		
+// regular button controls without custom remapping 	
+#ifdef USE_UAE4ALL_VKBD
+	if (usingRegularControls && !(gp2xMouseEmuOn) && !(gp2xButtonRemappingOn) && !vkbd_mode)
+#else
+	if (usingRegularControls && !(gp2xMouseEmuOn) && !(gp2xButtonRemappingOn))
+#endif
+	{
+		if (
+			(mainMenu_autofire & switch_autofire & delay>mainMenu_autofireRate) 
+			|| 
+				(
+					(
+						(mainMenu_autofireButton1==GP2X_BUTTON_B && buttonA) 
+						|| 
+						(mainMenu_autofireButton1==GP2X_BUTTON_X && buttonX) 
+						|| 
+						(mainMenu_autofireButton1==GP2X_BUTTON_Y && buttonY)
+					) 
+					& delay>mainMenu_autofireRate
+				)
+			)
+  		{
+  			if(!buttonB)
+  				*button=1;
+  			delay=0;
+  			*button |= (buttonB & 1) << 1;
+  		}
+  		else
+  		{
+#ifdef __PSP2__
+  		*button = ((mainMenu_button1==GP2X_BUTTON_B && buttonA) || (mainMenu_button1==GP2X_BUTTON_X && buttonX) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY)) & 1;
+#else
+#if !(defined(ANDROIDSDL) || defined(AROS))
+   	*button = ((mainMenu_button1==GP2X_BUTTON_B && buttonA) || (mainMenu_button1==GP2X_BUTTON_X && buttonX) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY) || SDL_JoystickGetButton(joy, mainMenu_button1)) & 1;
+#else
+   	*button = ((mainMenu_button1==GP2X_BUTTON_B && buttonA) || (mainMenu_button1==GP2X_BUTTON_X && buttonX) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY)) & 1;
+#endif
+#endif //__PSP2__
+  		delay++;
+#ifdef __PSP2__
+  		*button |= ((buttonB) & 1) << 1;
+#else
+#if defined(PANDORA) && !defined(AROS)
+  		*button |= ((buttonB || SDL_JoystickGetButton(joy, mainMenu_button2)) & 1) << 1;
+#else
+  		*button |= ((buttonB) & 1) << 1;
+#endif
+#endif //__PSP2__
+  		}
+  	}	  
 
+
+//Analog Mouse 
 #ifdef USE_UAE4ALL_VKBD
 	if (!vkbd_mode) {
 #endif
@@ -230,6 +302,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if(mainMenu_customControls)
 #endif
 	{
+		// The main Joystick mapping directions
 		if ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) 
   		{
 			if((mainMenu_custom_A==-5 && buttonA) || (mainMenu_custom_B==-5 && buttonB) || (mainMenu_custom_X==-5 && buttonX) || (mainMenu_custom_Y==-5 && buttonY) || (mainMenu_custom_L==-5 && triggerL) || (mainMenu_custom_R==-5 && triggerR))
@@ -264,6 +337,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					right = 1;
 			}
 		}
+		// The "other" (second) Joystick mapping directions
 		else if ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
   		{
 			if((mainMenu_custom_A==-9 && buttonA) || (mainMenu_custom_B==-9 && buttonB) || (mainMenu_custom_X==-9 && buttonX) || (mainMenu_custom_Y==-9 && buttonY) || (mainMenu_custom_L==-9 && triggerL) || (mainMenu_custom_R==-9 && triggerR))
@@ -302,19 +376,13 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
   if(!gp2xMouseEmuOn && !gp2xButtonRemappingOn)
   {
-  	if(!mainMenu_customControls && ((mainMenu_autofire & switch_autofire & delay>mainMenu_autofireRate) || (((mainMenu_autofireButton1==GP2X_BUTTON_B && buttonA) || (mainMenu_autofireButton1==GP2X_BUTTON_X && buttonX) || (mainMenu_autofireButton1==GP2X_BUTTON_Y && buttonY)) & delay>mainMenu_autofireRate)))
-  	{
-  		if(!buttonB)
-  			*button=1;
-  		delay=0;
-  		*button |= (buttonB & 1) << 1;
-  	}
 #ifdef USE_UAE4ALL_VKBD
-  	else if(mainMenu_customControls && !vkbd_mode)
+  	if(mainMenu_customControls && !vkbd_mode)
 #else
-  	else if(mainMenu_customControls)
+  	if(mainMenu_customControls)
 #endif
   	{
+  		//The main joystick mapping buttons
   		if ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) 
   		{
   			if((mainMenu_custom_A==-3 && buttonA) || (mainMenu_custom_B==-3 && buttonB) || (mainMenu_custom_X==-3 && buttonX) || (mainMenu_custom_Y==-3 && buttonY) || (mainMenu_custom_L==-3 && triggerL) || (mainMenu_custom_R==-3 && triggerR))
@@ -324,7 +392,6 @@ void read_joystick(int nr, unsigned int *dir, int *button)
   				if((mainMenu_custom_up==-3 && dpadUp) || (mainMenu_custom_down==-3 && dpadDown) || (mainMenu_custom_left==-3 && dpadLeft) || (mainMenu_custom_right==-3 && dpadRight))
   					*button = 1;
   			}
-  
   			if((mainMenu_custom_A==-4 && buttonA) || (mainMenu_custom_B==-4 && buttonB) || (mainMenu_custom_X==-4 && buttonX) || (mainMenu_custom_Y==-4 && buttonY) || (mainMenu_custom_L==-4 && triggerL) || (mainMenu_custom_R==-4 && triggerR))
   				*button |= 1 << 1;
   			else if(mainMenu_custom_dpad == 0)
@@ -333,6 +400,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
   					*button |= 1 << 1;
   			}
   		}
+  		//The "other" (second) joystick buttons
   		else if ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
   		{
   			if((mainMenu_custom_A==-1 && buttonA) || (mainMenu_custom_B==-1 && buttonB) || (mainMenu_custom_X==-1 && buttonX) || (mainMenu_custom_Y==-1 && buttonY) || (mainMenu_custom_L==-1 && triggerL) || (mainMenu_custom_R==-1 && triggerR))
@@ -353,22 +421,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
   		}
   		delay++;
   	}
-  	else
-  	{
-#if !(defined(ANDROIDSDL) || defined(AROS))
-   		*button = ((mainMenu_button1==GP2X_BUTTON_B && buttonA) || (mainMenu_button1==GP2X_BUTTON_X && buttonX) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY) || SDL_JoystickGetButton(joy, mainMenu_button1)) & 1;
-#else
-  		*button = ((mainMenu_button1==GP2X_BUTTON_B && buttonA) || (mainMenu_button1==GP2X_BUTTON_X && buttonX) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY)) & 1;
-#endif
-  		delay++;
-#if defined(PANDORA) && !defined(AROS)
-  		*button |= ((buttonB || SDL_JoystickGetButton(joy, mainMenu_button2)) & 1) << 1;
-#else
-  		*button |= ((buttonB) & 1) << 1;
-#endif
-  	}
   }
-
+  	
 #ifdef USE_UAE4ALL_VKBD
 	if (vkbd_mode && nr)
 	{
@@ -476,12 +530,32 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	else
 #endif
 	{
-	// normal joystick movement
-  if (left) top = !top;
-	if (right) bot = !bot;
-	*dir = bot | (right << 1) | (top << 8) | (left << 9);
-    }
+#ifdef __PSP2__
+		// On Vita, map the second player to always using the GP2X mapping, in addition to everything else
+		if((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
+		{
+			if (dpadRightPly2)
+				right = 1;
+			else if (dpadLeftPly2) 
+				left = 1;
+			if (dpadUpPly2)
+				top = 1;
+			else if (dpadDownPly2)
+				bot = 1;
+			if ((mainMenu_button1==GP2X_BUTTON_B && buttonAPly2) || (mainMenu_button1==GP2X_BUTTON_X && buttonXPly2) || (mainMenu_button1==GP2X_BUTTON_Y && buttonYPly2))
+				*button |= 0x01;
+			if (buttonBPly2)
+				*button |= (0x01 << 1);
+		}	
+#endif //__PSP2__
+		// normal joystick movement
+		if (left) top = !top;
+		if (right) bot = !bot;
+		*dir = bot | (right << 1) | (top << 8) | (left << 9);
+	}
 
+#ifndef __PSP2__ 
+//If not on Vita, zero the "other" joystick
   if (!mainMenu_customControls)
   {
   	if(mainMenu_joyPort != 0)
@@ -494,8 +568,12 @@ void read_joystick(int nr, unsigned int *dir, int *button)
     	}
   	}
   }
-#endif
+  
+  
+#endif //__PSP2__
+#endif // MAXAUTOEVENTS
 }
+
 
 void init_joystick(void)
 {

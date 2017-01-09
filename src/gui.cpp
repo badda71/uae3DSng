@@ -118,6 +118,21 @@ int rAnalogXCenter=0;
 int rAnalogYCenter=0;
 int haveJoysticksBeenCentered=0;
 extern int mainMenu_leftStickMouse;
+//Rudimentary second Player support for Vita TV
+int lAnalogXPly2=0;
+int lAnalogYPly2=0;
+int dpadUpPly2=0;
+int dpadDownPly2=0;
+int dpadLeftPly2=0;
+int dpadRightPly2=0;
+int buttonAPly2=0;
+int buttonBPly2=0;
+int buttonXPly2=0;
+int buttonYPly2=0;
+int triggerLPly2=0;
+int triggerRPly2=0;
+int buttonSelectPly2=0;
+int buttonStartPly2=0;
 #endif // __PSP2__
 
 #ifdef USE_UAE4ALL_VKBD
@@ -532,7 +547,7 @@ void gui_handle_events (void)
 	Uint8 *keystate = SDL_GetKeyState(NULL);
 #ifdef __PSP2__
 	SDL_JoystickUpdate();
-	
+// Main Controller	
 	//On Vita, always use either the left of right analog for mouse pointer movement
 	//the other stick replicates the dpad inputs
 	lAnalogX=SDL_JoystickGetAxis(uae4all_joy0, 0);
@@ -578,7 +593,7 @@ void gui_handle_events (void)
 		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
 			|| (lAnalogY > 1024*10) ? 1 : 0;
 	}
-	
+			
 	buttonA = SDL_JoystickGetButton(uae4all_joy0, PAD_SQUARE);
 	buttonB = SDL_JoystickGetButton(uae4all_joy0, PAD_CIRCLE);
 	buttonX = SDL_JoystickGetButton(uae4all_joy0, PAD_CROSS);
@@ -598,6 +613,30 @@ void gui_handle_events (void)
 		rAnalogYCenter=SDL_JoystickGetAxis(uae4all_joy0, 3);
 		goMenu();
 	}
+	
+// Second paired Controller for two players, 
+// only rudimentary mapping for now for two player games
+// with Vita TV.
+	lAnalogXPly2=SDL_JoystickGetAxis(uae4all_joy1, 0);
+	lAnalogYPly2=SDL_JoystickGetAxis(uae4all_joy1, 1);
+
+	dpadRightPly2  = SDL_JoystickGetButton(uae4all_joy1, 9)
+		|| (lAnalogXPly2 > 1024*10) ? 1 : 0;
+	dpadLeftPly2  = SDL_JoystickGetButton(uae4all_joy1, 7)
+		|| (lAnalogXPly2 < -1024*10) ? 1 : 0;
+	dpadUpPly2  = SDL_JoystickGetButton(uae4all_joy1, 8)
+		|| (lAnalogYPly2 < -1024*10) ? 1 : 0;
+	dpadDownPly2  = SDL_JoystickGetButton(uae4all_joy1, 6)
+			|| (lAnalogYPly2 > 1024*10) ? 1 : 0;
+	
+	buttonAPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_SQUARE);
+	buttonBPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_CIRCLE);
+	buttonXPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_CROSS);
+	buttonYPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_TRIANGLE);
+	triggerLPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_L);
+	triggerRPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_R);
+	buttonSelectPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_SELECT);
+	buttonStartPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_START);
 #else
 	dpadUp = keystate[SDLK_UP];
 	dpadDown = keystate[SDLK_DOWN];
