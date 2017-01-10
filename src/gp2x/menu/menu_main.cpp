@@ -57,6 +57,9 @@ extern void update_display(void);
 extern int saveAdfDir(void);
 extern void setCpuSpeed(void);
 extern void show_error(const char *);
+extern void close_joystick();
+extern void init_joystick();
+
 
 extern char launchDir[300];
 extern char currentDir[300];
@@ -442,6 +445,7 @@ void setSystem()
 		kickstart=3;
 		mainMenu_CPU_model=1;
 		mainMenu_chipset=2;
+		mainMenu_chipset|=0x100;//set blitter to "immediate"
 		mainMenu_CPU_speed=1;
 	}
 	else
@@ -452,6 +456,7 @@ void setSystem()
 		kickstart=1;
 		mainMenu_CPU_model=0;
 		mainMenu_chipset=0;
+		mainMenu_chipset|=0x100;//set blitter to "immediate"
 		mainMenu_CPU_speed=0;
 	}
 	UpdateMemorySettings();
@@ -475,6 +480,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hit5=hit6=hitH=hitS=hitQ=hitN1=hitN2=hitN3=hitN4=0;
 		if (event.type == SDL_QUIT)
 		{
 			mainMenu_case=MAIN_MENU_CASE_QUIT;
@@ -840,7 +846,7 @@ int run_mainMenu()
 	SDL_Event event;
 	while (SDL_PollEvent(&event) > 0);
 #endif
-   	
+   
 	while(mainMenu_case<0)
 	{
 		raise_mainMenu();
@@ -1030,7 +1036,13 @@ int run_mainMenu()
 
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
-
+	
+	//See if new joysticks have been paired
+   close_joystick();
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);	
+	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+	init_joystick();
+	
 	update_display();
 	return mainMenu_case;
 }

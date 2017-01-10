@@ -374,6 +374,7 @@ static int key_displayMenu(int *c)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		left=right=up=down=hit0=hit1=hit2=0;
 		if (event.type == SDL_KEYDOWN)
 		{
 			uae4all_play_click();
@@ -392,264 +393,263 @@ static int key_displayMenu(int *c)
 				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 			}
 		}
-	}
-	if (hit2) //Does the user want to cancel the menu completely?
-	{
-		if (emulating)
+		if (hit2) //Does the user want to cancel the menu completely?
 		{
-			end = -1; 
-			quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+			if (emulating)
+			{
+				end = -1; 
+				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+			}
+		}	
+		else if (hit0)
+		{
+			end = -1;
 		}
-	}	
-	else if (hit0)
-	{
-		end = -1;
-	}
-	else if (hit1)
-	{
-		end = -1;
-	}
-	else if (up)
-	{
-		if (menuDisplay==0) menuDisplay = MENUDISPLAY_END - 1;
-		else menuDisplay--;
-	}
-	else if (down)
-	{
-		if (menuDisplay == MENUDISPLAY_END - 1) menuDisplay=0;
-		else menuDisplay++;
-	}
-	switch (menuDisplay)
-	{
-		case MENUDISPLAY_PRESETWIDTH:
-			if (left)
-			{
-				if(presetModeId < 10)
-					SetPresetMode(presetModeId + 50);
-				else
-					SetPresetMode(presetModeId - 10);
-			}
-			if(right)
-			{
-				if(presetModeId > 50)
-					SetPresetMode(presetModeId - 50);
-				else
-					SetPresetMode(presetModeId + 10);
-			}
-			break;
-		case MENUDISPLAY_PRESETHEIGHT:
-			if (left)
-			{
-				switch(presetModeId)
+		else if (hit1)
+		{
+			end = -1;
+		}
+		else if (up)
+		{
+			if (menuDisplay==0) menuDisplay = MENUDISPLAY_END - 1;
+			else menuDisplay--;
+		}
+		else if (down)
+		{
+			if (menuDisplay == MENUDISPLAY_END - 1) menuDisplay=0;
+			else menuDisplay++;
+		}
+		switch (menuDisplay)
+		{
+			case MENUDISPLAY_PRESETWIDTH:
+				if (left)
 				{
-					case 0:
-					case 10:
-					case 20:
-					case 30:
-					case 40:
-					case 50:
-						SetPresetMode(presetModeId + 7);
-						break;
-					default:
-						SetPresetMode(presetModeId - 1);
-				}
-			}
-			else if (right)
-			{
-				switch(presetModeId)
-				{
-					case 7:
-					case 17:
-					case 27:
-					case 37:
-					case 47:
-					case 57:
-						SetPresetMode(presetModeId - 7);
-						break;
-					default:
-						SetPresetMode(presetModeId + 1);
-				}
-			}
-			break;
-		case MENUDISPLAY_DISPLINES:
-			if (left)
-			{
-				if (mainMenu_displayedLines>100)
-					mainMenu_displayedLines--;
-			}
-			else if (right)
-			{
-				if (mainMenu_displayedLines<270)
-					mainMenu_displayedLines++;
-			}
-			break;
-#ifndef __PSP2__
-		case MENUDISPLAY_SCREENWIDTH:
-			if (left)
-			{
-				screenWidth-=10;
-				if (screenWidth<200)
-					screenWidth=200;
-			}
-			else if (right)
-			{
-				screenWidth+=10;
-				if (screenWidth>800)
-					screenWidth=800;
-			}
-			break;
-#endif
-		case MENUDISPLAY_VERTPOS:
-			if (left)
-			{
-				if (moveY>-42)
-					moveY--;
-			}
-			else if (right)
-			{
-				if (moveY<50)
-					moveY++;
-			}
-			break;
-		case MENUDISPLAY_CUTLEFT:
-			if (left)
-			{
-				if (mainMenu_cutLeft>0)
-					mainMenu_cutLeft--;
-			}
-			else if (right)
-			{
-				if (mainMenu_cutLeft<100)
-					mainMenu_cutLeft++;
-			}
-			break;
-		case MENUDISPLAY_CUTRIGHT:
-			if (left)
-			{
-				if (mainMenu_cutRight>0)
-					mainMenu_cutRight--;
-			}
-			else if (right)
-			{
-				if (mainMenu_cutRight<100)
-					mainMenu_cutRight++;
-			}
-			break;
-		case MENUDISPLAY_FRAMESKIP:
-#ifdef PANDORA
-			if ((left)||(right))
-					mainMenu_frameskip = !mainMenu_frameskip;
-#else
-			if (left)
-			{
-				if (mainMenu_frameskip>0)
-					mainMenu_frameskip--;
-				else
-					mainMenu_frameskip=8;
-			}
-			else if (right)
-			{
-				if (mainMenu_frameskip<8)
-					mainMenu_frameskip++;
-				else
-					mainMenu_frameskip=0;
-			}
-#endif
-			break;
-		case MENUDISPLAY_REFRESHRATE:
-			if ((left)||(right))
-					mainMenu_ntsc = !mainMenu_ntsc;
-			break;
-#ifdef __PSP2__ //shader choice on VITA
-				case MENUDISPLAY_SHADER:
-            if (left)
-				{
-					if (mainMenu_shader <= 0)
-						mainMenu_shader = 0;
-					else 
-						mainMenu_shader -= 1;
-				}
-				else if (right)
-				{
-					if (mainMenu_shader >= NUM_SHADERS-1)
-						mainMenu_shader = NUM_SHADERS-1;
+					if(presetModeId < 10)
+						SetPresetMode(presetModeId + 50);
 					else
-						mainMenu_shader +=1;
+						SetPresetMode(presetModeId - 10);
+				}
+				if(right)
+				{
+					if(presetModeId > 50)
+						SetPresetMode(presetModeId - 50);
+					else
+						SetPresetMode(presetModeId + 10);
 				}
 				break;
-#endif			
-			
-		case MENUDISPLAY_SOUND:
+			case MENUDISPLAY_PRESETHEIGHT:
 				if (left)
 				{
-					if (mainMenu_sound == 1)
-						mainMenu_sound = 0;
-					else if (mainMenu_sound == 2)
-						mainMenu_sound = 1;
-					else if (mainMenu_sound == 0)
-						mainMenu_sound = 2;
+					switch(presetModeId)
+					{
+						case 0:
+						case 10:
+						case 20:
+						case 30:
+						case 40:
+						case 50:
+							SetPresetMode(presetModeId + 7);
+							break;
+						default:
+							SetPresetMode(presetModeId - 1);
+					}
 				}
 				else if (right)
 				{
-					if (mainMenu_sound == 2)
-						mainMenu_sound = 0;
-					else if (mainMenu_sound == 0)
-						mainMenu_sound = 1;
-					else if (mainMenu_sound == 1)
-						mainMenu_sound = 2;
+					switch(presetModeId)
+					{
+						case 7:
+						case 17:
+						case 27:
+						case 37:
+						case 47:
+						case 57:
+							SetPresetMode(presetModeId - 7);
+							break;
+						default:
+							SetPresetMode(presetModeId + 1);
+					}
 				}
 				break;
-			case MENUDISPLAY_SNDRATE:
-				if ((left)||(right))
-				{
-					static int rates[] = { 8000, 11025, 22050, 32000, 44100 };
-					int sel;
-					for (sel = 0; sel < sizeof(rates) / sizeof(rates[0]); sel++)
-						if (rates[sel] == sound_rate) break;
-					sel += left ? -1 : 1;
-					if (sel < 0) sel = 4;
-					if (sel > 4) sel = 0;
-					sound_rate = rates[sel];
-				}
-				break;
-      
-			case MENUDISPLAY_STEREO:
+			case MENUDISPLAY_DISPLINES:
 				if (left)
 				{
-					if(mainMenu_soundStereo == 0)
-					{
-						mainMenu_soundStereo=1;
-						mainMenu_soundStereoSep=3;
-					}
-					else if (mainMenu_soundStereoSep > 0)
-						mainMenu_soundStereoSep--;
-					else 
-					{	
-						mainMenu_soundStereo=0;
-						mainMenu_soundStereoSep=3;
-					}
-				}		
-				if (right)
+					if (mainMenu_displayedLines>100)
+						mainMenu_displayedLines--;
+				}
+				else if (right)
 				{
-					if(mainMenu_soundStereo == 0)
-					{
-						mainMenu_soundStereo=1;
-						mainMenu_soundStereoSep=0;
-					}
-					else if (mainMenu_soundStereoSep < 3)
-					{
-						mainMenu_soundStereoSep++;
-					}
-					else 
-					{	
-						mainMenu_soundStereo=0;
-						mainMenu_soundStereoSep=3;
-					}
-				}		
-				
+					if (mainMenu_displayedLines<270)
+						mainMenu_displayedLines++;
+				}
 				break;
+	#ifndef __PSP2__
+			case MENUDISPLAY_SCREENWIDTH:
+				if (left)
+				{
+					screenWidth-=10;
+					if (screenWidth<200)
+						screenWidth=200;
+				}
+				else if (right)
+				{
+					screenWidth+=10;
+					if (screenWidth>800)
+						screenWidth=800;
+				}
+				break;
+	#endif
+			case MENUDISPLAY_VERTPOS:
+				if (left)
+				{
+					if (moveY>-42)
+						moveY--;
+				}
+				else if (right)
+				{
+					if (moveY<50)
+						moveY++;
+				}
+				break;
+			case MENUDISPLAY_CUTLEFT:
+				if (left)
+				{
+					if (mainMenu_cutLeft>0)
+						mainMenu_cutLeft--;
+				}
+				else if (right)
+				{
+					if (mainMenu_cutLeft<100)
+						mainMenu_cutLeft++;
+				}
+				break;
+			case MENUDISPLAY_CUTRIGHT:
+				if (left)
+				{
+					if (mainMenu_cutRight>0)
+						mainMenu_cutRight--;
+				}
+				else if (right)
+				{
+					if (mainMenu_cutRight<100)
+						mainMenu_cutRight++;
+				}
+				break;
+			case MENUDISPLAY_FRAMESKIP:
+	#ifdef PANDORA
+				if ((left)||(right))
+						mainMenu_frameskip = !mainMenu_frameskip;
+	#else
+				if (left)
+				{
+					if (mainMenu_frameskip>0)
+						mainMenu_frameskip--;
+					else
+						mainMenu_frameskip=8;
+				}
+				else if (right)
+				{
+					if (mainMenu_frameskip<8)
+						mainMenu_frameskip++;
+					else
+						mainMenu_frameskip=0;
+				}
+	#endif
+				break;
+			case MENUDISPLAY_REFRESHRATE:
+				if ((left)||(right))
+						mainMenu_ntsc = !mainMenu_ntsc;
+				break;
+	#ifdef __PSP2__ //shader choice on VITA
+					case MENUDISPLAY_SHADER:
+					if (left)
+					{
+						if (mainMenu_shader <= 0)
+							mainMenu_shader = 0;
+						else 
+							mainMenu_shader -= 1;
+					}
+					else if (right)
+					{
+						if (mainMenu_shader >= NUM_SHADERS-1)
+							mainMenu_shader = NUM_SHADERS-1;
+						else
+							mainMenu_shader +=1;
+					}
+					break;
+	#endif			
+			
+			case MENUDISPLAY_SOUND:
+					if (left)
+					{
+						if (mainMenu_sound == 1)
+							mainMenu_sound = 0;
+						else if (mainMenu_sound == 2)
+							mainMenu_sound = 1;
+						else if (mainMenu_sound == 0)
+							mainMenu_sound = 2;
+					}
+					else if (right)
+					{
+						if (mainMenu_sound == 2)
+							mainMenu_sound = 0;
+						else if (mainMenu_sound == 0)
+							mainMenu_sound = 1;
+						else if (mainMenu_sound == 1)
+							mainMenu_sound = 2;
+					}
+					break;
+				case MENUDISPLAY_SNDRATE:
+					if ((left)||(right))
+					{
+						static int rates[] = { 8000, 11025, 22050, 32000, 44100 };
+						int sel;
+						for (sel = 0; sel < sizeof(rates) / sizeof(rates[0]); sel++)
+							if (rates[sel] == sound_rate) break;
+						sel += left ? -1 : 1;
+						if (sel < 0) sel = 4;
+						if (sel > 4) sel = 0;
+						sound_rate = rates[sel];
+					}
+					break;
+		
+				case MENUDISPLAY_STEREO:
+					if (left)
+					{
+						if(mainMenu_soundStereo == 0)
+						{
+							mainMenu_soundStereo=1;
+							mainMenu_soundStereoSep=3;
+						}
+						else if (mainMenu_soundStereoSep > 0)
+							mainMenu_soundStereoSep--;
+						else 
+						{	
+							mainMenu_soundStereo=0;
+							mainMenu_soundStereoSep=3;
+						}
+					}		
+					if (right)
+					{
+						if(mainMenu_soundStereo == 0)
+						{
+							mainMenu_soundStereo=1;
+							mainMenu_soundStereoSep=0;
+						}
+						else if (mainMenu_soundStereoSep < 3)
+						{
+							mainMenu_soundStereoSep++;
+						}
+						else 
+						{	
+							mainMenu_soundStereo=0;
+							mainMenu_soundStereoSep=3;
+						}
+					}		
+				
+					break;
+		}
 	}
-
 	return end;
 }
 

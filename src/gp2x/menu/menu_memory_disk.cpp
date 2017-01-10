@@ -339,14 +339,13 @@ static void draw_memDiskMenu(int c)
 static int key_memDiskMenu(int *c)
 {
 	int end=0;
-	int left=0, right=0, up=0, down=0;
-	int hit0=0, hit1=0, hit2=0;
-	int del=0;
+	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0, del=0;
 
 	SDL_Event event;
 	
 	while (SDL_PollEvent(&event) > 0)
 	{
+		left=right=up=down=hit0=hit1=hit2=del=0;
 		if (event.type == SDL_QUIT)
 			end=-1;
 		else if (event.type == SDL_KEYDOWN)
@@ -373,179 +372,185 @@ static int key_memDiskMenu(int *c)
 					break;
 			}
 		}
-	}
-	if (hit2) //Does the user want to cancel the menu completely?
-	{
-		if (emulating)
+	
+		if (hit2) //Does the user want to cancel the menu completely?
 		{
-			end = -1; 
-			quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+			if (emulating)
+			{
+				end = -1; 
+				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+			}
+		}	
+		else if (hit1)
+		{
+			end=-1;
 		}
-	}	
-	else if (hit1)
-	{
-		end=-1;
-	}
-	else if (up)
-	{
-		if (menuMemDisk==MENUDISK_RETURNMAIN) menuMemDisk=MENUDISK_END - 1;
-		else if (menuMemDisk==MENUDISK_HDFILE && current_hdf>0) 
-				current_hdf--;
-		else
-			menuMemDisk--;
-	}
-	else if (down)
-	{
-		if (menuMemDisk==MENUDISK_END - 1) menuMemDisk=MENUDISK_RETURNMAIN;
-		else if (menuMemDisk==MENUDISK_HDFILE && current_hdf<3) 
-				current_hdf++;
-		else
-			menuMemDisk++;	
-	}
+		else if (up)
+		{
+			if (menuMemDisk==MENUDISK_RETURNMAIN) menuMemDisk=MENUDISK_END - 1;
+			else if (menuMemDisk==MENUDISK_HDFILE && current_hdf>0) 
+					current_hdf--;
+			else if (menuMemDisk==MENUDISK_SAVEHDCONF)
+			{
+					current_hdf=3;
+					menuMemDisk=MENUDISK_HDFILE;
+			}
+			else
+				menuMemDisk--;
+		}
+		else if (down)
+		{
+			if (menuMemDisk==MENUDISK_END - 1) menuMemDisk=MENUDISK_RETURNMAIN;
+			else if (menuMemDisk==MENUDISK_HDFILE && current_hdf<3) 
+					current_hdf++;
+			else
+				menuMemDisk++;	
+		}
 
-	switch (menuMemDisk)
-	{
-		case MENUDISK_RETURNMAIN:
-			if (hit0)
-				end = 1;
-			break;
-		case MENUDISK_CHIPMEM:
-			if (hit0)
-				end = 1;
-			if ((left)||(right)) {
-				if (right) {
-					if (mainMenu_chipMemory < 4)
-						mainMenu_chipMemory++;
-					else
-						mainMenu_chipMemory = 0;
-				} else if (left) {
-					if (mainMenu_chipMemory > 0)
-						mainMenu_chipMemory--;
-					else
-						mainMenu_chipMemory = 4;
+		switch (menuMemDisk)
+		{
+			case MENUDISK_RETURNMAIN:
+				if (hit0)
+					end = 1;
+				break;
+			case MENUDISK_CHIPMEM:
+				if (hit0)
+					end = 1;
+				if ((left)||(right)) {
+					if (right) {
+						if (mainMenu_chipMemory < 4)
+							mainMenu_chipMemory++;
+						else
+							mainMenu_chipMemory = 0;
+					} else if (left) {
+						if (mainMenu_chipMemory > 0)
+							mainMenu_chipMemory--;
+						else
+							mainMenu_chipMemory = 4;
+					}
+					UpdateMemorySettings();
 				}
-				UpdateMemorySettings();
-			}
-			break;
-		case MENUDISK_SLOWMEM:
-			if (hit0)
-				end = 1;
-			if ((left)||(right)) {
-				if (right) {
-					if (mainMenu_slowMemory < 3)
-						mainMenu_slowMemory++;
-					else
-						mainMenu_slowMemory = 0;
-				} else if (left) {
-					if (mainMenu_slowMemory > 0)
-						mainMenu_slowMemory--;
-					else
-						mainMenu_slowMemory = 3;
+				break;
+			case MENUDISK_SLOWMEM:
+				if (hit0)
+					end = 1;
+				if ((left)||(right)) {
+					if (right) {
+						if (mainMenu_slowMemory < 3)
+							mainMenu_slowMemory++;
+						else
+							mainMenu_slowMemory = 0;
+					} else if (left) {
+						if (mainMenu_slowMemory > 0)
+							mainMenu_slowMemory--;
+						else
+							mainMenu_slowMemory = 3;
+					}
+					UpdateMemorySettings();
 				}
-				UpdateMemorySettings();
-			}
-			break;
-		case MENUDISK_FASTMEM:
-			if (hit0)
-				end = 1;
-			if ((left) || (right)) {
-				if (right) {
-					if (mainMenu_fastMemory < 4)
-						mainMenu_fastMemory++;
-					else
-						mainMenu_fastMemory = 0;
-				} else if (left) {
-					if (mainMenu_fastMemory > 0)
-						mainMenu_fastMemory--;
-					else
-						mainMenu_fastMemory = 4;
-				}
+				break;
+			case MENUDISK_FASTMEM:
+				if (hit0)
+					end = 1;
+				if ((left) || (right)) {
+					if (right) {
+						if (mainMenu_fastMemory < 4)
+							mainMenu_fastMemory++;
+						else
+							mainMenu_fastMemory = 0;
+					} else if (left) {
+						if (mainMenu_fastMemory > 0)
+							mainMenu_fastMemory--;
+						else
+							mainMenu_fastMemory = 4;
+					}
 				
-				/* Fast memory > 0 => max 2MB chip memory */
-				if ((mainMenu_fastMemory > 0) && (mainMenu_chipMemory > 2))
-					mainMenu_chipMemory = 2;
-				UpdateMemorySettings();
-			}
-			break;
-		case MENUDISK_BOOTHD:
-			if (hit0)
-				end = 1;
-			if (left) {
-				if (mainMenu_bootHD > 0)
-					mainMenu_bootHD--;
-				else
-					mainMenu_bootHD = 2;
-				reset_hdConf();
-			} else if (right) {
-				if (mainMenu_bootHD < 2)
-					mainMenu_bootHD++;
-				else
-					mainMenu_bootHD = 0;
-				reset_hdConf();
-			}
-			break;
-		case MENUDISK_HDDIR:
-			if (hit0) {
-				if (run_menuLoad(currentDir, MENU_LOAD_HD_DIR)) {
-					make_hard_dir_cfg_line(uae4all_hard_dir);
-					reset_hdConf();
-					loadconfig(2);
+					/* Fast memory > 0 => max 2MB chip memory */
+					if ((mainMenu_fastMemory > 0) && (mainMenu_chipMemory > 2))
+						mainMenu_chipMemory = 2;
+					UpdateMemorySettings();
 				}
-			} else if (del) {
-				uae4all_hard_dir[0] = '\0';
-				reset_hdConf();
-			}
-			break;
-		case MENUDISK_HDFILE:
-			if (hit0) {
-				if (run_menuLoad(currentDir, MENU_LOAD_HDF)) {
+				break;
+			case MENUDISK_BOOTHD:
+				if (hit0)
+					end = 1;
+				if (left) {
+					if (mainMenu_bootHD > 0)
+						mainMenu_bootHD--;
+					else
+						mainMenu_bootHD = 2;
+					reset_hdConf();
+				} else if (right) {
+					if (mainMenu_bootHD < 2)
+						mainMenu_bootHD++;
+					else
+						mainMenu_bootHD = 0;
+					reset_hdConf();
+				}
+				break;
+			case MENUDISK_HDDIR:
+				if (hit0) {
+					if (run_menuLoad(currentDir, MENU_LOAD_HD_DIR)) {
+						make_hard_dir_cfg_line(uae4all_hard_dir);
+						reset_hdConf();
+						loadconfig(2);
+					}
+				} else if (del) {
+					uae4all_hard_dir[0] = '\0';
+					reset_hdConf();
+				}
+				break;
+			case MENUDISK_HDFILE:
+				if (hit0) {
+					if (run_menuLoad(currentDir, MENU_LOAD_HDF)) {
+						if (current_hdf==0)
+							make_hard_file_cfg_line(uae4all_hard_file0);
+						else if (current_hdf==1)
+							make_hard_file_cfg_line(uae4all_hard_file1);
+						else if (current_hdf==2)
+							make_hard_file_cfg_line(uae4all_hard_file2);
+						else if (current_hdf==3)
+							make_hard_file_cfg_line(uae4all_hard_file3);
+						reset_hdConf();
+						loadconfig(2);
+					}
+				} else if (del) {
 					if (current_hdf==0)
-						make_hard_file_cfg_line(uae4all_hard_file0);
+						uae4all_hard_file0[0] = '\0';
 					else if (current_hdf==1)
-						make_hard_file_cfg_line(uae4all_hard_file1);
+						uae4all_hard_file1[0] = '\0';
 					else if (current_hdf==2)
-						make_hard_file_cfg_line(uae4all_hard_file2);
+						uae4all_hard_file2[0] = '\0';
 					else if (current_hdf==3)
-						make_hard_file_cfg_line(uae4all_hard_file3);
+						uae4all_hard_file3[0] = '\0';
 					reset_hdConf();
-					loadconfig(2);
 				}
-			} else if (del) {
-				if (current_hdf==0)
-					uae4all_hard_file0[0] = '\0';
-				else if (current_hdf==1)
-					uae4all_hard_file1[0] = '\0';
-				else if (current_hdf==2)
-					uae4all_hard_file2[0] = '\0';
-				else if (current_hdf==3)
-					uae4all_hard_file3[0] = '\0';
-				reset_hdConf();
-			}
-			break;
-		case MENUDISK_SAVEHDCONF:
-			if (hit0)
-			{
-				if (saveconfig(2))
-					showWarning("Config saved for current HD");
-			}
-			break;
-		case MENUDISK_FLOPPYSPEED:
-			if (hit0)
-				end = 1;
-			if (left)
-			{
-				if (mainMenu_floppyspeed>100)
-					mainMenu_floppyspeed/=2;
-				else
-					mainMenu_floppyspeed=800;
-			}
-			else if (right)
-			{
-				if (mainMenu_floppyspeed<800)
-					mainMenu_floppyspeed*=2;
-				else
-					mainMenu_floppyspeed=100;
-			}
+				break;
+			case MENUDISK_SAVEHDCONF:
+				if (hit0)
+				{
+					if (saveconfig(2))
+						showWarning("Config saved for current HD");
+				}
+				break;
+			case MENUDISK_FLOPPYSPEED:
+				if (hit0)
+					end = 1;
+				if (left)
+				{
+					if (mainMenu_floppyspeed>100)
+						mainMenu_floppyspeed/=2;
+					else
+						mainMenu_floppyspeed=800;
+				}
+				else if (right)
+				{
+					if (mainMenu_floppyspeed<800)
+						mainMenu_floppyspeed*=2;
+					else
+						mainMenu_floppyspeed=100;
+				}
+		}
 	}
 	
 	*c = menuMemDisk;
