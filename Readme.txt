@@ -39,15 +39,19 @@ NOTES:
 
 - Bios: Please put kickstart files in "ux0:/data/uae4all/kickstarts" directory. Files must be named as kick13.rom, kick20.rom, kick31.rom
 
-- Speed: Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are also fixed by this.
+- Speed: Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are fixed by this.
 
 - Config File: If you have problems with settings not saving etc, please delete or rename your config file in the folder "ux0:/data/uae4all" and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
-
-- Blitter: The Blitter settings can help with graphics glitches in some games. For example, Rick Dangerous graphics are fixed by setting Blitter to "immediate" instead of the default "normal," and rebooting the game.
 
 - Display: The sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
 Many Amiga games fit the Vita screen very nicely. I urge everyone to try Chaos Engine with a screen setting of 320*200 and the sharp_bilinear_simple shader. The picture almost fills the whole screen and is very pretty with no artifacts or blurriness. The picture can be moved using R+Start+Dpad to center it on the Vita screen. It runs smooth with zero frameskip.
 Selecting a 'Preset Width' of 320, 352 or 384 (max overscan) results in lo-res screen emulation, good for most games, while 640, 704, or 768 results in hi-res screen emulation, good for use with Workbench or some text-based games.
+
+- Blitter: The Blitter settings can help with graphics glitches in some games. For example, Rick Dangerous graphics are fixed by setting Blitter to "immediate" instead of "normal," and rebooting the game. Since it works much better, "immediate" is now the default.
+
+- Sprite Collisions: Some games require sprite-to-sprite collisions. They can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
+
+- Multiplayer: Up to four controllers on Vita TV are supported and can be fully mapped. The mouse can be switched off because it interferes with the other joystick that controls player 2 in most games. If you pair new controllers and they do not seem to work, scan for them in the "custom controls" menu by pressing L. At the bottom it will say how many controllers have been found.
 
 - Sound: For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results.
 
@@ -83,6 +87,15 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+
+1.43
+
+- full support for up to 4 controllers on Vita TV that can be fully mapped individually
+- filelists (adf, hdf, etc) are now sorted alphabetically with directories at the top
+- added option to turn off mouse emulation because it often interferes with second player (port 0 joystick) when playing multiplayer on the Vita TV
+- added option to turn on sprite-sprite collisions, useful for Spacetaxi 3
+- changed blitter default to "immediate" it seems to be more compatible
+
 1.42
 
 - added two player support on Vita TV, second paired Dualshock controller controls the 'other' joystick, only works if port is not set to 'both' 
