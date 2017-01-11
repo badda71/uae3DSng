@@ -55,7 +55,13 @@ Selecting a 'Preset Width' of 320, 352 or 384 (max overscan) results in lo-res s
 
 - Sound: For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results.
 
-VITA CONTROLS:
+- Building from Source: The dependencies are 
+VitaSDK: http://vitasdk.org (toolchain and Vita system headers etc.)
+SDL_ttf: https://github.com/Cpasjuste/SDL_ttf
+SDL-Vita: https://github.com/Cpasjuste/SDL-Vita#SDL12
+SDL-Image: https://github.com/Cpasjuste/SDL_image-1.2.12
+Vita2d: https://github.com/Cpasjuste/vita2dlib#fbo
+Install VitaSDK. Clone all the above repositories and install their libraries using "make -f Makefile.psp2 install" for each one. Cd into a separate build directory outside uae4all2 tree. Type "ccmake <uae4all2 dir>". Then press c (configure). In the release type form field, type "Release" and enter. Then press c then g. Then type "make uae4all2.vpk".
 
 Select = Toggle menu
 Start = Toggle virtual keyboard
