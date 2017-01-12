@@ -253,6 +253,10 @@ int gui_init (void)
 			sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
 #endif
 
+#ifdef USE_UAE4ALL_VKBD
+		vkbd_init();
+#endif
+
 #ifdef USE_GUICHAN
 		if (!uae4all_image_file0[0])
 			run_mainMenuGuichan();
@@ -261,9 +265,6 @@ int gui_init (void)
 		if (!uae4all_image_file0[0])
 			run_mainMenu();
 		quit_text();
-#endif
-#ifdef USE_UAE4ALL_VKBD
-		vkbd_init();
 #endif
 		inputmode_init();
 		uae4all_pause_music();

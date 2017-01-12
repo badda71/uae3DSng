@@ -839,6 +839,7 @@ int run_mainMenu()
 	int end;
 	int old_sound_rate = sound_rate;
 	int old_stereo = mainMenu_soundStereo;
+	int old_vkbdLanguage = mainMenu_vkbdLanguage;
 	mainMenu_case=-1;
 	init_text(0);
 	
@@ -1037,6 +1038,14 @@ int run_mainMenu()
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
 	
+#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+	if (mainMenu_vkbdLanguage != old_vkbdLanguage)
+	{
+		vkbd_quit();
+		vkbd_init();
+	}
+#endif
+
 	//See if new joysticks have been paired
    close_joystick();
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);	

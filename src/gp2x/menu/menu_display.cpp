@@ -64,6 +64,9 @@ enum {
 #ifdef __PSP2__
 	MENUDISPLAY_SHADER,
 #endif
+#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+	MENUDISPLAY_VKBDLANGUAGE,
+#endif
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
 	MENUDISPLAY_STEREO,
@@ -135,7 +138,7 @@ static void draw_displayMenu(int c)
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
-	menuLine+=2;
+	menuLine++;
 	write_text(leftMargin,menuLine,"Custom Settings");
 	menuLine++;
 	write_text(leftMargin,menuLine,"---------------");
@@ -283,7 +286,25 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop3-2,menuLine,value);
 #endif
+#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+	// MENUDISPLAY_VKBDLANGUAGE
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Keyboard");
+	if ((mainMenu_vkbdLanguage==0)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
+		write_text_inv(tabstop1,menuLine,"US");
+	else
+		write_text(tabstop1,menuLine,"US");
 
+	if ((mainMenu_vkbdLanguage==1)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
+		write_text_inv(tabstop3,menuLine,"UK");
+	else
+		write_text(tabstop3,menuLine,"UK");
+
+	if ((mainMenu_vkbdLanguage==2)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
+		write_text_inv(tabstop5,menuLine,"GERMAN");
+	else
+		write_text(tabstop5,menuLine,"GERMAN");
+#endif
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
 	menuLine++;
@@ -483,7 +504,7 @@ static int key_displayMenu(int *c)
 						mainMenu_displayedLines++;
 				}
 				break;
-	#ifndef __PSP2__
+#ifndef __PSP2__
 			case MENUDISPLAY_SCREENWIDTH:
 				if (left)
 				{
@@ -498,7 +519,7 @@ static int key_displayMenu(int *c)
 						screenWidth=800;
 				}
 				break;
-	#endif
+#endif
 			case MENUDISPLAY_VERTPOS:
 				if (left)
 				{
@@ -536,10 +557,10 @@ static int key_displayMenu(int *c)
 				}
 				break;
 			case MENUDISPLAY_FRAMESKIP:
-	#ifdef PANDORA
+#ifdef PANDORA
 				if ((left)||(right))
 						mainMenu_frameskip = !mainMenu_frameskip;
-	#else
+#else
 				if (left)
 				{
 					if (mainMenu_frameskip>0)
@@ -554,31 +575,48 @@ static int key_displayMenu(int *c)
 					else
 						mainMenu_frameskip=0;
 				}
-	#endif
+#endif
 				break;
 			case MENUDISPLAY_REFRESHRATE:
 				if ((left)||(right))
 						mainMenu_ntsc = !mainMenu_ntsc;
 				break;
-	#ifdef __PSP2__ //shader choice on VITA
-					case MENUDISPLAY_SHADER:
-					if (left)
-					{
-						if (mainMenu_shader <= 0)
-							mainMenu_shader = 0;
-						else 
-							mainMenu_shader -= 1;
-					}
-					else if (right)
-					{
-						if (mainMenu_shader >= NUM_SHADERS-1)
-							mainMenu_shader = NUM_SHADERS-1;
-						else
-							mainMenu_shader +=1;
-					}
-					break;
-	#endif			
-			
+#ifdef __PSP2__ //shader choice on VITA
+			case MENUDISPLAY_SHADER:
+				if (left)
+				{
+					if (mainMenu_shader <= 0)
+						mainMenu_shader = 0;
+					else 
+						mainMenu_shader -= 1;
+				}
+				else if (right)
+				{
+					if (mainMenu_shader >= NUM_SHADERS-1)
+						mainMenu_shader = NUM_SHADERS-1;
+					else
+						mainMenu_shader +=1;
+				}
+				break;
+#endif
+#ifdef LARGEKEYBOARD
+			case MENUDISPLAY_VKBDLANGUAGE:
+				if (left)
+				{
+					if (mainMenu_vkbdLanguage <= 0)
+						mainMenu_vkbdLanguage = 0;
+					else 
+						mainMenu_vkbdLanguage -= 1;
+				}
+				else if (right)
+				{
+					if (mainMenu_vkbdLanguage >= 2)
+						mainMenu_vkbdLanguage = 2;
+					else
+						mainMenu_vkbdLanguage +=1;
+				}
+				break;
+#endif
 			case MENUDISPLAY_SOUND:
 					if (left)
 					{

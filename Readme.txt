@@ -93,6 +93,10 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.44
+
+- improved contrast of virtual keyboard overlays, thanks to ScHlAuChi for new images
+- added option to choose between US, UK and German virtual keyboard overlays, thank to ScHlAuChi for updated images
 
 1.43
 
