@@ -28,8 +28,6 @@
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
-static const char *text_str_status_line="Status ln";
-
 const char *text_str_misc_separator="----------------------------------";
 static const char *text_str_misc_title=    "            Miscellanous         -";
 static const char *text_str_stylus_offset="StylusOffset";
@@ -58,24 +56,28 @@ enum {
 	MENUMISC_RETURNMAIN = 0,
 	MENUMISC_CPU,
 	MENUMISC_CHIPSET,
-	MENUMISC_BLITTER,
 	MENUMISC_KICKSTART,
 	MENUMISC_CPUSPEED,
+	MENUMISC_BLITTER,
+	MENUMISC_SPRITECOLLISIONS,
 #ifndef __PSP2__
 #ifdef PANDORA
 	MENUMISC_PANDORASPEED,
 #endif
 #endif // __PSP2__
-#ifdef __PSP2__
-	MENUMISC_LEFTSTICKMOUSE,
-#endif
 #ifdef ANDROIDSDL
 	MENUMISC_ONSCREEN,
 #endif
 	MENUMISC_CONTROLCFG,
 	MENUMISC_JOYSTICK,
-	MENUMISC_AUTOFIRE,
-	MENUMISC_STATUSLINE,
+	MENUMISC_AUTOFIRERATE,
+#ifdef __PSP2__
+	MENUMISC_CUSTOMAUTOFIREBUTTON,
+#endif
+#ifdef __PSP2__
+	MENUMISC_MOUSEEMULATION,
+	MENUMISC_LEFTSTICKMOUSE,
+#endif
 	MENUMISC_MOUSEMULTIPLIER,
 #ifndef __PSP2__ // No stylus on Vita
 	MENUMISC_STYLUSOFFSET,
@@ -107,6 +109,7 @@ static void draw_miscMenu(int c)
 	SDL_Rect r;
 	extern SDL_Surface *text_screen;
 	char cpuSpeed[8];
+	char tmpString[16];
 	
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
@@ -153,26 +156,7 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop5,menuLine,"AGA");
 	else
 		write_text(tabstop5,menuLine,"AGA");
-		
-	// MENUMISC_BLITTER
-	menuLine+=2;
-	write_text(leftMargin,menuLine,"Blitter");
-	
-	if (((mainMenu_chipset & 0xff00)!=0x100 && (mainMenu_chipset & 0xff00)!=0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
-		write_text_inv(tabstop1,menuLine,"Normal");
-	else
-		write_text(tabstop1,menuLine,"Normal");
-
-	if (((mainMenu_chipset & 0xff00)==0x100)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
-		write_text_inv(tabstop5-2,menuLine,"Immediate");
-	else
-		write_text(tabstop5-2,menuLine,"Immediate");
-
-	if (((mainMenu_chipset & 0xff00)==0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
-		write_text_inv(tabstop9,menuLine,"Improved");
-	else
-		write_text(tabstop9,menuLine,"Improved");
-		
+				
 	// MENUMISC_KICKSTART
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Kickstart");
@@ -214,6 +198,38 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop8,menuLine,"28MHz");
 
+	// MENUMISC_BLITTER
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Blitter");
+	
+	if (((mainMenu_chipset & 0xff00)!=0x100 && (mainMenu_chipset & 0xff00)!=0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
+		write_text_inv(tabstop1,menuLine,"Normal");
+	else
+		write_text(tabstop1,menuLine,"Normal");
+
+	if (((mainMenu_chipset & 0xff00)==0x100)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
+		write_text_inv(tabstop5-2,menuLine,"Immediate");
+	else
+		write_text(tabstop5-2,menuLine,"Immediate");
+
+	if (((mainMenu_chipset & 0xff00)==0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
+		write_text_inv(tabstop9,menuLine,"Improved");
+	else
+		write_text(tabstop9,menuLine,"Improved");
+
+	// MENUMISC_SPRITECOLLISIONS
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Sprite Collisions");
+	if ((mainMenu_spriteCollisions==0)&&((menuMisc!=MENUMISC_SPRITECOLLISIONS)||(bb)))
+	  write_text_inv(tabstop4,menuLine,"Off");
+	else
+	  write_text(tabstop4,menuLine,"Off");
+	
+	if ((mainMenu_spriteCollisions==1)&&((menuMisc!=MENUMISC_SPRITECOLLISIONS)||(bb)))
+	  write_text_inv(tabstop6,menuLine,"On");
+	else
+	  write_text(tabstop6,menuLine,"On");
+
 #ifndef __PSP2__
 #ifdef PANDORA
   // MENUMISC_PANDORASPEED
@@ -227,25 +243,6 @@ static void draw_miscMenu(int c)
 	write_text(tabstop6-1,menuLine,"MHz");
 #endif
 #endif // __PSP2__
-#ifdef __PSP2__
-  // MENUMISC_LEFTSTICKMOUSE
-	menuLine+=2;
-	write_text(leftMargin,menuLine,"Mouse Control:");	
-	if (mainMenu_leftStickMouse==0)
-	{
-		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
-			write_text_inv(tabstop4-1,menuLine,"Right Stick");
-		else
-			write_text(tabstop4-1,menuLine,"Right Stick  ");
-	}
-	else if (mainMenu_leftStickMouse==1) 
-	{
-		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
-			write_text_inv(tabstop4-1,menuLine,"Left Stick");
-		else
-			write_text(tabstop4-1,menuLine,"Left Stick  ");
-	}
-#endif
 
 #ifdef ANDROIDSDL
   // MENUMISC_ONSCREEN
@@ -320,42 +317,98 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop9-1,menuLine,"Both");
   
-	// MENUMISC_AUTOFIRE
+	// MENUMISC_AUTOFIRERATE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Autofire Rate");
 
-	if ((mainMenu_autofireRate==12)&&((menuMisc!=MENUMISC_AUTOFIRE)||(bb)))
+	if ((mainMenu_autofireRate==8)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
 		write_text_inv(tabstop3-2,menuLine,"Light");
 	else
 		write_text(tabstop3-2,menuLine,"Light");
 
-	if ((mainMenu_autofireRate==8)&&((menuMisc!=MENUMISC_AUTOFIRE)||(bb)))
+	if ((mainMenu_autofireRate==4)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
 		write_text_inv(tabstop6-2,menuLine,"Medium");
 	else
 		write_text(tabstop6-2,menuLine,"Medium");
 
-	if ((mainMenu_autofireRate==4)&&((menuMisc!=MENUMISC_AUTOFIRE)||(bb)))
+	if ((mainMenu_autofireRate==2)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
 		write_text_inv(tabstop9-1,menuLine,"Heavy");
 	else
 		write_text(tabstop9-1,menuLine,"Heavy");
 
-	// MENUMISC_STATUSLINE
+#ifdef __PSP2__
+	// MENUMISC_CUSTOMAUTOFIREBUTTON
 	menuLine+=2;
-	write_text(leftMargin, menuLine,text_str_status_line);
-	if ((!mainMenu_showStatus)&&((menuMisc!=MENUMISC_STATUSLINE)||(bb)))
-		write_text_inv(tabstop1,menuLine, "Off");
+	write_text(leftMargin,menuLine,"Custom Autofire Button");
+
+	switch (mainMenu_customAutofireButton)
+	{
+		case 0:
+			strcpy(tmpString,"None");
+			break;
+		case 1:
+			strcpy(tmpString,"Square");
+			break;
+		case 2:
+			strcpy(tmpString,"Triangle");
+			break;
+		case 3:
+			strcpy(tmpString,"Circle");
+			break;
+		case 4:
+			strcpy(tmpString,"Cross");
+			break;
+		case 5:
+			strcpy(tmpString,"L");
+			break;
+		case 6:
+			strcpy(tmpString,"R");
+			break;
+	}
+	if ((menuMisc!=MENUMISC_CUSTOMAUTOFIREBUTTON)||(bb))
+		write_text_inv(tabstop6,menuLine,tmpString);
 	else
-		write_text(tabstop1, menuLine, "Off");
-	if ((mainMenu_showStatus)&&((menuMisc!=MENUMISC_STATUSLINE)||(bb)))
-		write_text_inv(tabstop3, menuLine,"On");
-	else
-		write_text(tabstop3, menuLine,"On");
+		write_text(tabstop6,menuLine,tmpString);
+#endif
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_misc_separator);
 	menuLine++;
 
+#ifdef __PSP2__
+	// MENUMISC_MOUSEEMULATION
+	write_text(leftMargin,menuLine,"Mouse");	
+	if ((mainMenu_mouseEmulation==0) && ((menuMisc!=MENUMISC_MOUSEEMULATION)||(bb)))
+		write_text_inv(tabstop1-8,menuLine,"Off");
+	else
+		write_text(tabstop1-8,menuLine,"Off");
+	if ((mainMenu_mouseEmulation==1) && ((menuMisc!=MENUMISC_MOUSEEMULATION)||(bb)))
+		write_text_inv(tabstop3-8,menuLine,"On");
+	else
+		write_text(tabstop3-8,menuLine,"On");	
+	write_text(tabstop3-5,menuLine,"(can disturb 2nd player)");
+
+  	// MENUMISC_LEFTSTICKMOUSE
+  	menuLine+=2;
+	write_text(leftMargin,menuLine,"Mouse Control");	
+	if (mainMenu_leftStickMouse==0)
+	{
+		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
+			write_text_inv(tabstop4-1,menuLine,"Right Stick");
+		else
+			write_text(tabstop4-1,menuLine,"Right Stick  ");
+	}
+	else if (mainMenu_leftStickMouse==1) 
+	{
+		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
+			write_text_inv(tabstop4-1,menuLine,"Left Stick");
+		else
+			write_text(tabstop4-1,menuLine,"Left Stick  ");
+	}
+#endif
+
 	// MENUMISC_MOUSEMULTIPLIER
+	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_mouse_multiplier);
 
 	if ((mainMenu_mouseMultiplier==25)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
@@ -422,6 +475,7 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop3-2,menuLine,cpuSpeed);
 	else
 		write_text(tabstop3-2,menuLine,cpuSpeed);
+	
 #else
 	// MENUMISC_TAPDELAY
 	menuLine+=2;
@@ -442,9 +496,6 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop9,menuLine,text_str_none);
 #endif
-	menuLine++;
-	write_text(leftMargin,menuLine,text_str_misc_separator);
-	menuLine++;
 
 	text_flip();
 	b++;
@@ -458,6 +509,7 @@ static int key_miscMenu(int *c)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		left=right=up=down=hit0=hit1=hit2=0;
 		if (event.type == SDL_KEYDOWN)
 		{
 			uae4all_play_click();
@@ -600,7 +652,12 @@ static int key_miscMenu(int *c)
 				}
 				UpdateChipsetSettings();
 				break;
-					
+				
+			case MENUMISC_SPRITECOLLISIONS:
+				if (left||right)
+			   	mainMenu_spriteCollisions = !mainMenu_spriteCollisions;
+			   break;
+		
 			case MENUMISC_KICKSTART:
 				if (left)
 				{
@@ -689,31 +746,45 @@ static int key_miscMenu(int *c)
 					else
 						mainMenu_joyPort=0;
 				}
-			  break;
-			case MENUMISC_AUTOFIRE:
+			  break;  
+			case MENUMISC_AUTOFIRERATE:
 				if(left)
 				{
-					if(mainMenu_autofireRate==4)
-						mainMenu_autofireRate=8;
-					else if(mainMenu_autofireRate==8)
-						mainMenu_autofireRate=12;
-					else
+					if(mainMenu_autofireRate==2)
 						mainMenu_autofireRate=4;
+					else if(mainMenu_autofireRate==4)
+						mainMenu_autofireRate=8;
+					else
+						mainMenu_autofireRate=2;
 				}
 				else if (right)
 				{
-					if(mainMenu_autofireRate==4)
-						mainMenu_autofireRate=12;
+					if(mainMenu_autofireRate==2)
+						mainMenu_autofireRate=8;
 					else if(mainMenu_autofireRate==8)
 						mainMenu_autofireRate=4;
 					else
-						mainMenu_autofireRate=8;
+						mainMenu_autofireRate=2;
 				}
  				break;
-			case MENUMISC_STATUSLINE:
-				if ((left)||(right))
-					mainMenu_showStatus=!mainMenu_showStatus;
+#ifdef __PSP2__
+			case MENUMISC_CUSTOMAUTOFIREBUTTON:
+				if (left)
+				{
+					if (mainMenu_customAutofireButton > 0)
+						mainMenu_customAutofireButton--;
+					else
+						mainMenu_customAutofireButton=0;
+				}
+				else if (right)
+				{
+				 	if (mainMenu_customAutofireButton < 6)
+						mainMenu_customAutofireButton++;
+					else
+						mainMenu_customAutofireButton=6;
+				}
 				break;
+#endif
 			case MENUMISC_MOUSEMULTIPLIER:
 				if (left)
 				{
@@ -779,6 +850,8 @@ static int key_miscMenu(int *c)
 				{
 					if (mainMenu_deadZone <= 0)
 						mainMenu_deadZone=0;
+					else if (mainMenu_deadZone >= 20000)
+						mainMenu_deadZone-=10000;
 					else if (mainMenu_deadZone >= 2000)
 						mainMenu_deadZone-=1000;
 					else if (mainMenu_deadZone >= 200)
@@ -790,8 +863,10 @@ static int key_miscMenu(int *c)
 				}
 				else if (right)
 				{
-					if (mainMenu_deadZone >= 10000)
-						mainMenu_deadZone=10000;
+					if (mainMenu_deadZone >= 30000)
+						mainMenu_deadZone=30000;
+					else if (mainMenu_deadZone >= 10000)
+						mainMenu_deadZone+=10000;
 					else if (mainMenu_deadZone>=1000)
 						mainMenu_deadZone+=1000;
 					else if (mainMenu_deadZone>=100)
@@ -802,6 +877,10 @@ static int key_miscMenu(int *c)
 						mainMenu_deadZone+=1;
 				}
 				break;
+			case MENUMISC_MOUSEEMULATION:
+				if ((left)||(right))
+						mainMenu_mouseEmulation = !mainMenu_mouseEmulation;
+        		break;
 #else
 			case MENUMISC_TAPDELAY:
 				if (left)

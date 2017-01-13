@@ -36,6 +36,8 @@ static const char *text_str_32k="32k";
 static const char *text_str_22k="22k";
 static const char *text_str_11k="11k";
 static const char *text_str_8k="8k";
+static const char *text_str_status_line="Status Line";
+
 
 #define MAX_CUSTOM_ID 96
 #define MIN_CUSTOM_ID -5
@@ -63,6 +65,10 @@ enum {
 	MENUDISPLAY_REFRESHRATE,
 #ifdef __PSP2__
 	MENUDISPLAY_SHADER,
+#endif
+	MENUDISPLAY_STATUSLINE,
+#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+	MENUDISPLAY_VKBDLANGUAGE,
 #endif
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
@@ -135,7 +141,7 @@ static void draw_displayMenu(int c)
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
-	menuLine+=2;
+	menuLine++;
 	write_text(leftMargin,menuLine,"Custom Settings");
 	menuLine++;
 	write_text(leftMargin,menuLine,"---------------");
@@ -283,7 +289,37 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop3-2,menuLine,value);
 #endif
+	// MENUDISPLAY_STATUSLINE
+	menuLine+=2;
+	write_text(leftMargin, menuLine,text_str_status_line);
+	if ((!mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
+		write_text_inv(tabstop2,menuLine, "Off");
+	else
+		write_text(tabstop2, menuLine, "Off");
+	if ((mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
+		write_text_inv(tabstop4, menuLine,"On");
+	else
+		write_text(tabstop4, menuLine,"On");
 
+#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+	// MENUDISPLAY_VKBDLANGUAGE
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Keyboard");
+	if ((mainMenu_vkbdLanguage==0)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
+		write_text_inv(tabstop1,menuLine,"US");
+	else
+		write_text(tabstop1,menuLine,"US");
+
+	if ((mainMenu_vkbdLanguage==1)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
+		write_text_inv(tabstop3,menuLine,"UK");
+	else
+		write_text(tabstop3,menuLine,"UK");
+
+	if ((mainMenu_vkbdLanguage==2)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
+		write_text_inv(tabstop5,menuLine,"GERMAN");
+	else
+		write_text(tabstop5,menuLine,"GERMAN");
+#endif
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
 	menuLine++;
@@ -374,6 +410,7 @@ static int key_displayMenu(int *c)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		left=right=up=down=hit0=hit1=hit2=0;
 		if (event.type == SDL_KEYDOWN)
 		{
 			uae4all_play_click();
@@ -392,177 +429,176 @@ static int key_displayMenu(int *c)
 				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 			}
 		}
-	}
-	if (hit2) //Does the user want to cancel the menu completely?
-	{
-		if (emulating)
+		if (hit2) //Does the user want to cancel the menu completely?
 		{
-			end = -1; 
-			quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+			if (emulating)
+			{
+				end = -1; 
+				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
+			}
+		}	
+		else if (hit0)
+		{
+			end = -1;
 		}
-	}	
-	else if (hit0)
-	{
-		end = -1;
-	}
-	else if (hit1)
-	{
-		end = -1;
-	}
-	else if (up)
-	{
-		if (menuDisplay==0) menuDisplay = MENUDISPLAY_END - 1;
-		else menuDisplay--;
-	}
-	else if (down)
-	{
-		if (menuDisplay == MENUDISPLAY_END - 1) menuDisplay=0;
-		else menuDisplay++;
-	}
-	switch (menuDisplay)
-	{
-		case MENUDISPLAY_PRESETWIDTH:
-			if (left)
-			{
-				if(presetModeId < 10)
-					SetPresetMode(presetModeId + 50);
-				else
-					SetPresetMode(presetModeId - 10);
-			}
-			if(right)
-			{
-				if(presetModeId > 50)
-					SetPresetMode(presetModeId - 50);
-				else
-					SetPresetMode(presetModeId + 10);
-			}
-			break;
-		case MENUDISPLAY_PRESETHEIGHT:
-			if (left)
-			{
-				switch(presetModeId)
+		else if (hit1)
+		{
+			end = -1;
+		}
+		else if (up)
+		{
+			if (menuDisplay==0) menuDisplay = MENUDISPLAY_END - 1;
+			else menuDisplay--;
+		}
+		else if (down)
+		{
+			if (menuDisplay == MENUDISPLAY_END - 1) menuDisplay=0;
+			else menuDisplay++;
+		}
+		switch (menuDisplay)
+		{
+			case MENUDISPLAY_PRESETWIDTH:
+				if (left)
 				{
-					case 0:
-					case 10:
-					case 20:
-					case 30:
-					case 40:
-					case 50:
-						SetPresetMode(presetModeId + 7);
-						break;
-					default:
-						SetPresetMode(presetModeId - 1);
+					if(presetModeId < 10)
+						SetPresetMode(presetModeId + 50);
+					else
+						SetPresetMode(presetModeId - 10);
 				}
-			}
-			else if (right)
-			{
-				switch(presetModeId)
+				if(right)
 				{
-					case 7:
-					case 17:
-					case 27:
-					case 37:
-					case 47:
-					case 57:
-						SetPresetMode(presetModeId - 7);
-						break;
-					default:
-						SetPresetMode(presetModeId + 1);
+					if(presetModeId > 50)
+						SetPresetMode(presetModeId - 50);
+					else
+						SetPresetMode(presetModeId + 10);
 				}
-			}
-			break;
-		case MENUDISPLAY_DISPLINES:
-			if (left)
-			{
-				if (mainMenu_displayedLines>100)
-					mainMenu_displayedLines--;
-			}
-			else if (right)
-			{
-				if (mainMenu_displayedLines<270)
-					mainMenu_displayedLines++;
-			}
-			break;
+				break;
+			case MENUDISPLAY_PRESETHEIGHT:
+				if (left)
+				{
+					switch(presetModeId)
+					{
+						case 0:
+						case 10:
+						case 20:
+						case 30:
+						case 40:
+						case 50:
+							SetPresetMode(presetModeId + 7);
+							break;
+						default:
+							SetPresetMode(presetModeId - 1);
+					}
+				}
+				else if (right)
+				{
+					switch(presetModeId)
+					{
+						case 7:
+						case 17:
+						case 27:
+						case 37:
+						case 47:
+						case 57:
+							SetPresetMode(presetModeId - 7);
+							break;
+						default:
+							SetPresetMode(presetModeId + 1);
+					}
+				}
+				break;
+			case MENUDISPLAY_DISPLINES:
+				if (left)
+				{
+					if (mainMenu_displayedLines>100)
+						mainMenu_displayedLines--;
+				}
+				else if (right)
+				{
+					if (mainMenu_displayedLines<270)
+						mainMenu_displayedLines++;
+				}
+				break;
 #ifndef __PSP2__
-		case MENUDISPLAY_SCREENWIDTH:
-			if (left)
-			{
-				screenWidth-=10;
-				if (screenWidth<200)
-					screenWidth=200;
-			}
-			else if (right)
-			{
-				screenWidth+=10;
-				if (screenWidth>800)
-					screenWidth=800;
-			}
-			break;
+			case MENUDISPLAY_SCREENWIDTH:
+				if (left)
+				{
+					screenWidth-=10;
+					if (screenWidth<200)
+						screenWidth=200;
+				}
+				else if (right)
+				{
+					screenWidth+=10;
+					if (screenWidth>800)
+						screenWidth=800;
+				}
+				break;
 #endif
-		case MENUDISPLAY_VERTPOS:
-			if (left)
-			{
-				if (moveY>-42)
-					moveY--;
-			}
-			else if (right)
-			{
-				if (moveY<50)
-					moveY++;
-			}
-			break;
-		case MENUDISPLAY_CUTLEFT:
-			if (left)
-			{
-				if (mainMenu_cutLeft>0)
-					mainMenu_cutLeft--;
-			}
-			else if (right)
-			{
-				if (mainMenu_cutLeft<100)
-					mainMenu_cutLeft++;
-			}
-			break;
-		case MENUDISPLAY_CUTRIGHT:
-			if (left)
-			{
-				if (mainMenu_cutRight>0)
-					mainMenu_cutRight--;
-			}
-			else if (right)
-			{
-				if (mainMenu_cutRight<100)
-					mainMenu_cutRight++;
-			}
-			break;
-		case MENUDISPLAY_FRAMESKIP:
+			case MENUDISPLAY_VERTPOS:
+				if (left)
+				{
+					if (moveY>-42)
+						moveY--;
+				}
+				else if (right)
+				{
+					if (moveY<50)
+						moveY++;
+				}
+				break;
+			case MENUDISPLAY_CUTLEFT:
+				if (left)
+				{
+					if (mainMenu_cutLeft>0)
+						mainMenu_cutLeft--;
+				}
+				else if (right)
+				{
+					if (mainMenu_cutLeft<100)
+						mainMenu_cutLeft++;
+				}
+				break;
+			case MENUDISPLAY_CUTRIGHT:
+				if (left)
+				{
+					if (mainMenu_cutRight>0)
+						mainMenu_cutRight--;
+				}
+				else if (right)
+				{
+					if (mainMenu_cutRight<100)
+						mainMenu_cutRight++;
+				}
+				break;
+			case MENUDISPLAY_FRAMESKIP:
 #ifdef PANDORA
-			if ((left)||(right))
-					mainMenu_frameskip = !mainMenu_frameskip;
+				if ((left)||(right))
+						mainMenu_frameskip = !mainMenu_frameskip;
 #else
-			if (left)
-			{
-				if (mainMenu_frameskip>0)
-					mainMenu_frameskip--;
-				else
-					mainMenu_frameskip=8;
-			}
-			else if (right)
-			{
-				if (mainMenu_frameskip<8)
-					mainMenu_frameskip++;
-				else
-					mainMenu_frameskip=0;
-			}
+				if (left)
+				{
+					if (mainMenu_frameskip>0)
+						mainMenu_frameskip--;
+					else
+						mainMenu_frameskip=8;
+				}
+				else if (right)
+				{
+					if (mainMenu_frameskip<8)
+						mainMenu_frameskip++;
+					else
+						mainMenu_frameskip=0;
+				}
 #endif
-			break;
-		case MENUDISPLAY_REFRESHRATE:
-			if ((left)||(right))
-					mainMenu_ntsc = !mainMenu_ntsc;
-			break;
+				break;
+			case MENUDISPLAY_REFRESHRATE:
+				if ((left)||(right))
+						mainMenu_ntsc = !mainMenu_ntsc;
+				break;
 #ifdef __PSP2__ //shader choice on VITA
-				case MENUDISPLAY_SHADER:
-            if (left)
+			case MENUDISPLAY_SHADER:
+				if (left)
 				{
 					if (mainMenu_shader <= 0)
 						mainMenu_shader = 0;
@@ -577,79 +613,100 @@ static int key_displayMenu(int *c)
 						mainMenu_shader +=1;
 				}
 				break;
-#endif			
-			
-		case MENUDISPLAY_SOUND:
+#endif
+			case MENUDISPLAY_STATUSLINE:
+				if ((left)||(right))
+					mainMenu_showStatus=!mainMenu_showStatus;
+				break;
+#ifdef LARGEKEYBOARD
+			case MENUDISPLAY_VKBDLANGUAGE:
 				if (left)
 				{
-					if (mainMenu_sound == 1)
-						mainMenu_sound = 0;
-					else if (mainMenu_sound == 2)
-						mainMenu_sound = 1;
-					else if (mainMenu_sound == 0)
-						mainMenu_sound = 2;
+					if (mainMenu_vkbdLanguage <= 0)
+						mainMenu_vkbdLanguage = 0;
+					else 
+						mainMenu_vkbdLanguage -= 1;
 				}
 				else if (right)
 				{
-					if (mainMenu_sound == 2)
-						mainMenu_sound = 0;
-					else if (mainMenu_sound == 0)
-						mainMenu_sound = 1;
-					else if (mainMenu_sound == 1)
-						mainMenu_sound = 2;
+					if (mainMenu_vkbdLanguage >= 2)
+						mainMenu_vkbdLanguage = 2;
+					else
+						mainMenu_vkbdLanguage +=1;
 				}
 				break;
-			case MENUDISPLAY_SNDRATE:
-				if ((left)||(right))
-				{
-					static int rates[] = { 8000, 11025, 22050, 32000, 44100 };
-					int sel;
-					for (sel = 0; sel < sizeof(rates) / sizeof(rates[0]); sel++)
-						if (rates[sel] == sound_rate) break;
-					sel += left ? -1 : 1;
-					if (sel < 0) sel = 4;
-					if (sel > 4) sel = 0;
-					sound_rate = rates[sel];
-				}
-				break;
-      
-			case MENUDISPLAY_STEREO:
-				if (left)
-				{
-					if(mainMenu_soundStereo == 0)
+#endif
+			case MENUDISPLAY_SOUND:
+					if (left)
 					{
-						mainMenu_soundStereo=1;
-						mainMenu_soundStereoSep=3;
+						if (mainMenu_sound == 1)
+							mainMenu_sound = 0;
+						else if (mainMenu_sound == 2)
+							mainMenu_sound = 1;
+						else if (mainMenu_sound == 0)
+							mainMenu_sound = 2;
 					}
-					else if (mainMenu_soundStereoSep > 0)
-						mainMenu_soundStereoSep--;
-					else 
-					{	
-						mainMenu_soundStereo=0;
-						mainMenu_soundStereoSep=3;
-					}
-				}		
-				if (right)
-				{
-					if(mainMenu_soundStereo == 0)
+					else if (right)
 					{
-						mainMenu_soundStereo=1;
-						mainMenu_soundStereoSep=0;
+						if (mainMenu_sound == 2)
+							mainMenu_sound = 0;
+						else if (mainMenu_sound == 0)
+							mainMenu_sound = 1;
+						else if (mainMenu_sound == 1)
+							mainMenu_sound = 2;
 					}
-					else if (mainMenu_soundStereoSep < 3)
+					break;
+				case MENUDISPLAY_SNDRATE:
+					if ((left)||(right))
 					{
-						mainMenu_soundStereoSep++;
+						static int rates[] = { 8000, 11025, 22050, 32000, 44100 };
+						int sel;
+						for (sel = 0; sel < sizeof(rates) / sizeof(rates[0]); sel++)
+							if (rates[sel] == sound_rate) break;
+						sel += left ? -1 : 1;
+						if (sel < 0) sel = 4;
+						if (sel > 4) sel = 0;
+						sound_rate = rates[sel];
 					}
-					else 
-					{	
-						mainMenu_soundStereo=0;
-						mainMenu_soundStereoSep=3;
-					}
-				}		
+					break;
+		
+				case MENUDISPLAY_STEREO:
+					if (left)
+					{
+						if(mainMenu_soundStereo == 0)
+						{
+							mainMenu_soundStereo=1;
+							mainMenu_soundStereoSep=3;
+						}
+						else if (mainMenu_soundStereoSep > 0)
+							mainMenu_soundStereoSep--;
+						else 
+						{	
+							mainMenu_soundStereo=0;
+							mainMenu_soundStereoSep=3;
+						}
+					}		
+					if (right)
+					{
+						if(mainMenu_soundStereo == 0)
+						{
+							mainMenu_soundStereo=1;
+							mainMenu_soundStereoSep=0;
+						}
+						else if (mainMenu_soundStereoSep < 3)
+						{
+							mainMenu_soundStereoSep++;
+						}
+						else 
+						{	
+							mainMenu_soundStereo=0;
+							mainMenu_soundStereoSep=3;
+						}
+					}		
 				
-				break;
+					break;
+		}
 	}
-
 	return end;
 }
 

@@ -175,6 +175,37 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	b++;
 }
 
+#ifdef __PSP2__
+static int cmpDirentString(const void *first, const void *second)
+{
+	dirent *direntA = *(dirent * const *) first;
+	dirent *direntB = *(dirent * const *) second;
+	// Directories on the top
+	if (direntA->d_type != direntB->d_type)
+	{
+		if (direntA->d_type == DT_DIR)
+			return -1;
+		else
+			return 1;
+	}
+	// Filenames sorted case-insensitive
+	char *a = direntA->d_name;
+	char *b = direntB->d_name;
+	while (*a && *b) {
+        if (tolower(*a) != tolower(*b)) {
+            break;
+        }
+        ++a;
+        ++b;
+   }
+   int r = tolower(*a) - tolower(*b);
+	if (r) return r;
+   // if equal ignoring case, use opposite of strcmp() result to get
+   // lower before upper
+   return -strcmp(a, b); //aka: return strcmp(b, a)
+}
+#endif
+
 static int menuLoadLoop(char *curr_path)
 {
 	char *ret = NULL, *fname = NULL;
@@ -204,7 +235,7 @@ static int menuLoadLoop(char *curr_path)
 
 	struct dirent *ent = NULL;
 	n = 0;
-	namelist =  (struct dirent **)malloc(1024 * sizeof(struct dirent *)); // < 1024 files
+	namelist =  (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
 	namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
 	strcpy(namelist[0]->d_name, ".");
 	namelist[0]->d_type = DT_DIR; n++;
@@ -213,17 +244,20 @@ static int menuLoadLoop(char *curr_path)
 	namelist[1]->d_type = DT_DIR; n++;
 	
 	while ((ent = readdir (dir)) != NULL) {
-		if(n >= 1023)
+		if(n >= 3*1024-1)
 			break;
 		namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
 		memcpy(namelist[n], ent, sizeof(struct dirent));
 		n++;
 	}
 	closedir(dir);
-
+		
 	if(n <= 0) {
 		return 0;
 	}
+	
+	//sort alphabetically
+	qsort(namelist, n, sizeof(dirent*), cmpDirentString);
 	
 	if (n<10) SDL_Delay(70);
 	else SDL_Delay(40);
@@ -279,9 +313,9 @@ static int menuLoadLoop(char *curr_path)
 		//unsigned long keys;
 		draw_dirlist(curr_path, namelist, n, sel);
 		delay ++;
-		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hitL=0;
 		while (SDL_PollEvent(&event) > 0 && hit0+hit1+hitL==0)
 		{
+			left=right=up=down=hit0=hit1=hit2=hit3=hit4=hitL=0;
 			if (event.type == SDL_KEYDOWN)
 			{
 				uae4all_play_click();

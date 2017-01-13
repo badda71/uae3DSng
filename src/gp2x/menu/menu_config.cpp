@@ -20,6 +20,7 @@ extern int skipintro;
 extern int screenWidth;
 extern int moveX;
 extern int moveY;
+
 #if !( defined(PANDORA) || defined(ANDROIDSDL) )
 extern int timeslice_mode;
 #endif
@@ -53,6 +54,7 @@ int mainMenu_drives = DEFAULT_DRIVES;
 int mainMenu_floppyspeed = 100;
 int mainMenu_CPU_model = DEFAULT_CPU_MODEL;
 int mainMenu_chipset = DEFAULT_CHIPSET_SELECT;
+int mainMenu_spriteCollisions = DEFAULT_SPRITECOLLISIONS;
 int mainMenu_sound = DEFAULT_SOUND;
 int mainMenu_soundStereo = 1; // Default is stereo
 int mainMenu_soundStereoSep = 3; // Default is 100% stereo separation
@@ -67,54 +69,57 @@ int mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always o
 int mainMenu_joyPort = 0; // Both ports
 #endif
 int mainMenu_autofireRate = 8;
+int mainMenu_customAutofireButton = 0;
 int mainMenu_showStatus = DEFAULT_STATUSLN;
 int mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
+int mainMenu_mouseEmulation = 1;
 int mainMenu_stylusOffset = 0;
 int mainMenu_tapDelay = 10;
 int mainMenu_customControls = 0;
+int mainMenu_custom_currentlyEditingControllerNr = 0;
 int mainMenu_custom_dpad = 0;
-int mainMenu_custom_up = 0;
-int mainMenu_custom_down = 0;
-int mainMenu_custom_left = 0;
-int mainMenu_custom_right = 0;
-int mainMenu_custom_A = 0;
-int mainMenu_custom_B = 0;
-int mainMenu_custom_X = 0;
-int mainMenu_custom_Y = 0;
-int mainMenu_custom_L = 0;
-int mainMenu_custom_R = 0;
+int mainMenu_custom_up[4] = {0,0,0,0};
+int mainMenu_custom_down[4] = {0,0,0,0};
+int mainMenu_custom_left[4] = {0,0,0,0};
+int mainMenu_custom_right[4] = {0,0,0,0};
+int mainMenu_custom_A[4] = {0,0,0,0};
+int mainMenu_custom_B[4] = {0,0,0,0};
+int mainMenu_custom_X[4] = {0,0,0,0};
+int mainMenu_custom_Y[4] = {0,0,0,0};
+int mainMenu_custom_L[4] = {0,0,0,0};
+int mainMenu_custom_R[4] = {0,0,0,0};
 #ifdef __PSP2__
 int mainMenu_custom_controlSet = 0; //This controls which custom config is used
-int mainMenu_custom1_up = 0;
-int mainMenu_custom1_down = 0;
-int mainMenu_custom1_left = 0;
-int mainMenu_custom1_right = 0;
-int mainMenu_custom1_A = 0;
-int mainMenu_custom1_B = 0;
-int mainMenu_custom1_X = 0;
-int mainMenu_custom1_Y = 0;
-int mainMenu_custom1_L = 0;
-int mainMenu_custom1_R = 0;
-int mainMenu_custom2_up = 0;
-int mainMenu_custom2_down = 0;
-int mainMenu_custom2_left = 0;
-int mainMenu_custom2_right = 0;
-int mainMenu_custom2_A = 0;
-int mainMenu_custom2_B = 0;
-int mainMenu_custom2_X = 0;
-int mainMenu_custom2_Y = 0;
-int mainMenu_custom2_L = 0;
-int mainMenu_custom2_R = 0;
-int mainMenu_custom3_up = 0;
-int mainMenu_custom3_down = 0;
-int mainMenu_custom3_left = 0;
-int mainMenu_custom3_right = 0;
-int mainMenu_custom3_A = 0;
-int mainMenu_custom3_B = 0;
-int mainMenu_custom3_X = 0;
-int mainMenu_custom3_Y = 0;
-int mainMenu_custom3_L = 0;
-int mainMenu_custom3_R = 0;
+int mainMenu_custom1_up[4] = {0,0,0,0};
+int mainMenu_custom1_down[4] = {0,0,0,0};
+int mainMenu_custom1_left[4] = {0,0,0,0};
+int mainMenu_custom1_right[4] = {0,0,0,0};
+int mainMenu_custom1_A[4] = {0,0,0,0};
+int mainMenu_custom1_B[4] = {0,0,0,0};
+int mainMenu_custom1_X[4] = {0,0,0,0};
+int mainMenu_custom1_Y[4] = {0,0,0,0};
+int mainMenu_custom1_L[4] = {0,0,0,0};
+int mainMenu_custom1_R[4] = {0,0,0,0};
+int mainMenu_custom2_up[4] = {0,0,0,0};
+int mainMenu_custom2_down[4] = {0,0,0,0};
+int mainMenu_custom2_left[4] = {0,0,0,0};
+int mainMenu_custom2_right[4] = {0,0,0,0};
+int mainMenu_custom2_A[4] = {0,0,0,0};
+int mainMenu_custom2_B[4] = {0,0,0,0};
+int mainMenu_custom2_X[4] = {0,0,0,0};
+int mainMenu_custom2_Y[4] = {0,0,0,0};
+int mainMenu_custom2_L[4] = {0,0,0,0};
+int mainMenu_custom2_R[4] = {0,0,0,0};
+int mainMenu_custom3_up[4] = {0,0,0,0};
+int mainMenu_custom3_down[4] = {0,0,0,0};
+int mainMenu_custom3_left[4] = {0,0,0,0};
+int mainMenu_custom3_right[4] = {0,0,0,0};
+int mainMenu_custom3_A[4] = {0,0,0,0};
+int mainMenu_custom3_B[4] = {0,0,0,0};
+int mainMenu_custom3_X[4] = {0,0,0,0};
+int mainMenu_custom3_Y[4] = {0,0,0,0};
+int mainMenu_custom3_L[4] = {0,0,0,0};
+int mainMenu_custom3_R[4] = {0,0,0,0};
 #endif
 int mainMenu_autofire = DEFAULT_AUTOFIRE;
 
@@ -126,7 +131,9 @@ int mainMenu_cutLeft = 0;
 int mainMenu_cutRight = 0;
 int mainMenu_ntsc = DEFAULT_NTSC;
 int mainMenu_frameskip = 0;
+int mainMenu_vkbdLanguage = 0; //Default is US Keyboard
 int visibleAreaWidth = 320;
+
 
 int saveMenu_n_savestate = 0;
 
@@ -214,6 +221,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_CPU_model = DEFAULT_CPU_MODEL;
     mainMenu_chipset = DEFAULT_CHIPSET_SELECT;
     UpdateChipsetSettings();
+    mainMenu_spriteCollisions = DEFAULT_SPRITECOLLISIONS;
     kickstart = DEFAULT_KICKSTART;
     mainMenu_sound = DEFAULT_SOUND;
     sound_rate = DEFAULT_SOUND_FREQ;
@@ -229,54 +237,63 @@ void SetDefaultMenuSettings(int general)
     mainMenu_joyPort = 0;
 #endif
     mainMenu_autofireRate = 8;
+    mainMenu_customAutofireButton = 0;
     mainMenu_showStatus = DEFAULT_STATUSLN;
     mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
+    mainMenu_mouseEmulation = 1;
     mainMenu_stylusOffset = 0;
     mainMenu_tapDelay = 10;
     mainMenu_customControls = 0;
+	 mainMenu_custom_currentlyEditingControllerNr = 0;
     mainMenu_custom_dpad = 0;
-    mainMenu_custom_up = 0;
-    mainMenu_custom_down = 0;
-    mainMenu_custom_left = 0;
-    mainMenu_custom_right = 0;
-    mainMenu_custom_A = 0;
-    mainMenu_custom_B = 0;
-    mainMenu_custom_X = 0;
-    mainMenu_custom_Y = 0;
-    mainMenu_custom_L = 0;
-    mainMenu_custom_R = 0;
+	 for (int i=0; i<4; i++) 
+	 {
+		 mainMenu_custom_up[i] = 0;
+		 mainMenu_custom_down[i] = 0;
+		 mainMenu_custom_left[i] = 0;
+		 mainMenu_custom_right[i] = 0;
+		 mainMenu_custom_A[i] = 0;
+		 mainMenu_custom_B[i] = 0;
+		 mainMenu_custom_X[i] = 0;
+		 mainMenu_custom_Y[i] = 0;
+		 mainMenu_custom_L[i] = 0;
+		 mainMenu_custom_R[i] = 0;
+	}
 #ifdef __PSP2__
 	 mainMenu_custom_controlSet = 0;
-	 mainMenu_custom1_up = 0;
-    mainMenu_custom1_down = 0;
-    mainMenu_custom1_left = 0;
-    mainMenu_custom1_right = 0;
-    mainMenu_custom1_A = 0;
-    mainMenu_custom1_B = 0;
-    mainMenu_custom1_X = 0;
-    mainMenu_custom1_Y = 0;
-    mainMenu_custom1_L = 0;
-    mainMenu_custom1_R = 0;
-	 mainMenu_custom2_up = 0;
-    mainMenu_custom2_down = 0;
-    mainMenu_custom2_left = 0;
-    mainMenu_custom2_right = 0;
-    mainMenu_custom2_A = 0;
-    mainMenu_custom2_B = 0;
-    mainMenu_custom2_X = 0;
-    mainMenu_custom2_Y = 0;
-    mainMenu_custom2_L = 0;
-    mainMenu_custom2_R = 0;
-	 mainMenu_custom3_up = 0;
-    mainMenu_custom3_down = 0;
-    mainMenu_custom3_left = 0;
-    mainMenu_custom3_right = 0;
-    mainMenu_custom3_A = 0;
-    mainMenu_custom3_B = 0;
-    mainMenu_custom3_X = 0;
-    mainMenu_custom3_Y = 0;
-    mainMenu_custom3_L = 0;
-    mainMenu_custom3_R = 0;
+	 for (int i=0; i<4; i++) 
+	 {
+		 mainMenu_custom1_up[i] = 0;
+		 mainMenu_custom1_down[i] = 0;
+		 mainMenu_custom1_left[i] = 0;
+		 mainMenu_custom1_right[i] = 0;
+		 mainMenu_custom1_A[i] = 0;
+		 mainMenu_custom1_B[i] = 0;
+		 mainMenu_custom1_X[i] = 0;
+		 mainMenu_custom1_Y[i] = 0;
+		 mainMenu_custom1_L[i] = 0;
+		 mainMenu_custom1_R[i] = 0;
+		 mainMenu_custom2_up[i] = 0;
+		 mainMenu_custom2_down[i] = 0;
+		 mainMenu_custom2_left[i] = 0;
+		 mainMenu_custom2_right[i] = 0;
+		 mainMenu_custom2_A[i] = 0;
+		 mainMenu_custom2_B[i] = 0;
+		 mainMenu_custom2_X[i] = 0;
+		 mainMenu_custom2_Y[i] = 0;
+		 mainMenu_custom2_L[i] = 0;
+		 mainMenu_custom2_R[i] = 0;
+		 mainMenu_custom3_up[i] = 0;
+		 mainMenu_custom3_down[i] = 0;
+		 mainMenu_custom3_left[i] = 0;
+		 mainMenu_custom3_right[i] = 0;
+		 mainMenu_custom3_A[i] = 0;
+		 mainMenu_custom3_B[i] = 0;
+		 mainMenu_custom3_X[i] = 0;
+		 mainMenu_custom3_Y[i] = 0;
+		 mainMenu_custom3_L[i] = 0;
+		 mainMenu_custom3_R[i] = 0;
+	}
 #endif //__PSP2__
     SetPresetMode(2);
     moveX = 0;
@@ -285,6 +302,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_cutRight = 0;
     mainMenu_ntsc = DEFAULT_NTSC;
     mainMenu_frameskip = 0;
+    mainMenu_vkbdLanguage = 0; //Default is US Keyboard
     mainMenu_autofire = DEFAULT_AUTOFIRE;
 
 #ifdef __PSP2__
@@ -931,6 +949,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "mousemultiplier=%d\n",mainMenu_mouseMultiplier);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "mouseemulation=%d\n",mainMenu_mouseEmulation);
+    fputs(buffer,f);
 #if defined(PANDORA) || defined(ANDROIDSDL)
     snprintf((char*)buffer, 255, "systemclock=%d\n",5);   // mainMenu_throttle never changes -> removed
 #else
@@ -944,6 +964,8 @@ int saveconfig(int general)
 #endif
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "frameskip=%d\n",mainMenu_frameskip);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "vkbdlanguage=%d\n",mainMenu_vkbdLanguage);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "sound=%d\n",mainMenu_sound + mainMenu_soundStereo * 10);
     fputs(buffer,f);
@@ -960,6 +982,8 @@ int saveconfig(int general)
     snprintf((char*)buffer, 255, "autofireRate=%d\n",mainMenu_autofireRate);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "autofire=%d\n",mainMenu_autofire);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "customAutofireButton=%d\n",mainMenu_customAutofireButton);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "stylusOffset=%d\n",mainMenu_stylusOffset);
     fputs(buffer,f);
@@ -1000,95 +1024,100 @@ int saveconfig(int general)
     snprintf((char*)buffer, 255, "customControls=%d\n",mainMenu_customControls);
     fputs(buffer,f);
 #ifndef __PSP2__    
-    snprintf((char*)buffer, 255, "custom_dpad=%d\n",mainMenu_custom_dpad);
+    snprintf((char*)buffer, 255, "custom_dpad=%d\n",mainMenu_custom_dpad[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_up=%d\n",mainMenu_custom_up);
+    snprintf((char*)buffer, 255, "custom_up=%d\n",mainMenu_custom_up[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_down=%d\n",mainMenu_custom_down);
+    snprintf((char*)buffer, 255, "custom_down=%d\n",mainMenu_custom_down[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_left=%d\n",mainMenu_custom_left);
+    snprintf((char*)buffer, 255, "custom_left=%d\n",mainMenu_custom_left[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_right=%d\n",mainMenu_custom_right);
+    snprintf((char*)buffer, 255, "custom_right=%d\n",mainMenu_custom_right[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_A=%d\n",mainMenu_custom_A);
+    snprintf((char*)buffer, 255, "custom_A=%d\n",mainMenu_custom_A[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_B=%d\n",mainMenu_custom_B);
+    snprintf((char*)buffer, 255, "custom_B=%d\n",mainMenu_custom_B[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_X=%d\n",mainMenu_custom_X);
+    snprintf((char*)buffer, 255, "custom_X=%d\n",mainMenu_custom_X[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_Y=%d\n",mainMenu_custom_Y);
+    snprintf((char*)buffer, 255, "custom_Y=%d\n",mainMenu_custom_Y[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_L=%d\n",mainMenu_custom_L);
+    snprintf((char*)buffer, 255, "custom_L=%d\n",mainMenu_custom_L[0]);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_R=%d\n",mainMenu_custom_R);
+    snprintf((char*)buffer, 255, "custom_R=%d\n",mainMenu_custom_R[0]);
     fputs(buffer,f);
 #else
-    snprintf((char*)buffer, 255, "custom_controlSet=%d\n",mainMenu_custom_controlSet);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_up=%d\n",mainMenu_custom1_up);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_down=%d\n",mainMenu_custom1_down);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_left=%d\n",mainMenu_custom1_left);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_right=%d\n",mainMenu_custom1_right);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_A=%d\n",mainMenu_custom1_A);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_B=%d\n",mainMenu_custom1_B);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_X=%d\n",mainMenu_custom1_X);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_Y=%d\n",mainMenu_custom1_Y);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_L=%d\n",mainMenu_custom1_L);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom1_R=%d\n",mainMenu_custom1_R);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_up=%d\n",mainMenu_custom2_up);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_down=%d\n",mainMenu_custom2_down);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_left=%d\n",mainMenu_custom2_left);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_right=%d\n",mainMenu_custom2_right);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_A=%d\n",mainMenu_custom2_A);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_B=%d\n",mainMenu_custom2_B);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_X=%d\n",mainMenu_custom2_X);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_Y=%d\n",mainMenu_custom2_Y);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_L=%d\n",mainMenu_custom2_L);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom2_R=%d\n",mainMenu_custom2_R);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_up=%d\n",mainMenu_custom3_up);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_down=%d\n",mainMenu_custom3_down);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_left=%d\n",mainMenu_custom3_left);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_right=%d\n",mainMenu_custom3_right);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_A=%d\n",mainMenu_custom3_A);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_B=%d\n",mainMenu_custom3_B);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_X=%d\n",mainMenu_custom3_X);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_Y=%d\n",mainMenu_custom3_Y);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_L=%d\n",mainMenu_custom3_L);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom3_R=%d\n",mainMenu_custom3_R);
-    fputs(buffer,f);
+	 snprintf((char*)buffer, 255, "custom_controlSet=%d\n",mainMenu_custom_controlSet);
+	 fputs(buffer,f);
+	 for (int i=0; i<4; i++)
+	 {
+		 snprintf((char*)buffer, 255, "custom1_up_Ply%d=%d\n",i,mainMenu_custom1_up[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_down_Ply%d=%d\n",i,mainMenu_custom1_down[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_left_Ply%d=%d\n",i,mainMenu_custom1_left[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_right_Ply%d=%d\n",i,mainMenu_custom1_right[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_A_Ply%d=%d\n",i,mainMenu_custom1_A[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_B_Ply%d=%d\n",i,mainMenu_custom1_B[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_X_Ply%d=%d\n",i,mainMenu_custom1_X[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_Y_Ply%d=%d\n",i,mainMenu_custom1_Y[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_L_Ply%d=%d\n",i,mainMenu_custom1_L[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_R_Ply%d=%d\n",i,mainMenu_custom1_R[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_up_Ply%d=%d\n",i,mainMenu_custom2_up[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_down_Ply%d=%d\n",i,mainMenu_custom2_down[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_left_Ply%d=%d\n",i,mainMenu_custom2_left[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_right_Ply%d=%d\n",i,mainMenu_custom2_right[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_A_Ply%d=%d\n",i,mainMenu_custom2_A[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_B_Ply%d=%d\n",i,mainMenu_custom2_B[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_X_Ply%d=%d\n",i,mainMenu_custom2_X[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_Y_Ply%d=%d\n",i,mainMenu_custom2_Y[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_L_Ply%d=%d\n",i,mainMenu_custom2_L[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_R_Ply%d=%d\n",i,mainMenu_custom2_R[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_up_Ply%d=%d\n",i,mainMenu_custom3_up[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_down_Ply%d=%d\n",i,mainMenu_custom3_down[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_left_Ply%d=%d\n",i,mainMenu_custom3_left[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_right_Ply%d=%d\n",i,mainMenu_custom3_right[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_A_Ply%d=%d\n",i,mainMenu_custom3_A[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_B_Ply%d=%d\n",i,mainMenu_custom3_B[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_X_Ply%d=%d\n",i,mainMenu_custom3_X[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_Y_Ply%d=%d\n",i,mainMenu_custom3_Y[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_L_Ply%d=%d\n",i,mainMenu_custom3_L[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_R_Ply%d=%d\n",i,mainMenu_custom3_R[i]);
+		 fputs(buffer,f);
+	 }
 #endif
     snprintf((char*)buffer, 255, "cpu=%d\n",mainMenu_CPU_model);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "chipset=%d\n",mainMenu_chipset);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "spritecollisions=%d\n",mainMenu_spriteCollisions);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "cpu=%d\n",-mainMenu_CPU_speed);
     fputs(buffer,f);
@@ -1318,6 +1347,7 @@ void loadconfig(int general)
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
         fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier );
+        fscanf(f,"mouseemulation=%d\n",&mainMenu_mouseEmulation );
 #if defined(PANDORA) || defined(ANDROIDSDL)
         fscanf(f,"systemclock=%d\n",&dummy);    // mainMenu_throttle never changes -> removed
         fscanf(f,"syncthreshold=%d\n", &dummy); // timeslice_mode never changes -> removed
@@ -1326,6 +1356,7 @@ void loadconfig(int general)
         fscanf(f,"syncthreshold=%d\n", &timeslice_mode);
 #endif
         fscanf(f,"frameskip=%d\n",&mainMenu_frameskip);
+        fscanf(f,"vkbdlanguage=%d\n",&mainMenu_vkbdLanguage);
         fscanf(f,"sound=%d\n",&mainMenu_sound );
         if (mainMenu_sound >= 10) {
             mainMenu_soundStereo = 1;
@@ -1342,6 +1373,7 @@ void loadconfig(int general)
         mainMenu_joyPort = ((joybuffer >> 4) & 0x0f);
         fscanf(f,"autofireRate=%d\n",&mainMenu_autofireRate);
         fscanf(f,"autofire=%d\n",&mainMenu_autofire);
+        fscanf(f,"customAutofireButton=%d\n",&mainMenu_customAutofireButton);
         fscanf(f,"stylusOffset=%d\n",&mainMenu_stylusOffset);
         fscanf(f,"tapDelay=%d\n",&mainMenu_tapDelay);
         fscanf(f,"scanlines=%d\n",&mainMenu_scanlines);
@@ -1365,52 +1397,57 @@ void loadconfig(int general)
         fscanf(f,"customControls=%d\n",&mainMenu_customControls);
 #ifndef __PSP2__
         fscanf(f,"custom_dpad=%d\n",&mainMenu_custom_dpad);
-        fscanf(f,"custom_up=%d\n",&mainMenu_custom_up);
-        fscanf(f,"custom_down=%d\n",&mainMenu_custom_down);
-        fscanf(f,"custom_left=%d\n",&mainMenu_custom_left);
-        fscanf(f,"custom_right=%d\n",&mainMenu_custom_right);
-        fscanf(f,"custom_A=%d\n",&mainMenu_custom_A);
-        fscanf(f,"custom_B=%d\n",&mainMenu_custom_B);
-        fscanf(f,"custom_X=%d\n",&mainMenu_custom_X);
-        fscanf(f,"custom_Y=%d\n",&mainMenu_custom_Y);
-        fscanf(f,"custom_L=%d\n",&mainMenu_custom_L);
-        fscanf(f,"custom_R=%d\n",&mainMenu_custom_R);
+        fscanf(f,"custom_up=%d\n",&mainMenu_custom_up[0]);
+        fscanf(f,"custom_down=%d\n",&mainMenu_custom_down[0]);
+        fscanf(f,"custom_left=%d\n",&mainMenu_custom_left[0]);
+        fscanf(f,"custom_right=%d\n",&mainMenu_custom_right[0]);
+        fscanf(f,"custom_A=%d\n",&mainMenu_custom_A[0]);
+        fscanf(f,"custom_B=%d\n",&mainMenu_custom_B[0]);
+        fscanf(f,"custom_X=%d\n",&mainMenu_custom_X[0]);
+        fscanf(f,"custom_Y=%d\n",&mainMenu_custom_Y[0]);
+        fscanf(f,"custom_L=%d\n",&mainMenu_custom_L[0]);
+        fscanf(f,"custom_R=%d\n",&mainMenu_custom_R[0]);
 #else
 		  fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
-        fscanf(f,"custom1_up=%d\n",&mainMenu_custom1_up);
-        fscanf(f,"custom1_down=%d\n",&mainMenu_custom1_down);
-        fscanf(f,"custom1_left=%d\n",&mainMenu_custom1_left);
-        fscanf(f,"custom1_right=%d\n",&mainMenu_custom1_right);
-        fscanf(f,"custom1_A=%d\n",&mainMenu_custom1_A);
-        fscanf(f,"custom1_B=%d\n",&mainMenu_custom1_B);
-        fscanf(f,"custom1_X=%d\n",&mainMenu_custom1_X);
-        fscanf(f,"custom1_Y=%d\n",&mainMenu_custom1_Y);
-        fscanf(f,"custom1_L=%d\n",&mainMenu_custom1_L);
-        fscanf(f,"custom1_R=%d\n",&mainMenu_custom1_R);
-        fscanf(f,"custom2_up=%d\n",&mainMenu_custom2_up);
-        fscanf(f,"custom2_down=%d\n",&mainMenu_custom2_down);
-        fscanf(f,"custom2_left=%d\n",&mainMenu_custom2_left);
-        fscanf(f,"custom2_right=%d\n",&mainMenu_custom2_right);
-        fscanf(f,"custom2_A=%d\n",&mainMenu_custom2_A);
-        fscanf(f,"custom2_B=%d\n",&mainMenu_custom2_B);
-        fscanf(f,"custom2_X=%d\n",&mainMenu_custom2_X);
-        fscanf(f,"custom2_Y=%d\n",&mainMenu_custom2_Y);
-        fscanf(f,"custom2_L=%d\n",&mainMenu_custom2_L);
-        fscanf(f,"custom2_R=%d\n",&mainMenu_custom2_R);
-        fscanf(f,"custom3_up=%d\n",&mainMenu_custom3_up);
-        fscanf(f,"custom3_down=%d\n",&mainMenu_custom3_down);
-        fscanf(f,"custom3_left=%d\n",&mainMenu_custom3_left);
-        fscanf(f,"custom3_right=%d\n",&mainMenu_custom3_right);
-        fscanf(f,"custom3_A=%d\n",&mainMenu_custom3_A);
-        fscanf(f,"custom3_B=%d\n",&mainMenu_custom3_B);
-        fscanf(f,"custom3_X=%d\n",&mainMenu_custom3_X);
-        fscanf(f,"custom3_Y=%d\n",&mainMenu_custom3_Y);
-        fscanf(f,"custom3_L=%d\n",&mainMenu_custom3_L);
-        fscanf(f,"custom3_R=%d\n",&mainMenu_custom3_R);
-        remap_custom_controls(); // update the custom variables with the appropriate set.
+        for (int i=0; i<4; i++)
+        {
+			  int j;
+			  fscanf(f,"custom1_up_Ply%d=%d\n",&j,&mainMenu_custom1_up[i]);
+			  fscanf(f,"custom1_down_Ply%d=%d\n",&j,&mainMenu_custom1_down[i]);
+			  fscanf(f,"custom1_left_Ply%d=%d\n",&j,&mainMenu_custom1_left[i]);
+			  fscanf(f,"custom1_right_Ply%d=%d\n",&j,&mainMenu_custom1_right[i]);
+			  fscanf(f,"custom1_A_Ply%d=%d\n",&j,&mainMenu_custom1_A[i]);
+			  fscanf(f,"custom1_B_Ply%d=%d\n",&j,&mainMenu_custom1_B[i]);
+			  fscanf(f,"custom1_X_Ply%d=%d\n",&j,&mainMenu_custom1_X[i]);
+			  fscanf(f,"custom1_Y_Ply%d=%d\n",&j,&mainMenu_custom1_Y[i]);
+			  fscanf(f,"custom1_L_Ply%d=%d\n",&j,&mainMenu_custom1_L[i]);
+			  fscanf(f,"custom1_R_Ply%d=%d\n",&j,&mainMenu_custom1_R[i]);
+			  fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+			  fscanf(f,"custom2_down_Ply%d=%d\n",&j,&mainMenu_custom2_down[i]);
+			  fscanf(f,"custom2_left_Ply%d=%d\n",&j,&mainMenu_custom2_left[i]);
+			  fscanf(f,"custom2_right_Ply%d=%d\n",&j,&mainMenu_custom2_right[i]);
+			  fscanf(f,"custom2_A_Ply%d=%d\n",&j,&mainMenu_custom2_A[i]);
+			  fscanf(f,"custom2_B_Ply%d=%d\n",&j,&mainMenu_custom2_B[i]);
+			  fscanf(f,"custom2_X_Ply%d=%d\n",&j,&mainMenu_custom2_X[i]);
+			  fscanf(f,"custom2_Y_Ply%d=%d\n",&j,&mainMenu_custom2_Y[i]);
+			  fscanf(f,"custom2_L_Ply%d=%d\n",&j,&mainMenu_custom2_L[i]);
+			  fscanf(f,"custom2_R_Ply%d=%d\n",&j,&mainMenu_custom2_R[i]);
+			  fscanf(f,"custom3_up_Ply%d=%d\n",&j,&mainMenu_custom3_up[i]);
+			  fscanf(f,"custom3_down_Ply%d=%d\n",&j,&mainMenu_custom3_down[i]);
+			  fscanf(f,"custom3_left_Ply%d=%d\n",&j,&mainMenu_custom3_left[i]);
+			  fscanf(f,"custom3_right_Ply%d=%d\n",&j,&mainMenu_custom3_right[i]);
+			  fscanf(f,"custom3_A_Ply%d=%d\n",&j,&mainMenu_custom3_A[i]);
+			  fscanf(f,"custom3_B_Ply%d=%d\n",&j,&mainMenu_custom3_B[i]);
+			  fscanf(f,"custom3_X_Ply%d=%d\n",&j,&mainMenu_custom3_X[i]);
+			  fscanf(f,"custom3_Y_Ply%d=%d\n",&j,&mainMenu_custom3_Y[i]);
+			  fscanf(f,"custom3_L_Ply%d=%d\n",&j,&mainMenu_custom3_L[i]);
+			  fscanf(f,"custom3_R_Ply%d=%d\n",&j,&mainMenu_custom3_R[i]);
+			}
+			remap_custom_controls(); // update the custom variables with the appropriate set.
 #endif //__PSP2__
         fscanf(f,"cpu=%d\n",&mainMenu_CPU_model);
         fscanf(f,"chipset=%d\n",&mainMenu_chipset);
+        fscanf(f,"spritecollisions=%d\n",&mainMenu_spriteCollisions);
         fscanf(f,"cpu=%d\n",&mainMenu_CPU_speed);
         if(mainMenu_CPU_speed < 0) {
             // New version of this option

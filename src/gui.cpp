@@ -52,16 +52,30 @@
 
 extern int gp2xMouseEmuOn, gp2xButtonRemappingOn;
 extern bool switch_autofire;
-int justMovedUp=0, justMovedDown=0, justMovedLeft=0, justMovedRight=0;
+int justMovedUp[4]={0,0,0,0};
+int justMovedDown[4]={0,0,0,0};
+int justMovedLeft[4]={0,0,0,0}; 
+int justMovedRight[4]={0,0,0,0};
 int justLComma=0, justLPeriod=0;
 #ifdef USE_UAE4ALL_VKBD
 int justLK=0;
 #endif
-int justPressedA=0, justPressedB=0, justPressedX=0, justPressedY=0;
-int justPressedL=0, justPressedR=0, justPressedQ=0;
+int justPressedA[4]={0,0,0,0};
+int justPressedB[4]={0,0,0,0};
+int justPressedX[4]={0,0,0,0};
+int justPressedY[4]={0,0,0,0};
+int justPressedL[4]={0,0,0,0};
+int justPressedR[4]={0,0,0,0};
+int justPressedQ=0;
 int stylusClickOverride=0;
 int stylusAdjustX=0, stylusAdjustY=0;
 int screenWidth = 640;
+
+static int customAutofireDelay[4]={ 0,0,0,0 };
+
+extern int mainMenu_autofire;
+
+extern int nr_joysticks;
 
 extern struct gui_info gui_data;
 
@@ -77,7 +91,7 @@ char *show_message_str=(char *)&_show_message_str[0];
 
 extern SDL_Surface *prSDLScreen;
 
-extern SDL_Joystick *uae4all_joy0, *uae4all_joy1;
+extern SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3;
 
 #ifdef __PSP2__
 //Predefined quick switch resolutions to select via TRIGGER R+START+DPAD LEFT/RIGHT
@@ -112,27 +126,12 @@ int lAnalogX=0;
 int lAnalogY=0;
 int rAnalogX=0;
 int rAnalogY=0;
-int lAnalogXCenter=0;
-int lAnalogYCenter=0;
-int rAnalogXCenter=0;
-int rAnalogYCenter=0;
+int lAnalogXCenter[4]={ 0, 0, 0, 0 };
+int lAnalogYCenter[4]={ 0, 0, 0, 0 };
+int rAnalogXCenter[4]={ 0, 0, 0, 0 };
+int rAnalogYCenter[4]={ 0, 0, 0, 0 };
 int haveJoysticksBeenCentered=0;
 extern int mainMenu_leftStickMouse;
-//Rudimentary second Player support for Vita TV
-int lAnalogXPly2=0;
-int lAnalogYPly2=0;
-int dpadUpPly2=0;
-int dpadDownPly2=0;
-int dpadLeftPly2=0;
-int dpadRightPly2=0;
-int buttonAPly2=0;
-int buttonBPly2=0;
-int buttonXPly2=0;
-int buttonYPly2=0;
-int triggerLPly2=0;
-int triggerRPly2=0;
-int buttonSelectPly2=0;
-int buttonStartPly2=0;
 #endif // __PSP2__
 
 #ifdef USE_UAE4ALL_VKBD
@@ -157,18 +156,18 @@ int drawfinished=0;
 int moved_x = 0;
 int moved_y = 0;
 
-int dpadUp=0;
-int dpadDown=0;
-int dpadLeft=0;
-int dpadRight=0;
-int buttonA=0;
-int buttonB=0;
-int buttonX=0;
-int buttonY=0;
-int triggerL=0;
-int triggerR=0;
-int buttonSelect=0;
-int buttonStart=0;
+int dpadUp[4]={0,0,0,0};
+int dpadDown[4]={0,0,0,0};
+int dpadLeft[4]={0,0,0,0};
+int dpadRight[4]={0,0,0,0};
+int buttonA[4]={0,0,0,0};
+int buttonB[4]={0,0,0,0};
+int buttonX[4]={0,0,0,0};
+int buttonY[4]={0,0,0,0};
+int triggerL[4]={0,0,0,0};
+int triggerR[4]={0,0,0,0};
+int buttonSelect[4]={0,0,0,0};
+int buttonStart[4]={0,0,0,0};
 
 extern int mainMenu_case;
 #ifdef WITH_TESTMODE
@@ -178,46 +177,49 @@ int no_limiter = 0;
 #ifdef __PSP2__
 void remap_custom_controls() // assign custom 1-3 to currently used custom set
 {
-	switch (mainMenu_custom_controlSet)
+	for (int i=0; i<4; i++)
 	{
-		case 0:
-			mainMenu_custom_up = mainMenu_custom1_up;
-			mainMenu_custom_down = mainMenu_custom1_down;
-			mainMenu_custom_left = mainMenu_custom1_left;
-			mainMenu_custom_right = mainMenu_custom1_right;
-			mainMenu_custom_A = mainMenu_custom1_A;
-			mainMenu_custom_B = mainMenu_custom1_B;
-			mainMenu_custom_X = mainMenu_custom1_X;
-			mainMenu_custom_Y = mainMenu_custom1_Y;
-			mainMenu_custom_L = mainMenu_custom1_L;
-			mainMenu_custom_R = mainMenu_custom1_R;
-			break;
-		case 1:
-			mainMenu_custom_up = mainMenu_custom2_up;
-			mainMenu_custom_down = mainMenu_custom2_down;
-			mainMenu_custom_left = mainMenu_custom2_left;
-			mainMenu_custom_right = mainMenu_custom2_right;
-			mainMenu_custom_A = mainMenu_custom2_A;
-			mainMenu_custom_B = mainMenu_custom2_B;
-			mainMenu_custom_X = mainMenu_custom2_X;
-			mainMenu_custom_Y = mainMenu_custom2_Y;
-			mainMenu_custom_L = mainMenu_custom2_L;
-			mainMenu_custom_R = mainMenu_custom2_R;
-			break;
-		case 2:
-			mainMenu_custom_up = mainMenu_custom3_up;
-			mainMenu_custom_down = mainMenu_custom3_down;
-			mainMenu_custom_left = mainMenu_custom3_left;
-			mainMenu_custom_right = mainMenu_custom3_right;
-			mainMenu_custom_A = mainMenu_custom3_A;
-			mainMenu_custom_B = mainMenu_custom3_B;
-			mainMenu_custom_X = mainMenu_custom3_X;
-			mainMenu_custom_Y = mainMenu_custom3_Y;
-			mainMenu_custom_L = mainMenu_custom3_L;
-			mainMenu_custom_R = mainMenu_custom3_R;
-			break;
-		default:
-			break;
+		switch (mainMenu_custom_controlSet)
+		{
+			case 0:
+				mainMenu_custom_up[i] = mainMenu_custom1_up[i];
+				mainMenu_custom_down[i] = mainMenu_custom1_down[i];
+				mainMenu_custom_left[i] = mainMenu_custom1_left[i];
+				mainMenu_custom_right[i] = mainMenu_custom1_right[i];
+				mainMenu_custom_A[i] = mainMenu_custom1_A[i];
+				mainMenu_custom_B[i] = mainMenu_custom1_B[i];
+				mainMenu_custom_X[i] = mainMenu_custom1_X[i];
+				mainMenu_custom_Y[i] = mainMenu_custom1_Y[i];
+				mainMenu_custom_L[i] = mainMenu_custom1_L[i];
+				mainMenu_custom_R[i] = mainMenu_custom1_R[i];
+				break;
+			case 1:
+				mainMenu_custom_up[i] = mainMenu_custom2_up[i];
+				mainMenu_custom_down[i] = mainMenu_custom2_down[i];
+				mainMenu_custom_left[i] = mainMenu_custom2_left[i];
+				mainMenu_custom_right[i] = mainMenu_custom2_right[i];
+				mainMenu_custom_A[i] = mainMenu_custom2_A[i];
+				mainMenu_custom_B[i] = mainMenu_custom2_B[i];
+				mainMenu_custom_X[i] = mainMenu_custom2_X[i];
+				mainMenu_custom_Y[i] = mainMenu_custom2_Y[i];
+				mainMenu_custom_L[i] = mainMenu_custom2_L[i];
+				mainMenu_custom_R[i] = mainMenu_custom2_R[i];
+				break;
+			case 2:
+				mainMenu_custom_up[i] = mainMenu_custom3_up[i];
+				mainMenu_custom_down[i] = mainMenu_custom3_down[i];
+				mainMenu_custom_left[i] = mainMenu_custom3_left[i];
+				mainMenu_custom_right[i] = mainMenu_custom3_right[i];
+				mainMenu_custom_A[i] = mainMenu_custom3_A[i];
+				mainMenu_custom_B[i] = mainMenu_custom3_B[i];
+				mainMenu_custom_X[i] = mainMenu_custom3_X[i];
+				mainMenu_custom_Y[i] = mainMenu_custom3_Y[i];
+				mainMenu_custom_L[i] = mainMenu_custom3_L[i];
+				mainMenu_custom_R[i] = mainMenu_custom3_R[i];
+				break;
+			default:
+				break;
+		}
 	}
 }		
 #endif
@@ -255,6 +257,10 @@ int gui_init (void)
 			sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
 #endif
 
+#ifdef USE_UAE4ALL_VKBD
+		vkbd_init();
+#endif
+
 #ifdef USE_GUICHAN
 		if (!uae4all_image_file0[0])
 			run_mainMenuGuichan();
@@ -263,9 +269,6 @@ int gui_init (void)
 		if (!uae4all_image_file0[0])
 			run_mainMenu();
 		quit_text();
-#endif
-#ifdef USE_UAE4ALL_VKBD
-		vkbd_init();
 #endif
 		inputmode_init();
 		uae4all_pause_music();
@@ -547,110 +550,181 @@ void gui_handle_events (void)
 	Uint8 *keystate = SDL_GetKeyState(NULL);
 #ifdef __PSP2__
 	SDL_JoystickUpdate();
-// Main Controller	
-	//On Vita, always use either the left of right analog for mouse pointer movement
-	//the other stick replicates the dpad inputs
-	lAnalogX=SDL_JoystickGetAxis(uae4all_joy0, 0);
-	lAnalogY=SDL_JoystickGetAxis(uae4all_joy0, 1);
-	rAnalogX=SDL_JoystickGetAxis(uae4all_joy0, 2);
-	rAnalogY=SDL_JoystickGetAxis(uae4all_joy0, 3);
-	
-	//Is this the first time this routine is called when the program has just been launched? 
-	//If yes, center the joysticks now
-	//After that, center the joysticks everytime we open the menu with "select"
-	if (!haveJoysticksBeenCentered) {	
-		lAnalogXCenter=lAnalogX;
-		lAnalogYCenter=lAnalogY;
-		rAnalogXCenter=rAnalogX;
-		rAnalogYCenter=rAnalogY;
-		//From now on only center when entering menu
-		haveJoysticksBeenCentered=1;
+	SDL_Joystick *currentJoy = uae4all_joy0;
+	int lX, lY, rX, rY;
+
+	for (int i=0; i<nr_joysticks; i++)
+	{
+		switch (i)
+		{	
+			case 0:
+				currentJoy = uae4all_joy0;
+				break;
+			case 1:
+				currentJoy = uae4all_joy1;
+				break;
+			case 2:
+				currentJoy = uae4all_joy2;
+				break;
+			case 3:
+				currentJoy = uae4all_joy3;
+				break;
+		}
+		//Only Joystick 0 analog axis are important for mouse control, the others
+		//are used to have the dpad on the left stick but that is all
+		lX = SDL_JoystickGetAxis(currentJoy, 0);
+		lY = SDL_JoystickGetAxis(currentJoy, 1);
+		rX = SDL_JoystickGetAxis(currentJoy, 2);
+		rY = SDL_JoystickGetAxis(currentJoy, 3);
+		
+		//Is this the first time this routine is called when the program has just been launched? 
+		//If yes, center the joysticks now
+		//After that, center the joysticks everytime we open the menu with "select"
+		if (!haveJoysticksBeenCentered) {	
+			lAnalogXCenter[i]=lX;
+			lAnalogYCenter[i]=lY;
+			rAnalogXCenter[i]=rX;
+			rAnalogYCenter[i]=rY;
+			//From now on only center when entering menu
+			haveJoysticksBeenCentered=1;
+		}
+				
+		lX=lX-lAnalogXCenter[i];
+		lY=lY-lAnalogYCenter[i];
+		rX=rX-rAnalogXCenter[i];
+		rY=rY-rAnalogYCenter[i];
+
+		if (i==0)
+		{
+				//save the main controller analog inputs those are used in the vkeyboard etc.
+				lAnalogX=lX;
+				lAnalogY=lY;
+				rAnalogX=rX;
+				rAnalogY=rY;	
+		}
+		// Main Controller is special (it does mouse controls vkeyboard etc.)
+		// On Main Controller, always use either the left of right analog for mouse pointer movement
+		// the other stick replicates the dpad inputs for all controllers
+		if (i==0 && mainMenu_leftStickMouse) {
+			dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9)
+				|| (rX > 1024*10) ? 1 : 0;
+			dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7)
+				|| (rX < -1024*10) ? 1 : 0;
+			dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8)
+				|| (rY < -1024*10) ? 1 : 0;
+			dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6)
+				|| (rY > 1024*10) ? 1 : 0;
+		} 
+		else
+		{
+			dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9)
+				|| (lX > 1024*10) ? 1 : 0;
+			dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7)
+				|| (lX < -1024*10) ? 1 : 0;
+			dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8)
+				|| (lY < -1024*10) ? 1 : 0;
+			dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6)
+				|| (lY > 1024*10) ? 1 : 0;
+		}
+			
+		buttonA[i] = SDL_JoystickGetButton(currentJoy, PAD_SQUARE);
+		buttonB[i] = SDL_JoystickGetButton(currentJoy, PAD_CIRCLE);
+		buttonX[i] = SDL_JoystickGetButton(currentJoy, PAD_CROSS);
+		buttonY[i] = SDL_JoystickGetButton(currentJoy, PAD_TRIANGLE);
+		triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_L);
+		triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_R);
+		buttonSelect[i] = SDL_JoystickGetButton(currentJoy, PAD_SELECT);
+		buttonStart[i] = SDL_JoystickGetButton(currentJoy, PAD_START);
+	}
+#ifdef USE_UAE4ALL_VKBD
+	//no autofire when keyboard is displayed
+	if (mainMenu_customAutofireButton && !vkbd_mode)
+#else
+	if (mainMenu_customAutofireButton)
+#endif
+	{
+		int *autoButton;
+		for (int i=0; i<nr_joysticks; i++)
+		{
+			int *autoButton;
+			switch (mainMenu_customAutofireButton)
+			{
+				case 1: 
+					autoButton = &buttonA[i];
+					break;
+				case 2:
+					autoButton = &buttonY[i];
+					break;
+				case 3:
+					autoButton = &buttonB[i];
+					break;
+				case 4:
+					autoButton = &buttonX[i];
+					break;
+				case 5:
+					autoButton = &triggerL[i];
+					break;
+				case 6:
+					autoButton = &triggerR[i];
+					break;
+			}
+			if (*autoButton)
+			{
+				if (customAutofireDelay[i]>mainMenu_autofireRate)
+				{
+					*autoButton=1; // press button for one frame only
+					customAutofireDelay[i]=0;
+				}
+				else
+					*autoButton=0;
+					customAutofireDelay[i]++;
+			}
+			else
+				customAutofireDelay[i]=0;
+		}
 	}
 
-	lAnalogX=lAnalogX-lAnalogXCenter;
-	lAnalogY=lAnalogY-lAnalogYCenter;
-	rAnalogX=rAnalogX-rAnalogXCenter;
-	rAnalogY=rAnalogY-rAnalogYCenter;
-	
-	if (mainMenu_leftStickMouse) {
-		dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
-			|| (rAnalogX > 1024*10) ? 1 : 0;
-		dpadLeft  = SDL_JoystickGetButton(uae4all_joy0, 7)
-			|| (rAnalogX < -1024*10) ? 1 : 0;
-		dpadUp  = SDL_JoystickGetButton(uae4all_joy0, 8)
-			|| (rAnalogY < -1024*10) ? 1 : 0;
-		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
-			|| (rAnalogY > 1024*10) ? 1 : 0;
-	} 
-	else
-	{
-		dpadRight  = SDL_JoystickGetButton(uae4all_joy0, 9)
-			|| (lAnalogX > 1024*10) ? 1 : 0;
-		dpadLeft  = SDL_JoystickGetButton(uae4all_joy0, 7)
-			|| (lAnalogX < -1024*10) ? 1 : 0;
-		dpadUp  = SDL_JoystickGetButton(uae4all_joy0, 8)
-			|| (lAnalogY < -1024*10) ? 1 : 0;
-		dpadDown  = SDL_JoystickGetButton(uae4all_joy0, 6)
-			|| (lAnalogY > 1024*10) ? 1 : 0;
-	}
-			
-	buttonA = SDL_JoystickGetButton(uae4all_joy0, PAD_SQUARE);
-	buttonB = SDL_JoystickGetButton(uae4all_joy0, PAD_CIRCLE);
-	buttonX = SDL_JoystickGetButton(uae4all_joy0, PAD_CROSS);
-	buttonY = SDL_JoystickGetButton(uae4all_joy0, PAD_TRIANGLE);
-	triggerL = SDL_JoystickGetButton(uae4all_joy0, PAD_L);
-	triggerR = SDL_JoystickGetButton(uae4all_joy0, PAD_R);
-	buttonSelect = SDL_JoystickGetButton(uae4all_joy0, PAD_SELECT);
-	buttonStart = SDL_JoystickGetButton(uae4all_joy0, PAD_START);
-	
-	if(buttonSelect)
+	if(buttonSelect[0])
 	{
 		//re-center the Joysticks when the user opens the menu
-		SDL_JoystickUpdate();
-		lAnalogXCenter=SDL_JoystickGetAxis(uae4all_joy0, 0);
-		lAnalogYCenter=SDL_JoystickGetAxis(uae4all_joy0, 1);
-		rAnalogXCenter=SDL_JoystickGetAxis(uae4all_joy0, 2);
-		rAnalogYCenter=SDL_JoystickGetAxis(uae4all_joy0, 3);
+		for (int i=0; i<nr_joysticks; i++)
+		{
+			switch (i)
+			{	
+				case 0:
+					currentJoy = uae4all_joy0;
+					break;
+				case 1:
+					currentJoy = uae4all_joy1;
+					break;
+				case 2:
+					currentJoy = uae4all_joy2;
+					break;
+				case 3:
+					currentJoy = uae4all_joy3;
+					break;
+			}
+			lAnalogXCenter[i]=SDL_JoystickGetAxis(currentJoy, 0);
+			lAnalogYCenter[i]=SDL_JoystickGetAxis(currentJoy, 1);
+			rAnalogXCenter[i]=SDL_JoystickGetAxis(currentJoy, 2);
+			rAnalogYCenter[i]=SDL_JoystickGetAxis(currentJoy, 3);
+		}
 		goMenu();
 	}
-	
-// Second paired Controller for two players, 
-// only rudimentary mapping for now for two player games
-// with Vita TV.
-	lAnalogXPly2=SDL_JoystickGetAxis(uae4all_joy1, 0);
-	lAnalogYPly2=SDL_JoystickGetAxis(uae4all_joy1, 1);
-
-	dpadRightPly2  = SDL_JoystickGetButton(uae4all_joy1, 9)
-		|| (lAnalogXPly2 > 1024*10) ? 1 : 0;
-	dpadLeftPly2  = SDL_JoystickGetButton(uae4all_joy1, 7)
-		|| (lAnalogXPly2 < -1024*10) ? 1 : 0;
-	dpadUpPly2  = SDL_JoystickGetButton(uae4all_joy1, 8)
-		|| (lAnalogYPly2 < -1024*10) ? 1 : 0;
-	dpadDownPly2  = SDL_JoystickGetButton(uae4all_joy1, 6)
-			|| (lAnalogYPly2 > 1024*10) ? 1 : 0;
-	
-	buttonAPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_SQUARE);
-	buttonBPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_CIRCLE);
-	buttonXPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_CROSS);
-	buttonYPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_TRIANGLE);
-	triggerLPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_L);
-	triggerRPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_R);
-	buttonSelectPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_SELECT);
-	buttonStartPly2 = SDL_JoystickGetButton(uae4all_joy1, PAD_START);
 #else
-	dpadUp = keystate[SDLK_UP];
-	dpadDown = keystate[SDLK_DOWN];
-	dpadLeft = keystate[SDLK_LEFT];
-	dpadRight = keystate[SDLK_RIGHT];
-	buttonA = keystate[SDLK_HOME];
-	buttonB = keystate[SDLK_END];
-	buttonX = keystate[SDLK_PAGEDOWN];
-	buttonY = keystate[SDLK_PAGEUP];
+	dpadUp[0] = keystate[SDLK_UP];
+	dpadDown[0] = keystate[SDLK_DOWN];
+	dpadLeft[0] = keystate[SDLK_LEFT];
+	dpadRight[0] = keystate[SDLK_RIGHT];
+	buttonA[0] = keystate[SDLK_HOME];
+	buttonB[0] = keystate[SDLK_END];
+	buttonX[0] = keystate[SDLK_PAGEDOWN];
+	buttonY[0] = keystate[SDLK_PAGEUP];
 #ifndef ANDROIDSDL
-	triggerL = keystate[SDLK_RSHIFT];
-	triggerR = keystate[SDLK_RCTRL];
-	buttonSelect = keystate[SDLK_LCTRL];
-	buttonStart = keystate[SDLK_LALT];
+	triggerL[0] = keystate[SDLK_RSHIFT];
+	triggerR[0] = keystate[SDLK_RCTRL];
+	buttonSelect[0] = keystate[SDLK_LCTRL];
+	buttonStart[0] = keystate[SDLK_LALT];
 
 	if(keystate[SDLK_LCTRL])
 		goMenu();
@@ -658,10 +732,10 @@ void gui_handle_events (void)
 	if(keystate[SDLK_F12])
 		SDL_WM_ToggleFullScreen(prSDLScreen);
 #else
-	triggerL = keystate[SDLK_F13];
-	triggerR = keystate[SDLK_RCTRL];
-	buttonSelect = keystate[SDLK_F12];
-	buttonStart = keystate[SDLK_F11];
+	triggerL[0] = keystate[SDLK_F13];
+	triggerR[0] = keystate[SDLK_RCTRL];
+	buttonSelect[0] = keystate[SDLK_F12];
+	buttonStart[0] = keystate[SDLK_F11];
 
 	if(keystate[SDLK_F12])
 		goMenu();
@@ -684,7 +758,7 @@ void gui_handle_events (void)
 	else if(justLK)
 		justLK=0;
 	//Quick Switch - textUI virtual keyboard via buttonB+buttonY
-	if((mainMenu_quickSwitch!=0) && buttonB && buttonY)
+	if((mainMenu_quickSwitch!=0) && buttonB[0] && buttonY[0])
 	{
 		if(!justLK)
 		{
@@ -697,7 +771,7 @@ void gui_handle_events (void)
 		justLK=0;
 #endif
 	// Quick Switch - screen lowres/hires
-	if (((mainMenu_quickSwitch==1) && buttonB && dpadUp) || ((mainMenu_quickSwitch==2) && buttonY && dpadUp))
+	if (((mainMenu_quickSwitch==1) && buttonB[0] && dpadUp[0]) || ((mainMenu_quickSwitch==2) && buttonY[0] && dpadUp[0]))
 	{
 	  if (visibleAreaWidth==320) {
 	    visibleAreaWidth=640;
@@ -712,7 +786,7 @@ void gui_handle_events (void)
 		update_display();
 	}
 	// Quick Switch - screen height
-	if (((mainMenu_quickSwitch==1) && buttonB && dpadDown) || ((mainMenu_quickSwitch==2) && buttonY && dpadDown))
+	if (((mainMenu_quickSwitch==1) && buttonB[0] && dpadDown[0]) || ((mainMenu_quickSwitch==2) && buttonY[0] && dpadDown[0]))
 	{
 	  if (mainMenu_displayedLines==200)
 	    mainMenu_displayedLines=216;
@@ -731,13 +805,13 @@ void gui_handle_events (void)
 		update_display();
 	}
 	// Quick Switch - save state
-	if (((mainMenu_quickSwitch==1) && buttonB && dpadLeft) || ((mainMenu_quickSwitch==2) && buttonY && dpadLeft))
+	if (((mainMenu_quickSwitch==1) && buttonB[0] && dpadLeft[0]) || ((mainMenu_quickSwitch==2) && buttonY[0] && dpadLeft[0]))
 	{	
 	  keystate[SDLK_s]=0;
 	  savestate_state = STATE_DOSAVE;
 	}
 	// Quick Switch - restore state
-	if (((mainMenu_quickSwitch==1) && buttonB && dpadRight) || ((mainMenu_quickSwitch==2) && buttonY && dpadRight))
+	if (((mainMenu_quickSwitch==1) && buttonB[0] && dpadRight[0]) || ((mainMenu_quickSwitch==2) && buttonY[0] && dpadRight[0]))
 	{
 		extern char *savestate_filename;
 		FILE *f=fopen(savestate_filename, "rb");
@@ -757,7 +831,7 @@ if(!vkbd_mode)
 #endif
 {
 #ifdef __PSP2__
-	if(buttonStart && triggerL) //toggle custom control config 1-3
+	if(buttonStart[0] && triggerL[0]) //toggle custom control config 1-3
 	{
 		if (can_change_custom_controlSet)
 		{
@@ -779,11 +853,11 @@ if(!vkbd_mode)
 						break;
 				}
 				// zero triggerL before the control config switches
-				if(mainMenu_custom_L == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_L == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_L > 0)
+				if(mainMenu_custom_L[0] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_L[0] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_L[0] > 0)
 				{		
-					getMapping(mainMenu_custom_L);
+					getMapping(mainMenu_custom_L[0]);
 					uae4all_keystate[customKey] = 0;
 					record_key((customKey << 1) | 1);
 				}
@@ -797,39 +871,39 @@ if(!vkbd_mode)
 		can_change_custom_controlSet = 1;
 	}
 	//holding R + start on Vita to move screen, L/R are used for mousebuttons.
-	else if(buttonStart && triggerR)
+	else if(buttonStart[0] && triggerR[0])
 #else
 	//L + R
-	if(triggerL && triggerR)
+	if(triggerL[0] && triggerR[0])
 #endif
 	{
 		//up
-		if(dpadUp)
+		if(dpadUp[0])
 		{
 			moveVertical(1);
 			moved_y += 2;
 		}
 		//down
-		else if(dpadDown)
+		else if(dpadDown[0])
 		{
 			moveVertical(-1);
 			moved_y -= 2;
 		}
 		//left
-		else if(dpadLeft)
+		else if(dpadLeft[0])
 		{
 #ifdef __PSP2__
 // Change zoom:
 // quickSwitch resolution presets
 			if (can_change_quickSwitchModeID)
-			{
-				if (quickSwitchModeID==0)
+			{			
+				if (quickSwitchModeID==sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1)
 				{
-					quickSwitchModeID=sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1;
+					quickSwitchModeID=0;
 				}
 				else
 				{
-					quickSwitchModeID--;
+					quickSwitchModeID++;
 				}
 				mainMenu_displayedLines = 
 					quickSwitchModes[quickSwitchModeID].num_lines;	
@@ -848,19 +922,18 @@ if(!vkbd_mode)
 #endif
 		}
 		//right
-		else if(dpadRight)
+		else if(dpadRight[0])
 		{
 #ifdef __PSP2__
 			if (can_change_quickSwitchModeID)
+			{
+				if (quickSwitchModeID==0)
 				{
-			
-				if (quickSwitchModeID==sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1)
-				{
-					quickSwitchModeID=0;
+					quickSwitchModeID=sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1;
 				}
 				else
 				{
-					quickSwitchModeID++;
+					quickSwitchModeID--;
 				}
 				mainMenu_displayedLines = 
 					quickSwitchModes[quickSwitchModeID].num_lines;	
@@ -970,7 +1043,7 @@ if(!vkbd_mode)
 #endif
 	}
 
-	else if(triggerL)
+	else if(triggerL[0])
 	{
 		//cutRight
 		if(keystate[SDLK_COMMA] && mainMenu_cutLeft > 0)
@@ -1029,20 +1102,20 @@ if(!vkbd_mode)
 	}
 
 	//autofire on/off
-	else if(triggerR)
+	else if(triggerR[0])
 	{
 		//(Y) button
-		if(buttonY)
+		if(buttonY[0])
 		{
-			if(!justPressedY)
+			if(!justPressedY[0])
 			{
 				//autofire on/off
 				switch_autofire = !switch_autofire;
-				justPressedY=1;
+				justPressedY[0]=1;
 			}
 		}
-		else if(justPressedY)
-			justPressedY=0;
+		else if(justPressedY[0])
+			justPressedY[0]=0;
 
 		//Q key
 		if(keystate[SDLK_q])
@@ -1080,700 +1153,703 @@ if(!vkbd_mode)
 
 	if (mainMenu_customControls && !gp2xMouseEmuOn && !gp2xButtonRemappingOn)
 	{
-		if(mainMenu_custom_dpad == 0)
-		{
-			//UP
-			if(dpadUp)
+		for (int i=0; i<nr_joysticks; i++)
+		{		
+			if(mainMenu_custom_dpad == 0)
 			{
-				if(!justMovedUp)
+				//UP
+				if(dpadUp[i])
 				{
-					if(mainMenu_custom_up == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_up == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_up > 0)
+					if(!justMovedUp[i])
 					{
-						getMapping(mainMenu_custom_up);
+						if(mainMenu_custom_up[i] == -1) buttonstate[0]=1;
+						else if(mainMenu_custom_up[i] == -2) buttonstate[2]=1;
+						else if(mainMenu_custom_up[i] > 0)
+						{
+							getMapping(mainMenu_custom_up[i]);
+							uae4all_keystate[customKey] = 1;
+							record_key(customKey << 1);
+						}
+						justMovedUp[i]=1;
+					}
+				}
+				else if(justMovedUp[i])
+				{
+					if(mainMenu_custom_up[i] == -1) buttonstate[0]=0;
+					else if(mainMenu_custom_up[i] == -2) buttonstate[2]=0;
+					else if(mainMenu_custom_up[i] > 0)
+					{		
+						getMapping(mainMenu_custom_up[i]);
+						uae4all_keystate[customKey] = 0;
+						record_key((customKey << 1) | 1);
+					}
+					justMovedUp[i]=0;
+				}
+
+				//DOWN
+				if(dpadDown[i])
+				{
+					if(!justMovedDown[i])
+					{
+						if(mainMenu_custom_down[i] == -1) buttonstate[0]=1;
+						else if(mainMenu_custom_down[i] == -2) buttonstate[2]=1;
+						else if(mainMenu_custom_down[i] > 0)
+						{
+							getMapping(mainMenu_custom_down[i]);
+							uae4all_keystate[customKey] = 1;
+							record_key(customKey << 1);
+						}
+						justMovedDown[i]=1;
+					}
+				}
+				else if(justMovedDown[i])
+				{
+					if(mainMenu_custom_down[i] == -1) buttonstate[0]=0;
+					else if(mainMenu_custom_down[i] == -2) buttonstate[2]=0;
+					else if(mainMenu_custom_down[i] > 0)
+					{		
+						getMapping(mainMenu_custom_down[i]);
+						uae4all_keystate[customKey] = 0;
+						record_key((customKey << 1) | 1);
+					}
+					justMovedDown[i]=0;
+				}
+
+				//LEFT
+				if(dpadLeft[i])
+				{
+					if(!justMovedLeft[i])
+					{
+						if(mainMenu_custom_left[i] == -1) buttonstate[0]=1;
+						else if(mainMenu_custom_left[i] == -2) buttonstate[2]=1;
+						else if(mainMenu_custom_left[i] > 0)
+						{
+							getMapping(mainMenu_custom_left[i]);
+							uae4all_keystate[customKey] = 1;
+							record_key(customKey << 1);
+						}
+						justMovedLeft[i]=1;
+					}
+				}
+				else if(justMovedLeft[i])
+				{
+					if(mainMenu_custom_left[i] == -1) buttonstate[0]=0;
+					else if(mainMenu_custom_left[i] == -2) buttonstate[2]=0;
+					else if(mainMenu_custom_left[i] > 0)
+					{		
+						getMapping(mainMenu_custom_left[i]);
+						uae4all_keystate[customKey] = 0;
+						record_key((customKey << 1) | 1);
+					}
+					justMovedLeft[i]=0;
+				}
+
+				//Right[i]
+				if(dpadRight[i])
+				{
+					if(!justMovedRight[i])
+					{
+						if(mainMenu_custom_right[i] == -1) buttonstate[0]=1;
+						else if(mainMenu_custom_right[i] == -2) buttonstate[2]=1;
+						else if(mainMenu_custom_right[i] > 0)
+						{
+							getMapping(mainMenu_custom_right[i]);
+							uae4all_keystate[customKey] = 1;
+							record_key(customKey << 1);
+						}
+						justMovedRight[i]=1;
+					}
+				}
+				else if(justMovedRight[i])
+				{
+					if(mainMenu_custom_right[i] == -1) buttonstate[0]=0;
+					else if(mainMenu_custom_right[i] == -2) buttonstate[2]=0;
+					else if(mainMenu_custom_right[i] > 0)
+					{		
+						getMapping(mainMenu_custom_right[i]);
+						uae4all_keystate[customKey] = 0;
+						record_key((customKey << 1) | 1);
+					}
+					justMovedRight[i]=0;
+				}
+			}
+
+			//(A)
+			if(buttonA[i])
+			{
+				if(!justPressedA[i])
+				{
+					if(mainMenu_custom_A[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_A[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_A[i] > 0)
+					{
+						getMapping(mainMenu_custom_A[i]);
 						uae4all_keystate[customKey] = 1;
 						record_key(customKey << 1);
 					}
-					justMovedUp=1;
+					justPressedA[i]=1;
 				}
 			}
-			else if(justMovedUp)
+			else if(justPressedA[i])
 			{
-				if(mainMenu_custom_up == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_up == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_up > 0)
-				{		
-					getMapping(mainMenu_custom_up);
+				if(mainMenu_custom_A[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_A[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_A[i] > 0)
+				{
+					getMapping(mainMenu_custom_A[i]);
 					uae4all_keystate[customKey] = 0;
 					record_key((customKey << 1) | 1);
 				}
-				justMovedUp=0;
+				justPressedA[i]=0;
 			}
 
-			//DOWN
-			if(dpadDown)
+			//(B)
+			if(buttonB[i])
 			{
-				if(!justMovedDown)
+				if(!justPressedB[i])
 				{
-					if(mainMenu_custom_down == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_down == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_down > 0)
+					if(mainMenu_custom_B[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_B[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_B[i] > 0)
 					{
-						getMapping(mainMenu_custom_down);
+						getMapping(mainMenu_custom_B[i]);
 						uae4all_keystate[customKey] = 1;
 						record_key(customKey << 1);
 					}
-					justMovedDown=1;
+					justPressedB[i]=1;
 				}
 			}
-			else if(justMovedDown)
+			else if(justPressedB[i])
 			{
-				if(mainMenu_custom_down == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_down == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_down > 0)
-				{		
-					getMapping(mainMenu_custom_down);
+				if(mainMenu_custom_B[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_B[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_B[i] > 0)
+				{
+					getMapping(mainMenu_custom_B[i]);
 					uae4all_keystate[customKey] = 0;
 					record_key((customKey << 1) | 1);
 				}
-				justMovedDown=0;
+				justPressedB[i]=0;
 			}
 
-			//LEFT
-			if(dpadLeft)
+			//(X)
+			if(buttonX[i])
 			{
-				if(!justMovedLeft)
+				if(!justPressedX[i])
 				{
-					if(mainMenu_custom_left == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_left == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_left > 0)
+					if(mainMenu_custom_X[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_X[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_X[i] > 0)
 					{
-						getMapping(mainMenu_custom_left);
+						getMapping(mainMenu_custom_X[i]);
 						uae4all_keystate[customKey] = 1;
 						record_key(customKey << 1);
 					}
-					justMovedLeft=1;
+					justPressedX[i]=1;
 				}
 			}
-			else if(justMovedLeft)
+			else if(justPressedX[i])
 			{
-				if(mainMenu_custom_left == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_left == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_left > 0)
+				if(mainMenu_custom_X[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_X[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_X[i] > 0)
 				{		
-					getMapping(mainMenu_custom_left);
+					getMapping(mainMenu_custom_X[i]);
 					uae4all_keystate[customKey] = 0;
 					record_key((customKey << 1) | 1);
 				}
-				justMovedLeft=0;
+				justPressedX[i]=0;
 			}
 
- 			//RIGHT
-			if(dpadRight)
+			//(Y[i])
+			if(buttonY[i])
 			{
-				if(!justMovedRight)
+				if(!justPressedY[i])
 				{
-					if(mainMenu_custom_right == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_right == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_right > 0)
+					if(mainMenu_custom_Y[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_Y[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_Y[i] > 0)
 					{
-						getMapping(mainMenu_custom_right);
+						getMapping(mainMenu_custom_Y[i]);
 						uae4all_keystate[customKey] = 1;
 						record_key(customKey << 1);
 					}
-					justMovedRight=1;
+					justPressedY[i]=1;
 				}
 			}
-			else if(justMovedRight)
+			else if(justPressedY[i])
 			{
-				if(mainMenu_custom_right == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_right == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_right > 0)
+				if(mainMenu_custom_Y[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_Y[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_Y[i] > 0)
 				{		
-					getMapping(mainMenu_custom_right);
+					getMapping(mainMenu_custom_Y[i]);
 					uae4all_keystate[customKey] = 0;
 					record_key((customKey << 1) | 1);
 				}
-				justMovedRight=0;
+				justPressedY[i]=0;
 			}
-		}
 
-		//(A)
-		if(buttonA)
-		{
-			if(!justPressedA)
+			//(L)
+			if(triggerL[i])
 			{
-				if(mainMenu_custom_A == -1) buttonstate[0]=1;
-				else if(mainMenu_custom_A == -2) buttonstate[2]=1;
-				else if(mainMenu_custom_A > 0)
+				if(!justPressedL[i])
 				{
-					getMapping(mainMenu_custom_A);
-					uae4all_keystate[customKey] = 1;
-					record_key(customKey << 1);
+					if(mainMenu_custom_L[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_L[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_L[i] > 0)
+					{
+						getMapping(mainMenu_custom_L[i]);
+						uae4all_keystate[customKey] = 1;
+						record_key(customKey << 1);
+					}
+					justPressedL[i]=1;
 				}
-				justPressedA=1;
 			}
-		}
-		else if(justPressedA)
-		{
-			if(mainMenu_custom_A == -1) buttonstate[0]=0;
-			else if(mainMenu_custom_A == -2) buttonstate[2]=0;
-			else if(mainMenu_custom_A > 0)
+			else if(justPressedL[i])
 			{
-				getMapping(mainMenu_custom_A);
-				uae4all_keystate[customKey] = 0;
-				record_key((customKey << 1) | 1);
+				if(mainMenu_custom_L[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_L[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_L[i] > 0)
+				{		
+					getMapping(mainMenu_custom_L[i]);
+					uae4all_keystate[customKey] = 0;
+					record_key((customKey << 1) | 1);
+				}
+				justPressedL[i]=0;
 			}
-			justPressedA=0;
-		}
 
-		//(B)
-		if(buttonB)
-		{
-			if(!justPressedB)
+			//(R)
+			if(triggerR[i])
 			{
-				if(mainMenu_custom_B == -1) buttonstate[0]=1;
-				else if(mainMenu_custom_B == -2) buttonstate[2]=1;
-				else if(mainMenu_custom_B > 0)
+				if(!justPressedR[i])
 				{
-					getMapping(mainMenu_custom_B);
-					uae4all_keystate[customKey] = 1;
-					record_key(customKey << 1);
+					if(mainMenu_custom_R[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_R[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_R[i] > 0)
+					{
+						getMapping(mainMenu_custom_R[i]);
+						uae4all_keystate[customKey] = 1;
+						record_key(customKey << 1);
+					}
+					justPressedR[i]=1;
 				}
-				justPressedB=1;
 			}
-		}
-		else if(justPressedB)
-		{
-			if(mainMenu_custom_B == -1) buttonstate[0]=0;
-			else if(mainMenu_custom_B == -2) buttonstate[2]=0;
-			else if(mainMenu_custom_B > 0)
+			else if(justPressedR[i])
 			{
-				getMapping(mainMenu_custom_B);
-				uae4all_keystate[customKey] = 0;
-				record_key((customKey << 1) | 1);
-			}
-			justPressedB=0;
-		}
-
-		//(X)
-		if(buttonX)
-		{
-			if(!justPressedX)
-			{
-				if(mainMenu_custom_X == -1) buttonstate[0]=1;
-				else if(mainMenu_custom_X == -2) buttonstate[2]=1;
-				else if(mainMenu_custom_X > 0)
-				{
-					getMapping(mainMenu_custom_X);
-					uae4all_keystate[customKey] = 1;
-					record_key(customKey << 1);
+				if(mainMenu_custom_R[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_R[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_R[i] > 0)
+				{		
+					getMapping(mainMenu_custom_R[i]);
+					uae4all_keystate[customKey] = 0;
+					record_key((customKey << 1) | 1);
 				}
-				justPressedX=1;
+				justPressedR[i]=0;
 			}
 		}
-		else if(justPressedX)
-		{
-			if(mainMenu_custom_X == -1) buttonstate[0]=0;
-			else if(mainMenu_custom_X == -2) buttonstate[2]=0;
-			else if(mainMenu_custom_X > 0)
-			{		
-				getMapping(mainMenu_custom_X);
-				uae4all_keystate[customKey] = 0;
-				record_key((customKey << 1) | 1);
-			}
-			justPressedX=0;
-		}
-
-		//(Y)
-		if(buttonY)
-		{
-			if(!justPressedY)
-			{
-				if(mainMenu_custom_Y == -1) buttonstate[0]=1;
-				else if(mainMenu_custom_Y == -2) buttonstate[2]=1;
-				else if(mainMenu_custom_Y > 0)
-				{
-					getMapping(mainMenu_custom_Y);
-					uae4all_keystate[customKey] = 1;
-					record_key(customKey << 1);
-				}
-				justPressedY=1;
-			}
-		}
-		else if(justPressedY)
-		{
-			if(mainMenu_custom_Y == -1) buttonstate[0]=0;
-			else if(mainMenu_custom_Y == -2) buttonstate[2]=0;
-			else if(mainMenu_custom_Y > 0)
-			{		
-				getMapping(mainMenu_custom_Y);
-				uae4all_keystate[customKey] = 0;
-				record_key((customKey << 1) | 1);
-			}
-			justPressedY=0;
-		}
-
-		//(L)
-		if(triggerL)
-		{
-			if(!justPressedL)
-			{
-				if(mainMenu_custom_L == -1) buttonstate[0]=1;
-				else if(mainMenu_custom_L == -2) buttonstate[2]=1;
-				else if(mainMenu_custom_L > 0)
-				{
-					getMapping(mainMenu_custom_L);
-					uae4all_keystate[customKey] = 1;
-					record_key(customKey << 1);
-				}
-				justPressedL=1;
-			}
-		}
-		else if(justPressedL)
-		{
-			if(mainMenu_custom_L == -1) buttonstate[0]=0;
-			else if(mainMenu_custom_L == -2) buttonstate[2]=0;
-			else if(mainMenu_custom_L > 0)
-			{		
-				getMapping(mainMenu_custom_L);
-				uae4all_keystate[customKey] = 0;
-				record_key((customKey << 1) | 1);
-			}
-			justPressedL=0;
-		}
-
-		//(R)
-		if(triggerR)
-		{
-			if(!justPressedR)
-			{
-				if(mainMenu_custom_R == -1) buttonstate[0]=1;
-				else if(mainMenu_custom_R == -2) buttonstate[2]=1;
-				else if(mainMenu_custom_R > 0)
-				{
-					getMapping(mainMenu_custom_R);
-					uae4all_keystate[customKey] = 1;
-					record_key(customKey << 1);
-				}
-				justPressedR=1;
-			}
-		}
-		else if(justPressedR)
-		{
-			if(mainMenu_custom_R == -1) buttonstate[0]=0;
-			else if(mainMenu_custom_R == -2) buttonstate[2]=0;
-			else if(mainMenu_custom_R > 0)
-			{		
-				getMapping(mainMenu_custom_R);
-				uae4all_keystate[customKey] = 0;
-				record_key((customKey << 1) | 1);
-			}
-			justPressedR=0;
-		}
-	}
+	}//end of nr_joysticks loop
 	else if(!gp2xMouseEmuOn)
 	{
 		//DPad = arrow keys in stylus-mode
 		if(gp2xButtonRemappingOn)
 		{
 			//dpad up
-			if (dpadUp)
+			if (dpadUp[0])
 			{
-				if(!justMovedUp)
+				if(!justMovedUp[0])
 				{
 					//left and right mouse-buttons down
 					buttonstate[0] = 1;
 					buttonstate[2] = 1;
 					stylusClickOverride = 1;
-					justMovedUp=1;
+					justMovedUp[0]=1;
 				}
 			}
-			else if(justMovedUp)
+			else if(justMovedUp[0])
 			{
 				//left and right mouse-buttons up
 				buttonstate[0] = 0;
 				buttonstate[2] = 0;
 				stylusClickOverride = 0;
-				justMovedUp=0;
+				justMovedUp[0]=0;
 			}
 			//dpad down
-			if (dpadDown)
+			if (dpadDown[0])
 			{
-				if(!justMovedDown)
+				if(!justMovedDown[0])
 				{
 					//no clicks with stylus now
 					stylusClickOverride=1;
-					justMovedDown=1;
+					justMovedDown[0]=1;
 				}
 			}
-			else if(justMovedDown)
+			else if(justMovedDown[0])
 			{
 				//clicks active again
 				stylusClickOverride=0;
-				justMovedDown=0;
+				justMovedDown[0]=0;
 			}
 			//dpad left
-			if (dpadLeft)
+			if (dpadLeft[0])
 			{
-				if(!justMovedLeft)
+				if(!justMovedLeft[0])
 				{
 					//left mouse-button down
 					buttonstate[0] = 1;
 					stylusClickOverride = 1;
-					justMovedLeft=1;
+					justMovedLeft[0]=1;
 				}
 			}
-			else if(justMovedLeft)
+			else if(justMovedLeft[0])
 			{
 				//left mouse-button up
 				buttonstate[0] = 0;
 				stylusClickOverride = 0;
-				justMovedLeft=0;
+				justMovedLeft[0]=0;
 			}
 			//dpad right
-			if (dpadRight)
+			if (dpadRight[0])
 			{
-				if(!justMovedRight)
+				if(!justMovedRight[0])
 				{
 					//right mouse-button down
 					buttonstate[2] = 1;
 					stylusClickOverride = 1;
-					justMovedRight=1;
+					justMovedRight[0]=1;
 				}
 			}
-			else if(justMovedRight)
+			else if(justMovedRight[0])
 			{
 				//right mouse-button up
 				buttonstate[2] = 0;
 				stylusClickOverride = 0;
-				justMovedRight=0;
+				justMovedRight[0]=0;
 			}
 			//L + up
-			if(triggerL && dpadUp)
+			if(triggerL[0] && dpadUp[0])
 				stylusAdjustY-=2;
 			//L + down
-			if(triggerL && dpadDown)
+			if(triggerL[0] && dpadDown[0])
 				stylusAdjustY+=2;
 			//L + left
-			if(triggerL && dpadLeft)
+			if(triggerL[0] && dpadLeft[0])
 				stylusAdjustX-=2;
 			//L + right
-			if(triggerL && dpadRight)
+			if(triggerL[0] && dpadRight[0])
 				stylusAdjustX+=2;
 		}
 		//R-trigger in joystick mode
-		else if(triggerR)
+		else if(triggerR[0])
 		{
 			//(A) button
-			if(buttonA)
+			if(buttonA[0])
 			{
-				if(!justPressedA)
+				if(!justPressedA[0])
 				{
 					//CTRL
 					uae4all_keystate[AK_CTRL] = 1;
 					record_key(AK_CTRL << 1);
-					justPressedA=1;
+					justPressedA[0]=1;
 				}
 			}
-			else if(justPressedA)
+			else if(justPressedA[0])
 			{
 				uae4all_keystate[AK_CTRL] = 0;
 				record_key((AK_CTRL << 1) | 1);
-				justPressedA=0;
+				justPressedA[0]=0;
 			}
 			//(B) button
-			if(buttonB)
+			if(buttonB[0])
 			{
-				if(!justPressedB)
+				if(!justPressedB[0])
 				{
 					//left ALT
 					uae4all_keystate[AK_LALT] = 1;
 					record_key(AK_LALT << 1);
-					justPressedB=1;
+					justPressedB[0]=1;
 				}
 			}
-			else if(justPressedB)
+			else if(justPressedB[0])
 			{
 				uae4all_keystate[AK_LALT] = 0;
 				record_key((AK_LALT << 1) | 1);
-				justPressedB=0;
+				justPressedB[0]=0;
 			}
 			//(X) button
-			if(buttonX)
+			if(buttonX[0])
 			{
-				if(!justPressedX)
+				if(!justPressedX[0])
 				{
 					//HELP
 					uae4all_keystate[AK_HELP] = 1;
 					record_key(AK_HELP << 1);
-					justPressedX=1;
+					justPressedX[0]=1;
 				}
 			}
-			else if(justPressedX)
+			else if(justPressedX[0])
 			{
 				//HELP
 				uae4all_keystate[AK_HELP] = 0;
 				record_key((AK_HELP << 1) | 1);
-				justPressedX=0;
+				justPressedX[0]=0;
 			}
 		}
-		else if(triggerL)
+		else if(triggerL[0])
 		{
 			//(A) button
-			if(buttonA)
+			if(buttonA[0])
 			{
-				if(!justPressedA)
+				if(!justPressedA[0])
 				{
 					//left mouse-button down
 					buttonstate[0] = 1;
-					justPressedA=1;
+					justPressedA[0]=1;
 				}
 			}
-			else if(justPressedA)
+			else if(justPressedA[0])
 			{
 				//left mouse-button up
 				buttonstate[0] = 0;
-				justPressedA=0;
+				justPressedA[0]=0;
 			}
 			//(B) button
-			if(buttonB)
+			if(buttonB[0])
 			{
-				if(!justPressedB)
+				if(!justPressedB[0])
 				{
 					//right mouse-button down
 					buttonstate[2] = 1;
-					justPressedB=1;
+					justPressedB[0]=1;
 				}
 			}
-			else if(justPressedB)
+			else if(justPressedB[0])
 			{
 				//right mouse-button up
 				buttonstate[2] = 0;
-				justPressedB=0;
+				justPressedB[0]=0;
 			}
 		}
 		else if(mainMenu_joyConf<2)
 		{
-			if(buttonY)
+			if(buttonY[0])
 			{
-				if(!justPressedY)
+				if(!justPressedY[0])
 				{
 					//SPACE
 					uae4all_keystate[AK_SPC] = 1;
 					record_key(AK_SPC << 1);
-					justPressedY=1;
+					justPressedY[0]=1;
 				}
 			}
-			else if(justPressedY)
+			else if(justPressedY[0])
 			{
 				//SPACE
 				uae4all_keystate[AK_SPC] = 0;
 				record_key((AK_SPC << 1) | 1);
-				justPressedY=0;
+				justPressedY[0]=0;
 			}
 		}
 	}
 	else
 	{
-		if(buttonA)
+		if(buttonA[0])
 		{
-			if(!justPressedA)
+			if(!justPressedA[0])
 			{
 				//left mouse-button down
 				buttonstate[0] = 1;
-				justPressedA=1;
+				justPressedA[0]=1;
 			}
 		}
-		else if(justPressedA)
+		else if(justPressedA[0])
 		{
 			//left mouse-button up
 			buttonstate[0] = 0;
-			justPressedA=0;
+			justPressedA[0]=0;
 		}
 		//(B) button
-		if(buttonB)
+		if(buttonB[0])
 		{
-			if(!justPressedB)
+			if(!justPressedB[0])
 			{
 				//left mouse-button down
 				buttonstate[2] = 1;
-				justPressedB=1;
+				justPressedB[0]=1;
 			}
 		}
-		else if(justPressedB)
+		else if(justPressedB[0])
 		{
 			//left mouse-button up
 			buttonstate[2] = 0;
-			justPressedB=0;
+			justPressedB[0]=0;
 		}
-		if(buttonY)
+		if(buttonY[0])
 		{
-			if(!justPressedY)
+			if(!justPressedY[0])
 			{
 				//SPACE
 				uae4all_keystate[AK_SPC] = 1;
 				record_key(AK_SPC << 1);
-				justPressedY=1;
+				justPressedY[0]=1;
 			}
 		}
-		else if(justPressedY)
+		else if(justPressedY[0])
 		{
 			//SPACE
 			uae4all_keystate[AK_SPC] = 0;
 			record_key((AK_SPC << 1) | 1);
-			justPressedY=0;
+			justPressedY[0]=0;
 		}
-		if(dpadLeft)
+		if(dpadLeft[0])
 		{
-			if(!justMovedLeft)
+			if(!justMovedLeft[0])
 			{
 				//left ALT
 				uae4all_keystate[0x64] = 1;
 				record_key(0x64 << 1);
-				justMovedLeft=1;
+				justMovedLeft[0]=1;
 			}
 		}
-		else if(justMovedLeft)
+		else if(justMovedLeft[0])
 		{
 			//left ALT
 			uae4all_keystate[0x64] = 0;
 			record_key((0x64 << 1) | 1);
-			justMovedLeft=0;
+			justMovedLeft[0]=0;
 		}
-		if(dpadRight)
+		if(dpadRight[0])
 		{
-			if(!justMovedRight)
+			if(!justMovedRight[0])
 			{
 				//left ALT
 				uae4all_keystate[0x64] = 1;
 				record_key(0x64 << 1);
-				justMovedRight=1;
+				justMovedRight[0]=1;
 			}
 		}
-		else if(justMovedRight)
+		else if(justMovedRight[0])
 		{
 			//left ALT
 			uae4all_keystate[0x64] = 0;
 			record_key((0x64 << 1) | 1);
-			justMovedRight=0;
+			justMovedRight[0]=0;
 		}
 	}
 
-	if(!mainMenu_customControls && triggerR)
+	if(!mainMenu_customControls && triggerR[0])
 	{
 		//R+dpad = arrow keys in joystick mode
 		//dpad up
-		if(dpadUp)
+		if(dpadUp[0])
 		{
-			if(!justMovedUp)
+			if(!justMovedUp[0])
 			{
 				//arrow up
 				uae4all_keystate[0x4C] = 1;
 				record_key(0x4C << 1);
-				justMovedUp=1;
+				justMovedUp[0]=1;
 			}
 		}
-		else if(justMovedUp)
+		else if(justMovedUp[0])
 		{
 			//arrow up
 			uae4all_keystate[0x4C] = 0;
 			record_key((0x4C << 1) | 1);
-			justMovedUp=0;
+			justMovedUp[0]=0;
 		}
 		//dpad down
-		if(dpadDown)
+		if(dpadDown[0])
 		{
-			if(!justMovedDown)
+			if(!justMovedDown[0])
 			{
 				//arrow down
 				uae4all_keystate[0x4D] = 1;
 				record_key(0x4D << 1);
-				justMovedDown=1;
+				justMovedDown[0]=1;
 			}
 		}
-		else if(justMovedDown)
+		else if(justMovedDown[0])
 		{
 			//arrow down
 			uae4all_keystate[0x4D] = 0;
 			record_key((0x4D << 1) | 1);
-			justMovedDown=0;
+			justMovedDown[0]=0;
 		}
 		//dpad left
-		if(dpadLeft)
+		if(dpadLeft[0])
 		{
-			if(!justMovedLeft)
+			if(!justMovedLeft[0])
 			{
 				//arrow left
 				uae4all_keystate[0x4F] = 1;
 				record_key(0x4F << 1);
-				justMovedLeft=1;
+				justMovedLeft[0]=1;
 			}
 		}
-		else if(justMovedLeft)
+		else if(justMovedLeft[0])
 		{
 			//arrow left
 			uae4all_keystate[0x4F] = 0;
 			record_key((0x4F << 1) | 1);
-			justMovedLeft=0;
+			justMovedLeft[0]=0;
 		}
 		//dpad right
-		if (dpadRight)
+		if (dpadRight[0])
 		{
-			if(!justMovedRight)
+			if(!justMovedRight[0])
 			{
 				//arrow right
 				uae4all_keystate[0x4E] = 1;
 				record_key(0x4E << 1);
-				justMovedRight=1;
+				justMovedRight[0]=1;
 			}
 		}
-		else if(justMovedRight)
+		else if(justMovedRight[0])
 		{
 			//arrow right
 			uae4all_keystate[0x4E] = 0;
 			record_key((0x4E << 1) | 1);
-			justMovedRight=0;
+			justMovedRight[0]=0;
 		}
 	}
 	
 #ifdef __PSP2__
-	//VITA Controls: If no using custom controls, use L=right mouse, R=left mouse because 
+	//VITA Controls: If not using custom controls, use L=right mouse, R=left mouse 
 	//because analog stick = mouse movement is always on for Vita
 	if(!mainMenu_customControls)
 	{
 		//(R) button
-		if(triggerR)
+		if(triggerR[0])
 		{
-			if(!justPressedR)
+			if(!justPressedR[0])
 			{
 				//left mouse-button down
 				buttonstate[0] = 1;
-				justPressedR=1;
+				justPressedR[0]=1;
 			}
 		}
-		else if(justPressedR)
+		else if(justPressedR[0])
 		{
 			//left mouse-button up
 			buttonstate[0] = 0;
-			justPressedR=0;
+			justPressedR[0]=0;
 		}
 		//(L) button
-		if(triggerL)
+		if(triggerL[0])
 		{
-			if(!justPressedL)
+			if(!justPressedL[0])
 			{
 				//right mouse-button down
 				buttonstate[2] = 1;
-				justPressedL=1;
+				justPressedL[0]=1;
 			}
 		}
-		else if(justPressedL)
+		else if(justPressedL[0])
 		{
 			//right mouse-button up
 			buttonstate[2] = 0;
-			justPressedL=0;
+			justPressedL[0]=0;
 		}
 	}
 #endif // __PSP2__
@@ -1785,10 +1861,10 @@ if(!vkbd_mode)
 	//on Vita, Start brings up the  virtual keyboard, but Trigger R + Start is used for
 	//quickswitch resolution etc. and Trigger L + Start is used for switching between
 	//custom control configs
-	if(buttonStart && !triggerR && !triggerL)
+	if(buttonStart[0] && !triggerR[0] && !triggerL[0])
 #else
 	//L+K: virtual keyboard
-	if(triggerL && keystate[SDLK_k])
+	if(triggerL[0] && keystate[SDLK_k])
 #endif
 	{
 		if(!justLK)
@@ -1801,12 +1877,12 @@ if(!vkbd_mode)
 		justLK=0;
 #endif
 
-	if(triggerL && keystate[SDLK_s])
+	if(triggerL[0] && keystate[SDLK_s])
 	{
 		keystate[SDLK_s]=0;
 		savestate_state = STATE_DOSAVE;
 	}
-	if(triggerL && keystate[SDLK_l])
+	if(triggerL[0] && keystate[SDLK_l])
 	{
 		extern char *savestate_filename;
 		FILE *f=fopen(savestate_filename, "rb");

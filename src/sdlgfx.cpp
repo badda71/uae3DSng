@@ -824,7 +824,7 @@ void handle_events (void)
 
 int needmousehack (void)
 {
-    return 1;
+	return 1;
 }
 
 int lockscr (void)

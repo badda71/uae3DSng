@@ -116,6 +116,7 @@ static inline int key_saveMenu(int *cp)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hit5=0;
 		if (event.type == SDL_KEYDOWN)
 		{
 			uae4all_play_click();

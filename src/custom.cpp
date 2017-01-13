@@ -42,6 +42,7 @@
 #include "savestate.h"
 #include "menu_config.h"
 
+extern int mainMenu_mouseEmulation;
 
 #ifdef STOP_WHEN_COPPER
 static __inline__ void setcopper(void)
@@ -1811,7 +1812,7 @@ static _INLINE_ void record_sprite (int line, int num, int sprxp, uae_u16 *_GCCR
 		                 | (sprtabb[db & 0xFF] << 16) | sprtabb[db >> 8]);
 		
 		buf = spixels + word_offs + ((i << dbl) >> half);
-		record_sprite_1 (buf, datab, num, dbl, mask, 0, collision_mask);
+		record_sprite_1 (buf, datab, num, dbl, mask, mainMenu_spriteCollisions, collision_mask);
 		data++;
 		datb++;
 	}
@@ -2162,8 +2163,8 @@ static _INLINE_ void do_mouse_hack (void)
   int spr0x = ((spr0pos & 0xff) << 2) | ((spr0ctl & 1) << 1);
   int spr0y = ((spr0pos >> 8) | ((spr0ctl & 4) << 6)) << 1;
   int diffx, diffy;
-
-  if (ievent_alive > 0) 
+  
+  if (ievent_alive > 0 || !mainMenu_mouseEmulation) 
   {
 	  mouse_x = mouse_y = 0;
 	  return;
