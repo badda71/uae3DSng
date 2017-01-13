@@ -290,7 +290,13 @@ void text_draw_background()
 	int i,j;
 	int w=text_screen->w+text_background->w-1;
 	int h=text_screen->h+text_background->h-1;
-
+#ifdef __PSP2__
+	r.x=0;
+	r.y=0;
+	r.w=text_background->w;
+	r.h=text_background->h;
+	SDL_BlitSurface(text_background,NULL,text_screen,&r);
+#else
 	if (menu_moving)
 	{
 		if (pos_x>=0) pos_x=-text_screen->w;
@@ -308,6 +314,7 @@ void text_draw_background()
 			r.h=text_background->h;
 			SDL_BlitSurface(text_background,NULL,text_screen,&r);
 		}
+#endif
 	if (menu_moving)
 		update_window_color();
 }

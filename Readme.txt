@@ -93,6 +93,11 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.47
+
+- new menu background
+- fix swapped "Quote"<->"Backquote" overlay keyboard keys
+
 1.46
 
 - never save autofire button to reduce confusion 
