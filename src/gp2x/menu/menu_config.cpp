@@ -1374,6 +1374,8 @@ void loadconfig(int general)
         fscanf(f,"autofireRate=%d\n",&mainMenu_autofireRate);
         fscanf(f,"autofire=%d\n",&mainMenu_autofire);
         fscanf(f,"customAutofireButton=%d\n",&mainMenu_customAutofireButton);
+// Never actually load the custom Autofire button to reduce user confusion
+        mainMenu_customAutofireButton = 0;
         fscanf(f,"stylusOffset=%d\n",&mainMenu_stylusOffset);
         fscanf(f,"tapDelay=%d\n",&mainMenu_tapDelay);
         fscanf(f,"scanlines=%d\n",&mainMenu_scanlines);
