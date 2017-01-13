@@ -93,6 +93,10 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.45
+
+- added option to use autofire with custom configs, can choose one Vita button that will have autofire, or set it to 'none' (default) to turn it off
+
 1.44
 
 - improved contrast of virtual keyboard overlays (thanks to ScHlAuChi for new images)

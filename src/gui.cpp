@@ -71,6 +71,10 @@ int stylusClickOverride=0;
 int stylusAdjustX=0, stylusAdjustY=0;
 int screenWidth = 640;
 
+static int customAutofireDelay[4]={ 0,0,0,0 };
+
+extern int mainMenu_autofire;
+
 extern int nr_joysticks;
 
 extern struct gui_info gui_data;
@@ -632,9 +636,56 @@ void gui_handle_events (void)
 		buttonSelect[i] = SDL_JoystickGetButton(currentJoy, PAD_SELECT);
 		buttonStart[i] = SDL_JoystickGetButton(currentJoy, PAD_START);
 	}
+#ifdef USE_UAE4ALL_VKBD
+	//no autofire when keyboard is displayed
+	if (mainMenu_customAutofireButton && !vkbd_mode)
+#else
+	if (mainMenu_customAutofireButton)
+#endif
+	{
+		int *autoButton;
+		for (int i=0; i<nr_joysticks; i++)
+		{
+			int *autoButton;
+			switch (mainMenu_customAutofireButton)
+			{
+				case 1: 
+					autoButton = &buttonA[i];
+					break;
+				case 2:
+					autoButton = &buttonY[i];
+					break;
+				case 3:
+					autoButton = &buttonB[i];
+					break;
+				case 4:
+					autoButton = &buttonX[i];
+					break;
+				case 5:
+					autoButton = &triggerL[i];
+					break;
+				case 6:
+					autoButton = &triggerR[i];
+					break;
+			}
+			if (*autoButton)
+			{
+				if (customAutofireDelay[i]>mainMenu_autofireRate)
+				{
+					*autoButton=1; // press button for one frame only
+					customAutofireDelay[i]=0;
+				}
+				else
+					*autoButton=0;
+					customAutofireDelay[i]++;
+			}
+			else
+				customAutofireDelay[i]=0;
+		}
+	}
+
 	if(buttonSelect[0])
 	{
-		SDL_JoystickUpdate();
 		//re-center the Joysticks when the user opens the menu
 		for (int i=0; i<nr_joysticks; i++)
 		{
@@ -845,14 +896,14 @@ if(!vkbd_mode)
 // Change zoom:
 // quickSwitch resolution presets
 			if (can_change_quickSwitchModeID)
-			{
-				if (quickSwitchModeID==0)
+			{			
+				if (quickSwitchModeID==sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1)
 				{
-					quickSwitchModeID=sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1;
+					quickSwitchModeID=0;
 				}
 				else
 				{
-					quickSwitchModeID--;
+					quickSwitchModeID++;
 				}
 				mainMenu_displayedLines = 
 					quickSwitchModes[quickSwitchModeID].num_lines;	
@@ -875,15 +926,14 @@ if(!vkbd_mode)
 		{
 #ifdef __PSP2__
 			if (can_change_quickSwitchModeID)
+			{
+				if (quickSwitchModeID==0)
 				{
-			
-				if (quickSwitchModeID==sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1)
-				{
-					quickSwitchModeID=0;
+					quickSwitchModeID=sizeof(quickSwitchModes)/sizeof(quickSwitchModes[0])-1;
 				}
 				else
 				{
-					quickSwitchModeID++;
+					quickSwitchModeID--;
 				}
 				mainMenu_displayedLines = 
 					quickSwitchModes[quickSwitchModeID].num_lines;	

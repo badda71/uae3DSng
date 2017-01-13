@@ -69,6 +69,7 @@ int mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always o
 int mainMenu_joyPort = 0; // Both ports
 #endif
 int mainMenu_autofireRate = 8;
+int mainMenu_customAutofireButton = 0;
 int mainMenu_showStatus = DEFAULT_STATUSLN;
 int mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
 int mainMenu_mouseEmulation = 1;
@@ -236,6 +237,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_joyPort = 0;
 #endif
     mainMenu_autofireRate = 8;
+    mainMenu_customAutofireButton = 0;
     mainMenu_showStatus = DEFAULT_STATUSLN;
     mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
     mainMenu_mouseEmulation = 1;
@@ -981,6 +983,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "autofire=%d\n",mainMenu_autofire);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "customAutofireButton=%d\n",mainMenu_customAutofireButton);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "stylusOffset=%d\n",mainMenu_stylusOffset);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "tapDelay=%d\n",mainMenu_tapDelay);
@@ -1369,6 +1373,7 @@ void loadconfig(int general)
         mainMenu_joyPort = ((joybuffer >> 4) & 0x0f);
         fscanf(f,"autofireRate=%d\n",&mainMenu_autofireRate);
         fscanf(f,"autofire=%d\n",&mainMenu_autofire);
+        fscanf(f,"customAutofireButton=%d\n",&mainMenu_customAutofireButton);
         fscanf(f,"stylusOffset=%d\n",&mainMenu_stylusOffset);
         fscanf(f,"tapDelay=%d\n",&mainMenu_tapDelay);
         fscanf(f,"scanlines=%d\n",&mainMenu_scanlines);

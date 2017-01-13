@@ -36,6 +36,8 @@ static const char *text_str_32k="32k";
 static const char *text_str_22k="22k";
 static const char *text_str_11k="11k";
 static const char *text_str_8k="8k";
+static const char *text_str_status_line="Status Line";
+
 
 #define MAX_CUSTOM_ID 96
 #define MIN_CUSTOM_ID -5
@@ -64,6 +66,7 @@ enum {
 #ifdef __PSP2__
 	MENUDISPLAY_SHADER,
 #endif
+	MENUDISPLAY_STATUSLINE,
 #if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
 	MENUDISPLAY_VKBDLANGUAGE,
 #endif
@@ -286,6 +289,18 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop3-2,menuLine,value);
 #endif
+	// MENUDISPLAY_STATUSLINE
+	menuLine+=2;
+	write_text(leftMargin, menuLine,text_str_status_line);
+	if ((!mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
+		write_text_inv(tabstop2,menuLine, "Off");
+	else
+		write_text(tabstop2, menuLine, "Off");
+	if ((mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
+		write_text_inv(tabstop4, menuLine,"On");
+	else
+		write_text(tabstop4, menuLine,"On");
+
 #if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
 	// MENUDISPLAY_VKBDLANGUAGE
 	menuLine+=2;
@@ -599,6 +614,10 @@ static int key_displayMenu(int *c)
 				}
 				break;
 #endif
+			case MENUDISPLAY_STATUSLINE:
+				if ((left)||(right))
+					mainMenu_showStatus=!mainMenu_showStatus;
+				break;
 #ifdef LARGEKEYBOARD
 			case MENUDISPLAY_VKBDLANGUAGE:
 				if (left)

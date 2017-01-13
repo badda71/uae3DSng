@@ -28,8 +28,6 @@
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
-static const char *text_str_status_line="Status Line";
-
 const char *text_str_misc_separator="----------------------------------";
 static const char *text_str_misc_title=    "            Miscellanous         -";
 static const char *text_str_stylus_offset="StylusOffset";
@@ -72,8 +70,10 @@ enum {
 #endif
 	MENUMISC_CONTROLCFG,
 	MENUMISC_JOYSTICK,
-	MENUMISC_AUTOFIRE,
-	MENUMISC_STATUSLINE,
+	MENUMISC_AUTOFIRERATE,
+#ifdef __PSP2__
+	MENUMISC_CUSTOMAUTOFIREBUTTON,
+#endif
 #ifdef __PSP2__
 	MENUMISC_MOUSEEMULATION,
 	MENUMISC_LEFTSTICKMOUSE,
@@ -109,6 +109,7 @@ static void draw_miscMenu(int c)
 	SDL_Rect r;
 	extern SDL_Surface *text_screen;
 	char cpuSpeed[8];
+	char tmpString[16];
 	
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
@@ -316,36 +317,59 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop9-1,menuLine,"Both");
   
-	// MENUMISC_AUTOFIRE
+	// MENUMISC_AUTOFIRERATE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Autofire Rate");
 
-	if ((mainMenu_autofireRate==12)&&((menuMisc!=MENUMISC_AUTOFIRE)||(bb)))
+	if ((mainMenu_autofireRate==8)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
 		write_text_inv(tabstop3-2,menuLine,"Light");
 	else
 		write_text(tabstop3-2,menuLine,"Light");
 
-	if ((mainMenu_autofireRate==8)&&((menuMisc!=MENUMISC_AUTOFIRE)||(bb)))
+	if ((mainMenu_autofireRate==4)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
 		write_text_inv(tabstop6-2,menuLine,"Medium");
 	else
 		write_text(tabstop6-2,menuLine,"Medium");
 
-	if ((mainMenu_autofireRate==4)&&((menuMisc!=MENUMISC_AUTOFIRE)||(bb)))
+	if ((mainMenu_autofireRate==2)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
 		write_text_inv(tabstop9-1,menuLine,"Heavy");
 	else
 		write_text(tabstop9-1,menuLine,"Heavy");
 
-	// MENUMISC_STATUSLINE
+#ifdef __PSP2__
+	// MENUMISC_CUSTOMAUTOFIREBUTTON
 	menuLine+=2;
-	write_text(leftMargin, menuLine,text_str_status_line);
-	if ((!mainMenu_showStatus)&&((menuMisc!=MENUMISC_STATUSLINE)||(bb)))
-		write_text_inv(tabstop2,menuLine, "Off");
+	write_text(leftMargin,menuLine,"Custom Autofire Button");
+
+	switch (mainMenu_customAutofireButton)
+	{
+		case 0:
+			strcpy(tmpString,"None");
+			break;
+		case 1:
+			strcpy(tmpString,"Square");
+			break;
+		case 2:
+			strcpy(tmpString,"Triangle");
+			break;
+		case 3:
+			strcpy(tmpString,"Circle");
+			break;
+		case 4:
+			strcpy(tmpString,"Cross");
+			break;
+		case 5:
+			strcpy(tmpString,"L");
+			break;
+		case 6:
+			strcpy(tmpString,"R");
+			break;
+	}
+	if ((menuMisc!=MENUMISC_CUSTOMAUTOFIREBUTTON)||(bb))
+		write_text_inv(tabstop6,menuLine,tmpString);
 	else
-		write_text(tabstop2, menuLine, "Off");
-	if ((mainMenu_showStatus)&&((menuMisc!=MENUMISC_STATUSLINE)||(bb)))
-		write_text_inv(tabstop4, menuLine,"On");
-	else
-		write_text(tabstop4, menuLine,"On");
+		write_text(tabstop6,menuLine,tmpString);
+#endif
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_misc_separator);
@@ -722,31 +746,45 @@ static int key_miscMenu(int *c)
 					else
 						mainMenu_joyPort=0;
 				}
-			  break;
-			case MENUMISC_AUTOFIRE:
+			  break;  
+			case MENUMISC_AUTOFIRERATE:
 				if(left)
 				{
-					if(mainMenu_autofireRate==4)
-						mainMenu_autofireRate=8;
-					else if(mainMenu_autofireRate==8)
-						mainMenu_autofireRate=12;
-					else
+					if(mainMenu_autofireRate==2)
 						mainMenu_autofireRate=4;
+					else if(mainMenu_autofireRate==4)
+						mainMenu_autofireRate=8;
+					else
+						mainMenu_autofireRate=2;
 				}
 				else if (right)
 				{
-					if(mainMenu_autofireRate==4)
-						mainMenu_autofireRate=12;
+					if(mainMenu_autofireRate==2)
+						mainMenu_autofireRate=8;
 					else if(mainMenu_autofireRate==8)
 						mainMenu_autofireRate=4;
 					else
-						mainMenu_autofireRate=8;
+						mainMenu_autofireRate=2;
 				}
  				break;
-			case MENUMISC_STATUSLINE:
-				if ((left)||(right))
-					mainMenu_showStatus=!mainMenu_showStatus;
+#ifdef __PSP2__
+			case MENUMISC_CUSTOMAUTOFIREBUTTON:
+				if (left)
+				{
+					if (mainMenu_customAutofireButton > 0)
+						mainMenu_customAutofireButton--;
+					else
+						mainMenu_customAutofireButton=0;
+				}
+				else if (right)
+				{
+				 	if (mainMenu_customAutofireButton < 6)
+						mainMenu_customAutofireButton++;
+					else
+						mainMenu_customAutofireButton=6;
+				}
 				break;
+#endif
 			case MENUMISC_MOUSEMULTIPLIER:
 				if (left)
 				{
