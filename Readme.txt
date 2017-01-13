@@ -93,6 +93,11 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.46
+
+- never save autofire button to reduce confusion 
+- fixed menu navigation bug in HDF selection
+
 1.45
 
 - added option to use autofire with custom configs, can choose one Vita button that will have autofire, or set it to 'none' (default) to turn it off
