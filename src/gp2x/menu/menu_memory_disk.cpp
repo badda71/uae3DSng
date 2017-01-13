@@ -392,8 +392,8 @@ static int key_memDiskMenu(int *c)
 					current_hdf--;
 			else if (menuMemDisk==MENUDISK_SAVEHDCONF)
 			{
-					current_hdf=3;
-					menuMemDisk=MENUDISK_HDFILE;
+				current_hdf=3;
+				menuMemDisk=MENUDISK_HDFILE;
 			}
 			else
 				menuMemDisk--;
@@ -403,10 +403,14 @@ static int key_memDiskMenu(int *c)
 			if (menuMemDisk==MENUDISK_END - 1) menuMemDisk=MENUDISK_RETURNMAIN;
 			else if (menuMemDisk==MENUDISK_HDFILE && current_hdf<3) 
 					current_hdf++;
+			else if (menuMemDisk==MENUDISK_HDDIR)
+			{
+				current_hdf=0;
+				menuMemDisk=MENUDISK_HDFILE;
+			}
 			else
 				menuMemDisk++;	
 		}
-
 		switch (menuMemDisk)
 		{
 			case MENUDISK_RETURNMAIN:
