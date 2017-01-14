@@ -4,7 +4,11 @@
 extern SDL_Surface *prSDLScreen;
 
 #define MENU_FILE_SPLASH DATA_PREFIX "gp2xsplash.bmp"
+#ifdef __PSP2__
+#define MENU_FILE_BACKGROUND DATA_PREFIX "background_static.bmp"
+#else
 #define MENU_FILE_BACKGROUND DATA_PREFIX "background.bmp"
+#endif
 #define MENU_FILE_WINDOW DATA_PREFIX "window.bmp"
 #define MENU_FILE_TEXT DATA_PREFIX "text.bmp"
 #define MENU_DIR_DEFAULT "."

@@ -6,7 +6,7 @@ Features: AGA/OCS/ECS, 68020 and 68000 emulation, harddisk-support, WHDLoad-supp
 Authors:
 Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya
 
-Android port by Lubomyr, android libSDL by pelya 
+Android port by Lubomyr, android libSDL by pelya
 
 Vita port by Cpasjuste, additional features by rsn8887 with help from ScHlAuChi, VitaSDL by Cpasjuste based on Vita2D by Xerpi and frangarCJ and others, shader support by Cpasjuste and frangarcj, VitaSDK by The VITASDK Team
 
@@ -24,10 +24,10 @@ On-screen scheme
 '5' <Button L> [SDLK_F13]
 '6' <Button R> [SDLK_RCTRL]
 old textUI vkeybd - '2'+'4'
- 
+
 SDL keycode action:
 F15 textUI vkeybd
-F12 - emulator menu toggle 
+F12 - emulator menu toggle
 F11 - change input method
 
 Please put kickstarts files in android/data/pandora.uae4all.sdl/kickstarts directory.
@@ -35,6 +35,20 @@ Files must be named as kick13.rom kick20.rom kick31.rom
 
 Vita-port info
 --------------
+VITA-EXCLUSIVE FEATURES:
+
+- Full speed emulation of most Amiga games with zero frameskip
+- Large, complete virtual keyboard with adjustable position and adjustable transparency
+- Three fully mappable custom control sets: map Vita buttons to any Amiga joystick or key input, three custom control sets supported
+- Multiple hard-file support: up to 4 hdf files (size <2GB each) can be mounted simultaneously
+- Multiple controller support on Vita TV: up to four paired controllers can be fully mapped
+- Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
+- Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full Vita screen
+- Custom autofire: any mapped Vita button can have autofire with adjustable rate
+- Savestate with hard-file support: state can be saved even when hard-files are used
+- Additional emulator settings: sprite-sprite collisions can be enabled, blitter settings can be changed
+- Adjustable stereo separation
+
 NOTES:
 
 - Bios: Please put kickstart files in "ux0:/data/uae4all/kickstarts" directory. Files must be named as kick13.rom, kick20.rom, kick31.rom
@@ -55,7 +69,7 @@ Selecting a 'Preset Width' of 320, 352 or 384 (max overscan) results in lo-res s
 
 - Sound: For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results.
 
-- Building from Source: The dependencies are 
+- Building from Source: The dependencies are
 VitaSDK: http://vitasdk.org (toolchain and Vita system headers etc.)
 SDL_ttf: https://github.com/Cpasjuste/SDL_ttf
 SDL-Vita (v1.2 with 4 controller support): https://github.com/rsn8887/SDL-Vita/tree/SDL12
@@ -93,9 +107,14 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.47
+
+- new menu background
+- fix swapped "Quote"<->"Backquote" overlay keyboard keys
+
 1.46
 
-- never save autofire button to reduce confusion 
+- never save autofire button to reduce confusion
 - fixed menu navigation bug in HDF selection
 
 1.45
@@ -117,7 +136,7 @@ CHANGELOG:
 
 1.42
 
-- added two player support on Vita TV, second paired Dualshock controller controls the 'other' joystick, only works if port is not set to 'both' 
+- added two player support on Vita TV, second paired Dualshock controller controls the 'other' joystick, only works if port is not set to 'both'
 - fixed a crash bug when changing audio parameters while sound was playing
 
 1.41
@@ -146,13 +165,13 @@ CHANGELOG:
 
 - added measures to prevent file corruption: Disabled PS button because it caused corruption of hdf files; display a warning about file corruption if the Amiga is writing to hdf while the user tries to exit the program
 - fix hdf size checking
-- fixed up some menu text 
+- fixed up some menu text
 - adjusted quickswitch screenmodes by two pixels
 
 1.35
 
 - now upto four hdf files can be mounted. From my own testing, it looks like 2 Gb is the hdf size limit. Geometry for each file can be changed by manually editing the config file, default is sectors:surfaces:reserved:blocksize=32:1:2:512 for files <1 GB, 32:2:2:512 for files >1Gb and 32:4:2:512 for files >2Gb. Only files <=2 Gb seem to work.
-     
+
 1.34
 
 - hires support (e.g. 640*256), switchable in display menu. (Select a screen mode with "640" as width in the first option of the display menu, and the Workbench will be rendered with every pixel. A width of "320" reverts back to old behavior.)
@@ -164,7 +183,7 @@ CHANGELOG:
 
 1.32
 
-- virtual keyboard transparency adjust now toggles between four values, two of which cause zero slow-down when keyboard is displayed. 
+- virtual keyboard transparency adjust now toggles between four values, two of which cause zero slow-down when keyboard is displayed.
 - resolution/zoom quick switch with R+Start+Dpad left/right is now more responsive
 
 1.31
@@ -199,7 +218,7 @@ CHANGELOG:
 
 1.24
 
-- virtual keyboard (mapped to "hold start then press select") 
+- virtual keyboard (mapped to "hold start then press select")
 - labels in custom control menu now reflect Vita controller
 - default analog mouse control deadzone increased from 100 to 1000 to fix mouse pointer drift (can be changed in menu)
 - default joystick port set to 1, since the mouse is always on (can be changed in menu)
@@ -228,7 +247,7 @@ choice which analog stick to use for mouse
 - fixed misc menu entries for shader and analog mouse
 - custom controls menu is now more snappy
 
-<1.20: 
+<1.20:
 - perfect 2x scaling support to reduce pixel wobble
 - HD Dir fix (supports one HD Dir & one HDF simultaneously, but max hdf size is still 1 Gb)
 - Shader support implemented by Cpasjuste
