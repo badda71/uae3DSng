@@ -32,7 +32,9 @@ typedef struct private_hwdata {
 #endif //PRIVATE_HWDATA
 #endif
 
+extern int mainMenu_background;
 extern int bReloadKickstart;
+
 #ifdef USE_GUICHAN
 extern int mainMenu_displayHires;
 extern int visibleAreaWidth;
@@ -47,7 +49,7 @@ SDL_Surface *current_screenshot = NULL;
 #else
 #define VIDEO_FLAGS VIDEO_FLAGS_INIT | SDL_DOUBLEBUF
 #endif
-SDL_Surface *text_screen=NULL, *text_image, *text_background, *text_window_background, *window_screen;
+SDL_Surface *text_screen=NULL, *text_image, *text_background_0, *text_background_1, *text_window_background, *window_screen;
 
 static Uint32 menu_inv_color=0, menu_win0_color=0, menu_win1_color=0;
 static Uint32 menu_barra0_color=0, menu_barra1_color=0;
@@ -288,15 +290,22 @@ void text_draw_background()
 	static int pos_y=12345678;
 	SDL_Rect r;
 	int i,j;
-	int w=text_screen->w+text_background->w-1;
-	int h=text_screen->h+text_background->h-1;
-#ifdef __PSP2__
+	SDL_Surface *text_background;
+	
+if (mainMenu_background==0)
+{
+	text_background = text_background_0;
 	r.x=0;
 	r.y=0;
 	r.w=text_background->w;
 	r.h=text_background->h;
 	SDL_BlitSurface(text_background,NULL,text_screen,&r);
-#else
+}
+else
+{
+	text_background = text_background_1;
+	int w=text_screen->w+text_background->w-1;
+	int h=text_screen->h+text_background->h-1;
 	if (menu_moving)
 	{
 		if (pos_x>=0) pos_x=-text_screen->w;
@@ -314,7 +323,7 @@ void text_draw_background()
 			r.h=text_background->h;
 			SDL_BlitSurface(text_background,NULL,text_screen,&r);
 		}
-#endif
+};
 	if (menu_moving)
 		update_window_color();
 }
@@ -437,13 +446,23 @@ void init_text(int splash)
 		if (text_image==NULL)
 			exit(-2);
 		SDL_SetColorKey(text_image,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image -> format, 0, 0, 0));
-		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND);
+		
+		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND_0);
 		if (tmp==NULL)
 			exit(-3);
-		text_background=SDL_DisplayFormat(tmp);
+		text_background_0=SDL_DisplayFormat(tmp);
 		SDL_FreeSurface(tmp);
-		if (text_background==NULL)
+		if (text_background_0==NULL)
 			exit(-3);
+			
+		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND_1);
+		if (tmp==NULL)
+			exit(-3);
+		text_background_1=SDL_DisplayFormat(tmp);
+		SDL_FreeSurface(tmp);
+		if (text_background_1==NULL)
+			exit(-3);
+			
 		tmp=SDL_LoadBMP(MENU_FILE_WINDOW);
 		if (tmp==NULL)
 			exit(-4);
@@ -523,8 +542,10 @@ void quit_text(void)
 {
 	SDL_FreeSurface(text_image);
 	text_image = NULL;
-	SDL_FreeSurface(text_background);
-	text_background = NULL;
+	SDL_FreeSurface(text_background_0);
+	SDL_FreeSurface(text_background_1);
+	text_background_0 = NULL;
+	text_background_1 = NULL;	
 	SDL_FreeSurface(text_window_background);
 	text_window_background = NULL;
 	SDL_FreeSurface(text_screen);
