@@ -33,6 +33,7 @@ extern int mainMenu_joyPort;
 extern int mainMenu_autofireRate;
 extern int mainMenu_customAutofireButton;
 extern int mainMenu_showStatus;
+extern int mainMenu_background;
 extern int mainMenu_mouseMultiplier;
 extern int mainMenu_mouseEmulation;
 extern int mainMenu_stylusOffset;

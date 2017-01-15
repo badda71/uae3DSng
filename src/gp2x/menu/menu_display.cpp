@@ -27,10 +27,10 @@
 const char *text_str_display_separator="----------------------------------";
 const char *text_str_display_title=    "   Display and Sound Settings    ";
 static const char *text_str_sound="Sound";
-static const char *text_str_fast="fast";
-static const char *text_str_accurate="accurate";
-static const char *text_str_off="off";
-static const char *text_str_sndrate="Sound rate";
+static const char *text_str_fast="Fast";
+static const char *text_str_accurate="Accurate";
+static const char *text_str_off="Off";
+static const char *text_str_sndrate="Sound Rate";
 static const char *text_str_44k="44k";
 static const char *text_str_32k="32k";
 static const char *text_str_22k="22k";
@@ -59,8 +59,10 @@ enum {
 	MENUDISPLAY_SCREENWIDTH,
 #endif
 	MENUDISPLAY_VERTPOS,
+#ifndef __PSP2__
 	MENUDISPLAY_CUTLEFT,
 	MENUDISPLAY_CUTRIGHT,
+#endif
 	MENUDISPLAY_FRAMESKIP,
 	MENUDISPLAY_REFRESHRATE,
 #ifdef __PSP2__
@@ -70,6 +72,7 @@ enum {
 #if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
 	MENUDISPLAY_VKBDLANGUAGE,
 #endif
+	MENUDISPLAY_BACKGROUND,
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
 	MENUDISPLAY_STEREO,
@@ -172,7 +175,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-
+#ifndef __PSP2__
 	// MENUDISPLAY_CUTLEFT
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Cut Left");
@@ -190,7 +193,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-
+#endif
 	// MENUDISPLAY_FRAMESKIP
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
@@ -276,7 +279,7 @@ static void draw_displayMenu(int c)
 			snprintf((char*)value, 25, "SHARP_BILINEAR");
 			break;
 		case SHADER_SHARP_BILINEAR_SIMPLE:
-			snprintf((char*)value, 25, "SHARP_BILINEAR_SIMPL");
+			snprintf((char*)value, 25, "SHARP_BILINEAR_SIMPLE");
 			break;
 		case SHADER_FXAA:
 			snprintf((char*)value, 25, "FXAA");
@@ -285,21 +288,21 @@ static void draw_displayMenu(int c)
 			break;
 	}
 	if ((menuDisplay!=MENUDISPLAY_SHADER)||(bb))
-		write_text_inv(tabstop3-2,menuLine,value);
+		write_text_inv(tabstop1,menuLine,value);
 	else
-		write_text(tabstop3-2,menuLine,value);
+		write_text(tabstop1,menuLine,value);
 #endif
 	// MENUDISPLAY_STATUSLINE
 	menuLine+=2;
 	write_text(leftMargin, menuLine,text_str_status_line);
 	if ((!mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
-		write_text_inv(tabstop2,menuLine, "Off");
+		write_text_inv(tabstop1,menuLine, "Off");
 	else
-		write_text(tabstop2, menuLine, "Off");
+		write_text(tabstop1, menuLine, "Off");
 	if ((mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
-		write_text_inv(tabstop4, menuLine,"On");
+		write_text_inv(tabstop3, menuLine,"On");
 	else
-		write_text(tabstop4, menuLine,"On");
+		write_text(tabstop3, menuLine,"On");
 
 #if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
 	// MENUDISPLAY_VKBDLANGUAGE
@@ -320,6 +323,19 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop5,menuLine,"GERMAN");
 #endif
+
+	// MENUDISPLAY_BACKGROUND
+	menuLine+=2;
+	write_text(leftMargin, menuLine,"Menu Background");
+	if ((mainMenu_background==0)&&((menuDisplay!=MENUDISPLAY_BACKGROUND)||(bb)))
+		write_text_inv(tabstop3,menuLine, "Static");
+	else
+		write_text(tabstop3, menuLine, "Static");
+	if ((mainMenu_background==1)&&((menuDisplay!=MENUDISPLAY_BACKGROUND)||(bb)))
+		write_text_inv(tabstop8-2, menuLine,"Moving");
+	else
+		write_text(tabstop8-2, menuLine,"Moving");
+
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
 	menuLine++;
@@ -547,6 +563,7 @@ static int key_displayMenu(int *c)
 						moveY++;
 				}
 				break;
+#ifndef __PSP2__
 			case MENUDISPLAY_CUTLEFT:
 				if (left)
 				{
@@ -571,6 +588,7 @@ static int key_displayMenu(int *c)
 						mainMenu_cutRight++;
 				}
 				break;
+#endif
 			case MENUDISPLAY_FRAMESKIP:
 #ifdef PANDORA
 				if ((left)||(right))
@@ -618,7 +636,8 @@ static int key_displayMenu(int *c)
 				if ((left)||(right))
 					mainMenu_showStatus=!mainMenu_showStatus;
 				break;
-#ifdef LARGEKEYBOARD
+
+#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
 			case MENUDISPLAY_VKBDLANGUAGE:
 				if (left)
 				{
@@ -636,6 +655,10 @@ static int key_displayMenu(int *c)
 				}
 				break;
 #endif
+			case MENUDISPLAY_BACKGROUND:
+				if ((left)||(right))
+					mainMenu_background=!mainMenu_background;
+				break;
 			case MENUDISPLAY_SOUND:
 					if (left)
 					{

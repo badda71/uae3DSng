@@ -297,7 +297,7 @@ static void draw_mainMenu(int c)
 
 	// 6
 	menuLine+=2;
-	write_text(leftMargin,menuLine,"Number of drives:");
+	write_text(leftMargin,menuLine,"Number of Drives");
 	
 	if ((nr_drives==1)&&((c!=5)||(bb)))
 		write_text_inv(tabstop3,menuLine,"1");
@@ -390,9 +390,9 @@ static void draw_mainMenu(int c)
 	// 14
 	menuLine++;
 	if ((c==13)&&(bb))
-		write_text_inv(leftMargin,menuLine,"Save Config for current game");
+		write_text_inv(leftMargin,menuLine,"Save Config for Current Game");
 	else
-		write_text(leftMargin,menuLine,"Save Config for current game");
+		write_text(leftMargin,menuLine,"Save Config for Current Game");
 
 	// 15
 	menuLine+=2;

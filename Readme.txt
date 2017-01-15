@@ -107,6 +107,11 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.48
+
+- cleaned up display menu
+- added option to choose menu background
+
 1.47
 
 - new menu background

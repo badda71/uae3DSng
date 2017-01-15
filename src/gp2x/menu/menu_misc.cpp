@@ -40,7 +40,7 @@ static const char *text_str_tap_delay="Tap delay";
 static const char *text_str_normal="normal";
 static const char *text_str_short="short";
 static const char *text_str_none="no";
-static const char *text_str_mouse_multiplier="Mouse speed";
+static const char *text_str_mouse_multiplier="Mouse Speed";
 static const char *text_str_025x=".25";
 static const char *text_str_05x=".5";
 static const char *text_str_1x="1x";
@@ -263,39 +263,39 @@ static void draw_miscMenu(int c)
 	menuLine++;
 
 	// MENUMISC_CONTROLCFG
-	write_text(leftMargin,menuLine,"Control config");
+	write_text(leftMargin,menuLine,"Control Config");
 
 	if ((mainMenu_joyConf==0)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv(tabstop5,menuLine,"1");
+		write_text_inv(tabstop2,menuLine,"1");
 	else
-		write_text(tabstop5,menuLine,"1");
+		write_text(tabstop2,menuLine,"1");
 
 	if ((mainMenu_joyConf==1)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv(tabstop6,menuLine,"2");
+		write_text_inv(tabstop3,menuLine,"2");
 	else
-		write_text(tabstop6,menuLine,"2");
+		write_text(tabstop3,menuLine,"2");
 
 	if ((mainMenu_joyConf==2)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv(tabstop7,menuLine,"3");
+		write_text_inv(tabstop4,menuLine,"3");
 	else
-		write_text(tabstop7,menuLine,"3");
+		write_text(tabstop4,menuLine,"3");
 
 	if ((mainMenu_joyConf==3)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv(tabstop8,menuLine,"4");
+		write_text_inv(tabstop5,menuLine,"4");
 	else
-		write_text(tabstop8,menuLine,"4");
+		write_text(tabstop5,menuLine,"4");
 
 	menuLine+=2;
 #ifdef __PSP2__
-	if (mainMenu_joyConf==0) write_text(5,menuLine,"Sq=Autofire X=Fire Tr=Space O=2nd");
-	else if (mainMenu_joyConf==1) write_text(5,menuLine,"Sq=Fire X=Autofire Tr=Space O=2nd");
-	else if (mainMenu_joyConf==2) write_text(5,menuLine,"Sq=Autofire X=Jump Tr=Fire O=2nd");
-	else if (mainMenu_joyConf==3) write_text(5,menuLine,"Sq=Fire X=Jump Tr=Autofire O=2nd");
+	if (mainMenu_joyConf==0) write_text(3,menuLine,"(Sq=Autofire X=Fire Tr=Space O=2nd)");
+	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(Sq=Fire X=Autofire Tr=Space O=2nd)");
+	else if (mainMenu_joyConf==2) write_text(3,menuLine,"(Sq=Autofire X=Jump Tr=Fire O=2nd)");
+	else if (mainMenu_joyConf==3) write_text(3,menuLine,"(Sq=Fire X=Jump Tr=Autofire O=2nd)");
 #else
-	if (mainMenu_joyConf==0) write_text(5,menuLine,"A=Autofire X=Fire Y=Space B=2nd");
-	else if (mainMenu_joyConf==1) write_text(5,menuLine,"A=Fire X=Autofire Y=Space B=2nd");
-	else if (mainMenu_joyConf==2) write_text(5,menuLine,"A=Autofire X=Jump Y=Fire B=2nd");
-	else if (mainMenu_joyConf==3) write_text(5,menuLine,"A=Fire X=Jump Y=Autofire B=2nd");
+	if (mainMenu_joyConf==0) write_text(3,menuLine,"(A=Autofire X=Fire Y=Space B=2nd)");
+	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(A=Fire X=Autofire Y=Space B=2nd)");
+	else if (mainMenu_joyConf==2) write_text(3,menuLine,"(A=Autofire X=Jump Y=Fire B=2nd)");
+	else if (mainMenu_joyConf==3) write_text(3,menuLine,"(A=Fire X=Jump Y=Autofire B=2nd)");
 #endif
 
   // MENUMISC_JOYSTICK
@@ -394,16 +394,16 @@ static void draw_miscMenu(int c)
 	if (mainMenu_leftStickMouse==0)
 	{
 		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
-			write_text_inv(tabstop4-1,menuLine,"Right Stick");
+			write_text_inv(tabstop2,menuLine,"Right Stick");
 		else
-			write_text(tabstop4-1,menuLine,"Right Stick  ");
+			write_text(tabstop2,menuLine,"Right Stick  ");
 	}
 	else if (mainMenu_leftStickMouse==1) 
 	{
 		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
-			write_text_inv(tabstop4-1,menuLine,"Left Stick");
+			write_text_inv(tabstop2,menuLine,"Left Stick");
 		else
-			write_text(tabstop4-1,menuLine,"Left Stick  ");
+			write_text(tabstop2,menuLine,"Left Stick  ");
 	}
 #endif
 
@@ -412,29 +412,29 @@ static void draw_miscMenu(int c)
 	write_text(leftMargin,menuLine,text_str_mouse_multiplier);
 
 	if ((mainMenu_mouseMultiplier==25)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop1,menuLine,text_str_025x);
+		write_text_inv(tabstop2,menuLine,text_str_025x);
 	else
-		write_text(tabstop1,menuLine,text_str_025x);
+		write_text(tabstop2,menuLine,text_str_025x);
 
 	if ((mainMenu_mouseMultiplier==50)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop3,menuLine,text_str_05x);
+		write_text_inv(tabstop4,menuLine,text_str_05x);
 	else
-		write_text(tabstop3,menuLine,text_str_05x);
+		write_text(tabstop4,menuLine,text_str_05x);
 
 	if ((mainMenu_mouseMultiplier==1)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop5,menuLine,text_str_1x);
+		write_text_inv(tabstop6,menuLine,text_str_1x);
 	else
-		write_text(tabstop5,menuLine,text_str_1x);
+		write_text(tabstop6,menuLine,text_str_1x);
 
 	if ((mainMenu_mouseMultiplier==2)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop7,menuLine,text_str_2x);
+		write_text_inv(tabstop8,menuLine,text_str_2x);
 	else
-		write_text(tabstop7,menuLine,text_str_2x);
+		write_text(tabstop8,menuLine,text_str_2x);
 
 	if ((mainMenu_mouseMultiplier==4)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop9,menuLine,text_str_4x);
+		write_text_inv(tabstop9+2,menuLine,text_str_4x);
 	else
-		write_text(tabstop9,menuLine,text_str_4x);
+		write_text(tabstop9+2,menuLine,text_str_4x);
 #ifndef __PSP2__
 	// MENUMISC_STYLUSOFFSET
 	menuLine+=2;
@@ -466,15 +466,16 @@ static void draw_miscMenu(int c)
 		write_text(tabstop9,menuLine,text_str_8px);
 #endif //__PSP2__
 #ifdef __PSP2__
+
 	//Analog Stick Deadzone settings on Vita
 	//MENUMISC_DEADZONE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Mouse Deadzone");
   	snprintf((char*)cpuSpeed, 8, "%d", mainMenu_deadZone);
   	if ((menuMisc!=MENUMISC_DEADZONE)||(bb))
-		write_text_inv(tabstop3-2,menuLine,cpuSpeed);
+		write_text_inv(tabstop2,menuLine,cpuSpeed);
 	else
-		write_text(tabstop3-2,menuLine,cpuSpeed);
+		write_text(tabstop2,menuLine,cpuSpeed);
 	
 #else
 	// MENUMISC_TAPDELAY
