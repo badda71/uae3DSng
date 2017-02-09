@@ -107,6 +107,10 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.49
+
+-improved analog mouse deadzone (radial and scaled)
+
 1.48
 
 - cleaned up display menu
