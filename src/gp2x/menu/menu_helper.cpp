@@ -20,7 +20,7 @@
 
 #ifdef __PSP2__
 #include "psp2_shader.h"
-#include "vita2d.h"
+#include "vita2d_fbo/includes/vita2d.h"
 PSP2Shader *shader = NULL;
 extern int mainMenu_shader;
 #ifndef PRIVATE_HW_DATA
@@ -162,19 +162,19 @@ void update_display() {
 		prSDLScreen->hwdata = NULL;
 		prSDLScreen->pixels = NULL;
 		SDL_FreeSurface(prSDLScreen);
-      prSDLScreen = NULL; 
+      prSDLScreen = NULL;
     }
-    
+
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
     printf("update_display: SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
-    
+
     float sh;
     float sw;
     int x;
     int y;
 
     //is a shader active?
-    if (mainMenu_shader != 0) 
+    if (mainMenu_shader != 0)
     {
     	sh = 544;
       if (mainMenu_displayHires)
@@ -183,8 +183,8 @@ void update_display() {
       	sw = ((float)visibleAreaWidth*((float)544/(float)mainMenu_displayedLines));
     	x = (960 - sw) / 2;
     	y = (544 - sh) / 2;
-    	
-    	//This requires a recent SDL-Vita branch SDL12 for example 
+
+    	//This requires a recent SDL-Vita branch SDL12 for example
     	//https://github.com/rsn8887/SDL-Vita/tree/SDL12
     	//to compile
    	SDL_SetVideoModeScaling(x, y, sw, sh);
@@ -201,7 +201,7 @@ void update_display() {
       y = (544 - sh) / 2;
       SDL_SetVideoModeScaling(x, y, sw, sh);
       SDL_SetVideoModeBilinear(0);
-	 }    
+	 }
 	 printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
 
     SDL_SetVideoModeSync(1);

@@ -74,8 +74,12 @@ VitaSDK: http://vitasdk.org (toolchain and Vita system headers etc.)
 SDL_ttf: https://github.com/Cpasjuste/SDL_ttf
 SDL-Vita (v1.2 with 4 controller support): https://github.com/rsn8887/SDL-Vita/tree/SDL12
 SDL-Image: https://github.com/Cpasjuste/SDL_image-1.2.12
-Vita2d (fbo version with shader support): https://github.com/Cpasjuste/vita2dlib/tree/fbo
 Install VitaSDK. Clone all the above repositories and install their libraries using "make -f Makefile.psp2 install" for each one. Cd into a separate build directory outside uae4all2 tree. Type "ccmake <uae4all2 dir>". Then press c (configure). In the release type form field, type "Release" and enter. Then press c then g. Then type "make uae4all2.vpk".
+
+Note:
+The source depends on FrangarCJ's Vita2d fbo branch with shader support: https://github.com/Cpasjuste/vita2dlib/tree/fbo
+and FrangarCJ's vita-shader-collection gtu branch: https://github.com/frangarcj/vita-shader-collection/tree/gtu
+Those are both included as binaries and linked automatically.
 
 Select = Toggle menu
 Start = Toggle virtual keyboard
