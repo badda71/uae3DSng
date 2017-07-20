@@ -2,7 +2,7 @@
 // Created by cpasjuste on 18/12/16.
 //
 
-// use https://github.com/frangarcj/vita2dlib/commits/fbo
+// use https://github.com/frangarcj/vita2dlib/tree/fbo
 // and https://github.com/frangarcj/vita-shader-collection/releases
 
 #include <sysconfig.h>

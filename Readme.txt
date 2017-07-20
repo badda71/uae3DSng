@@ -111,6 +111,10 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.51
+
+-fix autofire for ply #2 w/o custom controls
+
 1.50
 
 - fix analog deadzone (broken in last release)

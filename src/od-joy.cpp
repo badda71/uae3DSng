@@ -57,6 +57,7 @@ extern int lAnalogX;
 extern int lAnalogY;
 extern int mainMenu_leftStickMouse;
 extern int mainMenu_deadZone;
+int delay2=0; // for 2nd player non-custom autofire 
 #endif
 
 extern char launchDir[300];
@@ -548,10 +549,34 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				top = 1;
 			else if (dpadDown[1])
 				bot = 1;
-			if ((mainMenu_button1==GP2X_BUTTON_B && buttonA[1]) || (mainMenu_button1==GP2X_BUTTON_X && buttonX[1]) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY[1]))
-				*button |= 0x01;
-			if (buttonB[1])
-				*button |= (0x01 << 1);
+			if (
+				(mainMenu_autofire & switch_autofire & delay2>mainMenu_autofireRate)
+				||
+					(
+						(
+							(mainMenu_autofireButton1==GP2X_BUTTON_B && buttonA[1])
+							||
+							(mainMenu_autofireButton1==GP2X_BUTTON_X && buttonX[1])
+							||
+							(mainMenu_autofireButton1==GP2X_BUTTON_Y && buttonY[1])
+						)
+						& delay2>mainMenu_autofireRate
+					)
+				)
+			{
+				if(!buttonB[1])
+					*button=1;
+				delay2=0;
+				*button |= (buttonB[1] & 1) << 1;
+			}
+			else
+			{
+				if ((mainMenu_button1==GP2X_BUTTON_B && buttonA[1]) || (mainMenu_button1==GP2X_BUTTON_X && buttonX[1]) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY[1]))
+					*button |= 0x01;
+				if (buttonB[1])
+					*button |= (0x01 << 1);
+				delay2++;
+			}
 		}
 #endif //__PSP2__
 		// normal joystick movement
