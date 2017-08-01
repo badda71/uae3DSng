@@ -552,6 +552,9 @@ void gui_handle_events (void)
 	SDL_JoystickUpdate();
 	SDL_Joystick *currentJoy = uae4all_joy0;
 	int lX, lY, rX, rY;
+	float joyX = 0;
+	float joyY = 0;
+	float joyDeadZoneSquared = 10240.0*10240.0;
 
 	for (int i=0; i<nr_joysticks; i++)
 	{
@@ -604,27 +607,56 @@ void gui_handle_events (void)
 		}
 		// Main Controller is special (it does mouse controls vkeyboard etc.)
 		// On Main Controller, always use either the left of right analog for mouse pointer movement
-		// the other stick replicates the dpad inputs for all controllers
-		if (i==0 && mainMenu_leftStickMouse) {
-			dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9)
-				|| (rX > 1024*10) ? 1 : 0;
-			dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7)
-				|| (rX < -1024*10) ? 1 : 0;
-			dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8)
-				|| (rY < -1024*10) ? 1 : 0;
-			dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6)
-				|| (rY > 1024*10) ? 1 : 0;
-		} 
+		// the other stick replicates the dpad inputs
+		dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9);
+		dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7);
+		dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8);
+		dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6);
+		// analog joystick acts as digital controls with proper circular deadzone
+		if (i==0 && mainMenu_leftStickMouse) 
+		{
+			joyX=rX;
+			joyY=-rY;
+		}
 		else
 		{
-			dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9)
-				|| (lX > 1024*10) ? 1 : 0;
-			dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7)
-				|| (lX < -1024*10) ? 1 : 0;
-			dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8)
-				|| (lY < -1024*10) ? 1 : 0;
-			dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6)
-				|| (lY > 1024*10) ? 1 : 0;
+			joyX=lX;
+			joyY=-lY;
+		}
+		if ((joyX*joyX + joyY*joyY) > joyDeadZoneSquared)
+		{
+			// upper right quadrant
+			if (joyY>0 && joyX>0)
+			{
+				if (2*joyY>joyX)
+					dpadUp[i] = 1;
+				if (2*joyX>joyY)
+					dpadRight[i] = 1;
+			}
+			// upper left quadrant
+			else if (joyY>0 && joyX<=0)
+			{
+				if (2*joyY>(-joyX))
+					dpadUp[i] = 1;
+				if (2*(-joyX)>joyY)
+					dpadLeft[i] = 1;
+			}
+			// lower right quadrant
+			else if (joyY<=0 && joyX>0)
+			{
+				if (2*(-joyY)>joyX)
+					dpadDown[i] = 1;
+				if (2*joyX>(-joyY))
+					dpadRight[i] = 1;
+			}
+			// lower left quadrant
+			else if (joyY<=0 && joyX<=0)
+			{
+				if (2*(-joyY)>(-joyX))
+					dpadDown[i] = 1;
+				if (2*(-joyX)>(-joyY))
+					dpadLeft[i] = 1;
+			}
 		}
 			
 		buttonA[i] = SDL_JoystickGetButton(currentJoy, PAD_SQUARE);

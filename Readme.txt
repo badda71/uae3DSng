@@ -111,6 +111,10 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.52
+
+- improved joystick diagonals and deadzone
+
 1.51
 
 -fix autofire for ply #2 w/o custom controls
