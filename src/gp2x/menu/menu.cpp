@@ -20,7 +20,7 @@
 
 #ifdef __PSP2__
 #include "psp2_shader.h"
-#include "vita2d.h"
+#include "vita2d_fbo/includes/vita2d.h"
 extern PSP2Shader *shader;
 extern int mainMenu_shader;
 #ifndef PRIVATE_HWDATA
@@ -147,14 +147,14 @@ int save_png(SDL_Surface* surface,char *path)
   int x;
 
 unsigned short *p = (unsigned short *)pix;
-for(y = 0; y < sizeY; y++) 
+for(y = 0; y < sizeY; y++)
 {
-   for(x = 0; x < sizeX; x++) 
+   for(x = 0; x < sizeX; x++)
    {
      unsigned short v = p[x];
 
      *b++ = ((v & systemRedMask  ) >> systemRedShift  ) << 3; // R
-     *b++ = ((v & systemGreenMask) >> systemGreenShift) << 2; // G 
+     *b++ = ((v & systemGreenMask) >> systemGreenShift) << 2; // G
      *b++ = ((v & systemBlueMask ) >> systemBlueShift ) << 3; // B
    }
    p += surface->pitch / 2;
@@ -186,8 +186,8 @@ void CreateScreenshot(int code)
 		w=prSDLScreen->w;
 		h=prSDLScreen->h;
 	}
-	else 
-	{ 
+	else
+	{
 		w=32;
 		h=32;
 	}
@@ -291,7 +291,7 @@ void text_draw_background()
 	SDL_Rect r;
 	int i,j;
 	SDL_Surface *text_background;
-	
+
 if (mainMenu_background==0)
 {
 	text_background = text_background_0;
@@ -331,7 +331,7 @@ else
 void text_flip(void)
 {
 	SDL_Delay(10);
-	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);		
+	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);
 	SDL_Flip(prSDLScreen);
 }
 
@@ -396,8 +396,8 @@ void init_text(int splash)
 		prSDLScreen->hwdata = NULL;
 		prSDLScreen->pixels = NULL;
 		SDL_FreeSurface(prSDLScreen);
-      prSDLScreen = NULL; 
-	};	
+      prSDLScreen = NULL;
+	};
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", 320, 240);
 
@@ -405,21 +405,21 @@ void init_text(int splash)
 	float sw = (float)320*((float)480/(float)240);
 	int x = (960-sw)/2;
 	int y = (544-sh)/2;
-		
+
 	SDL_SetVideoModeScaling(x, y, sw, sh);
 	printf("init_text: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
-	
-	//This requires a recent SDL-Vita branch SDL12 for example 
+
+	//This requires a recent SDL-Vita branch SDL12 for example
    //https://github.com/rsn8887/SDL-Vita/tree/SDL12
    //to compile
 	SDL_SetVideoModeBilinear(0);
-	
+
 	if(shader != NULL) {
         delete(shader);
         shader = NULL;
    }
    shader = new PSP2Shader((PSP2Shader::Shader)0);
-	
+
 #elif PANDORA
 	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);
 	setenv("SDL_OMAP_BORDER_CUT","0,0,0,30",1);
@@ -428,9 +428,9 @@ void init_text(int splash)
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE|SDL_FULLSCREEN);
 #endif
 
-	
+
 	char fname[256];
-	
+
 	SDL_Surface *tmp;
 
 	if (!text_screen)
@@ -446,7 +446,7 @@ void init_text(int splash)
 		if (text_image==NULL)
 			exit(-2);
 		SDL_SetColorKey(text_image,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image -> format, 0, 0, 0));
-		
+
 		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND_0);
 		if (tmp==NULL)
 			exit(-3);
@@ -454,7 +454,7 @@ void init_text(int splash)
 		SDL_FreeSurface(tmp);
 		if (text_background_0==NULL)
 			exit(-3);
-			
+
 		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND_1);
 		if (tmp==NULL)
 			exit(-3);
@@ -462,7 +462,7 @@ void init_text(int splash)
 		SDL_FreeSurface(tmp);
 		if (text_background_1==NULL)
 			exit(-3);
-			
+
 		tmp=SDL_LoadBMP(MENU_FILE_WINDOW);
 		if (tmp==NULL)
 			exit(-4);
@@ -488,7 +488,7 @@ void init_text(int splash)
 		int i,j;
 
 		obten_colores();
-		if (skipintro) 
+		if (skipintro)
 			goto skipintro;
 		tmp=SDL_LoadBMP(MENU_FILE_SPLASH);
 		if (tmp==NULL)
@@ -534,7 +534,7 @@ void init_text(int splash)
 		text_flip();
 		uae4all_resume_music();
 	}
-skipintro:		
+skipintro:
 	menu_msg_time=SDL_GetTicks();
 }
 
@@ -545,7 +545,7 @@ void quit_text(void)
 	SDL_FreeSurface(text_background_0);
 	SDL_FreeSurface(text_background_1);
 	text_background_0 = NULL;
-	text_background_1 = NULL;	
+	text_background_1 = NULL;
 	SDL_FreeSurface(text_window_background);
 	text_window_background = NULL;
 	SDL_FreeSurface(text_screen);
@@ -558,11 +558,11 @@ void write_text_pos(int x, int y, char * str)
 {
   int i, c;
   SDL_Rect src, dest;
-  
+
   for (i = 0; i < strlen(str); i++)
     {
       c = -1;
-      
+
       if (str[i] >= '0' && str[i] <= '9')
 		c = str[i] - '0';
       else if (str[i] >= 'A' && str[i] <= 'Z')
@@ -583,34 +583,34 @@ void write_text_pos(int x, int y, char * str)
 		c = 65;
       else if (str[i] == ')')
 		c = 66;
-      
+
 		if (c >= 0)
 		{
 		  src.x = c * 7;
 		  src.y = 0;
 		  src.w = 7;
 		  src.h = 8;
-		  
+
 		  dest.x = x + (i * 7);
 		  dest.y = y;
 		  dest.w = 7;
 		  dest.h = 8;
-		  
+
 		  SDL_BlitSurface(text_image, &src,
 				  text_screen, &dest);
 		}
 		else if (c == -2 || c == -3)
 		{
 		  dest.x = x + (i * 8);
-		  
+
 		  if (c == -2)
 			dest.y = y  + 7;
 		  else if (c == -3)
 			dest.y = y  + 3;
-		  
+
 		  dest.w = 7;
 		  dest.h = 1;
-		  
+
 		  SDL_FillRect(text_screen, &dest, menu_barra0_color);
 		}
     }
@@ -620,12 +620,12 @@ void write_text(int x, int y, const char * str)
 {
 	int i, c;
 	SDL_Rect src, dest;
-  
+
 	for (i = 0; i < strlen(str); i++)
     {
       c = -1;
-	  
-      
+
+
       if (str[i] >= '0' && str[i] <= '9')
 		c = str[i] - '0';
       else if (str[i] >= 'A' && str[i] <= 'Z')
@@ -646,7 +646,7 @@ void write_text(int x, int y, const char * str)
 		c = 65;
       else if (str[i] == ')')
 		c = 66;
-      
+
 		if (c >= 0)
 		{
 		  src.x = c * 7;
@@ -658,21 +658,21 @@ void write_text(int x, int y, const char * str)
 		  dest.y = y * 7; //10;
 		  dest.w = 7;
 		  dest.h = 8;
-		  
+
 		  SDL_BlitSurface(text_image, &src,
 				  text_screen, &dest);
 		}
 		else if (c == -2 || c == -3)
 		{
 		  dest.x = (x + i) * 7;
-		  
+
 		  if (c == -2)
 			dest.y = y * 7 /*10*/ + 7;
 		  else if (c == -3)
 			dest.y = y * 7 /*10*/ + 3;
 		  dest.w = 7;
 		  dest.h = 1;
-		  
+
 		  SDL_FillRect(text_screen, &dest, menu_barra0_color);
 		}
 		if (i>42)
@@ -701,7 +701,7 @@ void write_centered_text(int y, char * str)
 void write_num(int x, int y, int v)
 {
   char str[24];
-  
+
   snprintf(str, 24, "%d", v);
   write_text(x, y, str);
 }
@@ -716,7 +716,7 @@ void write_num_inv(int x, int y, int v)
 		l++;
   	else
 		break;
-  	
+
   dest.x = (x * 7) -2 ;
   dest.y = (y * 8) /*10*/ - 2;
   dest.w = (l * 7) + 4;
@@ -776,7 +776,7 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 	dest.w=w*7;
 	dest.h=h*8;
 	SDL_BlitSurface(window_screen,&dest,text_screen,&dest);
-	
+
 	write_text(x + ((w-strlen(title)) / 2), y-1, title);
 }
 

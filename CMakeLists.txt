@@ -115,7 +115,8 @@ set(FLAGS
         )
 
 set(LDFLAGS
-        SDL SDL_image vita2d
+        SDL SDL_image
+        ${CMAKE_SOURCE_DIR}/src/psp2/vita2d_fbo/lib/libvita2d.a
         ${CMAKE_SOURCE_DIR}/src/psp2/vita-shader-collection/lib/libvitashaders.a
         SceSysmodule_stub SceDisplay_stub SceGxm_stub
         SceCtrl_stub ScePgf_stub ScePower_stub SceCommonDialog_stub

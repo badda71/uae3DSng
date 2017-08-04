@@ -104,20 +104,20 @@ struct myRes
 		int top_pos;
 };
 static myRes quickSwitchModes[] = {
-    {192, 2},
-    {200, 2},
-    {216, 2},
-    {224, 2},
-    {240, 2},
-    {256, 2},
-    {270, 2},
-    {192, 14},
-    {200, 14},
-    {216, 14},
-    {224, 14},
-    {240, 14},
-    {256, 14},
-    {270, 14},
+	{192, 2},
+	{200, 2},
+	{216, 2},
+	{224, 2},
+	{240, 2},
+	{256, 2},
+	{270, 2},
+	{192, 14},
+	{200, 14},
+	{216, 14},
+	{224, 14},
+	{240, 14},
+	{256, 14},
+	{270, 14},
 };
 extern int moveY;
 
@@ -226,28 +226,28 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 
 static void getChanges(void)
 {
-    if (mainMenu_sound)
-    {
+	if (mainMenu_sound)
+	{
 		if (mainMenu_sound == 1)
 			changed_produce_sound=2;
 		else
 			changed_produce_sound=3;
-	    sound_default_evtime();
-    }
-    else
-	    changed_produce_sound=0;
-    changed_gfx_framerate=mainMenu_frameskip;
+		sound_default_evtime();
+	}
+	else
+		changed_produce_sound=0;
+	changed_gfx_framerate=mainMenu_frameskip;
 }
 	
 int gui_init (void)
 {
-    SDL_ShowCursor(SDL_DISABLE);
+	SDL_ShowCursor(SDL_DISABLE);
 #if !(defined(ANDROIDSDL) || defined(AROS))
-    SDL_JoystickEventState(SDL_ENABLE);
-    SDL_JoystickOpen(0);
+	SDL_JoystickEventState(SDL_ENABLE);
+	SDL_JoystickOpen(0);
 #endif
-    if (prSDLScreen!=NULL)
-    {
+	if (prSDLScreen!=NULL)
+	{
 		emulating=0;
 		uae4all_init_sound();
 		init_kickstart();
@@ -276,28 +276,28 @@ int gui_init (void)
 		getChanges();
 		check_all_prefs();
 		return 0;
-    }
-    return -1;
+	}
+	return -1;
 }
 
 int gui_update (void)
 {
-    extern char *savestate_filename;
+	extern char *savestate_filename;
 #ifdef USE_GUICHAN
-    extern char *screenshot_filename;
+	extern char *screenshot_filename;
 #else
 	 char *screenshot_filename=NULL;
 #endif
-    strcpy(changed_df[0],uae4all_image_file0);
-    strcpy(changed_df[1],uae4all_image_file1);
-    strcpy(changed_df[2],uae4all_image_file2);
-    strcpy(changed_df[3],uae4all_image_file3);
-    make_savestate_filenames(savestate_filename, screenshot_filename);
-    real_changed_df[0]=1;
-    real_changed_df[1]=1;
-    real_changed_df[2]=1;
-    real_changed_df[3]=1;
-    return 0;
+	strcpy(changed_df[0],uae4all_image_file0);
+	strcpy(changed_df[1],uae4all_image_file1);
+	strcpy(changed_df[2],uae4all_image_file2);
+	strcpy(changed_df[3],uae4all_image_file3);
+	make_savestate_filenames(savestate_filename, screenshot_filename);
+	real_changed_df[0]=1;
+	real_changed_df[1]=1;
+	real_changed_df[2]=1;
+	real_changed_df[3]=1;
+	return 0;
 }
 
 static void goMenu(void)
@@ -337,12 +337,12 @@ static void goMenu(void)
 	vkbd_init();
 #endif
 #endif
-    getChanges();
+	getChanges();
 #ifdef USE_UAE4ALL_VKBD
 	vkbd_init_button2();
 #endif
-    if (exitmode==1 || exitmode==2)
-    {
+	if (exitmode==1 || exitmode==2)
+	{
 		extern char *savestate_filename;
 #ifdef USE_GUICHAN
 		extern char *screenshot_filename;
@@ -351,7 +351,7 @@ static void goMenu(void)
 #endif
 		extern int saveMenu_n_savestate;
 		for(int i=0;i<mainMenu_drives;i++)
-	    {
+		{
 			if (i==0 && strcmp(changed_df[0],uae4all_image_file0)) {
 				strcpy(changed_df[0],uae4all_image_file0);
 				real_changed_df[0]=1;
@@ -368,11 +368,11 @@ static void goMenu(void)
 				strcpy(changed_df[3],uae4all_image_file3);
 				real_changed_df[3]=1;
 			}
-	    }
+		}
 		make_savestate_filenames(savestate_filename, screenshot_filename);
-    }
-    if (exitmode==3)
-    {
+	}
+	if (exitmode==3)
+	{
 		extern char *savestate_filename;
 #ifdef USE_GUICHAN
 		extern char *screenshot_filename;
@@ -420,24 +420,24 @@ static void goMenu(void)
 #ifdef USE_GUICHAN
 		strcpy(screenshot_filename,uae4all_image_file0);
 #endif
-    }
-    if (exitmode==2)
-    {
-	    if (autosave!=mainMenu_autosave)
-	    {
+	}
+	if (exitmode==2)
+	{
+		if (autosave!=mainMenu_autosave)
+		{
 			prefs_df[0][0]=0;
-	   	prefs_df[1][0]=0;
+		prefs_df[1][0]=0;
 			prefs_df[2][0]=0;
-	   	prefs_df[3][0]=0;
-	    }
+		prefs_df[3][0]=0;
+		}
 		if(gp2xButtonRemappingOn)
 			togglemouse();
 	   uae_reset ();
-    }
-    check_all_prefs();
-    gui_purge_events();
-    fpscounter_reset();
-    notice_screen_contents_lost();
+	}
+	check_all_prefs();
+	gui_purge_events();
+	fpscounter_reset();
+	notice_screen_contents_lost();
 }
 
 int customKey;
@@ -552,6 +552,10 @@ void gui_handle_events (void)
 	SDL_JoystickUpdate();
 	SDL_Joystick *currentJoy = uae4all_joy0;
 	int lX, lY, rX, rY;
+	float joyX = 0;
+	float joyY = 0;
+	float joyDeadZoneSquared = 10240.0*10240.0;
+	float slope = 0.414214f; // tangent of 22.5 degrees for size of angular zones
 
 	for (int i=0; i<nr_joysticks; i++)
 	{
@@ -604,27 +608,56 @@ void gui_handle_events (void)
 		}
 		// Main Controller is special (it does mouse controls vkeyboard etc.)
 		// On Main Controller, always use either the left of right analog for mouse pointer movement
-		// the other stick replicates the dpad inputs for all controllers
-		if (i==0 && mainMenu_leftStickMouse) {
-			dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9)
-				|| (rX > 1024*10) ? 1 : 0;
-			dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7)
-				|| (rX < -1024*10) ? 1 : 0;
-			dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8)
-				|| (rY < -1024*10) ? 1 : 0;
-			dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6)
-				|| (rY > 1024*10) ? 1 : 0;
-		} 
+		// the other stick replicates the dpad inputs
+		dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9);
+		dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7);
+		dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8);
+		dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6);
+		// analog joystick acts as digital controls with proper circular deadzone
+		if (i==0 && mainMenu_leftStickMouse) 
+		{
+			joyX=rX;
+			joyY=-rY;
+		}
 		else
 		{
-			dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9)
-				|| (lX > 1024*10) ? 1 : 0;
-			dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7)
-				|| (lX < -1024*10) ? 1 : 0;
-			dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8)
-				|| (lY < -1024*10) ? 1 : 0;
-			dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6)
-				|| (lY > 1024*10) ? 1 : 0;
+			joyX=lX;
+			joyY=-lY;
+		}
+		if ((joyX*joyX + joyY*joyY) > joyDeadZoneSquared)
+		{
+			// upper right quadrant
+			if (joyY>0 && joyX>0)
+			{
+				if (joyY>slope*joyX)
+					dpadUp[i] = 1;
+				if (joyX>slope*joyY)
+					dpadRight[i] = 1;
+			}
+			// upper left quadrant
+			else if (joyY>0 && joyX<=0)
+			{
+				if (joyY>slope*(-joyX))
+					dpadUp[i] = 1;
+				if ((-joyX)>slope*joyY)
+					dpadLeft[i] = 1;
+			}
+			// lower right quadrant
+			else if (joyY<=0 && joyX>0)
+			{
+				if ((-joyY)>slope*joyX)
+					dpadDown[i] = 1;
+				if (joyX>slope*(-joyY))
+					dpadRight[i] = 1;
+			}
+			// lower left quadrant
+			else if (joyY<=0 && joyX<=0)
+			{
+				if ((-joyY)>slope*(-joyX))
+					dpadDown[i] = 1;
+				if ((-joyX)>slope*(-joyY))
+					dpadLeft[i] = 1;
+			}
 		}
 			
 		buttonA[i] = SDL_JoystickGetButton(currentJoy, PAD_SQUARE);
@@ -774,13 +807,13 @@ void gui_handle_events (void)
 	if (((mainMenu_quickSwitch==1) && buttonB[0] && dpadUp[0]) || ((mainMenu_quickSwitch==2) && buttonY[0] && dpadUp[0]))
 	{
 	  if (visibleAreaWidth==320) {
-	    visibleAreaWidth=640;
-	    mainMenu_displayHires=1;
+		visibleAreaWidth=640;
+		mainMenu_displayHires=1;
 	  }
 	  else if (visibleAreaWidth==640) {
-	    visibleAreaWidth=320;
-	    mainMenu_displayHires=0;
-	    }
+		visibleAreaWidth=320;
+		mainMenu_displayHires=0;
+		}
 		getChanges();
 		check_all_prefs();
 		update_display();
@@ -789,17 +822,17 @@ void gui_handle_events (void)
 	if (((mainMenu_quickSwitch==1) && buttonB[0] && dpadDown[0]) || ((mainMenu_quickSwitch==2) && buttonY[0] && dpadDown[0]))
 	{
 	  if (mainMenu_displayedLines==200)
-	    mainMenu_displayedLines=216;
+		mainMenu_displayedLines=216;
 	  else if (mainMenu_displayedLines==216)
-	    mainMenu_displayedLines=240;
+		mainMenu_displayedLines=240;
 	  else if (mainMenu_displayedLines==240)
-	    mainMenu_displayedLines=256;
+		mainMenu_displayedLines=256;
 	  else if (mainMenu_displayedLines==256)
-	    mainMenu_displayedLines=262;
+		mainMenu_displayedLines=262;
 	  else if (mainMenu_displayedLines==262)
-	    mainMenu_displayedLines=270;
+		mainMenu_displayedLines=270;
 	  else if (mainMenu_displayedLines==270)
-	    mainMenu_displayedLines=200;
+		mainMenu_displayedLines=200;
 		getChanges();
 		check_all_prefs();
 		update_display();

@@ -5,7 +5,7 @@
 #ifndef UAE4ALL2_PSP2_SHADER_H
 #define UAE4ALL2_PSP2_SHADER_H
 
-#include <vita2d.h>
+#include "vita2d_fbo/includes/vita2d.h"
 
 class PSP2Shader {
 
