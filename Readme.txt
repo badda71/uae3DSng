@@ -111,6 +111,10 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.53
+
+- fix analog stick angular zone sizes (22.5 degrees now)
+
 1.52
 
 - improved joystick diagonals and deadzone
