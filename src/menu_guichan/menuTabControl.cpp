@@ -177,11 +177,11 @@ public:
         else if (actionEvent.getSource() == radioButton_mouseMultiplier_50)
             mainMenu_mouseMultiplier=50;
         else if (actionEvent.getSource() == radioButton_mouseMultiplier_1)
-            mainMenu_mouseMultiplier=1;
+            mainMenu_mouseMultiplier=100;
         else if (actionEvent.getSource() == radioButton_mouseMultiplier_2)
-            mainMenu_mouseMultiplier=2;
+            mainMenu_mouseMultiplier=200;
         else if (actionEvent.getSource() == radioButton_mouseMultiplier_4)
-            mainMenu_mouseMultiplier=4;
+            mainMenu_mouseMultiplier=400;
     }
 };
 MouseMultActionListener* mouseMultActionListener;
@@ -482,11 +482,11 @@ void show_settings_TabControl()
         radioButton_mouseMultiplier_25->setSelected(true);
     else if (mainMenu_mouseMultiplier==50)
         radioButton_mouseMultiplier_50->setSelected(true);
-    else if (mainMenu_mouseMultiplier==1)
+    else if (mainMenu_mouseMultiplier==100)
         radioButton_mouseMultiplier_1->setSelected(true);
-    else if (mainMenu_mouseMultiplier==2)
+    else if (mainMenu_mouseMultiplier==200)
         radioButton_mouseMultiplier_2->setSelected(true);
-    else if (mainMenu_mouseMultiplier==4)
+    else if (mainMenu_mouseMultiplier==400)
         radioButton_mouseMultiplier_4->setSelected(true);
 
     if (mainMenu_tapDelay==10)

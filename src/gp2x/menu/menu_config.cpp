@@ -1351,7 +1351,16 @@ void loadconfig(int general)
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
         fscanf(f,"background=%d\n",&mainMenu_background);
-        fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier );
+        fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier);
+        //remain compatible with old configuration versions
+        if (mainMenu_mouseMultiplier < 10) {
+            if (mainMenu_mouseMultiplier == 1 || mainMenu_mouseMultiplier == 2 || mainMenu_mouseMultiplier == 4) {
+                mainMenu_mouseMultiplier *= 100;
+            }
+            else {
+                mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
+            }
+        }
         fscanf(f,"mouseemulation=%d\n",&mainMenu_mouseEmulation );
 #if defined(PANDORA) || defined(ANDROIDSDL)
         fscanf(f,"systemclock=%d\n",&dummy);    // mainMenu_throttle never changes -> removed

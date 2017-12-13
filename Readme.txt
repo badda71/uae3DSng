@@ -111,6 +111,11 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.54
+
+- more choices for setting mouse speeds in steps of 0.25 now
+- a button can be mapped to "slow mouse" in custom controls. When that button is held down, the mouse pointer speed is greatly reduced. This is useful for precisely positioning the cursor.
+
 1.53
 
 - fix analog stick angular zone sizes (22.5 degrees now)
