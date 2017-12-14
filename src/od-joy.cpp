@@ -295,7 +295,6 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			float deadZone=(float) mainMenu_deadZone;
 			float scalingFactor=1.0f;
 			float magnitude=0.0f;
-			float slowdownFactor=1.0f;
 
 			if (mainMenu_leftStickMouse)
 			{
