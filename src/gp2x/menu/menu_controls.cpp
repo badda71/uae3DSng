@@ -28,7 +28,7 @@
 #endif
 
 #define MAX_CUSTOM_ID 96
-#define MIN_CUSTOM_ID -12
+#define MIN_CUSTOM_ID -13
 
 const char *text_str_controls_separator="----------------------------------";
 const char *text_str_controls_title=    "         Custom Controls         -";
@@ -70,6 +70,7 @@ static void getMapping(int customId)
 {
 	switch(customId)
 	{
+		case -13: strcpy(mapping, "Slow Down Mouse"); break;
 		case -12: strcpy(mapping, "2nd Joystick RIGHT"); break;
 		case -11: strcpy(mapping, "2nd Joystick LEFT"); break;
 		case -10: strcpy(mapping, "2nd Joystick DOWN"); break;
@@ -181,6 +182,7 @@ static void getMapping(int customId)
 		case 96: strcpy(mapping, "F10");
 	}
 	  /*
+	  -13 slow mouse modifier
 	  -12 2nd joy right
 	  -11 2nd joy left
 	  -10 2nd joy down

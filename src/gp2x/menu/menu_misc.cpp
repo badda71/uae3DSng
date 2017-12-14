@@ -41,11 +41,6 @@ static const char *text_str_normal="normal";
 static const char *text_str_short="short";
 static const char *text_str_none="no";
 static const char *text_str_mouse_multiplier="Mouse Speed";
-static const char *text_str_025x=".25";
-static const char *text_str_05x=".5";
-static const char *text_str_1x="1x";
-static const char *text_str_2x="2x";
-static const char *text_str_4x="4x";
 int menuMisc = 0;
 
 extern int kickstart;
@@ -411,30 +406,12 @@ static void draw_miscMenu(int c)
 	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_mouse_multiplier);
 
-	if ((mainMenu_mouseMultiplier==25)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop2,menuLine,text_str_025x);
+	snprintf((char*)cpuSpeed, 8, "%4.2f", mainMenu_mouseMultiplier/100.0f);
+	if ((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb))
+		write_text_inv(tabstop2,menuLine,cpuSpeed);
 	else
-		write_text(tabstop2,menuLine,text_str_025x);
+		write_text(tabstop2,menuLine,cpuSpeed);
 
-	if ((mainMenu_mouseMultiplier==50)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop4,menuLine,text_str_05x);
-	else
-		write_text(tabstop4,menuLine,text_str_05x);
-
-	if ((mainMenu_mouseMultiplier==1)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop6,menuLine,text_str_1x);
-	else
-		write_text(tabstop6,menuLine,text_str_1x);
-
-	if ((mainMenu_mouseMultiplier==2)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop8,menuLine,text_str_2x);
-	else
-		write_text(tabstop8,menuLine,text_str_2x);
-
-	if ((mainMenu_mouseMultiplier==4)&&((menuMisc!=MENUMISC_MOUSEMULTIPLIER)||(bb)))
-		write_text_inv(tabstop9+2,menuLine,text_str_4x);
-	else
-		write_text(tabstop9+2,menuLine,text_str_4x);
 #ifndef __PSP2__
 	// MENUMISC_STYLUSOFFSET
 	menuLine+=2;
@@ -789,29 +766,17 @@ static int key_miscMenu(int *c)
 			case MENUMISC_MOUSEMULTIPLIER:
 				if (left)
 				{
-					if (mainMenu_mouseMultiplier == 4)
-						mainMenu_mouseMultiplier = 2;
-					else if (mainMenu_mouseMultiplier == 2)
-						mainMenu_mouseMultiplier = 1;
-					else if (mainMenu_mouseMultiplier == 1)
-						mainMenu_mouseMultiplier = 50;
-					else if (mainMenu_mouseMultiplier == 50)
+					if (mainMenu_mouseMultiplier <= 50)
 						mainMenu_mouseMultiplier = 25;
 					else
-						mainMenu_mouseMultiplier = 4;
+						mainMenu_mouseMultiplier -= 25;
 				}
 				else if (right)
 				{
-					if (mainMenu_mouseMultiplier == 4)
-						mainMenu_mouseMultiplier = 25;
-					else if (mainMenu_mouseMultiplier == 2)
-						mainMenu_mouseMultiplier = 4;
-					else if (mainMenu_mouseMultiplier == 1)
-						mainMenu_mouseMultiplier = 2;
-					else if (mainMenu_mouseMultiplier == 50)
-						mainMenu_mouseMultiplier = 1;
+					if (mainMenu_mouseMultiplier >= 375)
+						mainMenu_mouseMultiplier = 400;
 					else
-						mainMenu_mouseMultiplier = 50;
+						mainMenu_mouseMultiplier += 25;
 				}
 				break;
 #ifndef __PSP2__

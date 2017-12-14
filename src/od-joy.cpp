@@ -86,8 +86,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
 	// are we trying to figure out the regular GP2X controls for the primary (or both) joysticks?
 	int usingRegularControls = (!mainMenu_customControls) && ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1));
-
+	//In every frame, UAE calls this function twice, once with nr=0, then again with nr=1
+	//only update all joysticks on first call
+	if (nr==0) {
 		SDL_JoystickUpdate ();
+	}
 /* Temporary disabled
 #ifdef ANDROIDSDL
 		if (nr_joysticks > 2)
@@ -105,9 +108,37 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 }
 #endif
 */
-	int mouseScale = mainMenu_mouseMultiplier * 4 * 16;
-	if (mouseScale > (99*16))
-		mouseScale /= 100;
+	int mouseScale = mainMenu_mouseMultiplier * 8 * 16;
+	mouseScale /= 100;
+	//slow down mouse motion if custom "slow mouse" button is held
+	if(mainMenu_customControls)
+	{
+		for (int i=0; i<nr_joysticks; i++)
+		{
+			if( 
+				(
+					(mainMenu_custom_A[i]==-13 && buttonA[i]) ||
+					(mainMenu_custom_B[i]==-13 && buttonB[i]) ||
+					(mainMenu_custom_X[i]==-13 && buttonX[i]) ||
+					(mainMenu_custom_Y[i]==-13 && buttonY[i]) ||
+					(mainMenu_custom_L[i]==-13 && triggerL[i]) ||
+					(mainMenu_custom_R[i]==-13 && triggerR[i])
+				) ||
+				(
+					(mainMenu_custom_dpad == 0) && 
+					(
+						(mainMenu_custom_up[i]==-13 && dpadUp[i]) ||
+						(mainMenu_custom_down[i]==-13 && dpadDown[i]) ||
+						(mainMenu_custom_left[i]==-13 && dpadLeft[i]) ||
+						(mainMenu_custom_right[i]==-13 && dpadRight[i]))
+					)
+				)
+			{
+				mouseScale/=8;
+				break;
+			}
+		}
+	}
 
 //Digital mouseemu hotkeys: Triangle changes mouse speed etc.
 #if !defined(__PSP2__) && defined(USE_UAE4ALL_VKBD)
@@ -126,8 +157,10 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 #endif
 #endif
 	{
-		if (buttonY[0])
+		if (buttonY[0]) {
 			mouseScale = mainMenu_mouseMultiplier * 16;
+			mouseScale /= 100;
+		}
 #if defined(PANDORA) || defined(ANDROIDSDL)
 		if (dpadLeft[0])
 #else
@@ -244,57 +277,57 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		}
 	}
 
-
-//Analog Mouse
-#ifdef USE_UAE4ALL_VKBD
-	if (!vkbd_mode) {
-#endif
+//Analog Mouse on PSP2, only update once per frame (when nr==1)
 #ifdef __PSP2__
-	//VITA: always use an analog stick (default: right stick) for mouse pointer movements
-	//here we are using a small deadzone
-	//This can be disabled in the menu because it interferes with Joystick Port 0
-	if (mainMenu_mouseEmulation)
+#ifdef USE_UAE4ALL_VKBD
+	if (!vkbd_mode && nr)
+#else
+	if (nr)
+#endif
 	{
-		float analogX=0.0f;
-		float analogY=0.0f;
-		float deadZone=(float) mainMenu_deadZone;
-		float scalingFactor=1.0f;
-		float magnitude=0.0f;
-
-		if (mainMenu_leftStickMouse)
+		//VITA: always use an analog stick (default: right stick) for mouse pointer movements
+		//here we are using a small deadzone
+		//This can be disabled in the menu because it interferes with Joystick Port 0
+		if (mainMenu_mouseEmulation)
 		{
-			analogX=(float) lAnalogX;
-			analogY=(float) lAnalogY;
+			float analogX=0.0f;
+			float analogY=0.0f;
+			float deadZone=(float) mainMenu_deadZone;
+			float scalingFactor=1.0f;
+			float magnitude=0.0f;
+
+			if (mainMenu_leftStickMouse)
+			{
+				analogX=(float) lAnalogX;
+				analogY=(float) lAnalogY;
+			}
+			else
+			{
+				analogX=(float) rAnalogX;
+				analogY=(float) rAnalogY;
+			}
+			//radial and scaled deadzone
+			//http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
+			//max movement is mouseScale.
+			//that way, when in one of the other mouse modes,
+			//the Y button to change scale still works
+			magnitude=sqrt(analogX*analogX+analogY*analogY);
+			if (magnitude >= deadZone)
+			{
+				scalingFactor=1.0f/magnitude*(magnitude-deadZone)/(32769.0f-deadZone);
+				analogX = analogX * scalingFactor;
+				analogY = analogY * scalingFactor;
+				lastmx += (int) (analogX * mouseScale);
+				lastmy += (int) (analogY * mouseScale);
+				newmousecounters=1;
+			}
 		}
 		else
 		{
-			analogX=(float) rAnalogX;
-			analogY=(float) rAnalogY;
+			newmousecounters=0;
 		}
-		//radial and scaled deadzone
-		//http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
-		//max movement is mouseScale.
-		//that way, when in one of the other mouse modes,
-		//the Y button to change scale still works
-		magnitude=sqrt(analogX*analogX+analogY*analogY);
-		if (magnitude >= deadZone)
-		{
-			scalingFactor=1.0f/magnitude*(magnitude-deadZone)/(32769.0f-deadZone);
-			analogX = analogX * scalingFactor;
-			analogY = analogY * scalingFactor;
-			lastmx += (int) (analogX * mouseScale);
-			lastmy += (int) (analogY * mouseScale);
-			newmousecounters=1;
-		}
-	}
-	else
-	{
-		newmousecounters=0;
 	}
 #endif //__PSP2__
-#ifdef USE_UAE4ALL_VKBD
-	}
-#endif
 
 #ifdef USE_UAE4ALL_VKBD
 	if(mainMenu_customControls && !vkbd_mode)
@@ -424,7 +457,6 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 							*button |= 1 << 1;
 					}
 				}
-				delay++;
 			}
 		}
 	}

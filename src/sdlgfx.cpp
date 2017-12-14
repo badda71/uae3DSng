@@ -794,9 +794,8 @@ void handle_events (void)
 			}
 			else
 			{
-				int mouseScale = mainMenu_mouseMultiplier * 4 *16;
-				if (mouseScale > 99*16)
-					mouseScale /= 100;
+				int mouseScale = mainMenu_mouseMultiplier * 8 * 16;
+				mouseScale /= 100;
 
 				lastmx += rEvent.motion.xrel * mouseScale;
 				lastmy += rEvent.motion.yrel * mouseScale;

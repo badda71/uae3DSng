@@ -129,12 +129,14 @@ safe_read
 #ifdef __PSP2__
 #include <psp2/io/devctl.h>
 
+/*
 typedef struct {
     uint64_t max_size;
     uint64_t free_size;
     uint32_t cluster_size;
     void *unk;
 } SceIoDevInfo;
+*/
 
 int
 get_fs_usage
