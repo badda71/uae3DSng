@@ -111,6 +111,11 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+
+1.55
+
+- support for Bluetooth keyboard and mouse added. The Vita doesn't pair with all Bluetooth keyboard/mouse combos. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All. Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP."
+
 1.54
 
 - more choices for setting mouse speeds in steps of 0.25 now
