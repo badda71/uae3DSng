@@ -112,6 +112,9 @@ Square = Backspace
 Triangle = Toggle Shift
 
 CHANGELOG:
+1.56
+
+- fix keys being pressed when pressing Vita buttons (introduced in 1.55)
 
 1.55
 

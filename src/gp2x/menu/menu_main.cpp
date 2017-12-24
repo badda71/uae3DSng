@@ -35,6 +35,7 @@
 #include <psp2/shellutil.h>
 #include <psp2/io/fcntl.h> 
 #define SDL_PollEvent PSP2_PollEvent
+int inside_menu = 0;
 #endif
 
 extern int kickstart;
@@ -844,6 +845,7 @@ int run_mainMenu()
 	init_text(0);
 	
 #ifdef __PSP2__
+	inside_menu = 1;
 	SDL_Event event;
 	while (SDL_PollEvent(&event) > 0);
 #endif
@@ -1047,11 +1049,14 @@ int run_mainMenu()
 #endif
 
 	//See if new joysticks have been paired
-   close_joystick();
+	close_joystick();
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);	
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 	init_joystick();
 	
 	update_display();
+#ifdef __PSP2__
+	inside_menu = 0;
+#endif
 	return mainMenu_case;
 }
