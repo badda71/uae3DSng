@@ -86,11 +86,12 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
 	// are we trying to figure out the regular GP2X controls for the primary (or both) joysticks?
 	int usingRegularControls = (!mainMenu_customControls) && ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1));
-	//In every frame, UAE calls this function twice, once with nr=0, then again with nr=1
-	//only update all joysticks on first call
-	if (nr==0) {
-		SDL_JoystickUpdate ();
-	}
+	
+	//PSP2 updates joysticks in handle_events function which is always called 
+	//just before read_joystick is called. No need to update them again here
+#ifndef __PSP2__
+	SDL_JoystickUpdate();
+#endif
 /* Temporary disabled
 #ifdef ANDROIDSDL
 		if (nr_joysticks > 2)

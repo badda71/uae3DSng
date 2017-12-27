@@ -61,7 +61,7 @@ char * make_hard_file_cfg_line (char *dst) {
 		if (mySize >= 1073741824L && mySize < 2147483648L)
 			surfaces = 2; //>1 Gb HDF but surfaces only equal to 1, change it to two.
 		else if (mySize >= 2147483648L)
-			surfaces = 4; //>2 Gb HDF (DOES NOT WORK YET FOR SOME REASON) 
+			surfaces = 4; //>2 Gb HDF (DOES NOT WORK YET BECAUSE 32BIT FSEEK HAS 2GB LIMIT) 
 		sprintf(buffer, "%d:%d:%d:%d:", sectors, surfaces, reserved, blocksize);
 		//strcpy(buffer, "32:1:2:512:");
 		strncat(buffer, dst, 256 - strlen(buffer));

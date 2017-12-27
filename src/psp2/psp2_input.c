@@ -1,5 +1,7 @@
 #include "psp2_input.h"
 
+extern int inside_menu;
+
 SDLKey getKey(Uint8 button) {
 	
 	switch(button) {
@@ -51,7 +53,7 @@ int PSP2_PollEvent(SDL_Event *event) {
 	
 	int ret = SDL_PollEvent(event);
 
-	if(event != NULL) {
+	if(event != NULL && inside_menu) {
 
 		switch (event->type) {
 			

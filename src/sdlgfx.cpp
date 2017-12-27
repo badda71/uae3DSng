@@ -457,8 +457,8 @@ static int kc_decode (SDL_keysym *prKeySym)
     case SDLK_TAB: return AK_TAB;
     case SDLK_LALT: return AK_LALT;
     case SDLK_RALT: return AK_RALT;
-    case SDLK_RMETA: return AK_RAMI;
     case SDLK_LMETA: return AK_LAMI;
+    case SDLK_RMETA: return AK_RAMI;
     case SDLK_RETURN: return AK_RET;
     case SDLK_SPACE: return AK_SPC;
     case SDLK_LSHIFT: return AK_LSH;
@@ -475,8 +475,8 @@ static int kc_decode (SDL_keysym *prKeySym)
     case SDLK_LEFT: return AK_LF;
     case SDLK_RIGHT: return AK_RT;
 
-    case SDLK_PAGEUP: return AK_RAMI;          /* PgUp mapped to right amiga */
     case SDLK_PAGEDOWN: return AK_LAMI;        /* PgDn mapped to left amiga */
+    case SDLK_PAGEUP: return AK_RAMI;          /* PgUp mapped to right amiga */
 
     default: return -1;
     }
@@ -521,14 +521,71 @@ static int refresh_necessary = 0;
 
 void handle_events (void)
 {
-    SDL_Event rEvent;
-    int iAmigaKeyCode;
-    int i, j;
-    int iIsHotKey = 0;
+	SDL_Event rEvent;
+	int iAmigaKeyCode;
+	int i, j;
+	int iIsHotKey = 0;
 
-    /* Handle GUI events */
-    gui_handle_events ();
-    
+	/* Handle GUI events */
+	gui_handle_events ();
+
+#ifdef __PSP2__
+/* SDL events on PSP2 with all keyboard/mouse inputs for BT keyboard and mouse */
+    while (SDL_PollEvent(&rEvent))
+	{
+		switch (rEvent.type)
+		{
+		case SDL_QUIT:
+			uae_quit();
+			break;
+		case SDL_KEYDOWN:
+			iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
+			if (iAmigaKeyCode >= 0)
+			{
+				if (!uae4all_keystate[iAmigaKeyCode])
+				{
+					uae4all_keystate[iAmigaKeyCode] = 1;
+					record_key(iAmigaKeyCode << 1);
+				}
+			}
+			break;
+		case SDL_KEYUP:
+			{
+				iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
+				if (iAmigaKeyCode >= 0)
+				{
+					uae4all_keystate[iAmigaKeyCode] = 0;
+					record_key((iAmigaKeyCode << 1) | 1);
+				}
+			}
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			buttonstate[(rEvent.button.button-1)%3] = 1;
+			break;
+		case SDL_MOUSEBUTTONUP:
+			buttonstate[(rEvent.button.button-1)%3] = 0;
+			break;
+		case SDL_MOUSEMOTION:
+			mouse_state = true;
+			int mouseScale = mainMenu_mouseMultiplier * 16;
+			mouseScale /= 100;
+
+			lastmx += rEvent.motion.xrel * mouseScale;
+			lastmy += rEvent.motion.yrel * mouseScale;
+			if(rEvent.motion.x == 0)
+				lastmx -= mouseScale * 4;
+			if(rEvent.motion.y == 0)
+				lastmy -= mouseScale * 4;
+			if(rEvent.motion.x == visibleAreaWidth-1)
+				lastmx += mouseScale * 4;
+			if(rEvent.motion.y == mainMenu_displayedLines-1)
+				lastmy += mouseScale * 4;
+			newmousecounters = 1;
+			break;
+		}
+	}
+#else
+/* Event handling on non-PSP2 systems involves special hooks for certain keys */    
     while (SDL_PollEvent(&rEvent))
     {
 		switch (rEvent.type)
@@ -557,8 +614,6 @@ void handle_events (void)
 					record_key(AK_DN << 1);
 				}
 			}
-
-#ifndef __PSP2__ //Skip input mode cycling for Vita. The mouse is always available already and the stylus mode never worked. Also the start button is repurposed for screen moving.
 #ifdef ANDROIDSDL
 			if (rEvent.key.keysym.sym==SDLK_F11)
 #else
@@ -612,13 +667,8 @@ void handle_events (void)
 				show_inputmode = 1;
 				}
 			}
-#endif //__PSP2__
 #ifdef USE_UAE4ALL_VKBD
-#ifdef __PSP2__ //skipped the above inputmode cycling on PSP2
-			if ((!gp2xMouseEmuOn) && (!gp2xButtonRemappingOn) && (!vkbd_mode) && (vkbd_button2!=(SDLKey)0))
-#else
 			else if ((!gp2xMouseEmuOn) && (!gp2xButtonRemappingOn) && (!vkbd_mode) && (vkbd_button2!=(SDLKey)0))
-#endif			
 			{
 				if (vkbd_button2) // button2 keyboard was a planned feature, not yet implemented
 					rEvent.key.keysym.sym=vkbd_button2;
@@ -794,7 +844,7 @@ void handle_events (void)
 			}
 			else
 			{
-				int mouseScale = mainMenu_mouseMultiplier * 8 * 16;
+				int mouseScale = mainMenu_mouseMultiplier * 4 * 16;
 				mouseScale /= 100;
 
 				lastmx += rEvent.motion.xrel * mouseScale;
@@ -811,14 +861,16 @@ void handle_events (void)
 			newmousecounters = 1;
 			break;
 		}
-    }
+	}
 
-    if (mouse_state==false)
-    {
+#endif // __PSP2__
+
+	if (mouse_state==false)
+	{
 		mouse_x = 0;
 		mouse_y = 0;
 		newmousecounters = 1;
-    }
+	}
 }
 
 int needmousehack (void)
