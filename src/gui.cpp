@@ -160,10 +160,10 @@ int dpadUp[4]={0,0,0,0};
 int dpadDown[4]={0,0,0,0};
 int dpadLeft[4]={0,0,0,0};
 int dpadRight[4]={0,0,0,0};
-int buttonA[4]={0,0,0,0};
-int buttonB[4]={0,0,0,0};
-int buttonX[4]={0,0,0,0};
-int buttonY[4]={0,0,0,0};
+int buttonA[4]={0,0,0,0}; // Vita Square, GP2X_BUTTON_B
+int buttonB[4]={0,0,0,0}; // Vita Circle, GP2X_BUTTON_A
+int buttonX[4]={0,0,0,0}; // Vita Cross, GP2X_BUTTON_X
+int buttonY[4]={0,0,0,0}; // Vita Triangle, GP2X_BUTTON_Y
 int triggerL[4]={0,0,0,0};
 int triggerR[4]={0,0,0,0};
 int buttonSelect[4]={0,0,0,0};
@@ -432,7 +432,7 @@ static void goMenu(void)
 		}
 		if(gp2xButtonRemappingOn)
 			togglemouse();
-	   uae_reset ();
+			uae_reset ();
 	}
 	check_all_prefs();
 	gui_purge_events();
@@ -1188,7 +1188,7 @@ if(!vkbd_mode)
 	{
 		for (int i=0; i<nr_joysticks; i++)
 		{		
-			if(mainMenu_custom_dpad == 0)
+			if(mainMenu_custom_dpad == 0) // always true on Vita
 			{
 				//UP
 				if(dpadUp[i])
@@ -1930,44 +1930,59 @@ if(!vkbd_mode)
 	}
 
 #ifdef USE_UAE4ALL_VKBD
-	if (vkbd_key!=-1234567) // This means key was selected by user. We cannot test for zero, because that is a valid Amiga keycode
+	if (vkbd_key!=KEYCODE_NOTHING) // This means key was selected by user. We cannot test for zero, because that is a valid Amiga keycode
 	{
-		if (vkbd_keysave==-1234567) // the previous vkbd key was released. Press the new key for one frame
+		if (vkbd_key >= 0)
 		{
-			vkbd_keysave=vkbd_key;	// remember which key we are pressing so we can release it later
-			if (vkbd_keysave >= 0)
+			// Handle all sticky keys (release and press) here up front
+			bool sticky=false;
+			for (int i=0; i<NUM_STICKY; i++) 
 			{
+				if (vkbd_key == vkbd_sticky_key[i].code)
+				{
+					if ((vkbd_sticky_key[i].stuck) && uae4all_keystate[vkbd_sticky_key[i].code] == 0)
+					{
+						uae4all_keystate[vkbd_sticky_key[i].code]=1;
+						record_key(vkbd_sticky_key[i].code<<1);
+					}
+					if (!(vkbd_sticky_key[i].stuck) && uae4all_keystate[vkbd_sticky_key[i].code] == 1)
+					{
+						uae4all_keystate[vkbd_sticky_key[i].code]=0;
+						record_key((vkbd_sticky_key[i].code<<1)|1);
+					}
+					sticky=true; // a sticky key was pressed and handled. We are done.
+					break;
+				}
+			}
+			if (!sticky && vkbd_keysave==KEYCODE_NOTHING) // a non-sticky key was pressed and previous key was released. Press the new key
+			{
+				vkbd_keysave=vkbd_key; // remember which key we are pressing so we can release it later
 				if (!uae4all_keystate[vkbd_keysave])
 				{
-					if ((vkbd_shift) && uae4all_keystate[AK_LSH] == 0)
-					{
-						uae4all_keystate[AK_LSH]=1;
-						record_key(AK_LSH<<1);
-					}
-					if (!(vkbd_shift) && uae4all_keystate[AK_LSH] == 1)
-					{
-						uae4all_keystate[AK_LSH]=0;
-						record_key((AK_LSH<<1)|1);
-					}
 					uae4all_keystate[vkbd_keysave]=1;
-					record_key(vkbd_keysave<<1);					
+					record_key(vkbd_keysave<<1);
+				}
+			}
+		} else if (vkbd_key == KEYCODE_STICKY_RESET) // the special button to reset all sticky keys was pressed
+		{
+			for (int i=0; i<NUM_STICKY; i++) 
+			{
+				if (uae4all_keystate[vkbd_sticky_key[i].code] == 1)
+				{
+					uae4all_keystate[vkbd_sticky_key[i].code]=0;
+					record_key((vkbd_sticky_key[i].code<<1)|1);
 				}
 			}
 		}
 	}
-	else if (vkbd_keysave!=-1234567)
+	else if (vkbd_keysave!=KEYCODE_NOTHING) // some non-sticky key was released
 	{
-		if (vkbd_keysave >= 0) //turn off shift together with any other key release if it was on
+		if (vkbd_keysave >= 0) //handle key release 
 		{
-			if (uae4all_keystate[AK_LSH] == 1)
-			{
-				uae4all_keystate[AK_LSH]=0;
-				record_key((AK_LSH<<1)|1);
-			}
 			uae4all_keystate[vkbd_keysave]=0;
 			record_key((vkbd_keysave << 1) | 1);
 		}
-		vkbd_keysave=-1234567;
+		vkbd_keysave=KEYCODE_NOTHING;
 	}
 #endif
 }

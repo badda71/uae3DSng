@@ -6,7 +6,6 @@
 
 #include "keyboard.h"
 
-
 #define VKBD_MIN_HOLDING_TIME 200
 #define VKBD_MOVE_DELAY 50
 
@@ -22,21 +21,31 @@ static int vkbd_just_blinked=0;
 static Uint32 vkbd_last_press_time=0;
 static Uint32 vkbd_last_move_time=0;
 
-int vkbd_shift=0;
-int vkbd_can_switch_shift=0;
+// Keep track of keys that are sticky
+t_vkbd_sticky_key vkbd_sticky_key[] = 
+{
+	{ AK_LSH, false, true, 70},
+	{ AK_RSH, false, true, 81},
+	{ AK_CTRL, false, true, 54},
+	{ AK_LALT, false, true, 85},
+	{ AK_RALT, false, true, 89},
+	{ AK_LAMI, false, true, 86},
+	{ AK_RAMI, false, true, 88}
+};
+
 int vkbd_let_go_of_direction=0;
 int vkbd_mode=0;
 int vkbd_move=0;
-int vkbd_key=-1234567;
+int vkbd_key=KEYCODE_NOTHING;
 SDLKey vkbd_button2=(SDLKey)0; //not implemented
-int vkbd_keysave=-1234567;
+int vkbd_keysave=KEYCODE_NOTHING;
 
 #if !defined (DREAMCAST) && !defined (GP2X) && !defined (PSP) && !defined (GIZMONDO) 
 
 int vkbd_init(void) { return 0; }
 void vkbd_init_button2(void) { }
 void vkbd_quit(void) { }
-int vkbd_process(void) { return -1234567; }
+int vkbd_process(void) { return KEYCODE_NOTHING; }
 void vkbd_displace_up(void) { };
 void vkbd_displace_down(void) { };
 void vkbd_transparency_up(void) { };
@@ -49,6 +58,8 @@ extern SDL_Surface *prSDLScreen;
 
 static SDL_Surface *ksur;
 static SDL_Surface *ksurHires;
+static SDL_Surface *canvas; // intermediate surface used to highlight sticky keys
+static SDL_Surface *canvasHires; // intermediate surface used to highlight sticky keys
 #ifdef LARGEKEYBOARD // The new larger keyboard uses transparency and supports shift.
 static SDL_Surface *ksurShift;
 static SDL_Surface *ksurShiftHires;
@@ -501,6 +512,15 @@ void vkbd_init_button2(void)
 	vkbd_button2=(SDLKey)0;
 }
 
+void vkbd_reset_sticky_keys(void) 
+{
+	for (int i=0; i<NUM_STICKY; i++)
+	{
+		vkbd_sticky_key[i].can_switch=true;
+		vkbd_sticky_key[i].stuck=false;
+	}
+}
+
 int vkbd_init(void)
 {
 	int i;
@@ -514,33 +534,33 @@ int vkbd_init(void)
 	switch (mainMenu_vkbdLanguage)
 	{
 		case 1:
-   		snprintf(vkbdFileName, 256, "vkbdUKLarge.bmp");
+			snprintf(vkbdFileName, 256, "vkbdUKLarge.bmp");
 			snprintf(vkbdHiresFileName, 256, "vkbdUKLargeHires.bmp");
-   		snprintf(vkbdShiftFileName, 256, "vkbdUKLargeShift.bmp");
-   		snprintf(vkbdShiftHiresFileName, 256, "vkbdUKLargeShiftHires.bmp");
-   		vkbd_rect=vkbd_rect_UK;
-   		break;
-   	case 2:
-   		snprintf(vkbdFileName, 256, "vkbdGERLarge.bmp");
+			snprintf(vkbdShiftFileName, 256, "vkbdUKLargeShift.bmp");
+			snprintf(vkbdShiftHiresFileName, 256, "vkbdUKLargeShiftHires.bmp");
+			vkbd_rect=vkbd_rect_UK;
+			break;
+		case 2:
+			snprintf(vkbdFileName, 256, "vkbdGERLarge.bmp");
 			snprintf(vkbdHiresFileName, 256, "vkbdGERLargeHires.bmp");
-   		snprintf(vkbdShiftFileName, 256, "vkbdGERLargeShift.bmp");
-   		snprintf(vkbdShiftHiresFileName, 256, "vkbdGERLargeShiftHires.bmp");
-   		vkbd_rect=vkbd_rect_GER;
-   		break;
+			snprintf(vkbdShiftFileName, 256, "vkbdGERLargeShift.bmp");
+			snprintf(vkbdShiftHiresFileName, 256, "vkbdGERLargeShiftHires.bmp");
+			vkbd_rect=vkbd_rect_GER;
+			break;
 		default:
-   		snprintf(vkbdFileName, 256, "vkbdUSLarge.bmp");
+			snprintf(vkbdFileName, 256, "vkbdUSLarge.bmp");
 			snprintf(vkbdHiresFileName, 256, "vkbdUSLargeHires.bmp");
-   		snprintf(vkbdShiftFileName, 256, "vkbdUSLargeShift.bmp");
-   		snprintf(vkbdShiftHiresFileName, 256, "vkbdUSLargeShiftHires.bmp");
-   		vkbd_rect=vkbd_rect_US;
-   		break;
+			snprintf(vkbdShiftFileName, 256, "vkbdUSLargeShift.bmp");
+			snprintf(vkbdShiftHiresFileName, 256, "vkbdUSLargeShiftHires.bmp");
+			vkbd_rect=vkbd_rect_US;
+			break;
 	}
 #else
 	snprintf(vkbdFileName, 256, "vkbd.bmp");
 	snprintf(vkbdFileName, 256, "vkbdHires.bmp");
 	vkbd_rect=vkbd_rect_Small;	
 #endif
-		
+
 #ifdef __PSP2__
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdFileName);
 	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdHiresFileName);
@@ -578,6 +598,10 @@ int vkbd_init(void)
 	}
 	ksurHires=SDL_DisplayFormat(tmp);
 	SDL_FreeSurface(tmp);
+
+	// intermediate surfaces to highlight sticky keys on
+	canvas=SDL_DisplayFormat(ksur);
+	canvasHires=SDL_DisplayFormat(ksurHires);
 
 //for large keyboard, load another image for shifted keys, and set transparency
 #ifdef LARGEKEYBOARD 
@@ -618,10 +642,10 @@ int vkbd_init(void)
 	}
 	ksurShiftHires=SDL_DisplayFormat(tmp);
 	SDL_FreeSurface(tmp);
-	
+
 	vkbd_transparency=128; //default transparency is 128 for LARGEKEYBOARD
-	SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
-	SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);	
+	SDL_SetAlpha(canvas, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
+	SDL_SetAlpha(canvasHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
 #else //LARGEKEYBOARD
 //if using the small keyboard, load in the zoomed keys instead
 	for(i=0;i<MAX_KEY_SMALL;i++)
@@ -654,7 +678,10 @@ int vkbd_init(void)
 #ifndef __PSP2__ //no need to show keyboard on first startup
 	vkbd_redraw();
 #endif
-	vkbd_shift=0;
+	for (int i=0; i<NUM_STICKY; i++)
+	{
+		vkbd_sticky_key[i].stuck=false;
+	}
 #ifdef LARGEKEYBOARD
 	vkbd_x=(prSDLScreen->w-ksur->w)/2;
 	vkbd_y=prSDLScreen->h-ksur->h;
@@ -666,9 +693,9 @@ int vkbd_init(void)
 	vkbd_move=0;
 	vkbd_last_press_time=0;
 	vkbd_last_move_time=0;
-	vkbd_key=-1234567;
+	vkbd_key=KEYCODE_NOTHING;
 	vkbd_button2=(SDLKey)0;
-	vkbd_keysave=-1234567;
+	vkbd_keysave=KEYCODE_NOTHING;
 	return 0;
 }
 
@@ -685,43 +712,80 @@ void vkbd_quit(void)
 	SDL_FreeSurface(ksur);
 	SDL_FreeSurface(ksurHires);
 	vkbd_mode=0;
-	vkbd_shift=0;
+	for (int i=0; i<NUM_STICKY; i++)
+	{
+		vkbd_sticky_key[i].stuck=false;
+	}
 }
 
 void vkbd_redraw(void)
 {
 	SDL_Rect r;
-	SDL_Surface *todraw;
+	SDL_Surface *toDraw;
+	SDL_Surface *myCanvas;
 	if (mainMenu_displayHires)
 	{
 #ifdef LARGEKEYBOARD
-		if (vkbd_shift)
-			todraw=ksurShiftHires;
+		if (vkbd_sticky_key[0].stuck || vkbd_sticky_key[1].stuck)			
+			toDraw=ksurShiftHires;
 		else
 #endif
-			todraw=ksurHires;
+			toDraw=ksurHires;
+			myCanvas=canvasHires;
 	}
 	else
 	{
 #ifdef LARGEKEYBOARD
-		if (vkbd_shift)
-			todraw=ksurShift;
+		if (vkbd_sticky_key[0].stuck || vkbd_sticky_key[1].stuck)
+			toDraw=ksurShift;
 		else
 #endif
-			todraw=ksur;
+			toDraw=ksur;
+			myCanvas=canvas;
 	}
+
+	// blit onto intermediate canvas
+	r.x=0;
+	r.y=0;
+	r.w=toDraw->w;
+	r.h=toDraw->h;
+	SDL_BlitSurface(toDraw,NULL,myCanvas,&r);
+
+#ifdef LARGEKEYBOARD
+	// highlight sticky keys that are pressed with a green dot
+	// do this on a canvas to ensure correct transparency on final blit
+	Uint32 sticky_key_color=SDL_MapRGB(myCanvas->format, 0, 255, 0);
+	for (int i=0; i<NUM_STICKY; i++) {
+		if (vkbd_sticky_key[i].stuck==true) {
+			int index = vkbd_sticky_key[i].index;
+			if (mainMenu_displayHires)
+			{
+				r.x=2*vkbd_rect[index].rect.x+2;
+				r.w=6;
+			}
+			else
+			{
+				r.x=vkbd_rect[index].rect.x+1;
+				r.w=3;
+			}
+			r.y=vkbd_rect[index].rect.y+1;
+			r.h=3;
+			SDL_FillRect(myCanvas,&r,sticky_key_color);
+		}
+	}
+#endif
+
+	if (vkbd_y>prSDLScreen->h-myCanvas->h) 
+		vkbd_y=prSDLScreen->h-myCanvas->h;
 		
-	if (vkbd_y>prSDLScreen->h-todraw->h) 
-		vkbd_y=prSDLScreen->h-todraw->h;
-		
-	vkbd_x=(prSDLScreen->w-todraw->w)/2;
+	vkbd_x=(prSDLScreen->w-myCanvas->w)/2;
 	
 	r.x=vkbd_x;	
 	r.y=vkbd_y;	
-	r.w=todraw->w;
-	r.h=todraw->h;
-	
-	SDL_BlitSurface(todraw,NULL,prSDLScreen,&r);
+	r.w=myCanvas->w;
+	r.h=myCanvas->h;
+
+	SDL_BlitSurface(myCanvas,NULL,prSDLScreen,&r);
 }
 
 void vkbd_transparency_up(void)
@@ -746,21 +810,13 @@ void vkbd_transparency_up(void)
 	}		
 	if (vkbd_transparency != 255)
 	{
-		SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
-		SDL_SetAlpha(ksurHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
-#ifdef LARGEKEYBOARD
-		SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
-		SDL_SetAlpha(ksurShiftHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
-#endif
+		SDL_SetAlpha(canvas, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+		SDL_SetAlpha(canvasHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
 	}
 	else //fully opague
 	{
-	 	SDL_SetAlpha(ksur, 0, 255);
-	 	SDL_SetAlpha(ksurHires, 0, 255);				
-#ifdef LARGEKEYBOARD
-		SDL_SetAlpha(ksurShift, 0, 255);
-		SDL_SetAlpha(ksurShiftHires, 0, 255);
-#endif
+	 	SDL_SetAlpha(canvas, 0, 255);
+	 	SDL_SetAlpha(canvasHires, 0, 255);
 	}
 }	
 
@@ -786,21 +842,13 @@ void vkbd_transparency_down(void)
 	}		
 	if (vkbd_transparency != 255)
 	{
-		SDL_SetAlpha(ksur, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
-		SDL_SetAlpha(ksurHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
-#ifdef LARGEKEYBOARD
-		SDL_SetAlpha(ksurShift, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
-		SDL_SetAlpha(ksurShiftHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
-#endif
+		SDL_SetAlpha(canvas, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
+		SDL_SetAlpha(canvasHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);		
 	}
 	else //fully opague
 	{
-	 	SDL_SetAlpha(ksur, 0, 255);
-	 	SDL_SetAlpha(ksurHires, 0, 255);				
-#ifdef LARGEKEYBOARD
-		SDL_SetAlpha(ksurShift, 0, 255);
-		SDL_SetAlpha(ksurShiftHires, 0, 255);
-#endif
+	 	SDL_SetAlpha(canvas, 0, 255);
+	 	SDL_SetAlpha(canvasHires, 0, 255);				
 	}
 }	
 
@@ -836,17 +884,25 @@ int vkbd_process(void)
 #ifndef LARGEKEYBOARD //the old small keyboard struct contains SDL codes
 		SDL_keysym ks;
 		ks.sym=vkbd_rect[vkbd_actual].key;
-		return keycode2amiga(&ks);
+		int amigaKeyCode=keycode2amiga(&ks);
 #else //the large keyboard struct contains Amiga key codes
 		int amigaKeyCode=vkbd_rect[vkbd_actual].key;
-			if ((amigaKeyCode == AK_LSH || amigaKeyCode == AK_RSH) && vkbd_can_switch_shift) 
-			{
-				vkbd_shift=!vkbd_shift;
-				vkbd_can_switch_shift=0;
-				amigaKeyCode=-1234567; //shift is handled as part of the other keypress
-			} 
-		return amigaKeyCode;
 #endif
+		//some keys are sticky
+		for (int i=0; i<NUM_STICKY; i++) 
+		{
+			if (amigaKeyCode == vkbd_sticky_key[i].code) 
+			{
+				if (vkbd_sticky_key[i].can_switch) 
+				{
+					vkbd_sticky_key[i].stuck=!vkbd_sticky_key[i].stuck;
+					vkbd_sticky_key[i].can_switch=false;
+					return amigaKeyCode;
+				}
+				else return (KEYCODE_NOTHING);
+			}
+		}
+		return amigaKeyCode;
 	}
 	
 	if (vkbd_move&VKBD_BUTTON_BACKSPACE)
@@ -857,14 +913,22 @@ int vkbd_process(void)
 	if (vkbd_move&VKBD_BUTTON_SHIFT)
 	{
 		vkbd_move=0;
-		if (vkbd_can_switch_shift)
+		// hotkey for shift toggle (arbitrarily use left shift here)
+		if (vkbd_sticky_key[0].can_switch)
 		{
-			vkbd_shift=!vkbd_shift;
-			vkbd_can_switch_shift=0;
-		}
-		return(-1234567); //shift is handled as part of the other keypress
+			vkbd_sticky_key[0].stuck=!vkbd_sticky_key[0].stuck;
+			vkbd_sticky_key[0].can_switch=false;
+			return(AK_LSH);
+		} else
+			return(KEYCODE_NOTHING);
 	}
-
+	if (vkbd_move&VKBD_BUTTON_RESET_STICKY)
+	{
+		vkbd_move=0;
+		// hotkey to reset all sticky keys at once
+		vkbd_reset_sticky_keys();
+		return(KEYCODE_STICKY_RESET); // special return code to reset amiga keystate
+	}
 	if (vkbd_move&VKBD_LEFT || vkbd_move&VKBD_RIGHT || vkbd_move&VKBD_UP || vkbd_move&VKBD_DOWN) 
 	{
 		if (vkbd_let_go_of_direction) //just pressing down
@@ -932,6 +996,6 @@ int vkbd_process(void)
 	}
 #endif
 #endif //!LARGEKEYBOARD
-	return -1234567; //nothing on the vkbd was pressed
+	return KEYCODE_NOTHING; //nothing on the vkbd was pressed
 }
 #endif

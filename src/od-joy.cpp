@@ -551,6 +551,12 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				buttonA[0] = 0;
 				*button = 0;
 			}
+			else if (buttonB[0])
+			{
+				vkbd_move=VKBD_BUTTON_RESET_STICKY;
+				buttonB[0] = 0;
+				*button = 0;
+			}
 #else // in other cases where those buttons might not be available, use the amiga joystick
 			if (*button || buttonX[0] )
 			{
@@ -559,9 +565,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				*button = 0;
 			}
 #endif
-			else //button release, make shift toggle possible again.
-			{
-				vkbd_can_switch_shift=1;
+			else { //button release, pressing sticky keys is possible again.
+				for (int i=0; i<NUM_STICKY; i++)
+				{
+					vkbd_sticky_key[i].can_switch=true;
+				}
 			}
 			// TODO: add vkbd_button2 mapped to button2
 		}
