@@ -21537,6 +21537,10 @@ OPCODE(0x4E7A)
     EXECUTE_EXCEPTION(M68K_PRIVILEGE_VIOLATION_EX,6);
     
   FETCH_WORD(src);
+
+  if ((src & 0x0FFF) == 3 || ((src & 0x07FF) >= 4 && (src & 0x0FFF) != 0x804))
+    EXECUTE_EXCEPTION(M68K_ILLEGAL_INSTRUCTION_EX,6);
+
   MOVEC2(src & 0x0FFF, src >> 12);
 	RET(6)
 }
