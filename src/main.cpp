@@ -57,6 +57,10 @@ extern SDL_Surface *current_screenshot;
 #include "gp2xutil.h"
 #endif
 
+#ifdef USE_UAE4ALL_VKBD
+#include "vkbd.h"
+#endif
+
 #ifdef __PSP2__
 //Allow locking PS Button
 #include <psp2/shellutil.h>
@@ -153,6 +157,9 @@ int quit_program = 0;
 void uae_reset (void)
 {
     gui_purge_events();
+#ifdef USE_UAE4ALL_VKBD
+	vkbd_reset_sticky_keys(); // keyvalues clear on reset, so vkbd must reflect this
+#endif
     black_screen_now();
     quit_program = 2;
     set_special (SPCFLAG_BRK);

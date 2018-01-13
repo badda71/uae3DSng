@@ -49,6 +49,7 @@ VITA-EXCLUSIVE FEATURES:
 - Additional emulator settings: sprite-sprite collisions can be enabled, blitter settings can be changed
 - Adjustable stereo separation
 - Bluetooth keyboard and mouse support
+- Sticky virtual keyboard modifiers: allows keyboard combos like CTRL-C to be entered easily
 
 NOTES:
 
@@ -92,8 +93,11 @@ Dpad = Amiga joystick directions
 
 When custom controls are off:
 L/R shoulder buttons = Mousebuttons
-Square = Joystick button autofire (can be customized)
-X = Joystick button (can be customized)
+(Shown below are control presets 1 (default) / 2 / 3 / 4)
+Square = Autofire (default) / Fire / Autofire / Fire
+Cross = Fire (default) / Autofire / Up (Jump) / Up (Jump) 
+Triangle = Space (default) / Space / Fire / Autofire
+Circle = Secondary Fire (used only in a few games)
 R+Square = Ctrl
 R+Circle = Left Alt
 R+Cross = Help
@@ -108,10 +112,16 @@ Virtual keyboard controls:
 Start = Toggle virtual keyboard
 Right analog stick up/down = Move virtual keyboard up and down
 Right analog stick left/right = Change virtual keyboard transparency
+Cross = Press selected key
 Square = Backspace
-Triangle = Toggle Shift
+Triangle = Toggle shift
+Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift)
 
 CHANGELOG:
+1.57
+
+- Sticky virtual keyboard keys implemented. The alt, ctrl, amiga, and shift virtual keyboard keys are now sticky. Press them once to enable and another time to let go of the key. Key combos like "Amiga-Q" can now be entered using the virtual keyboard. The circle button quickly un-sticks all keys.
+
 1.56
 
 - fix keys being pressed when pressing Vita buttons (introduced in 1.55)
