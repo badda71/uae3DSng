@@ -118,6 +118,11 @@ Triangle = Toggle shift
 Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift)
 
 CHANGELOG:
+1.58
+
+- fix 'movec pcr,d0' not throwing exception on 68020 (fixes WHDload 18.3)
+- recompiled with latest SDL 1.2 library supporting full analog joystick range
+
 1.57
 
 - Sticky virtual keyboard keys implemented. The alt, ctrl, amiga, and shift virtual keyboard keys are now sticky. Press them once to enable and another time to let go of the key. Key combos like "Amiga-Q" can now be entered using the virtual keyboard. The circle button quickly un-sticks all keys.
