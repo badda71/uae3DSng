@@ -141,6 +141,7 @@ int saveMenu_n_savestate = 0;
 #ifdef __PSP2__
 int mainMenu_shader = 5;
 int mainMenu_leftStickMouse = 0;
+int mainMenu_touchControls = 1;
 int mainMenu_deadZone = 1000;
 #endif
 
@@ -310,6 +311,7 @@ void SetDefaultMenuSettings(int general)
 #ifdef __PSP2__
     mainMenu_shader = 5;
     mainMenu_leftStickMouse = 0;
+    mainMenu_touchControls = 1;
     mainMenu_deadZone = 1000;
 #endif
 
@@ -944,6 +946,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "leftstickmouse=%d\n",mainMenu_leftStickMouse);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "touchcontrols=%d\n",mainMenu_touchControls);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "deadzone=%d\n",mainMenu_deadZone);
     fputs(buffer,f);
 #endif
@@ -1347,6 +1351,7 @@ void loadconfig(int general)
 #ifdef __PSP2__
         fscanf(f,"shader=%d\n",&mainMenu_shader);
         fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);
+        fscanf(f,"touchcontrols=%d\n",&mainMenu_touchControls);
         fscanf(f,"deadzone=%d\n",&mainMenu_deadZone);        
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);

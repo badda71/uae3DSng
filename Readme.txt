@@ -50,6 +50,7 @@ VITA-EXCLUSIVE FEATURES:
 - Adjustable stereo separation
 - Bluetooth keyboard and mouse support
 - Sticky virtual keyboard modifiers: allows keyboard combos like CTRL-C to be entered easily
+- Touchpad style pointer controls using the front touch panel and, optional, the rear touch panel. Touch pointer speed can be adjusted with the Mouse Speed option.
 
 NOTES:
 
@@ -117,7 +118,17 @@ Square = Backspace
 Triangle = Toggle shift
 Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift)
 
+Touch controls:
+single short tap = left mouse click
+single short tap while holding a second finger down = right mouse click
+single finger drag = move the mouse pointer
+dual finger drag = drag'n'drop (left mouse button is held down)
+
 CHANGELOG:
+1.59
+
+- implemented touchpad-style pointer controls. Touch controls are configured under 'More Options/Touch.' Choices are 'Touch Off', 'Front only', or 'Front and Back.' The default is to use only the front panel. Both panels work the same, using relative touch mode. How far a certain finger motion moves the pointer depends on the Mouse Speed setting, which also affects how fast the analog stick moves the mouse.
+
 1.58
 
 - fix 'movec pcr,d0' not throwing exception on 68020 (fixes WHDload 18.3)

@@ -79,6 +79,7 @@ enum {
 #endif
 #ifdef __PSP2__
 	MENUMISC_DEADZONE,
+	MENUMISC_TOUCHCONTROLS,
 #else
 	MENUMISC_TAPDELAY,
 #endif
@@ -383,8 +384,8 @@ static void draw_miscMenu(int c)
 		write_text(tabstop3-8,menuLine,"On");	
 	write_text(tabstop3-5,menuLine,"(can disturb 2nd player)");
 
-  	// MENUMISC_LEFTSTICKMOUSE
-  	menuLine+=2;
+	// MENUMISC_LEFTSTICKMOUSE
+	menuLine+=2;
 	write_text(leftMargin,menuLine,"Mouse Control");	
 	if (mainMenu_leftStickMouse==0)
 	{
@@ -392,8 +393,8 @@ static void draw_miscMenu(int c)
 			write_text_inv(tabstop2,menuLine,"Right Stick");
 		else
 			write_text(tabstop2,menuLine,"Right Stick  ");
-	}
-	else if (mainMenu_leftStickMouse==1) 
+	} 
+	else if (mainMenu_leftStickMouse==1)
 	{
 		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
 			write_text_inv(tabstop2,menuLine,"Left Stick");
@@ -453,7 +454,31 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop2,menuLine,cpuSpeed);
 	else
 		write_text(tabstop2,menuLine,cpuSpeed);
-	
+
+	// MENUMISC_TOUCHCONTROLS
+	write_text(tabstop6-2,menuLine,"Touch");
+	if (mainMenu_touchControls==0)
+	{
+		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
+			write_text_inv(tabstop9-1,menuLine,"Off");
+		else
+			write_text(tabstop9-1,menuLine,"Off  ");
+	}
+	else if (mainMenu_touchControls==1)
+	{
+		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
+			write_text_inv(tabstop9-1,menuLine,"Front");
+		else
+			write_text(tabstop9-1,menuLine,"Front  ");
+	}
+	else if (mainMenu_touchControls==2)
+	{
+		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
+			write_text_inv(tabstop9-1,menuLine,"Both");
+		else
+			write_text(tabstop9-1,menuLine,"Both  ");
+	}
+
 #else
 	// MENUMISC_TAPDELAY
 	menuLine+=2;
@@ -668,31 +693,46 @@ static int key_miscMenu(int *c)
 						mainMenu_CPU_speed=0;
 				}
 				break;
-      
+
 #ifndef __PSP2__
 #ifdef PANDORA
-      case MENUMISC_PANDORASPEED:
+			case MENUMISC_PANDORASPEED:
 				if(left)
 					mainMenu_cpuSpeed-=10;
 				else if(right)
 					mainMenu_cpuSpeed+=10;
-        break;
+				break;
 #endif
 #endif //__PSP2__
 #ifdef __PSP2__
-      case MENUMISC_LEFTSTICKMOUSE:
-				if ((left)||(right))
-						mainMenu_leftStickMouse = !mainMenu_leftStickMouse;
-        break;
+			case MENUMISC_LEFTSTICKMOUSE:
+				if (left || right) 
+					mainMenu_leftStickMouse = !mainMenu_leftStickMouse;
+				break;
+			case MENUMISC_TOUCHCONTROLS:
+				if (left) 
+				{
+					if (mainMenu_touchControls>0)
+						mainMenu_touchControls--;
+					else
+						mainMenu_touchControls=2;
+				}
+				else if (right) 
+				{
+					if (mainMenu_touchControls<2)
+						mainMenu_touchControls++;
+					else
+						mainMenu_touchControls=0;
+				}
+				break;
 #endif
 
 #ifdef ANDROIDSDL
 			case MENUMISC_ONSCREEN:
 				if ((left)||(right))
-						mainMenu_onScreen = !mainMenu_onScreen;
-        break;
+					mainMenu_onScreen = !mainMenu_onScreen;
+				break;
 #endif
-          
 			case MENUMISC_CONTROLCFG:
 				if (left)
 				{
@@ -724,7 +764,7 @@ static int key_miscMenu(int *c)
 					else
 						mainMenu_joyPort=0;
 				}
-			  break;  
+				break;  
 			case MENUMISC_AUTOFIRERATE:
 				if(left)
 				{
@@ -756,7 +796,7 @@ static int key_miscMenu(int *c)
 				}
 				else if (right)
 				{
-				 	if (mainMenu_customAutofireButton < 6)
+					if (mainMenu_customAutofireButton < 6)
 						mainMenu_customAutofireButton++;
 					else
 						mainMenu_customAutofireButton=6;
@@ -845,8 +885,8 @@ static int key_miscMenu(int *c)
 				break;
 			case MENUMISC_MOUSEEMULATION:
 				if ((left)||(right))
-						mainMenu_mouseEmulation = !mainMenu_mouseEmulation;
-        		break;
+					mainMenu_mouseEmulation = !mainMenu_mouseEmulation;
+				break;
 #else
 			case MENUMISC_TAPDELAY:
 				if (left)
