@@ -220,38 +220,55 @@ static int menuLoadLoop(char *curr_path)
 	max_in_dir=SHOW_MAX_FILES;
 
 #ifdef __PSP2__
-	if(strcmp(curr_path, "/") == 0)
-		strcpy(curr_path, "ux0:/");
-
-	if ((dir = opendir(curr_path)) == NULL)
+	if(strcmp(curr_path, "/") == 0 || curr_path[0] == 0) 
 	{
-		printf("opendir failed: %s\n", curr_path);
-		char *p;
-		for (p = curr_path + strlen(curr_path) - 1; p > curr_path && *p != '/'; p--);
-		*p = 0;
-		fname = p+1;
-		dir = opendir(curr_path);
+		struct dirent *ent = NULL;
+		n = 0;
+		namelist = (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
+		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
+		strcpy(namelist[0]->d_name, ".");
+		namelist[0]->d_type = DT_DIR; n++;
+		namelist[1] = (struct dirent *)malloc(sizeof(struct dirent));
+		strcpy(namelist[1]->d_name, "ux0:");
+		namelist[1]->d_type = DT_DIR; n++;
+		namelist[2] = (struct dirent *)malloc(sizeof(struct dirent));
+		strcpy(namelist[2]->d_name, "uma0:");
+		namelist[2]->d_type = DT_DIR; n++;
+
+		curr_path[0] == 0;
+	}
+	else
+	{
+		if ((dir = opendir(curr_path)) == NULL)
+		{
+			printf("opendir failed: %s\n", curr_path);
+			char *p;
+			for (p = curr_path + strlen(curr_path) - 1; p > curr_path && *p != '/'; p--);
+			*p = 0;
+			fname = p+1;
+			dir = opendir(curr_path);
+		}
+
+		struct dirent *ent = NULL;
+		n = 0;
+		namelist =  (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
+		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
+		strcpy(namelist[0]->d_name, ".");
+		namelist[0]->d_type = DT_DIR; n++;
+		namelist[1] = (struct dirent *)malloc(sizeof(struct dirent));
+		strcpy(namelist[1]->d_name, "..");
+		namelist[1]->d_type = DT_DIR; n++;
+
+		while ((ent = readdir (dir)) != NULL) {
+			if(n >= 3*1024-1)
+				break;
+			namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
+			memcpy(namelist[n], ent, sizeof(struct dirent));
+			n++;
+		}
+		closedir(dir);
 	}
 
-	struct dirent *ent = NULL;
-	n = 0;
-	namelist =  (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
-	namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
-	strcpy(namelist[0]->d_name, ".");
-	namelist[0]->d_type = DT_DIR; n++;
-	namelist[1] = (struct dirent *)malloc(sizeof(struct dirent));
-	strcpy(namelist[1]->d_name, "..");
-	namelist[1]->d_type = DT_DIR; n++;
-	
-	while ((ent = readdir (dir)) != NULL) {
-		if(n >= 3*1024-1)
-			break;
-		namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
-		memcpy(namelist[n], ent, sizeof(struct dirent));
-		n++;
-	}
-	closedir(dir);
-		
 	if(n <= 0) {
 		return 0;
 	}
@@ -409,7 +426,7 @@ static int menuLoadLoop(char *curr_path)
 					else
 					{
 						newdir=(char*)malloc(newlen);
-						if (strcmp(namelist[sel+1]->d_name, "..") == 0) 
+						if (strcmp(namelist[sel+1]->d_name, "..") == 0)
 						{
 							char *start = curr_path;
 							p = start + strlen(start) - 1;
@@ -418,6 +435,14 @@ static int menuLoadLoop(char *curr_path)
 							if (p <= start) strcpy(newdir, "/");
 							else { strncpy(newdir, start, p-start); newdir[p-start] = 0; }
 						} 
+						else if (strcmp(namelist[sel+1]->d_name, "ur0:") == 0)
+						{
+							strcpy(newdir, "ur0:/");
+						}
+						else if (strcmp(namelist[sel+1]->d_name, "ux0:") == 0)
+						{
+							strcpy(newdir, "ux0:/");
+						}
 						else 
 						{
 							strcpy(newdir, curr_path);

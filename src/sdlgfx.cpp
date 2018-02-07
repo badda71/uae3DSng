@@ -49,6 +49,7 @@
 
 #ifdef __PSP2__
 #define SDL_PollEvent PSP2_PollEvent
+#include "psp2/psp2_touch.h"
 #endif
 
 bool mouse_state = true;
@@ -530,7 +531,10 @@ void handle_events (void)
 	gui_handle_events ();
 
 #ifdef __PSP2__
-/* SDL events on PSP2 with all keyboard/mouse inputs for BT keyboard and mouse */
+/* SDL events on PSP2 with all keyboard/mouse inputs for BT keyboard and mouse, and touch */
+	if (mainMenu_touchControls) {
+		psp2PollTouch();
+	}
     while (SDL_PollEvent(&rEvent))
 	{
 		switch (rEvent.type)

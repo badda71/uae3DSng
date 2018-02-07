@@ -253,8 +253,8 @@ int gui_init (void)
 		init_kickstart();
 
 #ifdef __PSP2__
-			//Lock PS Button to prevent file corruption
-			sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
+		//Lock PS Button to prevent file corruption
+		sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
 #endif
 
 #ifdef USE_UAE4ALL_VKBD

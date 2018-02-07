@@ -27,6 +27,7 @@ set(SRC_FILES
         src/psp2/psp2_shader.cpp
         src/psp2/psp2_input.c
         src/psp2/psp2-dirent.c
+		src/psp2/psp2_touch.c
         src/vkbd/vkbd.cpp
         src/neon_helper.s
         src/gp2x/memset.s
@@ -120,7 +121,7 @@ set(LDFLAGS
         ${CMAKE_SOURCE_DIR}/src/psp2/vita-shader-collection/lib/libvitashaders.a
         SceSysmodule_stub SceDisplay_stub SceGxm_stub
         SceCtrl_stub ScePgf_stub ScePower_stub SceCommonDialog_stub
-        SceAudio_stub SceShellSvc_stub SceHid_stub png jpeg z m c
+        SceAudio_stub SceShellSvc_stub SceHid_stub SceTouch_stub png jpeg z m c
         )
 
 if (BUILD_DEBUG)
@@ -141,7 +142,7 @@ vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME} ${UNSAFE_FLAG})
 add_custom_target(${PROJECT_NAME}.vpk
         DEPENDS ${PROJECT_NAME}.self
         COMMAND rm -rf vpk && mkdir -p vpk/sce_sys
-        COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLEID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
+        COMMAND ${VITASDK}/bin/vita-mksfoex TITLE_ID=${TITLEID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
         COMMAND cp ${PROJECT_NAME}.self vpk/eboot.bin
         COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
         COMMAND cd vpk && zip -r ../uae4all-${BUILD_DATE}.vpk . && cd ..

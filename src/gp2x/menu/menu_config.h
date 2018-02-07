@@ -115,6 +115,7 @@ extern char custom_kickrom[256];
 
 #ifdef __PSP2__
 extern int mainMenu_leftStickMouse;
+extern int mainMenu_touchControls;
 extern int mainMenu_shader;
 extern int mainMenu_deadZone;
 extern int mainMenu_custom_controlSet;

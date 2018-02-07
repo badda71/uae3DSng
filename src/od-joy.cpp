@@ -56,6 +56,7 @@ extern int rAnalogY;
 extern int lAnalogX;
 extern int lAnalogY;
 extern int mainMenu_leftStickMouse;
+extern int mainMenu_touchControls;
 extern int mainMenu_deadZone;
 int delay2=0; // for 2nd player non-custom autofire 
 #endif

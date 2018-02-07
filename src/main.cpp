@@ -64,6 +64,8 @@ extern SDL_Surface *current_screenshot;
 #ifdef __PSP2__
 //Allow locking PS Button
 #include <psp2/shellutil.h>
+//Touch input
+#include "psp2_touch.h"
 #ifdef DEBUG_UAE4ALL
 #include <psp2shell.h>
 #endif
@@ -201,6 +203,8 @@ void do_leave_program (void)
 #ifdef USE_UAE4ALL_VKBD
 	vkbd_quit();
 #endif
+	//De-Initialize touch panels
+	psp2QuitTouch();
 #endif
   if(current_screenshot != NULL)
     SDL_FreeSurface(current_screenshot);
@@ -239,8 +243,13 @@ void real_main (int argc, char **argv)
 #endif
 
 #ifdef __PSP2__
-//Initialize ShellUtil to allow us to disable "PS" Button (corrupts hdf files)
-sceShellUtilInitEvents(0);
+	//Initialize ShellUtil to allow us to disable "PS" Button (corrupts hdf files)
+	sceShellUtilInitEvents(0);
+	// prevent suspend (corrupts hdf files)
+	sceKernelPowerTick(SCE_KERNEL_POWER_TICK_DISABLE_AUTO_SUSPEND);
+	sceKernelPowerTick(SCE_KERNEL_POWER_TICK_DISABLE_OLED_OFF);
+	//Initialize touch panels
+	psp2InitTouch();
 #endif
 
 #ifdef USE_SDL
