@@ -125,6 +125,11 @@ single finger drag = move the mouse pointer
 dual finger drag = drag'n'drop (left mouse button is held down)
 
 CHANGELOG:
+1.60
+
+- support for uma0: added
+- prevent suspend mode because it can corrupt hdf files
+
 1.59
 
 - implemented touchpad-style pointer controls. Touch controls are configured under 'More Options/Touch.' Choices are 'Touch Off', 'Front only', or 'Front and Back.' The default is to use only the front panel. Both panels work the same, using relative touch mode. How far a certain finger motion moves the pointer depends on the Mouse Speed setting, which also affects how fast the analog stick moves the mouse.
