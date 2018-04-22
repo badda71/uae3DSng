@@ -621,7 +621,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			else if (dpadDown[joynum])
 				bot = 1;
 			if (
-				(mainMenu_autofire & switch_autofire & delay2[joynum]>mainMenu_autofireRate)
+				(mainMenu_autofire & switch_autofire & delay2[joynum-1]>mainMenu_autofireRate)
 				||
 					(
 						(
@@ -631,13 +631,13 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 							||
 							(mainMenu_autofireButton1==GP2X_BUTTON_Y && buttonY[joynum])
 						)
-						& delay2[joynum]>mainMenu_autofireRate
+						& delay2[joynum-1]>mainMenu_autofireRate
 					)
 				)
 			{
 				if(!buttonB[joynum])
 					*button=1;
-				delay2[joynum]=0;
+				delay2[joynum-1]=0;
 				*button |= (buttonB[joynum] & 1) << 1;
 			}
 			else
@@ -646,7 +646,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					*button |= 0x01;
 				if (buttonB[joynum])
 					*button |= (0x01 << 1);
-				delay2[joynum]++;
+				delay2[joynum-1]++;
 			}
 		}
 #endif //__PSP2__
