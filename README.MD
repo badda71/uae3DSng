@@ -2,7 +2,7 @@ Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita. This is my mod of the latest Vita version of this great Amiga emulator that was ported by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
 
-![Screenshot of UAE4All2 Vita_mod](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
+![Screenshot of UAE4All2 Vita_mod](screenshots/uae4all2_vita_1.jpg)
 
 Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
 
