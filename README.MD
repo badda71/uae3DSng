@@ -119,6 +119,10 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.69
+
+- Improve pointer response to slow finger motion
+
 1.68
 
 - Parallel port joystick adapter support. By default, Amiga joysticks 3 and 4 are controlled by VitaTV gamepads 3 and 4. They can also be mapped to other inputs using the custom controls screen.
