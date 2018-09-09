@@ -119,6 +119,10 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.70
+
+- Improve pointer response to diagonal stick directions
+
 1.69
 
 - Improve pointer response to slow finger motion

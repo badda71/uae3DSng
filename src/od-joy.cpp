@@ -338,12 +338,45 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			//max movement is mouseScale.
 			//that way, when in one of the other mouse modes,
 			//the Y button to change scale still works
+			const float maxAxis = 32767.0f;
 			magnitude=sqrt(analogX*analogX+analogY*analogY);
-			if (magnitude >= deadZone)
+			if (magnitude > deadZone && deadZone < maxAxis)
 			{
-				scalingFactor=1.0f/magnitude*(magnitude-deadZone)/(32769.0f-deadZone);
-				analogX = analogX * scalingFactor;
-				analogY = analogY * scalingFactor;
+				//adjust maximum magnitude
+				float absAnalogX = fabs(analogX);
+				float absAnalogY = fabs(analogY);
+				float maxX;
+				float maxY;
+				if (absAnalogX > absAnalogY){
+					maxX = maxAxis;
+					maxY = (maxAxis * analogY) / absAnalogX;
+				}else{
+					maxX = (maxAxis * analogX) / absAnalogY;
+					maxY = maxAxis;
+				}
+				float maximum = sqrt(maxX * maxX + maxY * maxY);
+				if (maximum > 1.25f * maxAxis) maximum = 1.25f * maxAxis;
+				if (maximum < magnitude) maximum = magnitude;
+
+				// find scaled axis values with magnitudes between zero and maximum
+				float scalingFactor = maximum / magnitude * (magnitude - deadZone) / (maximum - deadZone);
+				analogX = (analogX * scalingFactor);
+				analogY = (analogY * scalingFactor);
+
+				// clamp to ensure results will always lie between 0 and 1.0f
+				float clampingFactor = 1.0f / maxAxis;
+				absAnalogX = fabs(analogX);
+				absAnalogY = fabs(analogY);
+				if (absAnalogX > maxAxis || absAnalogY > maxAxis){
+					if (absAnalogX > absAnalogY)
+						clampingFactor = 1.0f / absAnalogX;
+					else
+						clampingFactor = 1.0f / absAnalogY;
+				}
+
+				analogX *= clampingFactor;
+				analogY *= clampingFactor;
+
 				lastmx += (int) (analogX * mouseScale);
 				lastmy += (int) (analogY * mouseScale);
 				newmousecounters=1;
