@@ -119,6 +119,10 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.71
+
+- Fix hd settings not saving, and displayline settings not loading in certain situations
+
 1.70
 
 - Improve pointer response to diagonal stick directions

@@ -1154,45 +1154,44 @@ int saveconfig(int general)
             snprintf((char*)buffer, 255, "df3=%s\n",namebuffer);
             fputs(buffer,f);
         }
-    } else {
-        snprintf((char*)buffer, 255, "script=%d\n",mainMenu_enableScripts);
-        fputs(buffer,f);
-        snprintf((char*)buffer, 255, "screenshot=%d\n",mainMenu_enableScreenshots);
-        fputs(buffer,f);
-        snprintf((char*)buffer, 255, "skipintro=%d\n",skipintro);
-        fputs(buffer,f);
-        snprintf((char*)buffer, 255, "boot_hd=%d\n",mainMenu_bootHD);
-        fputs(buffer,f);
-        if (uae4all_hard_dir[0] == '\0')
-            snprintf((char*)buffer, 255, "hard_disk_dir=%s\n","*");
-        else
-            snprintf((char*)buffer, 255, "hard_disk_dir=%s\n",uae4all_hard_dir);
-        fputs(buffer,f);
-        //HDF0
-        if (uae4all_hard_file0[0] == '\0')
-            snprintf((char*)buffer, 255, "hard_disk_file0=%s\n","*");
-        else
-        	snprintf((char*)buffer, 255, "hard_disk_file0=%s\n",uae4all_hard_file0);
-        fputs(buffer,f);
-        //HDF1
-        if (uae4all_hard_file1[0] == '\0')
-            snprintf((char*)buffer, 255, "hard_disk_file1=%s\n","*");
-        else
-            snprintf((char*)buffer, 255, "hard_disk_file1=%s\n",uae4all_hard_file1);
-        fputs(buffer,f);
-        //HDF2
-        if (uae4all_hard_file2[0] == '\0')
-            snprintf((char*)buffer, 255, "hard_disk_file2=%s\n","*");
-        else
-            snprintf((char*)buffer, 255, "hard_disk_file2=%s\n",uae4all_hard_file2);
-        fputs(buffer,f);
-        //HDF3
-        if (uae4all_hard_file3[0] == '\0')
-            snprintf((char*)buffer, 255, "hard_disk_file3=%s\n","*");
-        else
-            snprintf((char*)buffer, 255, "hard_disk_file3=%s\n",uae4all_hard_file3);
-        fputs(buffer,f);
     }
+    snprintf((char*)buffer, 255, "script=%d\n",mainMenu_enableScripts);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "screenshot=%d\n",mainMenu_enableScreenshots);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "skipintro=%d\n",skipintro);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "boot_hd=%d\n",mainMenu_bootHD);
+    fputs(buffer,f);
+    if (uae4all_hard_dir[0] == '\0')
+        snprintf((char*)buffer, 255, "hard_disk_dir=%s\n","*");
+    else
+        snprintf((char*)buffer, 255, "hard_disk_dir=%s\n",uae4all_hard_dir);
+    fputs(buffer,f);
+    //HDF0
+    if (uae4all_hard_file0[0] == '\0')
+        snprintf((char*)buffer, 255, "hard_disk_file0=%s\n","*");
+    else
+        snprintf((char*)buffer, 255, "hard_disk_file0=%s\n",uae4all_hard_file0);
+    fputs(buffer,f);
+    //HDF1
+    if (uae4all_hard_file1[0] == '\0')
+        snprintf((char*)buffer, 255, "hard_disk_file1=%s\n","*");
+    else
+        snprintf((char*)buffer, 255, "hard_disk_file1=%s\n",uae4all_hard_file1);
+    fputs(buffer,f);
+    //HDF2
+    if (uae4all_hard_file2[0] == '\0')
+        snprintf((char*)buffer, 255, "hard_disk_file2=%s\n","*");
+    else
+        snprintf((char*)buffer, 255, "hard_disk_file2=%s\n",uae4all_hard_file2);
+    fputs(buffer,f);
+    //HDF3
+    if (uae4all_hard_file3[0] == '\0')
+        snprintf((char*)buffer, 255, "hard_disk_file3=%s\n","*");
+    else
+        snprintf((char*)buffer, 255, "hard_disk_file3=%s\n",uae4all_hard_file3);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "chipmemory=%d\n",mainMenu_chipMemory);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "slowmemory=%d\n",mainMenu_slowMemory);
@@ -1508,8 +1507,12 @@ void loadconfig(int general)
                 strcpy(uae4all_image_file3,filebuffer);
                 extractFileName(uae4all_image_file3,filename3);
             }
-        } else {
-            fscanf(f,"script=%d\n",&mainMenu_enableScripts);
+        }
+        mainMenu_drives=nr_drives;
+        // in versions <=1.70, some config files are missing the following
+        // hd settings, so skip them if the `script=`` line is absent
+        int oldconfig = fscanf(f,"script=%d\n",&mainMenu_enableScripts);
+        if (oldconfig != 0) {
             fscanf(f,"screenshot=%d\n", &mainMenu_enableScreenshots);
             fscanf(f,"skipintro=%d\n", &skipintro);
             fscanf(f,"boot_hd=%d\n",&mainMenu_bootHD);
@@ -1526,7 +1529,7 @@ void loadconfig(int general)
             }
             if (uae4all_hard_dir[0] == '*')
                 uae4all_hard_dir[0] = '\0';
-				//HDF0
+    			//HDF0
             fscanf(f,"hard_disk_file0=",uae4all_hard_file0);
             uae4all_hard_file0[0] = '\0';
             {
@@ -1578,10 +1581,11 @@ void loadconfig(int general)
             }
             if (uae4all_hard_file3[0] == '*')
                 uae4all_hard_file3[0] = '\0';
+            fscanf(f,"chipmemory=%d\n",&mainMenu_chipMemory);
         }
-        mainMenu_drives=nr_drives;
-
-        fscanf(f,"chipmemory=%d\n",&mainMenu_chipMemory);
+        else {
+            fscanf(f,"hipmemory=%d\n",&mainMenu_chipMemory);
+        }
         fscanf(f,"slowmemory=%d\n",&mainMenu_slowMemory);
         fscanf(f,"fastmemory=%d\n",&mainMenu_fastMemory);
 #ifdef ANDROIDSDL
@@ -1626,8 +1630,10 @@ void loadconfig(int general)
         }
         fclose(f);
     }
-
+// make sure the just-loaded mainMenu_displayedLines is not changed by setPresetMode
+    int old_displayedLines = mainMenu_displayedLines;
     SetPresetMode(presetModeId);
+    mainMenu_displayedLines = old_displayedLines;
     UpdateCPUModelSettings();
     UpdateChipsetSettings();
 #ifdef USE_GUICHAN
