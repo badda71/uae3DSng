@@ -864,8 +864,10 @@ int run_mainMenu()
 		switch(mainMenu_case)
 		{
 		case MAIN_MENU_CASE_LOAD:
+		{
+			int autostate_loaded = 0;
 			if(run_menuLoad(currentDir, MENU_LOAD_FLOPPY) && current_drive==0)
-			{ 
+			{
 				// Check for disk-specific config
 				char path[300];
 				create_configfilename(path, uae4all_image_file0, 0);
@@ -876,9 +878,36 @@ int run_mainMenu()
 					fclose(f);
 					loadconfig();
 				}
+				// Check for disk-specific Auto Savestate and load it automatically if possible
+				if (emulating)
+				{
+					int old_saveMenu_n_savestate = saveMenu_n_savestate;
+					saveMenu_n_savestate=4;
+					make_savestate_filenames(savestate_filename,NULL);
+					f=fopen(savestate_filename,"rb");
+					if (f)
+					{
+						fclose(f);
+						savestate_state=STATE_DORESTORE;
+						autostate_loaded=1;
+					} else 
+					{
+						saveMenu_n_savestate=old_saveMenu_n_savestate;
+						make_savestate_filenames(savestate_filename,NULL);
+					}
+				}
 			}
-			mainMenu_case=-1;
+			if (autostate_loaded==1)
+			{
+				setCpuSpeed();
+				mainMenu_case=1;
+			} 
+			else 
+			{
+				mainMenu_case=-1;
+			}
 			break;
+		}
 		case MAIN_MENU_CASE_MEMDISK:
 			run_menuMemDisk();
 			if (quit_pressed_in_submenu) //User quit menu while in sub-menu

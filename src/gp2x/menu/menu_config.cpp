@@ -194,7 +194,7 @@ int mainMenu_FloatingJoystick=0;
 int mainMenu_vsync=0;
 #endif
 char custom_kickrom[256] = "./kick.rom\0";
-
+int mainMenu_useSavesFolder = DEFAULT_USESAVESFOLDER;
 
 void SetDefaultMenuSettings(int general)
 {
@@ -327,6 +327,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_scanlines = 0;
     mainMenu_enableScreenshots = DEFAULT_ENABLESCREENSHOTS;
     mainMenu_enableScripts = DEFAULT_ENABLESCRIPTS;
+    mainMenu_useSavesFolder = DEFAULT_USESAVESFOLDER;
 }
 
 
@@ -1268,6 +1269,8 @@ int saveconfig(int general)
     replace (namebuffer,'|',' ');
     snprintf((char*)buffer, 255, "custom_kickrom=%s\n",namebuffer);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "useSavesFolder=%d\n",mainMenu_useSavesFolder);
+    fputs(buffer,f);
 
     fclose(f);
     return 1;
@@ -1628,6 +1631,7 @@ void loadconfig(int general)
         if (filebuffer[0]) {
             strcpy(custom_kickrom, filebuffer);
         }
+        fscanf(f,"useSavesFolder=%d\n",&mainMenu_useSavesFolder);
         fclose(f);
     }
 // make sure the just-loaded mainMenu_displayedLines is not changed by setPresetMode

@@ -2,7 +2,7 @@ Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita. This is my mod of the latest Vita version of this great Amiga emulator that was ported by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
 
-![Screenshot of UAE4All2 Vita_mod](screenshots/uae4all2_vita_1.jpg)
+![Screenshot of UAE4All2 Vita_mod](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
 
 Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
 
@@ -10,7 +10,7 @@ Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new l
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
-Thanks to my supporters on Patreon: Andyways, CountDuckula, and Sean Ritzo.
+Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and Sean Ritzo.
 
 Vita-exclusive Features
 ======
@@ -38,10 +38,12 @@ Notes
 - *Speed:* Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are fixed by this.
 - *Config File:* If you have problems with settings not saving etc, please delete or rename your config file in the folder "ux0:/data/uae4all" and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
 - *Display:* The sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
-  Many Amiga games fit the Vita screen very nicely. I urge everyone to try Chaos Engine with a screen setting of 320*200 and the sharp_bilinear_simple shader. The picture almost fills the whole screen and is very pretty with no artifacts or blurriness. The picture can be moved using R+Start+Dpad to center it on the Vita screen. It runs smooth with zero frameskip.
+  Many Amiga games fit the Vita screen very nicely. For example, take Chaos Engine with a screen setting of 320*200 and sharp_bilinear_simple shader enabled. The picture can be zoomed using R+Start+Dpad left/right, and moved vertically using R+Start+Dpad up/down to center it on the Vita screen. Once this is done, the picture fills almost the whole screen and looks amazing with no artifacts or blurriness. The game runs smooth with zero frameskip.
   Selecting a 'Preset Width' of 320, 352 or 384 (max overscan) results in lo-res screen emulation, good for most games, while 640, 704, or 768 results in hi-res screen emulation, good for use with Workbench or some text-based games.
-- *Blitter:* The Blitter settings can help with graphics glitches in some games. For example, Rick Dangerous graphics are fixed by setting Blitter to "immediate" instead of "normal," and re-booting the game. Since it works much better, "immediate" is now the default. But some games require setting Blitter to "normal" and re-booting to remove graphics glitches for example PP Hammer and Spindizzy Worlds.
-- *Sprite Collisions:* Some games require sprite-to-sprite collisions. They can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
+- *Blitter:* The blitter settings can help with graphics glitches in some games. Since it seems to work best, "immediate" is the default. But some games require setting blitter to "normal" and re-booting to remove graphics glitches, for example PP Hammer, Spindizzy Worlds, and Shufflepuck Cafe.
+- *WHDLoad:* If you have problems with a WHDLoad .hdf game, maybe try an .adf version of the same game. Rock'n Roll is one of a few games that work on UAE4All2 only using .adf files. It has graphics glitches and runs too fast in WHDLoad with .hdf. To make it work correctly, I loaded the "Rock'n Roll.adf" from Gamebase Amiga, chose the preset A500 config, and changed the Blitter setting to Normal.
+- *Sprite Collisions:* Some games require sprite-to-sprite collisions. Sprite collisions can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
+- *Savestates:* Four regular savestates can be saved per game. There's also a slot for an automatic savestate, labeled "auto". If it exists, this will be loaded immediately when the .adf is inserted. To prevent this, delete the auto savestate by selecting it and choosing "delete savestate".
 - *Multiplayer:* Up to four controllers on Vita TV are supported and can be fully mapped. The mouse can be switched off because it interferes with the other joystick that controls player 2 in most games. If you pair new controllers and they do not seem to work, scan for them in the "custom controls" menu by pressing L. At the bottom it will say how many controllers have been found. By default, parallel port Amiga joysticks 3 and 4 are controlled by VitaTV gamepads 3 and 4. They can also be mapped to other inputs using the custom controls screen.
 - *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results.
 - *Building from Source:* The dependencies are 
@@ -119,6 +121,14 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.72
+
+- Savestate location can now be changed in the menu
+
+- Savestates can now be deleted from the menu
+
+- Implemented an automatic savestate. There's a new savestate slot called auto. If it exists, this savestate will be loaded immediately when inserting a floppy.
+
 1.71
 
 - Fix hd settings not saving, and displayline settings not loading in certain situations
