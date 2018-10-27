@@ -31,6 +31,7 @@ Vita-exclusive Features
 - Touchpad style pointer controls using the front touch panel and (optional) the rear touch panel
 - Supports loading files from ux0: or uma0: partition
 - Parallel port joystick adapter support for multiplayer games with up to 4 joysticks.
+- Additional savestate slot called auto, for automatic savestate loading
 
 Notes
 ======
