@@ -9,7 +9,7 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 #include "psp2-dirent.h"
 #else
 #include<dirent.h>
@@ -24,7 +24,7 @@
 #include "custom.h"
 #include "menu_config.h"
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
@@ -55,7 +55,7 @@ enum {
 	MENUMISC_CPUSPEED,
 	MENUMISC_BLITTER,
 	MENUMISC_SPRITECOLLISIONS,
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 #ifdef PANDORA
 	MENUMISC_PANDORASPEED,
 #endif
@@ -66,18 +66,18 @@ enum {
 	MENUMISC_CONTROLCFG,
 	MENUMISC_JOYSTICK,
 	MENUMISC_AUTOFIRERATE,
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	MENUMISC_CUSTOMAUTOFIREBUTTON,
 #endif
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	MENUMISC_MOUSEEMULATION,
 	MENUMISC_LEFTSTICKMOUSE,
 #endif
 	MENUMISC_MOUSEMULTIPLIER,
-#ifndef __PSP2__ // No stylus on Vita
+#if !defined(__PSP2__) && !defined(__SWITCH__) // No stylus on Vita
 	MENUMISC_STYLUSOFFSET,
 #endif
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	MENUMISC_DEADZONE,
 	MENUMISC_TOUCHCONTROLS,
 #else
@@ -226,7 +226,7 @@ static void draw_miscMenu(int c)
 	else
 	  write_text(tabstop6,menuLine,"On");
 
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 #ifdef PANDORA
   // MENUMISC_PANDORASPEED
 	menuLine+=2;
@@ -282,7 +282,7 @@ static void draw_miscMenu(int c)
 		write_text(tabstop5,menuLine,"4");
 
 	menuLine+=2;
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	if (mainMenu_joyConf==0) write_text(3,menuLine,"(Sq=Autofire X=Fire Tr=Space O=2nd)");
 	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(Sq=Fire X=Autofire Tr=Space O=2nd)");
 	else if (mainMenu_joyConf==2) write_text(3,menuLine,"(Sq=Autofire X=Jump Tr=Fire O=2nd)");
@@ -332,7 +332,7 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop9-1,menuLine,"Heavy");
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	// MENUMISC_CUSTOMAUTOFIREBUTTON
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Custom Autofire Button");
@@ -371,7 +371,7 @@ static void draw_miscMenu(int c)
 	write_text(leftMargin,menuLine,text_str_misc_separator);
 	menuLine++;
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	// MENUMISC_MOUSEEMULATION
 	write_text(leftMargin,menuLine,"Mouse");	
 	if ((mainMenu_mouseEmulation==0) && ((menuMisc!=MENUMISC_MOUSEEMULATION)||(bb)))
@@ -413,7 +413,7 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop2,menuLine,cpuSpeed);
 
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	// MENUMISC_STYLUSOFFSET
 	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_stylus_offset);
@@ -443,7 +443,7 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop9,menuLine,text_str_8px);
 #endif //__PSP2__
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 
 	//Analog Stick Deadzone settings on Vita
 	//MENUMISC_DEADZONE
@@ -694,7 +694,7 @@ static int key_miscMenu(int *c)
 				}
 				break;
 
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 #ifdef PANDORA
 			case MENUMISC_PANDORASPEED:
 				if(left)
@@ -704,7 +704,7 @@ static int key_miscMenu(int *c)
 				break;
 #endif
 #endif //__PSP2__
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 			case MENUMISC_LEFTSTICKMOUSE:
 				if (left || right) 
 					mainMenu_leftStickMouse = !mainMenu_leftStickMouse;
@@ -785,7 +785,7 @@ static int key_miscMenu(int *c)
 						mainMenu_autofireRate=2;
 				}
  				break;
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 			case MENUMISC_CUSTOMAUTOFIREBUTTON:
 				if (left)
 				{
@@ -819,7 +819,7 @@ static int key_miscMenu(int *c)
 						mainMenu_mouseMultiplier += 25;
 				}
 				break;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 			case MENUMISC_STYLUSOFFSET:
 				if (left)
 				{
@@ -850,7 +850,7 @@ static int key_miscMenu(int *c)
 				break;
 #endif //__PSP2__
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 			case MENUMISC_DEADZONE:
 				if (left)
 				{
@@ -921,7 +921,7 @@ static void raise_miscMenu()
 
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -934,7 +934,7 @@ static void raise_miscMenu()
 static void unraise_miscMenu()
 {
 	int i;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

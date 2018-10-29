@@ -47,16 +47,48 @@ Notes
 - *Savestates:* Four regular savestates can be saved per game. There's also a slot for an automatic savestate, labeled "auto". If it exists, this will be loaded immediately when the .adf is inserted. To prevent this, delete the auto savestate by selecting it and choosing "delete savestate".
 - *Multiplayer:* Up to four controllers on Vita TV are supported and can be fully mapped. The mouse can be switched off because it interferes with the other joystick that controls player 2 in most games. If you pair new controllers and they do not seem to work, scan for them in the "custom controls" menu by pressing L. At the bottom it will say how many controllers have been found. By default, parallel port Amiga joysticks 3 and 4 are controlled by VitaTV gamepads 3 and 4. They can also be mapped to other inputs using the custom controls screen.
 - *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results.
-- *Building from Source:* The dependencies are 
-  VitaSDK: http://vitasdk.org (toolchain and Vita system headers etc.)
-  SDL_ttf: https://github.com/Cpasjuste/SDL_ttf
-  SDL-Vita (v1.2 with 4 controller support and with Bluetooth support, from December 24, 2017 or later): https://github.com/rsn8887/SDL-Vita/tree/SDL12
-  SDL-Image: https://github.com/Cpasjuste/SDL_image-1.2.12
-  Install VitaSDK. Clone all the above repositories and install their libraries using "make -f Makefile.psp2 install" for each one. Cd into a separate build directory outside uae4all2 tree. Type "ccmake 'your uae4all2 dir' ". Then press c (configure). In the release type form field, type "Release" and enter. Then press c then g. Then type "make uae4all2.vpk". 
 
-  Note: The source depends on FrangarCJ's Vita2d fbo branch with shader support here: https://github.com/Cpasjuste/vita2dlib/tree/fbo
+Compiling
+======
+* Dependencies: SDL2, SDL2_image, libpng, libjpeg, zlib
+* Clone repo into a folder somewhere
+* Vita:
+  * Install VitaSDK toolchain and all vdpm packages: http://vitasdk.org
+  * Compile and package:
+  ```
+  mkdir build
+  cd build
+  ccmake "your uae4all2 repo folder" -DBUILD_PSP2=ON -DCMAKE_BUILD_TYPE=Release
+  make uae4all2.vpk
+  ```
+  * Note: The Vita source depends on FrangarCJ's Vita2d fbo branch with shader support here: https://github.com/Cpasjuste/vita2dlib/tree/fbo
   and FrangarCJ's vita-shader-collection gtu branch: https://github.com/frangarcj/vita-shader-collection/tree/gtu
   Those are both included as binaries and linked automatically.
+
+* Switch:
+  * Install DevkitPro: https://devkitpro.org/wiki/devkitPro_pacman#Using_Pacman
+  * Install required libs:
+  ```
+  sudo (dkp-)pacman -S switch-dev
+  sudo -E dkp-pacman -S switch-sdl2
+  sudo -E dkp-pacman -S switch-sdl2_image
+  sudo -E dkp-pacman -S switch-glm
+  sudo -E dkp-pacman -S switch-glad
+  sudo -E dkp-pacman -S switch-mesa
+  sudo -E dkp-pacman -S switch-libpng
+  sudo -E dkp-pacman -S switch-zlib
+  sudo -E dkp-pacman -S switch-libjpeg-turbo
+  sudo -E dkp-pacman -S switch-libdrm-nouveau
+  ```
+  * Compile and package:
+  ```
+  mkdir build
+  cd build
+  ccmake "your uae4all2 repo folder" -DBUILD_NX=ON -DCMAKE_BUILD_TYPE=Release
+  make uae4all2_switch.zip
+  ```
+  * Unzip and copy all all files to Switch so you have `/switch/uae4all2/uae4all2.nro` and `/switch/uae4all2/data/` etc. on your SD card
+  * Launch using your favorite homebrew launcher
 
 FAQ
 =====

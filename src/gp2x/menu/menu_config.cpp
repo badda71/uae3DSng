@@ -27,7 +27,7 @@ extern int timeslice_mode;
 extern char launchDir[300];
 extern char currentDir[300];
 extern int nr_drives;
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__) 
 static char config_filename[255] = "uae4all.cfg";
 #else
 extern char *config_filename;
@@ -63,7 +63,7 @@ int mainMenu_CPU_speed = 0;
 int mainMenu_cpuSpeed = 600;
 
 int mainMenu_joyConf = 0;
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 int mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
 #else
 int mainMenu_joyPort = 0; // Both ports
@@ -89,7 +89,7 @@ int mainMenu_custom_X[4] = {0,0,0,0};
 int mainMenu_custom_Y[4] = {0,0,0,0};
 int mainMenu_custom_L[4] = {0,0,0,0};
 int mainMenu_custom_R[4] = {0,0,0,0};
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 int mainMenu_custom_controlSet = 0; //This controls which custom config is used
 int mainMenu_custom1_up[4] = {0,0,0,0};
 int mainMenu_custom1_down[4] = {0,0,0,0};
@@ -138,8 +138,12 @@ int visibleAreaWidth = 320;
 
 int saveMenu_n_savestate = 0;
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__SWITCH__)
+int mainMenu_shader = 1;
+#else
 int mainMenu_shader = 5;
+#endif
 int mainMenu_leftStickMouse = 0;
 int mainMenu_touchControls = 1;
 int mainMenu_deadZone = 1000;
@@ -233,7 +237,7 @@ void SetDefaultMenuSettings(int general)
 
     mainMenu_cpuSpeed = 600;
     mainMenu_joyConf = 0;
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
     mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
 #else
     mainMenu_joyPort = 0;
@@ -262,7 +266,7 @@ void SetDefaultMenuSettings(int general)
 		 mainMenu_custom_L[i] = 0;
 		 mainMenu_custom_R[i] = 0;
 	}
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	 mainMenu_custom_controlSet = 0;
 	 for (int i=0; i<4; i++) 
 	 {
@@ -308,8 +312,12 @@ void SetDefaultMenuSettings(int general)
     mainMenu_vkbdLanguage = 0; //Default is US Keyboard
     mainMenu_autofire = DEFAULT_AUTOFIRE;
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
+#ifdef __SWITCH__
+    mainMenu_shader = 1;
+#else
     mainMenu_shader = 5;
+#endif
     mainMenu_leftStickMouse = 0;
     mainMenu_touchControls = 1;
     mainMenu_deadZone = 1000;
@@ -942,7 +950,7 @@ int saveconfig(int general)
     snprintf((char*)buffer, 255, "scaling=%d\n",mainMenu_enableHWscaling);
 #endif
     fputs(buffer,f);
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
     snprintf((char*)buffer, 255, "shader=%d\n",mainMenu_shader);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "leftstickmouse=%d\n",mainMenu_leftStickMouse);
@@ -1032,7 +1040,7 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "customControls=%d\n",mainMenu_customControls);
     fputs(buffer,f);
-#ifndef __PSP2__    
+#if !defined(__PSP2__) && !defined(__SWITCH__)    
     snprintf((char*)buffer, 255, "custom_dpad=%d\n",mainMenu_custom_dpad[0]);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "custom_up=%d\n",mainMenu_custom_up[0]);
@@ -1279,7 +1287,7 @@ int saveconfig(int general)
 
 void loadconfig(int general)
 {
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	if (general == 1)
 	{
     //first time opening the screen on Vita
@@ -1350,8 +1358,11 @@ void loadconfig(int general)
 #else
         fscanf(f,"scaling=%d\n",&mainMenu_enableHWscaling);
 #endif
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
         fscanf(f,"shader=%d\n",&mainMenu_shader);
+#if defined(__SWITCH__)
+        if (mainMenu_shader > 1) mainMenu_shader = 1;
+#endif
         fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);
         fscanf(f,"touchcontrols=%d\n",&mainMenu_touchControls);
         fscanf(f,"deadzone=%d\n",&mainMenu_deadZone);        
@@ -1386,6 +1397,10 @@ void loadconfig(int general)
             mainMenu_soundStereo = 0;
         fscanf(f,"soundstereosep=%d\n",&mainMenu_soundStereoSep );
         fscanf(f,"soundrate=%d\n",&sound_rate);
+#ifdef __SWITCH__
+        // only 48 kHz supported on Switch
+        sound_rate = DEFAULT_SOUND_FREQ;
+#endif
         fscanf(f,"autosave=%d\n",&mainMenu_autosave);
         fscanf(f,"gp2xclock=%d\n", &gp2xClockSpeed);
         int joybuffer = 0;
@@ -1418,7 +1433,7 @@ void loadconfig(int general)
         fscanf(f,"cutLeft=%d\n",&mainMenu_cutLeft);
         fscanf(f,"cutRight=%d\n",&mainMenu_cutRight);
         fscanf(f,"customControls=%d\n",&mainMenu_customControls);
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
         fscanf(f,"custom_dpad=%d\n",&mainMenu_custom_dpad);
         fscanf(f,"custom_up=%d\n",&mainMenu_custom_up[0]);
         fscanf(f,"custom_down=%d\n",&mainMenu_custom_down[0]);
@@ -1644,7 +1659,7 @@ void loadconfig(int general)
     if (running==false)
 #endif
     {
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
         update_display();
 #endif
     }

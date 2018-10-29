@@ -15,7 +15,7 @@
 #include <SDL_ttf.h>
 #include "savestate.h"
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
@@ -255,7 +255,7 @@ static inline void raise_saveMenu()
 
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<8;i++)
 	{
 		text_draw_background();
@@ -269,7 +269,7 @@ static inline void raise_saveMenu()
 static inline void unraise_saveMenu()
 {
 	int i;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=7;i>=0;i--)
 	{
 		text_draw_background();
