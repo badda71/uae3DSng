@@ -222,6 +222,7 @@ static int menuLoadLoop(char *curr_path)
 	max_in_dir=SHOW_MAX_FILES;
 
 #if defined(__PSP2__) || defined(__SWITCH__)
+#if !defined(__SWITCH__)
 	if(strcmp(curr_path, "/") == 0 || curr_path[0] == 0) 
 	{
 		struct dirent *ent = NULL;
@@ -245,6 +246,7 @@ static int menuLoadLoop(char *curr_path)
 		curr_path[0] == 0;
 	}
 	else
+#endif
 	{
 		if ((dir = opendir(curr_path)) == NULL)
 		{
@@ -450,10 +452,10 @@ static int menuLoadLoop(char *curr_path)
 						{
 							strcpy(newdir, "ux0:/");
 						}
-						else if (strcmp(namelist[sel+1]->d_name, "sdmc:") == 0)
-						{
-							strcpy(newdir, "sdmc:/");
-						}
+						//else if (strcmp(namelist[sel+1]->d_name, "sdmc:") == 0)
+						//{
+						//	strcpy(newdir, "sdmc:/");
+						//}
 						else 
 						{
 							strcpy(newdir, curr_path);
