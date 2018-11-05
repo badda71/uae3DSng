@@ -12,6 +12,19 @@ Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni 
 
 Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and Sean Ritzo.
 
+Installation
+======
+* Vita:
+  * Install .vpk
+  * Obtain and copy BIOS files "kick13.rom", "kick20.rom" and "kick31.rom" to "ux0:/data/uae4all/kickstarts"
+
+* Switch:
+  * Download and unzip `uae4all2_switch.zip`
+  * Copy the resulting folder `uae4all2` to `/switch/` onto your SDCard, ensure none of the "archive" flags is set.
+  * You should now have the executable `/switch/uae4all2/uae4all2.nro` and a folders `/switch/uae4all2/data/` with the keyboard icons and other data files on your SDCard. 
+  * Obtain and copy BIOS files `kick13.rom` (size: 262,144 bytes), `kick20.rom` (size: 524,288 bytes) and `kick31.rom` (size: 524,288 bytes) to your SDCard into `/switch/uae4all2/kickstarts/`
+  * Use your favorite Homebrew Launcher or Homebrew Loader to start Uaeall2
+
 Vita/Switch-exclusive Features
 ======
 - Full speed emulation of most Amiga games with zero frameskip
@@ -37,7 +50,6 @@ Vita-exclusive Features
 ======
 - Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full Vita screen
 
-
 Notes
 ======
 - *Bios:* Please put kickstart files in `ux0:/data/uae4all/kickstarts` on Vita and in `/switch/uae4all2/kickstarts` directory on Switch. Files must be named as kick13.rom, kick20.rom, kick31.rom
@@ -52,7 +64,7 @@ Notes
 - *Sprite Collisions:* Some games require sprite-to-sprite collisions. Sprite collisions can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
 - *Savestates:* Four regular savestates can be saved per game. There's also a slot for an automatic savestate, labeled "auto". If it exists, this will be loaded immediately when the .adf is inserted. To prevent this, delete the auto savestate by selecting it and choosing "delete savestate".
 - *Multiplayer:* Up to four controllers on Vita TV are supported and can be fully mapped. The mouse can be switched off because it interferes with the other joystick that controls player 2 in most games. If you pair new controllers and they do not seem to work, scan for them in the "custom controls" menu by pressing L. At the bottom it will say how many controllers have been found. By default, parallel port Amiga joysticks 3 and 4 are controlled by VitaTV gamepads 3 and 4. They can also be mapped to other inputs using the custom controls screen.
-- *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results.
+- *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results. On the Switch, the best sound is obtained with 48 kHz, which is the only frequency supported on Switch.
 
 Compiling
 ======
@@ -111,7 +123,7 @@ Controls
 
 Switch: 
 -----
-Switch uses exactly the same controls as Vita, with
+Switch uses exactly the same controls as the Vita, with the following meaning:
 Square = Y
 Triangle = X
 Cross = B
@@ -177,6 +189,10 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.72switch
+
+- Added Switch release
+
 1.72
 
 - Savestate location can now be changed in the menu
