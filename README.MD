@@ -1,8 +1,8 @@
 Description
 =====
-Use4All2 Mod is an Amiga emulator for Vita. This is my mod of the latest Vita version of this great Amiga emulator that was ported by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
+Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this great Amiga emulator that was originally ported to the Vita by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
 
-![Screenshot of UAE4All2 Vita_mod](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
+![Screenshot of UAE4All2 Vita/Switch_mod](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
 
 Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
 
@@ -12,7 +12,7 @@ Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni 
 
 Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and Sean Ritzo.
 
-Vita-exclusive Features
+Vita/Switch-exclusive Features
 ======
 - Full speed emulation of most Amiga games with zero frameskip
 - Large, complete virtual keyboard with adjustable position and adjustable transparency
@@ -33,14 +33,20 @@ Vita-exclusive Features
 - Parallel port joystick adapter support for multiplayer games with up to 4 joysticks.
 - Additional savestate slot called auto, for automatic savestate loading
 
+Vita-exclusive Features
+======
+- Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full Vita screen
+
+
 Notes
 ======
-- *Bios:* Please put kickstart files in "ux0:/data/uae4all/kickstarts" directory. Files must be named as kick13.rom, kick20.rom, kick31.rom
+- *Bios:* Please put kickstart files in `ux0:/data/uae4all/kickstarts` on Vita and in `/switch/uae4all2/kickstarts` directory on Switch. Files must be named as kick13.rom, kick20.rom, kick31.rom
 - *Speed:* Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are fixed by this.
-- *Config File:* If you have problems with settings not saving etc, please delete or rename your config file in the folder "ux0:/data/uae4all" and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
-- *Display:* The sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
-  Many Amiga games fit the Vita screen very nicely. For example, take Chaos Engine with a screen setting of 320*200 and sharp_bilinear_simple shader enabled. The picture can be zoomed using R+Start+Dpad left/right, and moved vertically using R+Start+Dpad up/down to center it on the Vita screen. Once this is done, the picture fills almost the whole screen and looks amazing with no artifacts or blurriness. The game runs smooth with zero frameskip.
+- *Config File:* If you have problems with settings not saving etc, please delete or rename your config file in the folder `ux0:/data/uae4all` (Vita) or `/switch/uae4all2/conf/` and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
+- *Display on Vita:* On the Vita, the sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
+  Many Amiga games fit the screen very nicely. For example, take Chaos Engine with a screen setting of 320*200 and sharp_bilinear_simple shader enabled. The picture can be zoomed using R+Start+Dpad left/right, and moved vertically using R+Start+Dpad up/down to center it on the Vita screen. Once this is done, the picture fills almost the whole screen and looks amazing with no artifacts or blurriness. The game runs smooth with zero frameskip.
   Selecting a 'Preset Width' of 320, 352 or 384 (max overscan) results in lo-res screen emulation, good for most games, while 640, 704, or 768 results in hi-res screen emulation, good for use with Workbench or some text-based games.
+- *Display on Switch:* On Switch, there is no shader support yet. But the 720p resolution on Switch allows 3* integer scaling in many cases, which can be selected in the display menu under `shader`. There are two settings: `None (perfect integer scaling)` or `bilinear (quite blurry)`.
 - *Blitter:* The blitter settings can help with graphics glitches in some games. Since it seems to work best, "immediate" is the default. But some games require setting blitter to "normal" and re-booting to remove graphics glitches, for example PP Hammer, Spindizzy Worlds, and Shufflepuck Cafe.
 - *WHDLoad:* If you have problems with a WHDLoad .hdf game, maybe try an .adf version of the same game. Rock'n Roll is one of a few games that work on UAE4All2 only using .adf files. It has graphics glitches and runs too fast in WHDLoad with .hdf. To make it work correctly, I loaded the "Rock'n Roll.adf" from Gamebase Amiga, chose the preset A500 config, and changed the Blitter setting to Normal.
 - *Sprite Collisions:* Some games require sprite-to-sprite collisions. Sprite collisions can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
@@ -92,10 +98,27 @@ Compiling
 
 FAQ
 =====
-- Kickstart rom files not found on startup? First, please ensure you are using the correct files. They should be "kick13.rom" (size: 262,144 bytes), "kick20.rom" (size: 524,288) and "kick31.rom" (size: 524,288). They should be placed in ""ux0:/data/uae4all/kickstarts" Second, please make sure your ux0:/data folder does NOT have the FAT attributes "hidden" or "system" set. 
+* Kickstart rom files not found on startup? 
+
+First, please ensure you are using the correct files. They should be "kick13.rom" (size: 262,144 bytes), "kick20.rom" (size: 524,288) and "kick31.rom" (size: 524,288). They should be placed in ""ux0:/data/uae4all/kickstarts" Second, please make sure your ux0:/data folder does NOT have the FAT attributes "hidden" or "system" set. 
+
+* Black screen on Switch, or crash on startup?
+
+In my testing (only with exFAT), I found that exFAT corruption can cause all files in the uae4all2 folder to become corrupted (among others). This includes kick13.rom and other kickstart files, which causes a black screen when leaving the menu. Game .adf files can become corrupted, causing the game to stop booting. Even the executable uae4all2.nro and/or config files in the conf folder can become corrupted quite easily, causing black screen crash on startup. Either don't use exFAT, or make a good backup of the folder and restore it via FTP if there are problems. 
 
 Controls
 =====
+
+Switch: 
+-----
+Switch uses exactly the same controls as Vita, with
+Square = Y
+Triangle = X
+Cross = B
+Circle = A
+Start = Plus
+Select = Minus
+
 General
 -----
 Select = Toggle menu  

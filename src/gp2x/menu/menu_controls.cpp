@@ -522,8 +522,10 @@ static void draw_controlsMenu(int c)
 
 	// MENUCONTROLS_Y
 	menuLine+=3;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__)
 	write_text(leftMargin,menuLine,"Triangle");
+#elif defined(__SWITCH__)
+	write_text(leftMargin,menuLine,"   (X)");
 #else
 	write_text(leftMargin,menuLine,"   (Y)");
 #endif
@@ -535,8 +537,10 @@ static void draw_controlsMenu(int c)
 		
 	// MENUCONTROLS_X
 	menuLine+=2;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__)
 	write_text(leftMargin,menuLine,"Cross");
+#elif defined(__SWITCH__)
+	write_text(leftMargin,menuLine,"   (B)");
 #else
 	write_text(leftMargin,menuLine,"   (X)");
 #endif
@@ -548,8 +552,10 @@ static void draw_controlsMenu(int c)
 
 	// MENUCONTROLS_A
 	menuLine+=2;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__)
 	write_text(leftMargin,menuLine,"Square");
+#elif defined(__SWITCH__)
+	write_text(leftMargin,menuLine,"   (Y)");
 #else
 	write_text(leftMargin,menuLine,"   (A)");
 #endif
@@ -561,8 +567,10 @@ static void draw_controlsMenu(int c)
 
 	// MENUCONTROLS_B
 	menuLine+=2;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__)
 	write_text(leftMargin,menuLine,"Circle");
+#elif defined(__SWITCH__)
+	write_text(leftMargin,menuLine,"   (A)");
 #else
 	write_text(leftMargin,menuLine,"   (B)");
 #endif

@@ -282,11 +282,16 @@ static void draw_miscMenu(int c)
 		write_text(tabstop5,menuLine,"4");
 
 	menuLine+=2;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__)
 	if (mainMenu_joyConf==0) write_text(3,menuLine,"(Sq=Autofire X=Fire Tr=Space O=2nd)");
 	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(Sq=Fire X=Autofire Tr=Space O=2nd)");
 	else if (mainMenu_joyConf==2) write_text(3,menuLine,"(Sq=Autofire X=Jump Tr=Fire O=2nd)");
 	else if (mainMenu_joyConf==3) write_text(3,menuLine,"(Sq=Fire X=Jump Tr=Autofire O=2nd)");
+#elif defined(__SWITCH__)
+	if (mainMenu_joyConf==0) write_text(3,menuLine,"(Y=Autofire B=Fire X=Space A=2nd)");
+	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(Y=Fire B=Autofire X=Space A=2nd)");
+	else if (mainMenu_joyConf==2) write_text(3,menuLine,"(Y=Autofire B=Jump X=Fire A=2nd)");
+	else if (mainMenu_joyConf==3) write_text(3,menuLine,"(Y=Fire B=Jump X=Autofire A=2nd)");
 #else
 	if (mainMenu_joyConf==0) write_text(3,menuLine,"(A=Autofire X=Fire Y=Space B=2nd)");
 	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(A=Fire X=Autofire Y=Space B=2nd)");
@@ -343,16 +348,32 @@ static void draw_miscMenu(int c)
 			strcpy(tmpString,"None");
 			break;
 		case 1:
+#ifdef __SWITCH__
+			strcpy(tmpString,"Y");
+#else
 			strcpy(tmpString,"Square");
+#endif
 			break;
 		case 2:
+#ifdef __SWITCH__
+			strcpy(tmpString,"X");
+#else
 			strcpy(tmpString,"Triangle");
+#endif
 			break;
 		case 3:
+#ifdef __SWITCH__
+			strcpy(tmpString,"A");
+#else
 			strcpy(tmpString,"Circle");
+#endif
 			break;
 		case 4:
+#ifdef __SWITCH__
+			strcpy(tmpString,"B");
+#else
 			strcpy(tmpString,"Cross");
+#endif
 			break;
 		case 5:
 			strcpy(tmpString,"L");
@@ -474,9 +495,17 @@ static void draw_miscMenu(int c)
 	else if (mainMenu_touchControls==2)
 	{
 		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
+#ifdef __SWITCH__
+			write_text_inv(tabstop9-1,menuLine,"Front");
+#else
 			write_text_inv(tabstop9-1,menuLine,"Both");
+#endif
 		else
+#ifdef __SWITCH__
+			write_text(tabstop9-1,menuLine,"Front  ");
+#else
 			write_text(tabstop9-1,menuLine,"Both  ");
+#endif
 	}
 
 #else
@@ -710,6 +739,13 @@ static int key_miscMenu(int *c)
 					mainMenu_leftStickMouse = !mainMenu_leftStickMouse;
 				break;
 			case MENUMISC_TOUCHCONTROLS:
+#ifdef __SWITCH__
+				if (mainMenu_touchControls == 2)
+					mainMenu_touchControls = 1;
+				if (left || right)
+					mainMenu_touchControls = !mainMenu_touchControls;
+				break;
+#else
 				if (left) 
 				{
 					if (mainMenu_touchControls>0)
@@ -725,6 +761,7 @@ static int key_miscMenu(int *c)
 						mainMenu_touchControls=0;
 				}
 				break;
+#endif
 #endif
 
 #ifdef ANDROIDSDL
