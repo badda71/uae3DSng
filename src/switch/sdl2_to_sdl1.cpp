@@ -30,11 +30,6 @@ SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
 		display_height = DM.h;
 	}
 	SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 16, SDL_PIXELFORMAT_RGB565);
-	//if (texture) {
-	//	SDL_DestroyTexture(texture);
-	//	texture = NULL;
-	//}
-	//texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, w, h);
 	return surface;
 }
 
@@ -78,14 +73,6 @@ void SDL_SetVideoModeSync(int value) {
 
 void SDL_Flip(SDL_Surface *surface) {
 	if (surface && renderer && window) {
-		//SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
-		Uint32 *texture_pixels = NULL;
-		int texture_pitch;
-		Uint32 texture_format;
-		//SDL_QueryTexture(texture, &texture_format, NULL, NULL, NULL);
-		//SDL_LockTexture(texture, NULL, (void **) texture_pixels, &texture_pitch);
-		//SDL_ConvertPixels(surface->w, surface->h, surface->format->format, surface->pixels, surface->pitch, texture_format, texture_pixels, texture_pitch);
-		//SDL_UnlockTexture(texture);
 		if (texture) {
 			SDL_DestroyTexture(texture);
 			texture = NULL;
