@@ -1,3 +1,13 @@
+Changes in this Version
+======
+1.74 (Switch only)
+
+- Allow remapping of ZR/ZL on Switch
+- Map ZR/ZL to "slow-down mouse" on Switch if custom controls are off
+- Add option to misc menu to choose either A or B as OK button on Switch
+- Add sharp-bilinear-simple scaling routine, and make it the new default
+- Add point filtering scaling routine
+
 Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this great Amiga emulator that was originally ported to the Vita by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
@@ -10,7 +20,7 @@ Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new l
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
-Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and Sean Ritzo.
+Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and RadicalR.
 
 Installation
 ======
@@ -33,6 +43,7 @@ Vita/Switch-exclusive Features
 - Multiple hard-file support: up to 4 hdf files (size <2GB each) can be mounted simultaneously
 - Multiple controller support on Vita TV: up to four paired controllers can be fully mapped
 - Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
+- Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full screen
 - Custom autofire: any mapped Vita button can have autofire with adjustable rate
 - Savestate with hard-file support: state can be saved even when hard-files are used
 - Additional emulator settings: sprite-sprite collisions can be enabled, blitter settings can be changed
@@ -45,23 +56,17 @@ Vita/Switch-exclusive Features
 
 Vita-exclusive Features
 ======
-- Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full Vita screen.
 - Bluetooth keyboard and mouse support
 - Supports loading files from ux0: or uma0: partition
 - Rear touch panel can be enabled for mouse pointer control
-
-Switch-exclusive Features
-======
-- On the Switch, there's no shader support yet. But the Switch resolution is high enough for perfect integer scaling with factor 3x if displayed lines is not larger than 240 and width is not larger than 426. Filtering can be set to "Bilinear" or "None". When "Bilinear" is selected, the screen is scaled to fill the Vita display, keeping aspect ratio. No black bars on top and bottom appear. The image can be quickly zoomed using "R+Start+left/right" and vertically adjusted using "R+Start+up/down" to center it. When "None" is selected, only a perfect integer scaling is applied. Depending on the chosen Amiga screenmode, the integer scaling will be a 1x, 2x, 3x, or in principle even 4x, depending on whether the scaled Amiga screen fits. In most cases, this results in black bars on top and bottom as well as left and right.
 
 Notes
 ======
 - *Bios:* Please put kickstart files in `ux0:/data/uae4all/kickstarts` on Vita and in `/switch/uae4all2/kickstarts` directory on Switch. Files must be named as kick13.rom, kick20.rom, kick31.rom
 - *Speed:* Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are fixed by this.
 - *Config File:* If you have problems with settings not saving etc, please delete or rename your config file in the folder `ux0:/data/uae4all` (Vita) or `/switch/uae4all2/conf/` and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
-- *Display on Vita:* On the Vita, the sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
-- *Display on Switch:* On Switch, there is no shader support yet. But the 720p resolution on Switch allows 3* integer scaling as long as the displayed lines are <=240 and width is <426. This can be selected in the display menu under `shader`. There are two settings: `None (perfect integer scaling)` with black bars on top and bottom, or `bilinear (a little blurry)`, without black bars on top and bottom.
-- *Screen settings:* Many Amiga games fit the screen very nicely. For example, take Chaos Engine with a screen setting of 320*200 and sharp_bilinear_simple shader enabled (or bilinear on Switch). The picture can be zoomed using R+Start+Dpad left/right, and moved vertically using R+Start+Dpad up/down to center it on the screen. Once this is done, the picture fills almost the whole screen and looks amazing with no artifacts and, on Vita, almost no blurriness. The game runs smooth with zero frameskip.
+- *Display:* The sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
+  Many Amiga games fit the Vita screen very nicely. For example, take Chaos Engine with a screen setting of 320*200 and sharp_bilinear_simple shader enabled. The picture can be zoomed using R+Start+Dpad left/right, and moved vertically using R+Start+Dpad up/down to center it on the Vita screen. Once this is done, the picture fills almost the whole screen and looks amazing with no artifacts or blurriness. The game runs smooth with zero frameskip.
   Selecting a 'Preset Width' of 320, 352 or 384 (max overscan) results in lo-res screen emulation, good for most games, while 640, 704, or 768 results in hi-res screen emulation, good for use with Workbench or some text-based games.
 - *Blitter:* The blitter settings can help with graphics glitches in some games. Since it seems to work best, "immediate" is the default. But some games require setting blitter to "normal" and re-booting to remove graphics glitches, for example PP Hammer, Spindizzy Worlds, and Shufflepuck Cafe.
 - *WHDLoad:* If you have problems with a WHDLoad .hdf game, maybe try an .adf version of the same game. Rock'n Roll is one of a few games that work on UAE4All2 only using .adf files. It has graphics glitches and runs too fast in WHDLoad with .hdf. To make it work correctly, I loaded the "Rock'n Roll.adf" from Gamebase Amiga, chose the preset A500 config, and changed the Blitter setting to Normal.
@@ -127,7 +132,12 @@ Controls
 
 Switch: 
 -----
-Switch uses exactly the same controls as the Vita, with the following meaning:
+The default OK button in menu and on-screen keyboard is B. This can be changed to A in "more options."
+
+ZR button = slow-mouse (if custom controls are off)
+ZL button = slow-mouse (if custom controls are off)
+
+Otherwise Switch uses exactly the same controls as the Vita (see below), with the following meaning:
 Square = Y
 Triangle = X
 Cross = B
@@ -172,10 +182,10 @@ Virtual keyboard controls
 Start = Toggle virtual keyboard  
 Right analog stick up/down = Move virtual keyboard up and down  
 Right analog stick left/right = Change virtual keyboard transparency  
-Cross = Press selected key  
+Cross = Press selected key (on Switch, this can be changed from B to A)
 Square = Backspace  
 Triangle = Toggle shift  
-Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift)  
+Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift) (on Switch, this can be changed from A to B)
 
 Touch controls
 -----
@@ -193,6 +203,14 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.74 (Switch only)
+
+- Allow remapping of ZR/ZL on Switch
+- Map ZR/ZL to "slow-down mouse" on Switch if custom controls are off
+- Add option to misc menu to choose either A or B as OK button on Switch
+- Add sharp-bilinear-simple scaling routine, and make it the new default
+- Add point filtering scaling routine
+
 1.73 (Switch only)
 
 - Fix savestates on Switch
