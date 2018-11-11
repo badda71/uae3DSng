@@ -1,12 +1,8 @@
 Changes in this Version
 ======
-1.74 (Switch only)
+1.75 (WIP)
 
-- Allow remapping of ZR/ZL on Switch
-- Map ZR/ZL to "slow-down mouse" on Switch if custom controls are off
-- Add option to misc menu to choose either A or B as OK button on Switch
-- Add sharp-bilinear-simple scaling routine, and make it the new default
-- Add point filtering scaling routine
+- fix crash when booting a floppy with floppy speed >1x 
 
 Description
 =====
@@ -203,6 +199,10 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.75 (WIP)
+
+- fix crash when booting a floppy with floppy speed >1x 
+
 1.74 (Switch only)
 
 - Allow remapping of ZR/ZL on Switch
