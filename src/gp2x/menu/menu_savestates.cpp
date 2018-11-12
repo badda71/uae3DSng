@@ -158,13 +158,18 @@ static inline int key_saveMenu(int *cp)
 			case SDLK_LEFT: left=1; break;
 			case SDLK_UP: up=1; break;
 			case SDLK_DOWN: down=1; break;
+			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
+			//note SDLK_CTRL corresponds to ButtonSelect on Vita
+#if defined(__PSP2__) || defined(__SWITCH__)
+			case SDLK_PAGEDOWN: hit0=1; break;
+			case SDLK_END: hit1=1; break;
+#else
 			case SDLK_PAGEDOWN: hit0=1; break;
 			case SDLK_HOME: hit0=1; break;
 			case SDLK_LALT: hit1=1; break;
 			case SDLK_END: hit0=1; break;
 			case SDLK_PAGEUP: hit0=1;
-			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
-			//note SDLK_CTRL corresponds to ButtonSelect on Vita
+#endif
 			}
 		}
 		if (hit2) // does the user want to shut-down the whole menu?
@@ -175,6 +180,11 @@ static inline int key_saveMenu(int *cp)
 				end=1;
 				quit_pressed_in_submenu=1; //also change mainMenu state so that it automatically exits
 			}
+		}
+		if (hit1)
+		{
+			saveMenu_case=SAVE_MENU_CASE_EXIT;
+			end=1;
 		}
 		else if (up)
 		{

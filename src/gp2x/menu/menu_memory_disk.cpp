@@ -358,16 +358,17 @@ static int key_memDiskMenu(int *c)
 				case SDLK_UP: up=1; break;
 				case SDLK_DOWN: down=1; break;
 				case SDLK_PAGEDOWN: hit0=1; break;
+				case SDLK_END: hit1=1; break;
+				case SDLK_DELETE: case SDLK_BACKSPACE: 
+				case SDLK_ESCAPE: case SDLK_PAGEUP: del=1; break;
+				case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
+				//note SDLK_LCTRL corresponds to ButtonSelect on Vita
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 				case SDLK_HOME: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_RSHIFT: hit0=1; break;
 				case SDLK_RCTRL: hit0=1; break;
-				case SDLK_END: hit1=1; break;
-				case SDLK_DELETE: case SDLK_BACKSPACE: 
-				case SDLK_ESCAPE: case SDLK_PAGEUP: del=1; break;
-				//note SDLK_PAGEUP corresponds to PAD_Triangle on Vita
-				case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
-				//note SDLK_CTRL corresponds to ButtonSelect on Vita
+#endif
 				default:
 					break;
 			}
@@ -418,8 +419,6 @@ static int key_memDiskMenu(int *c)
 					end = 1;
 				break;
 			case MENUDISK_CHIPMEM:
-				if (hit0)
-					end = 1;
 				if ((left)||(right)) {
 					if (right) {
 						if (mainMenu_chipMemory < 4)
@@ -436,8 +435,6 @@ static int key_memDiskMenu(int *c)
 				}
 				break;
 			case MENUDISK_SLOWMEM:
-				if (hit0)
-					end = 1;
 				if ((left)||(right)) {
 					if (right) {
 						if (mainMenu_slowMemory < 3)
@@ -454,8 +451,6 @@ static int key_memDiskMenu(int *c)
 				}
 				break;
 			case MENUDISK_FASTMEM:
-				if (hit0)
-					end = 1;
 				if ((left) || (right)) {
 					if (right) {
 						if (mainMenu_fastMemory < 4)
@@ -476,8 +471,6 @@ static int key_memDiskMenu(int *c)
 				}
 				break;
 			case MENUDISK_BOOTHD:
-				if (hit0)
-					end = 1;
 				if (left) {
 					if (mainMenu_bootHD > 0)
 						mainMenu_bootHD--;
@@ -497,7 +490,7 @@ static int key_memDiskMenu(int *c)
 					if (run_menuLoad(currentDir, MENU_LOAD_HD_DIR)) {
 						make_hard_dir_cfg_line(uae4all_hard_dir);
 						reset_hdConf();
-						loadconfig(2);
+						loadconfig(4);
 					}
 				} else if (del) {
 					uae4all_hard_dir[0] = '\0';
@@ -516,7 +509,7 @@ static int key_memDiskMenu(int *c)
 						else if (current_hdf==3)
 							make_hard_file_cfg_line(uae4all_hard_file3);
 						reset_hdConf();
-						if (current_hdf == 0) {
+						if (current_hdf==0) {
 							loadconfig(2);
 						}
 					}
@@ -540,8 +533,6 @@ static int key_memDiskMenu(int *c)
 				}
 				break;
 			case MENUDISK_FLOPPYSPEED:
-				if (hit0)
-					end = 1;
 				if (left)
 				{
 					if (mainMenu_floppyspeed>100)

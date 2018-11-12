@@ -120,14 +120,47 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	extern SDL_Surface *text_screen;
 	r.x=80-64; r.y=0; r.w=150-24+64+64; r.h=240;
 	text_draw_background();
+
 	if (menu_load_type == MENU_LOAD_HD_DIR)
-#if defined(__PSP2__) || defined(__SWITCH__)
-		text_draw_window(2,2,41,25,"  Press SELECT to load HD-dir  ");
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"  Press SELECT to load HD-dir (Tri.=Info)  ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"  Press MINUS to load HD-dir (X = Info)  ");
 #else
 		text_draw_window(2,2,41,25,"  Press L-key to load HD-dir  ");
 #endif
+#endif
 	else if (menu_load_type == MENU_LOAD_HDF)
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"       Select .HDF-file (Triangle = Info)      ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"       Select .HDF-file (X = Info)      ");
+#else
 		text_draw_window(2,2,41,25,"       Select .HDF-file       ");
+#endif
+#endif
+#ifdef __PSP2__
+	else if (current_drive==0)
+		text_draw_window(2,2,41,25," Insert .ADF into DF0 (Triangle = Info) ");
+	else if (current_drive==1)
+		text_draw_window(2,2,41,25," Insert .ADF into DF1 (Triangle = Info)");
+	else if (current_drive==2)
+		text_draw_window(2,2,41,25," Insert .ADF into DF2 (Triangle = Info)");
+	else if (current_drive==3)
+		text_draw_window(2,2,41,25," Insert .ADF into DF3 (Triangle = Info)");
+#else
+#ifdef __SWITCH__
+	else if (current_drive==0)
+		text_draw_window(2,2,41,25," Insert .ADF into DF0 (X = Info)");
+	else if (current_drive==1)
+		text_draw_window(2,2,41,25," Insert .ADF into DF1 (X = Info)");
+	else if (current_drive==2)
+		text_draw_window(2,2,41,25," Insert .ADF into DF2 (X = Info)");
+	else if (current_drive==3)
+		text_draw_window(2,2,41,25," Insert .ADF into DF3 (X = Info)");
+#else
 	else if (current_drive==0)
 		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF0 ");
 	else if (current_drive==1)
@@ -136,6 +169,8 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF2 ");
 	else if (current_drive==3)
 		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF3 ");
+#endif
+#endif
 	else
 		text_draw_window(2,2,41,25,text_str_load_title);
 
@@ -352,18 +387,22 @@ static int menuLoadLoop(char *curr_path)
 					case SDLK_UP: up=1; break;
 					case SDLK_DOWN: down=1; break;
 					case SDLK_PAGEDOWN: hit0=1; break;
-					case SDLK_HOME: hit0=1; break;
 					case SDLK_LALT: hit1=1; break;
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 					case SDLK_LCTRL: hit2=1; break;
+					case SDLK_HOME: hit0=1; break;
+					case SDLK_END: hit0=1; break;
+					case SDLK_PAGEUP: hit0=1; break;
 #endif
 					case SDLK_RSHIFT: hit3=1; break;
 					case SDLK_RCTRL: hit4=1; break;
-					case SDLK_END: hit0=1; break;
 #if defined(__PSP2__) || defined(__SWITCH__)
+					// SELECT to select HD dir
 					case SDLK_LCTRL: hitL=1; break;
-#else
-					case SDLK_PAGEUP: hit0=1; break;
+					// TRIANGLE for fileinfo
+					case SDLK_PAGEUP: hit2=1; break;
+					// CIRCLE for cancel
+					case SDLK_END: hit1=1; break;
 #endif
 					case SDLK_l: hitL=1;
 				}

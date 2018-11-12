@@ -72,13 +72,17 @@ extern char filename0[256];
 extern char filename1[256];
 extern char filename2[256];
 extern char filename3[256];
-#if defined(__PSP2__) || defined(__SWITCH__)
+#ifdef __PSP2__
 static const char *text_str_title=    "----- UAE4All Vita -----";
+#else
+#ifdef __SWITCH__
+static const char *text_str_title=    "----- UAE4All Switch -----";
 #else
 #ifdef PANDORA
 static const char *text_str_title=    "----- UAE4All Pandora -----";
 #else
 static const char *text_str_title=    "----- UAE4All Android -----";
+#endif
 #endif
 #endif // __PSP2__
 static const char *text_str_df0=		"DF0:";
@@ -500,17 +504,17 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				case SDLK_UP: up=1; break;
 				case SDLK_DOWN: down=1; break;
 				case SDLK_PAGEDOWN: hit0=1; break;
-				case SDLK_HOME: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_LCTRL: hit2=1; break;
 #if defined(__PSP2__) || defined(__SWITCH__) //RSHIFT is PAD_L on Vita
 				case SDLK_RSHIFT: hitQ=1; break;
 #else
 				case SDLK_RSHIFT: hit3=1; break;
-#endif
-				case SDLK_RCTRL: hit4=1; break;
 				case SDLK_END: hit5=1; break;
 				case SDLK_PAGEUP: hit6=1; break;
+				case SDLK_HOME: hit0=1; break;
+#endif
+				case SDLK_RCTRL: hit4=1; break;
 				case SDLK_i: info=1; break;
 				case SDLK_h: hitH=1; break;
 				case SDLK_s: hitS=1; break;
@@ -1072,7 +1076,7 @@ int run_mainMenu()
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
 	
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 	if (mainMenu_vkbdLanguage != old_vkbdLanguage)
 	{
 		vkbd_quit();

@@ -582,12 +582,16 @@ static int key_miscMenu(int *c)
 			case SDLK_UP: up=1; break;
 			case SDLK_DOWN: down=1; break;
 			case SDLK_PAGEDOWN: hit0=1; break;
+			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
+			//note SDLK_CTRL corresponds to ButtonSelect on Vita
+#if defined(__PSP2__) || defined(__SWITCH__)
+			case SDLK_END: hit1=1; break;
+#else
 			case SDLK_HOME: hit0=1; break;
 			case SDLK_LALT: hit1=1; break;
-			case SDLK_END: hit0=1; break;
 			case SDLK_PAGEUP: hit0=1;
-			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
-				//note SDLK_CTRL corresponds to ButtonSelect on Vita
+			case SDLK_END: hit0=1; break;
+#endif
 			}
 		}
 		if (hit2) //Does the user want to cancel the menu completely?
@@ -598,10 +602,12 @@ static int key_miscMenu(int *c)
 				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
 			}
 		}	
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 		else if (hit0)
 		{
 			end = -1;
 		}
+#endif
 		else if (hit1)
 		{
 			end = -1;
@@ -618,6 +624,10 @@ static int key_miscMenu(int *c)
 		}
 		switch (menuMisc)
 		{
+			case MENUMISC_RETURNMAIN:
+				if (hit0)
+					end = 1;
+				break;
 			case MENUMISC_CPU:
 				if (left)
 				{
@@ -717,7 +727,7 @@ static int key_miscMenu(int *c)
 				
 			case MENUMISC_SPRITECOLLISIONS:
 				if (left||right)
-			   	mainMenu_spriteCollisions = !mainMenu_spriteCollisions;
+					mainMenu_spriteCollisions = !mainMenu_spriteCollisions;
 			   break;
 		
 			case MENUMISC_KICKSTART:

@@ -138,8 +138,6 @@ if(BUILD_PSP2)
           -DSHM_SUPPORT_LINKS=0 -DUNALIGNED_PROFITABLE -DOPTIMIZED_FLAGS -DOS_WITHOUT_MEMORY_MANAGEMENT
           -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"app0:/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
           -DUSE_UAE4ALL_VKBD
-          -DVKBD_ALWAYS
-          -DLARGEKEYBOARD
           -DUSE_ARMV7
           -DUSE_ARMNEON
           -marm -mfpu=neon -mcpu=cortex-a9 -march=armv7-a -mfloat-abi=hard -ffast-math
@@ -179,7 +177,7 @@ if(BUILD_PSP2)
           COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLEID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
           COMMAND cp ${PROJECT_NAME}.self vpk/eboot.bin
           COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
-          COMMAND cd vpk && zip -r ../uae4all-${BUILD_DATE}.vpk . && cd ..
+          COMMAND cd vpk && zip -r ../uae4all_${VERSION_MAJOR}.${VERSION_MINOR}.vpk . && cd ..
   )
 endif(BUILD_PSP2)
 
@@ -218,8 +216,6 @@ if(BUILD_NX)
     -DDATA_PREFIX=\"./data/\"
     -DSAVE_PREFIX=\"./saves/\"
     -DUSE_UAE4ALL_VKBD
-    -DVKBD_ALWAYS
-    -DLARGEKEYBOARD
   )
 
   set(FLAGS

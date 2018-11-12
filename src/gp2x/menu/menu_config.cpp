@@ -1374,6 +1374,11 @@ int saveconfig(int general)
 
 void loadconfig(int general)
 {
+// general == 0 (default): loading disk specific config after inserting floppy #1 
+// general == 1: first time, loading general config
+// general == 2: loading hdf-file-specific config after inserting hdf file #1
+// general == 3: loading config from guichan (unused)
+// general == 4: loading hd-dir-specific config after selecting hd dir
 #if defined(__PSP2__) || defined(__SWITCH__)
 	if (general == 1)
 	{
@@ -1418,12 +1423,17 @@ void loadconfig(int general)
         snprintf(path, 300, config_filename, launchDir);
     else if(general == 0)
         create_configfilename(path, uae4all_image_file0, 0);
-    else {
+    else if (general == 2) {
         path[0] = '\0';
-        if(mainMenu_bootHD == 1 && uae4all_hard_dir[0] != '\0')
-            create_configfilename(path, uae4all_hard_dir, 1);
-        if(mainMenu_bootHD == 2 && uae4all_hard_file0[0] != '\0')
+        if(uae4all_hard_file0[0] != '\0')
             create_configfilename(path, uae4all_hard_file0, 0);
+        if(path[0] == '\0')
+            return;
+    }
+    else if (general == 4) {
+        path[0] = '\0';
+        if(uae4all_hard_dir[0] != '\0')
+            create_configfilename(path, uae4all_hard_dir, 1);
         if(path[0] == '\0')
             return;
     }

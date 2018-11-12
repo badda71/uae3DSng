@@ -66,7 +66,7 @@ enum {
 	MENUDISPLAY_SHADER,
 #endif
 	MENUDISPLAY_STATUSLINE,
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 	MENUDISPLAY_VKBDLANGUAGE,
 #endif
 	MENUDISPLAY_BACKGROUND,
@@ -328,7 +328,7 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop3, menuLine,"On");
 
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 	// MENUDISPLAY_VKBDLANGUAGE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Keyboard");
@@ -466,10 +466,14 @@ static int key_displayMenu(int *c)
 			case SDLK_UP: up=1; break;
 			case SDLK_DOWN: down=1; break;
 			case SDLK_PAGEDOWN: hit0=1; break;
+#if defined(__PSP2__) || defined(__SWITCH__)
+			case SDLK_END: hit1=1; break;
+#else
 			case SDLK_HOME: hit0=1; break;
 			case SDLK_LALT: hit1=1; break;
 			case SDLK_END: hit0=1; break;
 			case SDLK_PAGEUP: hit0=1;				
+#endif
 			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 			}
@@ -482,10 +486,12 @@ static int key_displayMenu(int *c)
 				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
 			}
 		}	
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 		else if (hit0)
 		{
 			end = -1;
 		}
+#endif
 		else if (hit1)
 		{
 			end = -1;
@@ -502,6 +508,10 @@ static int key_displayMenu(int *c)
 		}
 		switch (menuDisplay)
 		{
+			case MENUDISPLAY_RETURNMAIN:
+				if (hit0)
+					end = -1;
+				break;
 			case MENUDISPLAY_PRESETWIDTH:
 				if (left)
 				{
@@ -666,7 +676,7 @@ static int key_displayMenu(int *c)
 					mainMenu_showStatus=!mainMenu_showStatus;
 				break;
 
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 			case MENUDISPLAY_VKBDLANGUAGE:
 				if (left)
 				{

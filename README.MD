@@ -1,8 +1,12 @@
 Changes in this Version
 ======
-1.75 (WIP)
+1.75
 
-- fix crash when booting a floppy with floppy speed >1x 
+- fixed crash when booting a floppy with floppy speed >1x 
+- fixed inconsistencies in menu navigation
+- enabled long filename display in file browser (hold Triangle or X to show it)
+- fixed an issue where HD Dir could not be selected unless Boot HD was set to OFF
+- removed legacy code and data files that were not needed
 
 Description
 =====
@@ -199,9 +203,13 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
-1.75 (WIP)
+1.75
 
-- fix crash when booting a floppy with floppy speed >1x 
+- fixed crash when booting a floppy with floppy speed >1x 
+- fixed inconsistencies in menu navigation
+- enabled long filename display in file browser (hold Triangle or X to show it)
+- fixed an issue where HD Dir could not be selected unless Boot HD was set to OFF
+- removed legacy code and data files that were not needed
 
 1.74 (Switch only)
 

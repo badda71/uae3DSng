@@ -688,15 +688,18 @@ static int key_controlsMenu(int *c)
 				case SDLK_LEFT: left=1; break;
 				case SDLK_UP: up=1; break;
 				case SDLK_DOWN: down=1; break;
-				case SDLK_PAGEDOWN: hit0=1; break;
-				case SDLK_HOME: hit0=1; break;
-				case SDLK_LALT: hit1=1; break;
-				case SDLK_END: hit0=1; break;
 				case SDLK_PAGEUP: del=1; break; //Note: PAGEUP is Triangle on Vita
 				case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 #if defined(__PSP2__) || defined(__SWITCH__)
 				case SDLK_RSHIFT: hit3=1; break; //SDLK_RSHIFT is triggerL on Vita
+				case SDLK_PAGEDOWN: hit0=1; break; //SDLK_PAGEDOWN is the ok button on Vita
+				case SDLK_END: hit1=1; break; // SDLK_END is the cancel button on Vita
+#else
+				case SDLK_HOME: hit0=1; break;
+				case SDLK_PAGEDOWN: hit0=1; break;
+				case SDLK_LALT: hit1=1; break;
+				case SDLK_END: hit0=1; break;
 #endif
 			}
 		}	
@@ -718,10 +721,12 @@ static int key_controlsMenu(int *c)
 			init_joystick();	
 		}
 #endif
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 		else if (hit0)
 		{
 			end = -1;
 		}
+#endif
 		else if (hit1)
 		{
 			end = -1;
@@ -761,7 +766,10 @@ static int key_controlsMenu(int *c)
 						mainMenu_onScreen = !mainMenu_onScreen;
 				break;
 #endif
-
+			case MENUCONTROLS_RETURNMAIN:
+				if (hit0)
+					end = -1;
+				break;
 			case MENUCONTROLS_CUSTOM_ON_OFF:
 				if ((left)||(right))
 				{
