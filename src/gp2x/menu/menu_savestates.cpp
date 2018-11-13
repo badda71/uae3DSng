@@ -142,9 +142,9 @@ static inline int key_saveMenu(int *cp)
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0;
 	int hit2=0, hit3=0, hit4=0, hit5=0;
 	SDL_Event event;
-	delay ++;
-	if (delay<3) return end;
-	delay=0;
+	//delay ++;
+	//if (delay<3) return end;
+	//delay=0;
 
 	while (SDL_PollEvent(&event) > 0)
 	{
