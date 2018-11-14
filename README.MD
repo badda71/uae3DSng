@@ -1,12 +1,9 @@
 Changes in this Version
 ======
-1.75
+1.76
 
-- fixed crash when booting a floppy with floppy speed >1x 
-- fixed inconsistencies in menu navigation
-- enabled long filename display in file browser (hold Triangle or X to show it)
-- fixed an issue where HD Dir could not be selected unless Boot HD was set to OFF
-- removed legacy code and data files that were not needed
+- on Switch, added split Joycon option for tabletop multiplayer with multiple single Joycons
+- fixed lag when navigating the savestate menu
 
 Description
 =====
@@ -59,6 +56,10 @@ Vita-exclusive Features
 - Bluetooth keyboard and mouse support
 - Supports loading files from ux0: or uma0: partition
 - Rear touch panel can be enabled for mouse pointer control
+
+Switch-exclusive Features
+======
+- Split Joycon support
 
 Notes
 ======
@@ -145,6 +146,12 @@ Circle = A
 Start = Plus
 Select = Minus
 
+Split Joycon mode: When you pair additional Joycons in this mode, please turn Split Joycon mode off and back on to force a re-scan. In split Joycon mode, the controls for player 1 are slightly different:
+Minus or Plus = Menu (player 1 only)
+SL = on-screen keyboard (player 1 only)
+Pressing Stick while moving it = change keyboard transparency and position; move mouse pointer (player 1 only)
+SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)
+
 General
 -----
 Select = Toggle menu  
@@ -203,6 +210,11 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.76
+
+- on Switch, added split Joycon option for tabletop multiplayer with multiple single Joycons
+- fixed lag when navigating the savestate menu
+
 1.75
 
 - fixed crash when booting a floppy with floppy speed >1x 

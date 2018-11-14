@@ -174,6 +174,7 @@ int mainMenu_deadZone = 1000;
 #endif
 #ifdef __SWITCH__
 int mainMenu_swapAB = DEFAULT_SWAPAB;
+int mainMenu_singleJoycons = DEFAULT_SINGLEJOYCONS;
 #endif
 
 // The following params in use, but can't be changed with gui
@@ -376,6 +377,7 @@ void SetDefaultMenuSettings(int general)
 #endif
 #ifdef __SWITCH__
     mainMenu_swapAB = DEFAULT_SWAPAB;
+    mainMenu_singleJoycons = DEFAULT_SINGLEJOYCONS;
 #endif
     // The following params can't be changed in gui
     skipintro = DEFAULT_SKIPINTRO;
@@ -1366,6 +1368,8 @@ int saveconfig(int general)
 #ifdef __SWITCH__
     snprintf((char*)buffer, 255, "swapAB=%d\n",mainMenu_swapAB);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "singleJoycons=%d\n",mainMenu_singleJoycons);
+    fputs(buffer,f);
 #endif
     fclose(f);
     return 1;
@@ -1783,6 +1787,7 @@ void loadconfig(int general)
         fscanf(f,"useSavesFolder=%d\n",&mainMenu_useSavesFolder);
 #ifdef __SWITCH__ 
         fscanf(f,"swapAB=%d\n",&mainMenu_swapAB);
+        fscanf(f,"singleJoycons=%d\n",&mainMenu_singleJoycons);
 #endif
         fclose(f);
     }

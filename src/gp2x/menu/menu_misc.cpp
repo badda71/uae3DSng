@@ -28,6 +28,10 @@
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
 const char *text_str_misc_separator="----------------------------------";
 static const char *text_str_misc_title=    "            Miscellanous         -";
 static const char *text_str_stylus_offset="StylusOffset";
@@ -71,6 +75,9 @@ enum {
 #endif
 #if defined(__PSP2__) || defined(__SWITCH__)
 	MENUMISC_MOUSEEMULATION,
+#ifdef __SWITCH__
+	MENUMISC_SINGLEJOYCONS,
+#endif
 	MENUMISC_LEFTSTICKMOUSE,
 #endif
 	MENUMISC_MOUSEMULTIPLIER,
@@ -414,8 +421,26 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop3-8,menuLine,"On");
 	else
 		write_text(tabstop3-8,menuLine,"On");	
+#ifdef __SWITCH__
+	// MENUMISC_SINGLEJOYCONS
+	write_text(tabstop2,menuLine,"Split JoyCons");
+	if (mainMenu_singleJoycons==0)
+	{
+		if ((menuMisc!=MENUMISC_SINGLEJOYCONS)||(bb))
+			write_text_inv(tabstop9,menuLine,"Off");
+		else
+			write_text(tabstop9,menuLine,"Off ");
+	}
+	else if (mainMenu_singleJoycons==1)
+	{
+		if ((menuMisc!=MENUMISC_SINGLEJOYCONS)||(bb))
+			write_text_inv(tabstop9,menuLine,"On");
+		else
+			write_text(tabstop9,menuLine,"On ");
+	}
+#else
 	write_text(tabstop3-5,menuLine,"(can disturb 2nd player)");
-
+#endif
 	// MENUMISC_LEFTSTICKMOUSE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Mouse Control");	
@@ -784,6 +809,11 @@ static int key_miscMenu(int *c)
 					mainMenu_touchControls = 1;
 				if (left || right)
 					mainMenu_touchControls = !mainMenu_touchControls;
+				break;
+			case MENUMISC_SINGLEJOYCONS:
+				if (left || right) {
+					mainMenu_singleJoycons = !mainMenu_singleJoycons;
+				}
 				break;
 #else
 				if (left) 

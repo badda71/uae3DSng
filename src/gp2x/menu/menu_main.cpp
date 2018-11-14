@@ -36,6 +36,11 @@
 #include <psp2/io/fcntl.h>
 #endif
  
+#ifdef __SWITCH__
+#include <switch.h>
+extern void update_joycon_mode();
+#endif
+ 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 int inside_menu = 0;
@@ -1065,6 +1070,10 @@ int run_mainMenu()
       	leave_program();
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 			sync();
+#endif
+#ifdef __SWITCH__
+            mainMenu_singleJoycons = 0;
+            update_joycon_mode();
 #endif
 			exit(0);
 			break;

@@ -55,6 +55,7 @@ extern int triggerR3[4];
 #endif
 extern int buttonSelect[4];
 extern int buttonStart[4];
+extern int singleJoycons;
 #endif
 #if defined(__PSP2__) || defined(__SWITCH__)
 extern int rAnalogX;
@@ -350,7 +351,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			float scalingFactor=1.0f;
 			float magnitude=0.0f;
 
-			if (mainMenu_leftStickMouse)
+			if ((mainMenu_leftStickMouse)
+#ifdef __SWITCH__
+			&& (!singleJoycons)
+#endif
+			)
 			{
 				analogX=(float) lAnalogX;
 				analogY=(float) lAnalogY;

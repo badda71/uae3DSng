@@ -46,6 +46,10 @@
 #include <psp2/shellutil.h>
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
 #ifdef USE_SDL2
 #include "sdl2_to_sdl1.h"
 #endif
@@ -188,6 +192,60 @@ int buttonStart[4]={0,0,0,0};
 extern int mainMenu_case;
 #ifdef WITH_TESTMODE
 int no_limiter = 0;
+#endif
+
+#ifdef __SWITCH__
+int singleJoycons = 0;  // are single Joycons being used at the moment?
+void update_joycon_mode() {
+	int handheld = hidGetHandheldMode();
+	int coalesceControllers = 0;
+	int splitControllers = 0;
+	if (!handheld) {
+		if (mainMenu_singleJoycons) {
+			if (!singleJoycons) {
+				splitControllers = 1;
+				singleJoycons = 1;
+			}
+		} else if (singleJoycons) {
+			coalesceControllers = 1;
+			singleJoycons = 0;
+		}
+	} else {
+		if (singleJoycons) {
+			coalesceControllers = 1;
+			singleJoycons = 0;
+		}
+	}
+	if (coalesceControllers) {
+		for (int id=0; id<8; id++) {
+			hidSetNpadJoyAssignmentModeDual((HidControllerID) id);
+		}
+		for (int id=0; id<8; id+=2) {
+			hidMergeSingleJoyAsDualJoy ((HidControllerID) id, (HidControllerID) (id + 1));
+		}
+		for (int id=0; id<8; id++) {
+			HidControllerType type = hidGetControllerType((HidControllerID) id);
+				hidSetControllerLayout((HidControllerID) id, LAYOUT_DEFAULT);
+		}
+	}
+	if (splitControllers) {
+		for (int id=0; id<8; id++) {
+			hidSetNpadJoyAssignmentModeSingleByDefault((HidControllerID) id);
+			//this following command doesn't work, so use the workaround of forcing layout, see below
+			//hidSetControllerLayout((HidControllerID) id, LAYOUT_SINGLE);
+		}
+		hidScanInput();
+	}
+	if (singleJoycons) {
+		for (int id=0; id<8; id++) {
+			HidControllerType type = hidGetControllerType((HidControllerID) id);
+			if (type == TYPE_JOYCON_LEFT)
+				hidSetControllerLayout((HidControllerID) id, LAYOUT_LEFT);
+			if (type == TYPE_JOYCON_RIGHT)
+				hidSetControllerLayout((HidControllerID) id, LAYOUT_RIGHT);
+		}
+	}
+}
 #endif
 
 #if defined(__PSP2__) || defined(__SWITCH__)
@@ -652,16 +710,110 @@ void gui_handle_events (void)
 		dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, PAD_LEFT);
 		dpadUp[i]  = SDL_JoystickGetButton(currentJoy, PAD_UP);
 		dpadDown[i]  = SDL_JoystickGetButton(currentJoy, PAD_DOWN);
-		// analog joystick acts as digital controls with proper circular deadzone
-		if (i==0 && mainMenu_leftStickMouse) 
-		{
-			joyX=rX;
-			joyY=-rY;
+		
+		buttonA[i] = SDL_JoystickGetButton(currentJoy, PAD_SQUARE);
+		buttonB[i] = SDL_JoystickGetButton(currentJoy, PAD_CIRCLE);
+		buttonX[i] = SDL_JoystickGetButton(currentJoy, PAD_CROSS);
+		buttonY[i] = SDL_JoystickGetButton(currentJoy, PAD_TRIANGLE);
+		triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_L);
+		triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_R);
+
+		buttonSelect[i] = SDL_JoystickGetButton(currentJoy, PAD_SELECT);
+		buttonStart[i] = SDL_JoystickGetButton(currentJoy, PAD_START);
+#ifdef __SWITCH__
+		triggerL2[i] = SDL_JoystickGetButton(currentJoy, PAD_L2);
+		triggerR2[i] = SDL_JoystickGetButton(currentJoy, PAD_R2);
+		triggerL3[i] = SDL_JoystickGetButton(currentJoy, PAD_L3);
+		triggerR3[i] = SDL_JoystickGetButton(currentJoy, PAD_R3);
+
+		if (singleJoycons) {
+			u64 single_joycon_buttons;
+			HidControllerType type;
+			HidControllerID id = (HidControllerID) i;
+			type = hidGetControllerType(id);
+			single_joycon_buttons = hidKeysHeld(id);
+
+			if (type == TYPE_JOYCON_LEFT) {
+				buttonA[i] = dpadUp[i]; // new left = old top
+				buttonX[i] = dpadLeft[i]; // new bottom = old left
+				buttonY[i] = dpadRight[i]; // new top = old right
+				buttonB[i] = dpadDown[i]; // new right = old down
+				joyX = lY;
+				joyY = lX;
+			}
+			if  (type == TYPE_JOYCON_RIGHT) {
+				int oldButtonA = buttonA[i]; // square (Y) left button
+				int oldButtonB = buttonB[i]; // circle (A) right button
+				int oldButtonX = buttonX[i]; // cross (B) bottom button
+				int oldButtonY = buttonY[i]; // triangle (X) top button
+				buttonB[i] = oldButtonY;
+				buttonA[i] = oldButtonX;
+				buttonX[i] = oldButtonB;
+				buttonY[i] = oldButtonA;
+				joyX = -rY;
+				joyY = -rX;
+			}
+
+			dpadRight[i] = 0;
+			dpadLeft[i] = 0;
+			dpadUp[i] = 0;
+			dpadDown[i] = 0;
+			triggerL[i] = 0;
+			triggerR[i] = 0;
+			triggerL2[i] = 0;
+			triggerR2[i] = 0;
+			
+			if (i == 0) {
+				if (type == TYPE_JOYCON_RIGHT) {
+					buttonSelect[0] = buttonStart[0];
+					triggerL3[0] = triggerR3[0];
+					buttonStart[0] = (single_joycon_buttons & (KEY_SL << 2))? 1 : 0;
+					triggerR[0] = (single_joycon_buttons & (KEY_SR << 2))? 1 : 0;
+				} else {
+					buttonStart[0] = (single_joycon_buttons & KEY_SL)? 1 : 0;
+					triggerR[0] = (single_joycon_buttons & KEY_SR)? 1 : 0;
+				}
+				// push player 1 joystick in for mouse movement or keyboard adjustment
+				if (triggerL3[0]) {
+					rAnalogX = joyX;
+					rAnalogY = -joyY;
+					joyX = 0;
+					joyY = 0;
+				} else {
+					rAnalogX = 0;
+					rAnalogY = 0;
+				}
+				triggerL3[0] = 0;
+				triggerR3[0] = 0;
+				lAnalogX = 0;
+				lAnalogY = 0;
+			} else {
+				if (type == TYPE_JOYCON_RIGHT) {
+					triggerL[i] = (single_joycon_buttons & (KEY_SL << 2))? 1 : 0;
+					triggerR[i] = (single_joycon_buttons & (KEY_SR << 2))? 1 : 0;
+				} else {
+					triggerL[i] = (single_joycon_buttons & KEY_SL)? 1 : 0;
+					triggerR[i] = (single_joycon_buttons & KEY_SR)? 1 : 0;
+				}
+			}
 		}
-		else
+#endif
+
+#ifdef __SWITCH__
+		if (!singleJoycons)
+#endif
 		{
-			joyX=lX;
-			joyY=-lY;
+			// analog joystick acts as digital controls with proper circular deadzone
+			if (i==0 && mainMenu_leftStickMouse)
+			{
+				joyX=rX;
+				joyY=-rY;
+			}
+			else
+			{
+				joyX=lX;
+				joyY=-lY;
+			}
 		}
 		if ((joyX*joyX + joyY*joyY) > joyDeadZoneSquared)
 		{
@@ -698,22 +850,8 @@ void gui_handle_events (void)
 					dpadLeft[i] = 1;
 			}
 		}
-			
-		buttonA[i] = SDL_JoystickGetButton(currentJoy, PAD_SQUARE);
-		buttonB[i] = SDL_JoystickGetButton(currentJoy, PAD_CIRCLE);
-		buttonX[i] = SDL_JoystickGetButton(currentJoy, PAD_CROSS);
-		buttonY[i] = SDL_JoystickGetButton(currentJoy, PAD_TRIANGLE);
-		triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_L);
-		triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_R);
-#ifdef __SWITCH__
-		triggerL2[i] = SDL_JoystickGetButton(currentJoy, PAD_L2);
-		triggerR2[i] = SDL_JoystickGetButton(currentJoy, PAD_R2);
-		triggerL3[i] = SDL_JoystickGetButton(currentJoy, PAD_L3);
-		triggerR3[i] = SDL_JoystickGetButton(currentJoy, PAD_R3);
-#endif
-		buttonSelect[i] = SDL_JoystickGetButton(currentJoy, PAD_SELECT);
-		buttonStart[i] = SDL_JoystickGetButton(currentJoy, PAD_START);
 	}
+
 #ifdef USE_UAE4ALL_VKBD
 	//no autofire when keyboard is displayed
 	if (mainMenu_customAutofireButton && !vkbd_mode)
@@ -956,7 +1094,6 @@ if(!vkbd_mode)
 	{
 		can_change_custom_controlSet = 1;
 	}
-	//holding R + start on Vita to move screen, L/R are used for mousebuttons.
 	else if(buttonStart[0] && triggerR[0])
 #else
 	//L + R

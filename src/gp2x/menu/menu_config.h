@@ -175,6 +175,7 @@ extern int mainMenu_custom3_R3[4];
 #endif
 #ifdef __SWITCH__
 extern int mainMenu_swapAB;
+extern int mainMenu_singleJoycons;
 #endif
 #endif
 
