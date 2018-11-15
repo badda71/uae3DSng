@@ -2,8 +2,9 @@ Changes in this Version
 ======
 1.76
 
-- on Switch, added split Joycon option for tabletop multiplayer with multiple single Joycons
 - fixed lag when navigating the savestate menu
+- on Switch, added split Joycon option for tabletop multiplayer with up to four single Joycons
+- on Switch, allow menu navigation with analog stick
 
 Description
 =====
@@ -145,11 +146,14 @@ Cross = B
 Circle = A
 Start = Plus
 Select = Minus
+L = L/SL
+R = R/SR
 
-Split Joycon mode: When you pair additional Joycons in this mode, please turn Split Joycon mode off and back on to force a re-scan. In split Joycon mode, the controls for player 1 are slightly different:
-Minus or Plus = Menu (player 1 only)
+- *Split Joycon Mode:*: Split Joycon mode can be enabled/disabled in "more options." Upto four single Joycons are supported. Buttons can still be remapped. SL for player 1 is hardcoded to bring up the keyboard.
+Split Joycon controls:
+Minus/Plus = Menu (player 1 only)
 SL = on-screen keyboard (player 1 only)
-Pressing Stick while moving it = change keyboard transparency and position; move mouse pointer (player 1 only)
+Pressing stick while moving it = change keyboard transparency/position, control mouse pointer (player 1 only)
 SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)
 
 General
@@ -212,8 +216,9 @@ CHANGELOG
 =====
 1.76
 
-- on Switch, added split Joycon option for tabletop multiplayer with multiple single Joycons
 - fixed lag when navigating the savestate menu
+- on Switch, added split Joycon option for tabletop multiplayer with up to four single Joycons
+- on Switch, allow menu navigation with analog stick
 
 1.75
 
