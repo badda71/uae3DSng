@@ -41,6 +41,16 @@ SDLKey getKey(Uint8 button) {
 				case LSTICK_RIGHT:
 					button = LSTICK_UP;
 					break;
+				case PAD_SL:
+					button = PAD_L;
+					break;
+				case PAD_SR:
+					button = PAD_R;
+					break;
+				case PAD_L:
+				case PAD_R:
+					button = BUTTON_NONE;
+					break;
 				default:
 					break;
 			}
@@ -69,6 +79,19 @@ SDLKey getKey(Uint8 button) {
 					break;
 				case RSTICK_RIGHT:
 					button = LSTICK_DOWN;
+					break;
+				case PAD_START:
+					button = PAD_SELECT;
+					break;
+				case PAD_SL_RIGHT:
+					button = PAD_L;
+					break;
+				case PAD_SR_RIGHT:
+					button = PAD_R;
+					break;
+				case PAD_L:
+				case PAD_R:
+					button = BUTTON_NONE;
 					break;
 				default:
 					break;
