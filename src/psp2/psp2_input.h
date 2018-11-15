@@ -46,11 +46,11 @@ int PSP2_PollEvent(SDL_Event *event);
 #define RSTICK_UP 21
 #define RSTICK_RIGHT 22
 #define RSTICK_DOWN 23
-#define PAD_SL = 24
-#define PAD_SR = 25
-#define PAD_SL_RIGHT = 26
-#define PAD_SR_RIGHT = 27
-#define BUTTON_NONE = 254
+#define PAD_SL_LEFT 24
+#define PAD_SR_LEFT 25
+#define PAD_SL_RIGHT 26
+#define PAD_SR_RIGHT 27
+#define BUTTON_NONE 254
 #endif
 
 #ifdef __cplusplus

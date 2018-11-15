@@ -1,10 +1,9 @@
 Changes in this Version
 ======
-1.76
+1.77
 
-- fixed lag when navigating the savestate menu
-- on Switch, added split Joycon option for tabletop multiplayer with up to four single Joycons
-- on Switch, allow menu navigation with analog stick
+- on Switch, make SL/SR act as L/R also in menu
+- on Switch, in split JoyCon mode, disable L/R/ZL/ZR in menu
 
 Description
 =====
@@ -108,6 +107,15 @@ Compiling
   sudo -E dkp-pacman -S switch-zlib
   sudo -E dkp-pacman -S switch-libjpeg-turbo
   sudo -E dkp-pacman -S switch-libdrm-nouveau
+  ```
+  * Patch SDL2 library to include SL/SR button support, otherwise SL/SR will not function in UAE4All2
+  ```
+  git clone https://github.com/rsn8887/pacman-packages/tree/SwitchSDL2ButtonFix
+  cd pacman-packages/pacman-packages/switch/SDL2
+  dkp-makepkg
+  cd pkg/switch-sdl2/opt/devkitpro/portlibs/switch/lib
+  cp *.a $DEVKITPRO/portlibs/switch/lib/
+  cp *.la $DEVKITPRO/portlibs/switch/lib/
   ```
   * Compile and package:
   ```
@@ -214,6 +222,11 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.77
+
+- on Switch, make SL/SR act as L/R also in menu
+- on Switch, in split JoyCon mode, disable L/R/ZL/ZR in menu
+
 1.76
 
 - fixed lag when navigating the savestate menu

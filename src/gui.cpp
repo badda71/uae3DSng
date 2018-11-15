@@ -731,9 +731,10 @@ void gui_handle_events (void)
 			HidControllerType type;
 			HidControllerID id = (HidControllerID) i;
 			type = hidGetControllerType(id);
-			single_joycon_buttons = hidKeysHeld(id);
 
 			if (type == TYPE_JOYCON_LEFT) {
+				triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_SL_LEFT);
+				triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_SR_LEFT);
 				buttonA[i] = dpadUp[i]; // new left = old top
 				buttonX[i] = dpadLeft[i]; // new bottom = old left
 				buttonY[i] = dpadRight[i]; // new top = old right
@@ -742,6 +743,8 @@ void gui_handle_events (void)
 				joyY = lX;
 			}
 			if  (type == TYPE_JOYCON_RIGHT) {
+				triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_SL_RIGHT);
+				triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_SR_RIGHT);
 				int oldButtonA = buttonA[i]; // square (Y) left button
 				int oldButtonB = buttonB[i]; // circle (A) right button
 				int oldButtonX = buttonX[i]; // cross (B) bottom button
@@ -758,8 +761,6 @@ void gui_handle_events (void)
 			dpadLeft[i] = 0;
 			dpadUp[i] = 0;
 			dpadDown[i] = 0;
-			triggerL[i] = 0;
-			triggerR[i] = 0;
 			triggerL2[i] = 0;
 			triggerR2[i] = 0;
 			
@@ -767,12 +768,9 @@ void gui_handle_events (void)
 				if (type == TYPE_JOYCON_RIGHT) {
 					buttonSelect[0] = buttonStart[0];
 					triggerL3[0] = triggerR3[0];
-					buttonStart[0] = (single_joycon_buttons & (KEY_SL << 2))? 1 : 0;
-					triggerR[0] = (single_joycon_buttons & (KEY_SR << 2))? 1 : 0;
-				} else {
-					buttonStart[0] = (single_joycon_buttons & KEY_SL)? 1 : 0;
-					triggerR[0] = (single_joycon_buttons & KEY_SR)? 1 : 0;
 				}
+				buttonStart[0] = triggerL[0];
+
 				// push player 1 joystick in for mouse movement or keyboard adjustment
 				if (triggerL3[0]) {
 					rAnalogX = joyX;
@@ -783,18 +781,11 @@ void gui_handle_events (void)
 					rAnalogX = 0;
 					rAnalogY = 0;
 				}
+				triggerL[0] = 0;
 				triggerL3[0] = 0;
 				triggerR3[0] = 0;
 				lAnalogX = 0;
 				lAnalogY = 0;
-			} else {
-				if (type == TYPE_JOYCON_RIGHT) {
-					triggerL[i] = (single_joycon_buttons & (KEY_SL << 2))? 1 : 0;
-					triggerR[i] = (single_joycon_buttons & (KEY_SR << 2))? 1 : 0;
-				} else {
-					triggerL[i] = (single_joycon_buttons & KEY_SL)? 1 : 0;
-					triggerR[i] = (single_joycon_buttons & KEY_SR)? 1 : 0;
-				}
 			}
 		}
 #endif
