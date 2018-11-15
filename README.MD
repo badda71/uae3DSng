@@ -1,15 +1,17 @@
 Changes in this Version
 ======
-1.77
+1.77 (Switch only)
 
-- on Switch, make SL/SR act as L/R also in menu
+- on Switch, in split JoyCon mode, make SL/SR act as L/R also in menu
 - on Switch, in split JoyCon mode, disable L/R/ZL/ZR in menu
 
 Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this great Amiga emulator that was originally ported to the Vita by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
 
-![Screenshot of UAE4All2 Vita/Switch_mod](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
+![Screenshot of UAE4All2 running on Vita](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
+
+![Photo of UAE4All2 running on Switch in tabletop mode](https://i.postimg.cc/3RD6Lr7j/Split-Joycon-b.jpg)
 
 Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
 
@@ -157,12 +159,12 @@ Select = Minus
 L = L/SL
 R = R/SR
 
-- *Split Joycon Mode:*: Split Joycon mode can be enabled/disabled in "more options." Upto four single Joycons are supported. Buttons can still be remapped. SL for player 1 is hardcoded to bring up the keyboard.
-Split Joycon controls:
-Minus/Plus = Menu (player 1 only)
-SL = on-screen keyboard (player 1 only)
-Pressing stick while moving it = change keyboard transparency/position, control mouse pointer (player 1 only)
-SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)
+- *Split Joycon Mode:* Split Joycon mode can be enabled/disabled in "more options." Upto four single Joycons are supported. Buttons can still be remapped. SL for player 1 is hardcoded to bring up the keyboard.  
+- *Split Joycon Controls:*  
+  Minus/Plus = Menu (player 1 only)  
+  SL = on-screen keyboard (player 1 only)
+  Pressing stick while moving it = change keyboard transparency/position, control mouse pointer (player 1 only)  
+  SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)  
 
 General
 -----
@@ -222,9 +224,9 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
-1.77
+1.77 (Switch only)
 
-- on Switch, make SL/SR act as L/R also in menu
+- on Switch, in split JoyCon mode, make SL/SR act as L/R also in menu
 - on Switch, in split JoyCon mode, disable L/R/ZL/ZR in menu
 
 1.76
