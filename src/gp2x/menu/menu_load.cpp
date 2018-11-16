@@ -52,6 +52,7 @@ static const char *text_str_load_title="            Filemanager            -";
 int text_dir_num_files=0, text_dir_num_files_index=0;
 
 #define SHOW_MAX_FILES 13
+#define MAX_FILES_PER_DIR 10240
 
 extern int run_menuFileinfo(char* fileName);
 static int min_in_dir=0, max_in_dir=SHOW_MAX_FILES;
@@ -262,7 +263,7 @@ static int menuLoadLoop(char *curr_path)
 	{
 		struct dirent *ent = NULL;
 		n = 0;
-		namelist = (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
+		namelist = (struct dirent **)malloc(MAX_FILES_PER_DIR * sizeof(struct dirent *));
 		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[0]->d_name, ".");
 		namelist[0]->d_type = DT_DIR; n++;
@@ -295,7 +296,7 @@ static int menuLoadLoop(char *curr_path)
 
 		struct dirent *ent = NULL;
 		n = 0;
-		namelist =  (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
+		namelist =  (struct dirent **)malloc(MAX_FILES_PER_DIR * sizeof(struct dirent *));
 		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[0]->d_name, ".");
 		namelist[0]->d_type = DT_DIR; n++;
@@ -304,7 +305,7 @@ static int menuLoadLoop(char *curr_path)
 		namelist[1]->d_type = DT_DIR; n++;
 
 		while ((ent = readdir (dir)) != NULL) {
-			if(n >= 3*1024-1)
+			if(n >= MAX_FILES_PER_DIR-1)
 				break;
 			namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
 			memcpy(namelist[n], ent, sizeof(struct dirent));

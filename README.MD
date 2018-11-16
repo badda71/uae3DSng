@@ -1,7 +1,8 @@
 Changes in this Version
 ======
-1.77 (Switch only)
+1.77
 
+- increase max files per dir from 3072 to 10240
 - on Switch, in split JoyCon mode, make SL/SR act as L/R also in menu
 - on Switch, in split JoyCon mode, disable L/R/ZL/ZR in menu
 
@@ -224,8 +225,9 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
-1.77 (Switch only)
+1.77
 
+- increase max files per dir from 3072 to 10240
 - on Switch, in split JoyCon mode, make SL/SR act as L/R also in menu
 - on Switch, in split JoyCon mode, disable L/R/ZL/ZR in menu
 
