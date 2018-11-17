@@ -53,16 +53,88 @@ Vita/Switch-exclusive Features
 - Touchpad style pointer controls using the touchscreen
 - Parallel port joystick adapter support for multiplayer games with up to 4 joysticks.
 - Additional savestate slot called auto, for automatic savestate loading
+- Bluetooth keyboard and mouse support (Vita only)
+- Supports loading files from ux0: or uma0: partition (Vita only)
+- Rear touch panel can be enabled for mouse pointer control (Vita only) 
+- Split Joy-Con support (Switch only)
 
-Vita-exclusive Features
-======
-- Bluetooth keyboard and mouse support
-- Supports loading files from ux0: or uma0: partition
-- Rear touch panel can be enabled for mouse pointer control
+Controls
+=====
 
-Switch-exclusive Features
-======
-- Split Joycon support
+General
+-----
+(For Switch: Cross = B, Square = Y, Triangle = X, Circle = A, Select = Minus, Start = Plus)
+
+Select = Toggle menu  
+Start = Toggle virtual keyboard  
+R+Start+Dpad up/down = Move screen up/down  
+R+Start+Dpad left/right = Change screenmode (to zoom in on games with borders)  
+Right analog stick = Analog mouse (can switch this to left stick in menu)  
+
+When custom controls are off
+-----
+Up to four controllers are automatically mapped to players 1-4. Players 3 and 4 are on the emulated parallel port 4 player adapter.
+
+Left analog stick = Amiga joystick directions  
+Dpad = Amiga joystick directions  
+L shoulder button = right mouse click (player 1 only)  
+R shoulder button = left mouse click (player 1 only)
+(Shown below are control presets 1 (default) / 2 / 3 / 4)  
+Square = Autofire (default) / Fire / Autofire / Fire  
+Cross = Fire (default) / Autofire / Up (Jump) / Up (Jump)  
+Triangle = Space (default) / Space / Fire / Autofire  
+Circle = Secondary Fire (used only in a few games)  
+R+Square = Ctrl  
+R+Circle = Left Alt  
+R+Cross = Help  
+L+Square = Left mouse  
+L+Circle = Right mouse  
+R+Dpad = Arrow keys  
+
+When custom controls are on
+-----
+L+Start = Toggle between custom control set number 1, 2, and 3  
+
+In this mode, Vita buttons can be mapped to any Amiga side keyboard key or joystick action. There's also a mapping option called "slow mouse." It will slow down the mouse pointer by a factor ten if that mapped button is held down. Up to four controllers can be mapped (for multiplayer on VitaTV and Switch). Four Amiga-side joysticks are supported. Joystick 3 and 4 are on the emulated parallel port joystick adapter.
+
+Virtual keyboard controls
+-----
+Start = Toggle virtual keyboard  
+Right analog stick up/down = Move virtual keyboard up and down  
+Right analog stick left/right = Change virtual keyboard transparency  
+Cross = Press selected key (on Switch, this can be changed from B to A)
+Square = Backspace  
+Triangle = Toggle shift  
+Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift) (on Switch, this can be changed from A to B)
+
+Touch controls
+-----
+Note: for multi-touch gestures, the fingers have to be far enough apart from each other, so that the Vita will not erroneously recognize them as a single finger. Otherwise the pointer will jump around. 
+
+Single short tap = left mouse click  
+Single short tap while holding a second finger down = right mouse click  
+Single finger drag = move the mouse pointer, how far the pointer moves in response to finger motion depends on the Mouse Speed setting  
+Dual finger drag = drag'n'drop (left mouse button is held down)  
+Three finger drag = drag'n'drop (right mouse button is held down)  
+
+Switch controls
+-----
+The default OK button in menu and on-screen keyboard is B. This can be changed to A in "more options."
+
+ZR button = slow-mouse (if custom controls are off)
+ZL button = slow-mouse (if custom controls are off)
+
+Split Joycon Mode: Split Joycon mode can be enabled/disabled in "more options." Upto four single Joycons are supported. Buttons can still be remapped. SL for player 1 is hardcoded to bring up the keyboard.  
+
+Split Joycon Controls:  
+Minus/Plus = Menu (player 1 only)  
+SL = on-screen keyboard (player 1 only)  
+Pressing stick while moving it = change keyboard transparency/position, control mouse pointer (player 1 only)  
+SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)  
+
+Bluetooth Keyboard / Mouse controls (Vita only)
+-----
+Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
 
 Notes
 ======
@@ -78,6 +150,16 @@ Notes
 - *Savestates:* Four regular savestates can be saved per game. There's also a slot for an automatic savestate, labeled "auto". If it exists, this will be loaded immediately when the .adf is inserted. To prevent this, delete the auto savestate by selecting it and choosing "delete savestate".
 - *Multiplayer:* Up to four controllers on Vita TV and Switch are supported and can be fully mapped. The mouse can be switched off because it interferes with the other joystick that controls player 2 in most games. If you pair new controllers on Vita TV and they do not seem to work, scan for them in the "custom controls" menu by pressing L. At the bottom it will say how many controllers have been found. This scanning is not neccessary on Switch. By default, parallel port Amiga joysticks 3 and 4 are controlled by VitaTV/Switch gamepads 3 and 4. They can also be mapped to other inputs using the custom controls screen.
 - *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results. On the Switch, the best sound is obtained with 48 kHz, which is the only frequency supported on Switch.
+
+FAQ
+=====
+* Kickstart rom files not found on startup? 
+
+  First, please ensure you are using the correct files. They should be "kick13.rom" (size: 262,144 bytes), "kick20.rom" (size: 524,288) and "kick31.rom" (size: 524,288). They should be placed in "ux0:/data/uae4all/kickstarts" on Vita and "/switch/uae4all2/kickstarts" on Switch. Second, on Vita, please make sure your ux0:/data folder does NOT have the FAT attributes "hidden" or "system" set. 
+
+* Black screen on Switch, or crash on startup?
+
+  In my testing (only with exFAT), I found that exFAT corruption can cause all files in the uae4all2 folder to become corrupted (among others). This includes kick13.rom and other kickstart files, which causes a black screen when leaving the menu. Game .adf files can become corrupted, causing the game to stop booting. Even the executable uae4all2.nro and/or config files in the conf folder can become corrupted quite easily, causing black screen crash on startup. Either don't use exFAT, or make a good backup of the folder and restore it via FTP if there are problems. Once I switched to FAT32, all these problems with file corruption went away.
 
 Compiling
 ======
@@ -129,99 +211,6 @@ Compiling
   ```
   * Unzip and copy all all files to Switch so you have `/switch/uae4all2/uae4all2.nro` and `/switch/uae4all2/data/` etc. on your SD card
   * Launch using your favorite homebrew launcher
-
-FAQ
-=====
-* Kickstart rom files not found on startup? 
-
-First, please ensure you are using the correct files. They should be "kick13.rom" (size: 262,144 bytes), "kick20.rom" (size: 524,288) and "kick31.rom" (size: 524,288). They should be placed in "ux0:/data/uae4all/kickstarts" on Vita and "/switch/uae4all2/kickstarts" on Switch. Second, on Vita, please make sure your ux0:/data folder does NOT have the FAT attributes "hidden" or "system" set. 
-
-* Black screen on Switch, or crash on startup?
-
-In my testing (only with exFAT), I found that exFAT corruption can cause all files in the uae4all2 folder to become corrupted (among others). This includes kick13.rom and other kickstart files, which causes a black screen when leaving the menu. Game .adf files can become corrupted, causing the game to stop booting. Even the executable uae4all2.nro and/or config files in the conf folder can become corrupted quite easily, causing black screen crash on startup. Either don't use exFAT, or make a good backup of the folder and restore it via FTP if there are problems. Once I switched to FAT32, all these problems with file corruption went away.
-
-Controls
-=====
-
-Switch: 
------
-The default OK button in menu and on-screen keyboard is B. This can be changed to A in "more options."
-
-ZR button = slow-mouse (if custom controls are off)
-ZL button = slow-mouse (if custom controls are off)
-
-Otherwise Switch uses exactly the same controls as the Vita (see below), with the following meaning:
-Square = Y
-Triangle = X
-Cross = B
-Circle = A
-Start = Plus
-Select = Minus
-L = L/SL
-R = R/SR
-
-- *Split Joycon Mode:* Split Joycon mode can be enabled/disabled in "more options." Upto four single Joycons are supported. Buttons can still be remapped. SL for player 1 is hardcoded to bring up the keyboard.  
-- *Split Joycon Controls:*  
-  Minus/Plus = Menu (player 1 only)  
-  SL = on-screen keyboard (player 1 only)
-  Pressing stick while moving it = change keyboard transparency/position, control mouse pointer (player 1 only)  
-  SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)  
-
-General
------
-Select = Toggle menu  
-Start = Toggle virtual keyboard  
-R+Start+Dpad up/down = Move screen up/down  
-R+Start+Dpad left/right = Change screenmode (to zoom in on games with borders)  
-Right analog stick = Analog mouse (can switch this to left stick in menu)  
-Left analog stick = Amiga joystick directions  
-Dpad = Amiga joystick directions  
-
-When custom controls are off
------
-L shoulder button = right mouse click  
-R shoulder button = left mouse click  
-(Shown below are control presets 1 (default) / 2 / 3 / 4)  
-Square = Autofire (default) / Fire / Autofire / Fire  
-Cross = Fire (default) / Autofire / Up (Jump) / Up (Jump)  
-Triangle = Space (default) / Space / Fire / Autofire  
-Circle = Secondary Fire (used only in a few games)  
-R+Square = Ctrl  
-R+Circle = Left Alt  
-R+Cross = Help  
-L+Square = Left mouse  
-L+Circle = Right mouse  
-R+Dpad = Arrow keys  
-
-When custom controls are on
------
-L+Start = Toggle between custom control set number 1, 2, and 3  
-
-In this mode, Vita buttons can be mapped to any Amiga side keyboard key or joystick action. There's also a mapping option called "slow mouse." It will slow down the mouse pointer by a factor ten if that mapped button is held down. Up to four Vita controllers can be mapped (for multiplayer on VitaTV). Four Amiga-side joysticks are supported. Joystick 3 and 4 are on the emulated parallel port joystick adapter.
-
-Virtual keyboard controls
------
-Start = Toggle virtual keyboard  
-Right analog stick up/down = Move virtual keyboard up and down  
-Right analog stick left/right = Change virtual keyboard transparency  
-Cross = Press selected key (on Switch, this can be changed from B to A)
-Square = Backspace  
-Triangle = Toggle shift  
-Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift) (on Switch, this can be changed from A to B)
-
-Touch controls
------
-Note: for multi-touch gestures, the fingers have to be far enough apart from each other, so that the Vita will not erroneously recognize them as a single finger. Otherwise the pointer will jump around. 
-
-Single short tap = left mouse click  
-Single short tap while holding a second finger down = right mouse click  
-Single finger drag = move the mouse pointer, how far the pointer moves in response to finger motion depends on the Mouse Speed setting  
-Dual finger drag = drag'n'drop (left mouse button is held down)  
-Three finger drag = drag'n'drop (right mouse button is held down)  
-
-Bluetooth Keyboard / Mouse controls
------
-Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
 
 CHANGELOG
 =====
