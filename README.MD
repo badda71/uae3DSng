@@ -1,10 +1,8 @@
 Changes in this Version
 ======
-1.77
+1.78
 
-- increase max files per dir from 3072 to 10240
-- on Switch, in split JoyCon mode, make SL/SR act as L/R also in menu
-- on Switch, in split JoyCon mode, disable L/R/ZL/ZR in menu
+- fix 68020+ bitfield instructions (fixes crash in Virocop AGA)
 
 Description
 =====
@@ -214,6 +212,10 @@ Compiling
 
 CHANGELOG
 =====
+1.78
+
+- fix 68020+ bitfield instructions (fixes crash in Virocop AGA)
+
 1.77
 
 - increase max files per dir from 3072 to 10240
