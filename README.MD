@@ -159,6 +159,69 @@ FAQ
 
   In my testing (only with exFAT), I found that exFAT corruption can cause all files in the uae4all2 folder to become corrupted (among others). This includes kick13.rom and other kickstart files, which causes a black screen when leaving the menu. Game .adf files can become corrupted, causing the game to stop booting. Even the executable uae4all2.nro and/or config files in the conf folder can become corrupted quite easily, causing black screen crash on startup. Either don't use exFAT, or make a good backup of the folder and restore it via FTP if there are problems. Once I switched to FAT32, all these problems with file corruption went away.
 
+Games with known fixes
+======
+
+- Lure of the Temptress (adf only)
+  Issue: hangs at title
+  Fix: use hdf version
+
+- PP Hammer
+  Issue: flickering
+  Fix: set “Blitter: Normal” and reboot
+
+- Rainbow Islands (adf only)
+  Issue: hangs after title
+  Fix: use hdf version
+
+- Rock’n’Roll
+  Issue: gfx glitches / flickering
+  Fix: set “Blitter: Normal,” use .adf and A500 config, and reboot
+
+- Shufflepuck Cafe
+  Issue: flickering
+  Fix: set “Blitter: Normal” and reboot.
+
+- Spacetaxi 3
+  Issue: taxis move through each other
+  Fix: set “Sprite Collisions: On” then it works perfectly.
+
+- Spindizzy Worlds
+  Issue: flickering/screen tearing
+  Fix: set “Blitter: Normal” and reboot.
+
+- Xenon 2
+  Issue: hangs after title
+  Fix: use hdf version “Xenon21 disk” which works perfectly.
+
+
+Games with no fixes (or unknown fixes)
+======
+
+- Banshee AGA
+  Issue: score display on left is missing.
+  Fix: unknown
+
+- Celtic Legends
+  Issue: cannot get past language select screen, all keypresses are ignored.
+  Fix: unknown. This requires cycle exact, which is not supported.
+
+- IK+
+  Issue: no sound fx
+  Fix: unknown, but can play PlayStation 1 version in Retroarch instead. This requires cycle exact, which is not supported.
+
+- Marvin’s Marvellous Adventure AGA
+  Issue: nothing happens when selecting “start game”
+  Fix: unknown. Apparently something to do with an interrupt for the music routine that is ignored. The game refuses to start unless the music is playing at the correct volume.
+
+- Nebulus 2
+  Issue: doors are not showing
+  Fix: unknown. This requires cycle exact, which is not supported.
+
+- Prince of Persia
+  Issue: : runs slow 
+  Fix: unknown, but can play Usineur’s native Switch/Vita port [SDLPop](https://github.com/usineur/SDLPoP/releases)
+
 Compiling
 ======
 * Dependencies: SDL2, SDL2_image, libpng, libjpeg, zlib
