@@ -1,8 +1,8 @@
 Changes in this Version
 ======
-1.78
+1.79
 
-- fix 68020+ bitfield instructions (fixes crash in Virocop AGA)
+- fix interrupt 6 bitmask (fixes Marvin's Marv. Adv. AGA)
 
 Description
 =====
@@ -210,10 +210,6 @@ Games with no fixes (or unknown fixes)
   Issue: no sound fx
   Fix: unknown, but can play PlayStation 1 version in Retroarch instead. This requires cycle exact, which is not supported.
 
-- Marvin’s Marvellous Adventure AGA
-  Issue: nothing happens when selecting “start game”
-  Fix: unknown. Apparently something to do with an interrupt for the music routine that is ignored. The game refuses to start unless the music is playing at the correct volume.
-
 - Nebulus 2
   Issue: doors are not showing
   Fix: unknown. This requires cycle exact, which is not supported.
@@ -275,6 +271,10 @@ Compiling
 
 CHANGELOG
 =====
+1.79
+
+- fix interrupt 6 bitmask (fixes Marvin's Marv. Adv. AGA)
+
 1.78
 
 - fix 68020+ bitfield instructions (fixes crash in Virocop AGA)

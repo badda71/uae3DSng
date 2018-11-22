@@ -2417,7 +2417,7 @@ static _INLINE_ void SET_INTERRUPT(void)
 		if (imask & 0x0070) { new_irqs |= 1 << 3; }
 		if (imask & 0x0780) { new_irqs |= 1 << 4; }
 		if (imask & 0x1800) { new_irqs |= 1 << 5; }
-		if (imask & 0x2000) { new_irqs |= 1 << 6; }
+		if (imask & 0x6000) { new_irqs |= 1 << 6; }
 	}
 
 	if (new_irqs == M68KCONTEXT.interrupts[0]); // nothing changed
