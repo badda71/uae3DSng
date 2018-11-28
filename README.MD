@@ -1,8 +1,8 @@
 Changes in this Version
 ======
-1.79
+1.80
 
-- fix interrupt 6 bitmask (fixes Marvin's Marv. Adv. AGA)
+- on Switch, improve single/dual joycon mode switching
 
 Description
 =====
@@ -18,7 +18,7 @@ Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new l
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
-Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and RadicalR.
+Thanks to my supporters on Patreon: Andyways, CountDuckula, Jesse Harlin, Matthew Machnee, and RadicalR.
 
 Installation
 ======
@@ -237,7 +237,7 @@ Compiling
 
 * Switch:
   * Install DevkitPro: https://devkitpro.org/wiki/devkitPro_pacman#Using_Pacman
-  * Install required libs:
+  * Install required libs (libnx 1.6.0 and recent sdl2 are required):
   ```
   sudo (dkp-)pacman -S switch-dev
   sudo -E dkp-pacman -S switch-sdl2
@@ -249,15 +249,6 @@ Compiling
   sudo -E dkp-pacman -S switch-zlib
   sudo -E dkp-pacman -S switch-libjpeg-turbo
   sudo -E dkp-pacman -S switch-libdrm-nouveau
-  ```
-  * Patch SDL2 library to include SL/SR button support, otherwise SL/SR will not function in UAE4All2
-  ```
-  git clone https://github.com/rsn8887/pacman-packages/tree/SwitchSDL2ButtonFix
-  cd pacman-packages/pacman-packages/switch/SDL2
-  dkp-makepkg
-  cd pkg/switch-sdl2/opt/devkitpro/portlibs/switch/lib
-  cp *.a $DEVKITPRO/portlibs/switch/lib/
-  cp *.la $DEVKITPRO/portlibs/switch/lib/
   ```
   * Compile and package:
   ```
@@ -271,6 +262,10 @@ Compiling
 
 CHANGELOG
 =====
+1.80
+
+- on Switch, improve single/dual joycon mode switching
+
 1.79
 
 - fix interrupt 6 bitmask (fixes Marvin's Marv. Adv. AGA)

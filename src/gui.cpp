@@ -217,33 +217,34 @@ void update_joycon_mode() {
 		}
 	}
 	if (coalesceControllers) {
-		for (int id=0; id<8; id++) {
+		// find all left/right single JoyCon pairs and join them together
+		for (int id = 0; id < 8; id++) {
 			hidSetNpadJoyAssignmentModeDual((HidControllerID) id);
 		}
-		for (int id=0; id<8; id+=2) {
-			hidMergeSingleJoyAsDualJoy ((HidControllerID) id, (HidControllerID) (id + 1));
-		}
-		for (int id=0; id<8; id++) {
-			HidControllerType type = hidGetControllerType((HidControllerID) id);
-				hidSetControllerLayout((HidControllerID) id, LAYOUT_DEFAULT);
+		int lastRightId = 8;		
+		for (int id0 = 0; id0 < 8; id0++) {
+			if (hidGetControllerType((HidControllerID) id0) & TYPE_JOYCON_LEFT) {
+				for (int id1=lastRightId-1; id1>=0; id1--) {
+					if (hidGetControllerType((HidControllerID) id1) & TYPE_JOYCON_RIGHT) {
+						lastRightId=id1;
+						// prevent missing player numbers
+						if (id0 < id1) {
+							hidMergeSingleJoyAsDualJoy((HidControllerID) id0, (HidControllerID) id1);
+						} else if (id0 > id1) {
+							hidMergeSingleJoyAsDualJoy((HidControllerID) id1, (HidControllerID) id0);
+						}
+						break;
+					}
+				}
+			}	
 		}
 	}
 	if (splitControllers) {
 		for (int id=0; id<8; id++) {
 			hidSetNpadJoyAssignmentModeSingleByDefault((HidControllerID) id);
-			//this following command doesn't work, so use the workaround of forcing layout, see below
-			//hidSetControllerLayout((HidControllerID) id, LAYOUT_SINGLE);
 		}
+		hidSetNpadJoyHoldType(HidJoyHoldType_Horizontal);
 		hidScanInput();
-	}
-	if (singleJoycons) {
-		for (int id=0; id<8; id++) {
-			HidControllerType type = hidGetControllerType((HidControllerID) id);
-			if (type == TYPE_JOYCON_LEFT)
-				hidSetControllerLayout((HidControllerID) id, LAYOUT_LEFT);
-			if (type == TYPE_JOYCON_RIGHT)
-				hidSetControllerLayout((HidControllerID) id, LAYOUT_RIGHT);
-		}
 	}
 }
 #endif
@@ -727,35 +728,12 @@ void gui_handle_events (void)
 		triggerR3[i] = SDL_JoystickGetButton(currentJoy, PAD_R3);
 
 		if (singleJoycons) {
-			u64 single_joycon_buttons;
 			HidControllerType type;
 			HidControllerID id = (HidControllerID) i;
 			type = hidGetControllerType(id);
 
-			if (type == TYPE_JOYCON_LEFT) {
-				triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_SL_LEFT);
-				triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_SR_LEFT);
-				buttonA[i] = dpadUp[i]; // new left = old top
-				buttonX[i] = dpadLeft[i]; // new bottom = old left
-				buttonY[i] = dpadRight[i]; // new top = old right
-				buttonB[i] = dpadDown[i]; // new right = old down
-				joyX = lY;
-				joyY = lX;
-			}
-			if  (type == TYPE_JOYCON_RIGHT) {
-				triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_SL_RIGHT);
-				triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_SR_RIGHT);
-				int oldButtonA = buttonA[i]; // square (Y) left button
-				int oldButtonB = buttonB[i]; // circle (A) right button
-				int oldButtonX = buttonX[i]; // cross (B) bottom button
-				int oldButtonY = buttonY[i]; // triangle (X) top button
-				buttonB[i] = oldButtonY;
-				buttonA[i] = oldButtonX;
-				buttonX[i] = oldButtonB;
-				buttonY[i] = oldButtonA;
-				joyX = -rY;
-				joyY = -rX;
-			}
+			joyX=lX;
+			joyY=-lY;
 
 			dpadRight[i] = 0;
 			dpadLeft[i] = 0;
@@ -767,7 +745,6 @@ void gui_handle_events (void)
 			if (i == 0) {
 				if (type == TYPE_JOYCON_RIGHT) {
 					buttonSelect[0] = buttonStart[0];
-					triggerL3[0] = triggerR3[0];
 				}
 				buttonStart[0] = triggerL[0];
 

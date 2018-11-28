@@ -30,6 +30,7 @@
 
 #ifdef __SWITCH__
 #include <switch.h>
+static int justSwitchedSingleJoycons = 0;
 #endif
 
 const char *text_str_misc_separator="----------------------------------";
@@ -594,6 +595,8 @@ static int key_miscMenu(int *c)
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0;
 	SDL_Event event;
 
+	int directionHeld = 0;
+
 	while (SDL_PollEvent(&event) > 0)
 	{
 		left=right=up=down=hit0=hit1=hit2=0;
@@ -619,6 +622,15 @@ static int key_miscMenu(int *c)
 #endif
 			}
 		}
+
+#ifdef __SWITCH__
+		if (justSwitchedSingleJoycons) {
+			if (left != 0 || right != 0 || up != 0 || down != 0)
+				directionHeld = 1;
+			continue;
+		}
+#endif
+
 		if (hit2) //Does the user want to cancel the menu completely?
 		{
 			if (emulating)
@@ -813,6 +825,8 @@ static int key_miscMenu(int *c)
 			case MENUMISC_SINGLEJOYCONS:
 				if (left || right) {
 					mainMenu_singleJoycons = !mainMenu_singleJoycons;
+					justSwitchedSingleJoycons = 1;
+					directionHeld = 1;
 				}
 				break;
 #else
@@ -1031,6 +1045,11 @@ static int key_miscMenu(int *c)
 #endif
 		}
 	}
+#ifdef __SWITCH__
+	if (justSwitchedSingleJoycons && !directionHeld) {
+		justSwitchedSingleJoycons = 0;
+	}
+#endif
 
 	return end;
 }
