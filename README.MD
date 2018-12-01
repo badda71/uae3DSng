@@ -2,6 +2,7 @@ Changes in this Version
 ======
 1.80
 
+- improve keyboard input (fixes Celtic Legends)
 - on Switch, improve single/dual joycon mode switching
 
 Description
@@ -202,10 +203,6 @@ Games with no fixes (or unknown fixes)
   Issue: score display on left is missing.
   Fix: unknown
 
-- Celtic Legends
-  Issue: cannot get past language select screen, all keypresses are ignored.
-  Fix: unknown. This requires cycle exact, which is not supported.
-
 - IK+
   Issue: no sound fx
   Fix: unknown, but can play PlayStation 1 version in Retroarch instead. This requires cycle exact, which is not supported.
@@ -264,6 +261,7 @@ CHANGELOG
 =====
 1.80
 
+- improve keyboard input (fixes Celtic Legends)
 - on Switch, improve single/dual joycon mode switching
 
 1.79
