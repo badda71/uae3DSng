@@ -225,7 +225,7 @@ Compiling
   ```
   mkdir build
   cd build
-  ccmake "your uae4all2 repo folder" -DBUILD_PSP2=ON -DCMAKE_BUILD_TYPE=Release
+  cmake "your uae4all2 repo folder" -DBUILD_PSP2=ON -DCMAKE_BUILD_TYPE=Release
   make uae4all2.vpk
   ```
   * Note: The Vita source depends on FrangarCJ's Vita2d fbo branch with shader support here: https://github.com/Cpasjuste/vita2dlib/tree/fbo
@@ -236,7 +236,7 @@ Compiling
   * Install DevkitPro: https://devkitpro.org/wiki/devkitPro_pacman#Using_Pacman
   * Install required libs (libnx 1.6.0 and recent sdl2 are required):
   ```
-  sudo (dkp-)pacman -S switch-dev
+  sudo -E dkp-pacman -S switch-dev
   sudo -E dkp-pacman -S switch-sdl2
   sudo -E dkp-pacman -S switch-sdl2_image
   sudo -E dkp-pacman -S switch-glm
@@ -251,7 +251,7 @@ Compiling
   ```
   mkdir build
   cd build
-  ccmake "your uae4all2 repo folder" -DBUILD_NX=ON -DCMAKE_BUILD_TYPE=Release
+  cmake "your uae4all2 repo folder" -DBUILD_NX=ON -DCMAKE_BUILD_TYPE=Release
   make uae4all2_switch.zip
   ```
   * Unzip and copy all all files to Switch so you have `/switch/uae4all2/uae4all2.nro` and `/switch/uae4all2/data/` etc. on your SD card
