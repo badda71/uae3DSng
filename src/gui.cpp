@@ -1250,7 +1250,7 @@ if(!vkbd_mode)
 		else if(keystate[SDLK_a])
 		{
 			keystate[SDLK_a]=0;
-			mainMenu_CPU_speed == 2 ? mainMenu_CPU_speed = 0 : mainMenu_CPU_speed++;
+			mainMenu_CPU_speed == 3 ? mainMenu_CPU_speed = 0 : mainMenu_CPU_speed++;
 		}
 		else if(keystate[SDLK_c])
 		{

@@ -201,9 +201,14 @@ static void draw_miscMenu(int c)
 		write_text(tabstop4,menuLine,"14MHz");
 
 	if ((mainMenu_CPU_speed==2)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
-		write_text_inv(tabstop8,menuLine,"28MHz");
+		write_text_inv(tabstop7,menuLine,"28MHz");
 	else
-		write_text(tabstop8,menuLine,"28MHz");
+		write_text(tabstop7,menuLine,"28MHz");
+
+	if ((mainMenu_CPU_speed==3)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
+		write_text_inv(tabstop7+6,menuLine,"56MHz");
+	else
+		write_text(tabstop7+6,menuLine,"56MHz");
 
 	// MENUMISC_BLITTER
 	menuLine+=2;
@@ -789,11 +794,11 @@ static int key_miscMenu(int *c)
 					if (mainMenu_CPU_speed>0)
 						mainMenu_CPU_speed--;
 					else
-						mainMenu_CPU_speed=2;
+						mainMenu_CPU_speed=3;
 				}
 				else if (right)
 				{
-					if (mainMenu_CPU_speed<2)
+					if (mainMenu_CPU_speed<3)
 						mainMenu_CPU_speed++;
 					else
 						mainMenu_CPU_speed=0;
