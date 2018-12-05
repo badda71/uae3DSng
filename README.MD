@@ -163,57 +163,61 @@ FAQ
 Games with known fixes
 ======
 
-- Lure of the Temptress (adf only)
-  Issue: hangs at title
-  Fix: use hdf version
+- Lure of the Temptress (adf only)  
+  Issue: hangs at title  
+  Fix: use hdf version  
 
-- PP Hammer
-  Issue: flickering
-  Fix: set “Blitter: Normal” and reboot
+- Mister and Misses (Amiga Power Coverdisk 14b)  
+  Issue: flickering and missing floors  
+  Fix: set “Blitter: Normal” and reboot  
 
-- Rainbow Islands (adf only)
-  Issue: hangs after title
-  Fix: use hdf version
+- PP Hammer  
+  Issue: flickering  
+  Fix: set “Blitter: Normal” and reboot  
 
-- Rock’n’Roll
-  Issue: gfx glitches / flickering
-  Fix: set “Blitter: Normal,” use .adf and A500 config, and reboot
+- Rainbow Islands (adf only)  
+  Issue: hangs after title  
+  Fix: use hdf version  
 
-- Shufflepuck Cafe
-  Issue: flickering
-  Fix: set “Blitter: Normal” and reboot.
+- Rock’n’Roll  
+  Issue: gfx glitches / flickering  
+  Fix: set “Blitter: Normal,” use .adf and A500 config, and reboot  
 
-- Spacetaxi 3
-  Issue: taxis move through each other
-  Fix: set “Sprite Collisions: On” then it works perfectly.
+- Shufflepuck Cafe  
+  Issue: flickering  
+  Fix: set “Blitter: Normal” and reboot.  
 
-- Spindizzy Worlds
-  Issue: flickering/screen tearing
-  Fix: set “Blitter: Normal” and reboot.
+- Spacetaxi 3  
+  Issue: taxis move through each other  
+  Fix: set “Sprite Collisions: On” then it works perfectly.  
 
-- Xenon 2
-  Issue: hangs after title
-  Fix: use hdf version “Xenon21 disk” which works perfectly.
+- Spindizzy Worlds  
+  Issue: flickering/screen tearing  
+  Fix: set “Blitter: Normal” and reboot.  
+
+- Xenon 2  
+  Issue: hangs after title  
+  Fix: use hdf version “Xenon21 disk” which works perfectly.  
 
 
 Games with no fixes (or unknown fixes)
 ======
 
-- Banshee AGA
-  Issue: score display on left is missing.
-  Fix: unknown
+- Banshee AGA  
+  Issue: score display on left is missing.  
+  Fix: unknown  
 
-- IK+
-  Issue: no sound fx
-  Fix: unknown, but can play PlayStation 1 version in Retroarch instead. This requires cycle exact, which is not supported.
+- IK+  
+  Issue: no sound fx  
+  Fix: unknown, but can play PlayStation 1 version in Retroarch instead. This requires cycle exact, which is not supported.  
 
-- Nebulus 2
-  Issue: doors are not showing
-  Fix: unknown. This requires cycle exact, which is not supported.
+- Nebulus 2  
+  Issue: doors are not showing  
+  Fix: unknown. This requires cycle exact, which is not supported.  
 
-- Prince of Persia
-  Issue: : runs slow 
-  Fix: unknown, but can play Usineur’s native Switch/Vita port [SDLPop](https://github.com/usineur/SDLPoP/releases)
+- Prince of Persia  
+  Issue: : runs slow  
+  Fix: unknown, but can play Usineur’s native Switch/Vita port [SDLPop](https://github.com/usineur/SDLPoP/releases)  
 
 Compiling
 ======
