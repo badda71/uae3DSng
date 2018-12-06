@@ -1,9 +1,8 @@
 Changes in this Version
 ======
-1.80
+1.81
 
-- improve keyboard input (fixes Celtic Legends)
-- on Switch, improve single/dual joycon mode switching
+- allow higher CPU speed hack (for Alien Breed 3D)
 
 Description
 =====
@@ -39,7 +38,7 @@ Vita/Switch-exclusive Features
 - Full speed emulation of most Amiga games with zero frameskip
 - Large, complete virtual keyboard with adjustable position and adjustable transparency
 - Three fully mappable custom control sets: map Vita buttons to any Amiga joystick or key input, three custom control sets supported
-- Multiple hard-file support: up to 4 hdf files (size <2GB each) can be mounted simultaneously
+- Multiple hard-file support: up to 4 hdf files (size <2GB each on Vita, size <4GB each on Switch) can be mounted simultaneously
 - Multiple controller support on Vita TV: up to four paired controllers can be fully mapped
 - Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
 - Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full screen
@@ -160,6 +159,10 @@ FAQ
 
   In my testing (only with exFAT), I found that exFAT corruption can cause all files in the uae4all2 folder to become corrupted (among others). This includes kick13.rom and other kickstart files, which causes a black screen when leaving the menu. Game .adf files can become corrupted, causing the game to stop booting. Even the executable uae4all2.nro and/or config files in the conf folder can become corrupted quite easily, causing black screen crash on startup. Either don't use exFAT, or make a good backup of the folder and restore it via FTP if there are problems. Once I switched to FAT32, all these problems with file corruption went away.
 
+* HDF not working?
+
+  The maximum hdf file size on Switch is 4 Gb, on Vita it is only 2 Gb. When creating a .hdf file in WinUAE for use with UAE4All2, set surfaces to 1 (size < 1 Gb), 2 (size > 1Gb), or 4 (size > 2 Gb) depending on the size of the file. Set blocksize to 512, sectors to 32 and reserved to 2. Don't use RDB mode. After creating the .hdf it has to be formatted using Workbench. A quick format to FFS filesystem is fine.
+
 Games with known fixes
 ======
 
@@ -263,6 +266,10 @@ Compiling
 
 CHANGELOG
 =====
+1.81
+
+- allow higher CPU speed hack (for Alien Breed 3D)
+
 1.80
 
 - improve keyboard input (fixes Celtic Legends)
