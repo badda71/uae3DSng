@@ -336,7 +336,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		else {
 			for (int i=0; i<nr_joysticks; i++)
 			{
-				if (triggerR2[i] || triggerL2[i])
+				if (triggerR2[i])
 				{
 					mouseScale/=8;
 					slow_mouse=true; //also slow down touch-mouse and real mouse
@@ -379,20 +379,20 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					)
 				{
 					mouseScale*=3;
-					fast_mouse=true; //also speed up touch-mouse and real mouse
+					fast_mouse=true; //signal to also speed up touch-mouse and real mouse
 					break;
 				}
 			}
 		}
 #ifdef __SWITCH__
-		// or if custom controls are OFF but ZR is held on Switch, then also use slow-mouse
+		// or if custom controls are OFF but ZL is held on Switch, then also use fast-mouse
 		else {
 			for (int i=0; i<nr_joysticks; i++)
 			{
-				if (triggerR2[i] || triggerL2[i])
+				if (triggerL2[i])
 				{
 					mouseScale*=3;
-					fast_mouse=true; //also speed up touch-mouse and real mouse
+					fast_mouse=true; //signal to also speed up touch-mouse and real mouse
 					break;
 				}
 			}
