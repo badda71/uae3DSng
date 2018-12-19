@@ -4,6 +4,7 @@ Changes in this Version
 
 - allow higher CPU speed hack (for Alien Breed 3D)
 - allow optional custom kickstart file named kickcustom.rom (for 3.1.4 etc.)
+- load/save state can now be mapped to custom buttons
 
 Description
 =====
@@ -273,6 +274,7 @@ CHANGELOG
 
 - allow higher CPU speed hack (for Alien Breed 3D)
 - allow optional custom kickstart file named kickcustom.rom (for 3.1.4 etc.)
+- load/save state can now be mapped to custom buttons
 
 1.80
 

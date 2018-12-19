@@ -1146,6 +1146,7 @@ if(!vkbd_mode)
 		{
 			can_change_quickSwitchModeID = 1;
 		}
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 		//1
 		else if(keystate[SDLK_1])
 		{
@@ -1340,423 +1341,168 @@ if(!vkbd_mode)
 			mainMenu_cutRight++;
 			update_display();
 		}
+#endif //!defined(__PSP2__) && !defined(__SWITCH__)
 	}
-
 	if (mainMenu_customControls && !gp2xMouseEmuOn && !gp2xButtonRemappingOn)
 	{
-		for (int i=0; i<nr_joysticks; i++)
+		int quickSave = 0;
+		int quickLoad = 0;
+		int *button;
+		int *justPressed;
+		int *mainMenu_custom;
+		for (int i = 0; i < nr_joysticks; i++)
 		{		
 			if(mainMenu_custom_dpad == 0) // always true on Vita
 			{
-				//UP
-				if(dpadUp[i])
-				{
-					if(!justMovedUp[i])
-					{
-						if(mainMenu_custom_up[i] == -1) buttonstate[0]=1;
-						else if(mainMenu_custom_up[i] == -2) buttonstate[2]=1;
-						else if(mainMenu_custom_up[i] > 0)
-						{
-							getMapping(mainMenu_custom_up[i]);
-							uae4all_keystate[customKey] = 1;
-							record_key(customKey << 1);
-						}
-						justMovedUp[i]=1;
-					}
-				}
-				else if(justMovedUp[i])
-				{
-					if(mainMenu_custom_up[i] == -1) buttonstate[0]=0;
-					else if(mainMenu_custom_up[i] == -2) buttonstate[2]=0;
-					else if(mainMenu_custom_up[i] > 0)
-					{		
-						getMapping(mainMenu_custom_up[i]);
-						uae4all_keystate[customKey] = 0;
-						record_key((customKey << 1) | 1);
-					}
-					justMovedUp[i]=0;
-				}
-
-				//DOWN
-				if(dpadDown[i])
-				{
-					if(!justMovedDown[i])
-					{
-						if(mainMenu_custom_down[i] == -1) buttonstate[0]=1;
-						else if(mainMenu_custom_down[i] == -2) buttonstate[2]=1;
-						else if(mainMenu_custom_down[i] > 0)
-						{
-							getMapping(mainMenu_custom_down[i]);
-							uae4all_keystate[customKey] = 1;
-							record_key(customKey << 1);
-						}
-						justMovedDown[i]=1;
-					}
-				}
-				else if(justMovedDown[i])
-				{
-					if(mainMenu_custom_down[i] == -1) buttonstate[0]=0;
-					else if(mainMenu_custom_down[i] == -2) buttonstate[2]=0;
-					else if(mainMenu_custom_down[i] > 0)
-					{		
-						getMapping(mainMenu_custom_down[i]);
-						uae4all_keystate[customKey] = 0;
-						record_key((customKey << 1) | 1);
-					}
-					justMovedDown[i]=0;
-				}
-
-				//LEFT
-				if(dpadLeft[i])
-				{
-					if(!justMovedLeft[i])
-					{
-						if(mainMenu_custom_left[i] == -1) buttonstate[0]=1;
-						else if(mainMenu_custom_left[i] == -2) buttonstate[2]=1;
-						else if(mainMenu_custom_left[i] > 0)
-						{
-							getMapping(mainMenu_custom_left[i]);
-							uae4all_keystate[customKey] = 1;
-							record_key(customKey << 1);
-						}
-						justMovedLeft[i]=1;
-					}
-				}
-				else if(justMovedLeft[i])
-				{
-					if(mainMenu_custom_left[i] == -1) buttonstate[0]=0;
-					else if(mainMenu_custom_left[i] == -2) buttonstate[2]=0;
-					else if(mainMenu_custom_left[i] > 0)
-					{		
-						getMapping(mainMenu_custom_left[i]);
-						uae4all_keystate[customKey] = 0;
-						record_key((customKey << 1) | 1);
-					}
-					justMovedLeft[i]=0;
-				}
-
-				//Right[i]
-				if(dpadRight[i])
-				{
-					if(!justMovedRight[i])
-					{
-						if(mainMenu_custom_right[i] == -1) buttonstate[0]=1;
-						else if(mainMenu_custom_right[i] == -2) buttonstate[2]=1;
-						else if(mainMenu_custom_right[i] > 0)
-						{
-							getMapping(mainMenu_custom_right[i]);
-							uae4all_keystate[customKey] = 1;
-							record_key(customKey << 1);
-						}
-						justMovedRight[i]=1;
-					}
-				}
-				else if(justMovedRight[i])
-				{
-					if(mainMenu_custom_right[i] == -1) buttonstate[0]=0;
-					else if(mainMenu_custom_right[i] == -2) buttonstate[2]=0;
-					else if(mainMenu_custom_right[i] > 0)
-					{		
-						getMapping(mainMenu_custom_right[i]);
-						uae4all_keystate[customKey] = 0;
-						record_key((customKey << 1) | 1);
-					}
-					justMovedRight[i]=0;
-				}
-			}
-
-			//(A)
-			if(buttonA[i])
-			{
-				if(!justPressedA[i])
-				{
-					if(mainMenu_custom_A[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_A[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_A[i] > 0)
-					{
-						getMapping(mainMenu_custom_A[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedA[i]=1;
-				}
-			}
-			else if(justPressedA[i])
-			{
-				if(mainMenu_custom_A[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_A[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_A[i] > 0)
-				{
-					getMapping(mainMenu_custom_A[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedA[i]=0;
-			}
-
-			//(B)
-			if(buttonB[i])
-			{
-				if(!justPressedB[i])
-				{
-					if(mainMenu_custom_B[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_B[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_B[i] > 0)
-					{
-						getMapping(mainMenu_custom_B[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedB[i]=1;
-				}
-			}
-			else if(justPressedB[i])
-			{
-				if(mainMenu_custom_B[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_B[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_B[i] > 0)
-				{
-					getMapping(mainMenu_custom_B[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedB[i]=0;
-			}
-
-			//(X)
-			if(buttonX[i])
-			{
-				if(!justPressedX[i])
-				{
-					if(mainMenu_custom_X[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_X[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_X[i] > 0)
-					{
-						getMapping(mainMenu_custom_X[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedX[i]=1;
-				}
-			}
-			else if(justPressedX[i])
-			{
-				if(mainMenu_custom_X[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_X[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_X[i] > 0)
-				{		
-					getMapping(mainMenu_custom_X[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedX[i]=0;
-			}
-
-			//(Y[i])
-			if(buttonY[i])
-			{
-				if(!justPressedY[i])
-				{
-					if(mainMenu_custom_Y[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_Y[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_Y[i] > 0)
-					{
-						getMapping(mainMenu_custom_Y[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedY[i]=1;
-				}
-			}
-			else if(justPressedY[i])
-			{
-				if(mainMenu_custom_Y[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_Y[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_Y[i] > 0)
-				{		
-					getMapping(mainMenu_custom_Y[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedY[i]=0;
-			}
-
-			//(L)
-			if(triggerL[i])
-			{
-				if(!justPressedL[i])
-				{
-					if(mainMenu_custom_L[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_L[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_L[i] > 0)
-					{
-						getMapping(mainMenu_custom_L[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedL[i]=1;
-				}
-			}
-			else if(justPressedL[i])
-			{
-				if(mainMenu_custom_L[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_L[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_L[i] > 0)
-				{		
-					getMapping(mainMenu_custom_L[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedL[i]=0;
-			}
-
-			//(R)
-			if(triggerR[i])
-			{
-				if(!justPressedR[i])
-				{
-					if(mainMenu_custom_R[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_R[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_R[i] > 0)
-					{
-						getMapping(mainMenu_custom_R[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedR[i]=1;
-				}
-			}
-			else if(justPressedR[i])
-			{
-				if(mainMenu_custom_R[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_R[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_R[i] > 0)
-				{		
-					getMapping(mainMenu_custom_R[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedR[i]=0;
-			}
 #ifdef __SWITCH__
-			//(L2)
-			if(triggerL2[i])
-			{
-				if(!justPressedL2[i])
-				{
-					if(mainMenu_custom_L2[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_L2[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_L2[i] > 0)
-					{
-						getMapping(mainMenu_custom_L2[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedL2[i]=1;
-				}
-			}
-			else if(justPressedL2[i])
-			{
-				if(mainMenu_custom_L2[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_L2[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_L2[i] > 0)
-				{		
-					getMapping(mainMenu_custom_L2[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedL2[i]=0;
-			}
-
-			//(R2)
-			if(triggerR2[i])
-			{
-				if(!justPressedR2[i])
-				{
-					if(mainMenu_custom_R2[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_R2[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_R2[i] > 0)
-					{
-						getMapping(mainMenu_custom_R2[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedR2[i]=1;
-				}
-			}
-			else if(justPressedR2[i])
-			{
-				if(mainMenu_custom_R2[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_R2[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_R2[i] > 0)
-				{		
-					getMapping(mainMenu_custom_R2[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedR2[i]=0;
-			}
-
-			//(L3)
-			if(triggerL3[i])
-			{
-				if(!justPressedL3[i])
-				{
-					if(mainMenu_custom_L3[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_L3[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_L3[i] > 0)
-					{
-						getMapping(mainMenu_custom_L3[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedL3[i]=1;
-				}
-			}
-			else if(justPressedL3[i])
-			{
-				if(mainMenu_custom_L3[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_L3[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_L3[i] > 0)
-				{		
-					getMapping(mainMenu_custom_L3[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedL3[i]=0;
-			}
-
-			//(R3)
-			if(triggerR3[i])
-			{
-				if(!justPressedR3[i])
-				{
-					if(mainMenu_custom_R3[i] == -1) buttonstate[0]=1;
-					else if(mainMenu_custom_R3[i] == -2) buttonstate[2]=1;
-					else if(mainMenu_custom_R3[i] > 0)
-					{
-						getMapping(mainMenu_custom_R3[i]);
-						uae4all_keystate[customKey] = 1;
-						record_key(customKey << 1);
-					}
-					justPressedR3[i]=1;
-				}
-			}
-			else if(justPressedR3[i])
-			{
-				if(mainMenu_custom_R3[i] == -1) buttonstate[0]=0;
-				else if(mainMenu_custom_R3[i] == -2) buttonstate[2]=0;
-				else if(mainMenu_custom_R3[i] > 0)
-				{		
-					getMapping(mainMenu_custom_R3[i]);
-					uae4all_keystate[customKey] = 0;
-					record_key((customKey << 1) | 1);
-				}
-				justPressedR3[i]=0;
-			}
+				for (int j = 0; j < 14; j++)
+#else				
+				for (int j = 0; j < 10; j++)
 #endif
+				{
+					switch (j)
+					{
+						case 0:
+							//UP
+							button = &(dpadUp[i]);
+							justPressed = &(justMovedUp[i]);
+							mainMenu_custom = &(mainMenu_custom_up[i]);
+							break;
+						case 1:
+							//DOWN
+							button = &(dpadDown[i]);
+							justPressed = &(justMovedDown[i]);
+							mainMenu_custom = &(mainMenu_custom_down[i]);
+							break;
+						case 2:
+							//LEFT
+							button = &(dpadLeft[i]);
+							justPressed = &(justMovedLeft[i]);
+							mainMenu_custom = &(mainMenu_custom_left[i]);
+							break;
+						case 3:
+							//RIGHT
+							button = &(dpadRight[i]);
+							justPressed = &(justMovedRight[i]);
+							mainMenu_custom = &(mainMenu_custom_right[i]);
+							break;
+						case 4:
+							//(A)
+							button = &(buttonA[i]);
+							justPressed = &(justPressedA[i]);
+							mainMenu_custom = &(mainMenu_custom_A[i]);
+							break;
+						case 5:
+							//(B)
+							button = &(buttonB[i]);
+							justPressed = &(justPressedB[i]);
+							mainMenu_custom = &(mainMenu_custom_B[i]);
+							break;
+						case 6:
+							//(X)
+							button = &(buttonX[i]);
+							justPressed = &(justPressedX[i]);
+							mainMenu_custom = &(mainMenu_custom_X[i]);
+							break;
+						case 7:
+							//(Y)
+							button = &(buttonY[i]);
+							justPressed = &(justPressedY[i]);
+							mainMenu_custom = &(mainMenu_custom_Y[i]);
+							break;
+						case 8:
+							//(L)
+							button = &(triggerL[i]);
+							justPressed = &(justPressedL[i]);
+							mainMenu_custom = &(mainMenu_custom_L[i]);
+							break;
+						case 9:
+							//(R)
+							button = &(triggerR[i]);
+							justPressed = &(justPressedR[i]);
+							mainMenu_custom = &(mainMenu_custom_R[i]);
+							break;
+#ifdef __SWITCH__
+						case 10:
+							//(L2)
+							button = &(triggerL2[i]);
+							justPressed = &(justPressedL2[i]);
+							mainMenu_custom = &(mainMenu_custom_L2[i]);
+							break;
+						case 11:
+							//(R2)
+							button = &(triggerR2[i]);
+							justPressed = &(justPressedR2[i]);
+							mainMenu_custom = &(mainMenu_custom_R2[i]);
+							break;
+						case 12:
+							//(L3)
+							button = &(triggerL3[i]);
+							justPressed = &(justPressedL3[i]);
+							mainMenu_custom = &(mainMenu_custom_L3[i]);
+							break;
+						case 13:
+							//(R3)
+							button = &(triggerR3[i]);
+							justPressed = &(justPressedR3[i]);
+							mainMenu_custom = &(mainMenu_custom_R3[i]);
+							break;
+#endif
+						default:
+							break;
+					}
+
+					if (*button)
+					{
+						if (!(*justPressed))
+						{
+							
+							if (*mainMenu_custom == -1) buttonstate[0]=1;
+							else if (*mainMenu_custom == -2) buttonstate[2]=1;
+							else if (*mainMenu_custom == -26) quickSave=1;
+							else if (*mainMenu_custom == -27) quickLoad=1;
+							else if (*mainMenu_custom > 0)
+							{
+								getMapping(*mainMenu_custom);
+								uae4all_keystate[customKey] = 1;
+								record_key(customKey << 1);
+							}
+							*justPressed=1;
+						}
+					}
+					else if (*justPressed)
+					{
+						if (*mainMenu_custom == -1) buttonstate[0]=0;
+						else if (*mainMenu_custom == -2) buttonstate[2]=0;
+						else if (*mainMenu_custom > 0)
+						{		
+							getMapping(*mainMenu_custom);
+							uae4all_keystate[customKey] = 0;
+							record_key((customKey << 1) | 1);
+						}
+						*justPressed=0;
+					}
+				} // end of buttons loop
+			}
+		}//end of nr_joysticks loop
+		if (quickSave)
+		{
+			make_savestate_filenames(savestate_filename,NULL);
+			savestate_state = STATE_DOSAVE;
+		} 
+		else if (quickLoad) 
+		{
+			make_savestate_filenames(savestate_filename,NULL);
+			FILE *f=fopen(savestate_filename, "rb");
+			keystate[SDLK_l]=0;
+			if(f)
+			{
+				fclose(f);
+				savestate_state = STATE_DORESTORE;
+			}
 		}
-	}//end of nr_joysticks loop
+	}
+	// on Vita/Switch: gp2xMouseEmuOn = 0, and gp2xButtonRemappingOn = 0;
 	else if(!gp2xMouseEmuOn)
 	{
 		//DPad = arrow keys in stylus-mode
@@ -2185,6 +1931,7 @@ if(!vkbd_mode)
 		justLK=0;
 #endif
 
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	if(triggerL[0] && keystate[SDLK_s])
 	{
 		keystate[SDLK_s]=0;
@@ -2203,6 +1950,7 @@ if(!vkbd_mode)
 		else
 			gui_set_message("Failed: Savestate not found", 100);
 	}
+#endif
 
 #ifdef USE_UAE4ALL_VKBD
 	if (vkbd_key!=KEYCODE_NOTHING) // This means key was selected by user. We cannot test for zero, because that is a valid Amiga keycode
