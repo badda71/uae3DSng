@@ -1459,8 +1459,8 @@ if(!vkbd_mode)
 							
 							if (*mainMenu_custom == -1) buttonstate[0]=1;
 							else if (*mainMenu_custom == -2) buttonstate[2]=1;
-							else if (*mainMenu_custom == -26) quickSave=1;
-							else if (*mainMenu_custom == -27) quickLoad=1;
+							else if (*mainMenu_custom == -27) quickSave=1;
+							else if (*mainMenu_custom == -28) quickLoad=1;
 							else if (*mainMenu_custom > 0)
 							{
 								getMapping(*mainMenu_custom);

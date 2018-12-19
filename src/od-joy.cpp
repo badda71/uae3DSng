@@ -66,6 +66,8 @@ extern int mainMenu_leftStickMouse;
 extern int mainMenu_touchControls;
 extern int mainMenu_deadZone;
 int delay2[] = {0, 0, 0}; // for 2nd, 3rd and 4th player non-custom autofire
+bool slow_mouse = false;
+bool fast_mouse = false;
 #endif
 
 extern char launchDir[300];
@@ -144,56 +146,6 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 */
 	int mouseScale = mainMenu_mouseMultiplier * 8 * 16;
 	mouseScale /= 100;
-	//slow down mouse motion if custom "slow mouse" button is held
-	if(mainMenu_customControls)
-	{
-		for (int i=0; i<nr_joysticks; i++)
-		{
-			if( 
-				(
-					(mainMenu_custom_A[i]==-25 && buttonA[i]) ||
-					(mainMenu_custom_B[i]==-25 && buttonB[i]) ||
-					(mainMenu_custom_X[i]==-25 && buttonX[i]) ||
-					(mainMenu_custom_Y[i]==-25 && buttonY[i]) ||
-					(mainMenu_custom_L[i]==-25 && triggerL[i]) ||
-					(mainMenu_custom_R[i]==-25 && triggerR[i])
-				) ||
-#ifdef __SWITCH__
-				(
-					(mainMenu_custom_L2[i]==-25 && triggerL2[i]) ||
-					(mainMenu_custom_R2[i]==-25 && triggerR2[i]) ||
-					(mainMenu_custom_L3[i]==-25 && triggerL3[i]) ||
-					(mainMenu_custom_R3[i]==-25 && triggerR3[i])
-				) ||
-#endif
-				(
-					(mainMenu_custom_dpad == 0) && 
-					(
-						(mainMenu_custom_up[i]==-25 && dpadUp[i]) ||
-						(mainMenu_custom_down[i]==-25 && dpadDown[i]) ||
-						(mainMenu_custom_left[i]==-25 && dpadLeft[i]) ||
-						(mainMenu_custom_right[i]==-25 && dpadRight[i]))
-					)
-				)
-			{
-				mouseScale/=8;
-				break;
-			}
-		}
-	}
-#ifdef __SWITCH__
-	// or if custom controls are OFF but ZR is held on Switch, then also use slow-mouse
-	else {
-		for (int i=0; i<nr_joysticks; i++)
-		{
-			if (triggerR2[i] || triggerL2[i])
-			{
-				mouseScale/=8;
-				break;
-			}
-		}
-	}
-#endif
 
 //Digital mouseemu hotkeys: Triangle changes mouse speed etc.
 #if !defined(__PSP2__) && !defined(__SWITCH__) && defined(USE_UAE4ALL_VKBD)
@@ -340,6 +292,112 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if (nr == 1)
 #endif
 	{
+		//slow down mouse motion if custom "slow mouse" button is held
+		slow_mouse=false;
+		if(mainMenu_customControls)
+		{
+			for (int i=0; i<nr_joysticks; i++)
+			{
+				if( 
+					(
+						(mainMenu_custom_A[i]==-25 && buttonA[i]) ||
+						(mainMenu_custom_B[i]==-25 && buttonB[i]) ||
+						(mainMenu_custom_X[i]==-25 && buttonX[i]) ||
+						(mainMenu_custom_Y[i]==-25 && buttonY[i]) ||
+						(mainMenu_custom_L[i]==-25 && triggerL[i]) ||
+						(mainMenu_custom_R[i]==-25 && triggerR[i])
+					) ||
+#ifdef __SWITCH__
+					(
+						(mainMenu_custom_L2[i]==-25 && triggerL2[i]) ||
+						(mainMenu_custom_R2[i]==-25 && triggerR2[i]) ||
+						(mainMenu_custom_L3[i]==-25 && triggerL3[i]) ||
+						(mainMenu_custom_R3[i]==-25 && triggerR3[i])
+					) ||
+#endif
+					(
+						(mainMenu_custom_dpad == 0) && 
+						(
+							(mainMenu_custom_up[i]==-25 && dpadUp[i]) ||
+							(mainMenu_custom_down[i]==-25 && dpadDown[i]) ||
+							(mainMenu_custom_left[i]==-25 && dpadLeft[i]) ||
+							(mainMenu_custom_right[i]==-25 && dpadRight[i]))
+						)
+					)
+				{
+					mouseScale/=8;
+					slow_mouse=true; //also slow down touch-mouse and real mouse
+					break;
+				}
+			}
+		}
+#ifdef __SWITCH__
+		// or if custom controls are OFF but ZR is held on Switch, then also use slow-mouse
+		else {
+			for (int i=0; i<nr_joysticks; i++)
+			{
+				if (triggerR2[i] || triggerL2[i])
+				{
+					mouseScale/=8;
+					slow_mouse=true; //also slow down touch-mouse and real mouse
+					break;
+				}
+			}
+		}
+#endif
+		//speed up mouse motion if custom "fast mouse" button is held
+		fast_mouse=false;
+		if(mainMenu_customControls)
+		{
+			for (int i=0; i<nr_joysticks; i++)
+			{
+				if( 
+					(
+						(mainMenu_custom_A[i]==-26 && buttonA[i]) ||
+						(mainMenu_custom_B[i]==-26 && buttonB[i]) ||
+						(mainMenu_custom_X[i]==-26 && buttonX[i]) ||
+						(mainMenu_custom_Y[i]==-26 && buttonY[i]) ||
+						(mainMenu_custom_L[i]==-26 && triggerL[i]) ||
+						(mainMenu_custom_R[i]==-26 && triggerR[i])
+					) ||
+#ifdef __SWITCH__
+					(
+						(mainMenu_custom_L2[i]==-26 && triggerL2[i]) ||
+						(mainMenu_custom_R2[i]==-26 && triggerR2[i]) ||
+						(mainMenu_custom_L3[i]==-26 && triggerL3[i]) ||
+						(mainMenu_custom_R3[i]==-26 && triggerR3[i])
+					) ||
+#endif
+					(
+						(mainMenu_custom_dpad == 0) && 
+						(
+							(mainMenu_custom_up[i]==-26 && dpadUp[i]) ||
+							(mainMenu_custom_down[i]==-26 && dpadDown[i]) ||
+							(mainMenu_custom_left[i]==-26 && dpadLeft[i]) ||
+							(mainMenu_custom_right[i]==-26 && dpadRight[i]))
+						)
+					)
+				{
+					mouseScale*=3;
+					fast_mouse=true; //also speed up touch-mouse and real mouse
+					break;
+				}
+			}
+		}
+#ifdef __SWITCH__
+		// or if custom controls are OFF but ZR is held on Switch, then also use slow-mouse
+		else {
+			for (int i=0; i<nr_joysticks; i++)
+			{
+				if (triggerR2[i] || triggerL2[i])
+				{
+					mouseScale*=3;
+					fast_mouse=true; //also speed up touch-mouse and real mouse
+					break;
+				}
+			}
+		}
+#endif
 		//VITA: always use an analog stick (default: right stick) for mouse pointer movements
 		//here we are using a small deadzone
 		//This can be disabled in the menu because it interferes with Joystick Port 0

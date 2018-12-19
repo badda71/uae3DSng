@@ -3,8 +3,10 @@ Changes in this Version
 1.81
 
 - allow higher CPU speed hack (for Alien Breed 3D)
-- allow optional custom kickstart file named kickcustom.rom (for 3.1.4 etc.)
-- load/save state can now be mapped to custom buttons
+- allow optional custom kickstart named kickcustom.rom (for 3.1.4 etc.)
+- buttons can now be mapped to quickload/quicksave for fast savestates 
+- a button can be mapped to "fast mouse", hold it down to speed up mouse
+- "slow mouse" or "fast mouse" buttons now also affect touch and real mice
 
 Description
 =====
@@ -273,8 +275,10 @@ CHANGELOG
 1.81
 
 - allow higher CPU speed hack (for Alien Breed 3D)
-- allow optional custom kickstart file named kickcustom.rom (for 3.1.4 etc.)
-- load/save state can now be mapped to custom buttons
+- allow optional custom kickstart named kickcustom.rom (for 3.1.4 etc.)
+- buttons can now be mapped to quickload/quicksave for fast savestates 
+- a button can be mapped to "fast mouse", hold it down to speed up mouse
+- "slow mouse" or "fast mouse" buttons now also affect touch and real mice
 
 1.80
 
