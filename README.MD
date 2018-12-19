@@ -3,6 +3,7 @@ Changes in this Version
 1.81
 
 - allow higher CPU speed hack (for Alien Breed 3D)
+- allow optional custom kickstart file named kickcustom.rom (for 3.1.4 etc.)
 
 Description
 =====
@@ -24,13 +25,15 @@ Installation
 ======
 * Vita:
   * Install .vpk
-  * Obtain and copy BIOS files "kick13.rom", "kick20.rom" and "kick31.rom" to "ux0:/data/uae4all/kickstarts"
+  * Obtain and copy BIOS files `kick13.rom` (Amiga 500, size: 262,144 bytes), and `kick31.rom` (Amiga 1200, size: 524,288 bytes) to `ux0:/data/uae4all/kickstarts`.
+  * Optional: copy over additional BIOS files `kick12.rom`, `kick20.rom`, `kickcustom.rom` (for e.g. version 3.1.4 or any other user-supplied BIOS) to the same folder.
 
 * Switch:
   * Download and unzip `uae4all2_switch.zip`
   * Copy the resulting folder `uae4all2` to `/switch/` onto your SDCard, ensure none of the "archive" flags is set.
   * You should now have the executable `/switch/uae4all2/uae4all2.nro` and a folder `/switch/uae4all2/data/` with the keyboard icons and other data files on your SDCard. 
-  * Obtain and copy BIOS files `kick13.rom` (size: 262,144 bytes), `kick20.rom` (size: 524,288 bytes) and `kick31.rom` (size: 524,288 bytes) to your SDCard into `/switch/uae4all2/kickstarts/`
+  * Obtain and copy BIOS files `kick13.rom` (Amiga 500, size: 262,144 bytes), and `kick31.rom` (Amiga 1200, size: 524,288 bytes) to your SDCard into `/switch/uae4all2/kickstarts/`.
+  * Optional: copy over additional BIOS files `kick12.rom`, `kick20.rom`, `kickcustom.rom` (for e.g. version 3.1.4 or any other user-supplied BIOS) to the same folder.
   * Use your favorite Homebrew Launcher or Homebrew Loader to start Uaeall2
 
 Vita/Switch-exclusive Features
@@ -136,7 +139,7 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 Notes
 ======
-- *Bios:* Please put kickstart files in `ux0:/data/uae4all/kickstarts` on Vita and in `/switch/uae4all2/kickstarts` directory on Switch. Files must be named as kick13.rom, kick20.rom, kick31.rom
+- *Bios:* Please put kickstart files in `ux0:/data/uae4all/kickstarts` on Vita and in `/switch/uae4all2/kickstarts` directory on Switch. Files must be named as `kick13.rom` (for Amiga 500), and `kick31.rom` (for Amiga 1200). Optionally, `kick12.rom`, `kick20.rom`, and `kickcustom.rom` (any user supplied file, e.g. version 3.1.4 or anything else), can also be supplied.
 - *Speed:* Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are fixed by this.
 - *Config File:* If you have problems with settings not saving etc, please delete or rename your config file in the folder `ux0:/data/uae4all` (Vita) or `/switch/uae4all2/conf/` and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
 - *Display:* The sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
@@ -153,7 +156,7 @@ FAQ
 =====
 * Kickstart rom files not found on startup? 
 
-  First, please ensure you are using the correct files. They should be "kick13.rom" (size: 262,144 bytes), "kick20.rom" (size: 524,288) and "kick31.rom" (size: 524,288). They should be placed in "ux0:/data/uae4all/kickstarts" on Vita and "/switch/uae4all2/kickstarts" on Switch. Second, on Vita, please make sure your ux0:/data folder does NOT have the FAT attributes "hidden" or "system" set. 
+  First, please ensure you are using the correct files. They should be `kick13.rom` (size: 262,144 bytes), and `kick31.rom` (size: 524,288). They should be placed in `ux0:/data/uae4all/kickstarts` on Vita and `/switch/uae4all2/kickstarts` on Switch. Second, on Vita, please make sure your ux0:/data folder does NOT have the FAT attributes "hidden" or "system" set. Additional supported files are `kick12.rom`, `kick20.rom`, and `kickcustom.rom` (for any user-supplied file, e.g. version 3.1.4).
 
 * Black screen on Switch, or crash on startup?
 
@@ -269,6 +272,7 @@ CHANGELOG
 1.81
 
 - allow higher CPU speed hack (for Alien Breed 3D)
+- allow optional custom kickstart file named kickcustom.rom (for 3.1.4 etc.)
 
 1.80
 

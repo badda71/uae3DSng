@@ -4219,7 +4219,7 @@ static __inline__ uae_u32 REGPARAM2 custom_wget_1 (uaecptr addr)
      case 0x004: v = VPOSR (); break;
      case 0x006:
        v = VHPOSR ();
-       if (kickstart == 3) {
+       if (kickstart == 3 || kickstart == 4) {
           if (v_last_006 == v)
              currcycle += 1;
           else

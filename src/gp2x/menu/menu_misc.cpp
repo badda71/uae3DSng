@@ -187,6 +187,11 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop7,menuLine,"3.1");
 
+	if ((kickstart==4)&&((menuMisc!=MENUMISC_KICKSTART)||(bb)))
+		write_text_inv(tabstop9,menuLine,"Custom");
+	else
+		write_text(tabstop9,menuLine,"Custom");
+
 	// MENUMISC_CPUSPEED
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"CPU Speed");
@@ -778,11 +783,11 @@ static int key_miscMenu(int *c)
 					if (kickstart>0)
 						kickstart--;
 					else
-						kickstart=3;
+						kickstart=4;
 				}
 				else if (right)
 				{
-					if (kickstart<3)
+					if (kickstart<4)
 						kickstart++;
 					else
 						kickstart=0;
