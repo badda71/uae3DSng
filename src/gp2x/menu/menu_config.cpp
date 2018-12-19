@@ -354,6 +354,150 @@ void SetDefaultMenuSettings(int general)
 #endif
 
 	}
+
+	// custom control set 1 defaults
+	// controller 1 defaults
+	mainMenu_custom1_up[0] = -5; // ply1 joy up
+	mainMenu_custom1_down[0] = -6; // ply1 joy down
+	mainMenu_custom1_left[0] = -7; // ply1 joy left
+	mainMenu_custom1_right[0] = -8; // ply1 joy right
+	mainMenu_custom1_A[0] = -5; // ply1 joy up (jump)
+	mainMenu_custom1_B[0] = 23; // space
+	mainMenu_custom1_X[0] = -3; // ply1 fire 1
+	mainMenu_custom1_Y[0] = -4; // ply1 fire 2
+	mainMenu_custom1_L[0] = -2; // right mouse
+	mainMenu_custom1_R[0] = -1; // left mouse
+#ifdef __SWITCH__
+	mainMenu_custom1_L2[0] = -26; // fast mouse
+	mainMenu_custom1_R2[0] = -25; // slow mouse
+	mainMenu_custom1_L3[0] = 0;
+	mainMenu_custom1_R3[0] = 0;
+#endif
+	// controller 2 defaults
+	mainMenu_custom1_up[1] = -9; // ply2 joy up
+	mainMenu_custom1_down[1] = -10; // ply2 joy down
+	mainMenu_custom1_left[1] = -11; // ply2 joy left
+	mainMenu_custom1_right[1] = -12; // ply2 joy right
+	mainMenu_custom1_A[1] = -9; // ply2 joy up (jump)
+	mainMenu_custom1_B[1] = 0;
+	mainMenu_custom1_X[1] = -1; // left mouse (ply2 fire 1)
+	mainMenu_custom1_Y[1] = -2; // right mouse (ply2 fire 2)
+	mainMenu_custom1_L[1] = 0;
+	mainMenu_custom1_R[1] = 0;
+#ifdef __SWITCH__
+	mainMenu_custom1_L2[1] = 0;
+	mainMenu_custom1_R2[1] = 0;
+	mainMenu_custom1_L3[1] = 0;
+	mainMenu_custom1_R3[1] = 0;
+#endif
+	//controller 3 defaults
+	mainMenu_custom1_up[2] = -15; // ply3 joy up
+	mainMenu_custom1_down[2] = -16; // ply3 joy down
+	mainMenu_custom1_left[2] = -17; // ply3 joy left
+	mainMenu_custom1_right[2] = -18; // ply3 joy right
+	mainMenu_custom1_A[2] = -15; // ply3 joy up (jump)
+	mainMenu_custom1_B[2] = 0;
+	mainMenu_custom1_X[2] = -13; // ply3 fire 1
+	mainMenu_custom1_Y[2] = -14; // ply3 fire 2
+	mainMenu_custom1_L[2] = 0;
+	mainMenu_custom1_R[2] = 0;
+#ifdef __SWITCH__
+	mainMenu_custom1_L2[2] = 0;
+	mainMenu_custom1_R2[2] = 0;
+	mainMenu_custom1_L3[2] = 0;
+	mainMenu_custom1_R3[2] = 0;
+#endif
+	//controller 4 defaults
+	mainMenu_custom1_up[3] = -21; // ply4 joy up
+	mainMenu_custom1_down[3] = -22; // ply4 joy down
+	mainMenu_custom1_left[3] = -23; // ply4 joy left
+	mainMenu_custom1_right[3] = -24; // ply4 joy right
+	mainMenu_custom1_A[3] = -21; // ply4 joy up (jump)
+	mainMenu_custom1_B[3] = 0;
+	mainMenu_custom1_X[3] = -19; // ply4 fire 1
+	mainMenu_custom1_Y[3] = -20; // ply4 fire 2
+	mainMenu_custom1_L[3] = 0;
+	mainMenu_custom1_R[3] = 0;
+#ifdef __SWITCH__
+	mainMenu_custom1_L2[3] = 0;
+	mainMenu_custom1_R2[3] = 0;
+	mainMenu_custom1_L3[3] = 0;
+	mainMenu_custom1_R3[3] = 0;
+#endif
+
+	// custom control set 2 defaults
+	// controller 1 defaults (for Pinball Dreams & Slam Tilt)
+	mainMenu_custom2_up[0] = 0;
+	mainMenu_custom2_down[0] = 2; // arrow down (spring launch ball)
+	mainMenu_custom2_left[0] = 33; // left alt (left flipper)
+	mainMenu_custom2_right[0] = 30; // right shift (magna saver)
+	mainMenu_custom2_A[0] = 23; // space (nudge center)
+	mainMenu_custom2_B[0] = 34; // right alt (right flipper)
+	mainMenu_custom2_X[0] = 26; // return (launch ball)
+	mainMenu_custom2_Y[0] = 87; // F1 (start 1 player game)
+	mainMenu_custom2_L[0] = 33; // left alt (left flipper)
+	mainMenu_custom2_R[0] = 34; // right alt (right flipper)
+#ifdef __SWITCH__
+	mainMenu_custom2_L2[0] = 33; // left alt (left flipper)
+	mainMenu_custom2_R2[0] = 34; // right alt (right flipper)
+	mainMenu_custom2_L3[0] = 0;
+	mainMenu_custom2_R3[0] = 0;
+#endif
+
+	// controller 2 defaults (for Pinball Dreams & Slam Tilt)
+	mainMenu_custom2_up[1] = 0;
+	mainMenu_custom2_down[1] = 2; // arrow down (spring launch ball)
+	mainMenu_custom2_left[1] = 33; // left alt (left flipper)
+	mainMenu_custom2_right[1] = 30; // right shift (magna saver)
+	mainMenu_custom2_A[1] = 23; // space (nudge center)
+	mainMenu_custom2_B[1] = 34; // right alt (right flipper)
+	mainMenu_custom2_X[1] = 26; // return (launch ball)
+	mainMenu_custom2_Y[1] = 88; // F2 (start 2 player game)
+	mainMenu_custom2_L[1] = 33; // left alt (left flipper)
+	mainMenu_custom2_R[1] = 34; // right alt (right flipper)
+#ifdef __SWITCH__
+	mainMenu_custom2_L2[1] = 33; // left alt (left flipper)
+	mainMenu_custom2_R2[1] = 34; // right alt (right flipper)
+	mainMenu_custom2_L3[1] = 0;
+	mainMenu_custom2_R3[1] = 0;
+#endif
+
+	// controller 3 defaults (for Pinball Dreams & Slam Tilt)
+	mainMenu_custom2_up[2] = 0;
+	mainMenu_custom2_down[2] = 2; // arrow down (spring launch ball)
+	mainMenu_custom2_left[2] = 33; // left alt (left flipper)
+	mainMenu_custom2_right[2] = 30; // right shift (magna saver)
+	mainMenu_custom2_A[2] = 23; // space (nudge center)
+	mainMenu_custom2_B[2] = 34; // right alt (right flipper)
+	mainMenu_custom2_X[2] = 26; // return (launch ball)
+	mainMenu_custom2_Y[2] = 89; // F3 (start 3 player game)
+	mainMenu_custom2_L[2] = 33; // left alt (left flipper)
+	mainMenu_custom2_R[2] = 34; // right alt (right flipper)
+#ifdef __SWITCH__
+	mainMenu_custom2_L2[2] = 33; // left alt (left flipper)
+	mainMenu_custom2_R2[2] = 34; // right alt (right flipper)
+	mainMenu_custom2_L3[2] = 0;
+	mainMenu_custom2_R3[2] = 0;
+#endif
+
+	// controller 4 defaults (for Pinball Dreams & Slam Tilt)
+	mainMenu_custom2_up[3] = 0;
+	mainMenu_custom2_down[3] = 2; // arrow down (spring launch ball)
+	mainMenu_custom2_left[3] = 33; // left alt (left flipper)
+	mainMenu_custom2_right[3] = 30; // right shift (magna saver)
+	mainMenu_custom2_A[3] = 23; // space (nudge center)
+	mainMenu_custom2_B[3] = 34; // right alt (right flipper)
+	mainMenu_custom2_X[3] = 26; // return (launch ball)
+	mainMenu_custom2_Y[3] = 90; // F4 (start 4 player game)
+	mainMenu_custom2_L[3] = 33; // left alt (left flipper)
+	mainMenu_custom2_R[3] = 34; // right alt (right flipper)
+#ifdef __SWITCH__
+	mainMenu_custom2_L2[3] = 33; // left alt (left flipper)
+	mainMenu_custom2_R2[3] = 34; // right alt (right flipper)
+	mainMenu_custom2_L3[3] = 0;
+	mainMenu_custom2_R3[3] = 0;
+#endif
+
 #endif //__PSP2__
     SetPresetMode(2);
     moveX = 0;

@@ -7,6 +7,7 @@ Changes in this Version
 - buttons can now be mapped to quickload/quicksave for fast savestates 
 - a button can be mapped to "fast mouse", hold it down to speed up mouse
 - "slow mouse" or "fast mouse" buttons now also affect touch and real mice
+- populate custom controls with sensible defaults instead of all blank
 
 Description
 =====
@@ -279,6 +280,7 @@ CHANGELOG
 - buttons can now be mapped to quickload/quicksave for fast savestates 
 - a button can be mapped to "fast mouse", hold it down to speed up mouse
 - "slow mouse" or "fast mouse" buttons now also affect touch and real mice
+- populate custom controls with sensible defaults instead of all blank
 
 1.80
 
