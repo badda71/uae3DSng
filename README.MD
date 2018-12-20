@@ -23,7 +23,7 @@ Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new l
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
-Thanks to my supporters on Patreon: Andyways, CountDuckula, Jesse Harlin, Matthew Machnee, and RadicalR.
+Thanks to my supporters on Patreon: Andyways, CountDuckula, Jesse Harlin, Özgür Karter, Matthew Machnee, and RadicalR.
 
 Installation
 ======
