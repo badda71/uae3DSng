@@ -339,7 +339,12 @@ void make_savestate_filenames(char *save, char *thumb)
 			int oneColonFound=0;
 			for (i = strlen(hd_name); i > 0; i--)
 				if (hd_name[i] == ':' && !oneColonFound)
+				{
 					oneColonFound=1;
+#ifdef __SWITCH__
+				    break;
+#endif
+				}
 				else if (hd_name[i] == ':' && oneColonFound)
 					break;
 			if (i > 0) 
