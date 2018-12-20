@@ -293,6 +293,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 #endif
 	{
 		//slow down mouse motion if custom "slow mouse" button is held
+		fast_mouse=false;
 		slow_mouse=false;
 		if(mainMenu_customControls)
 		{
@@ -325,8 +326,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 						)
 					)
 				{
-					mouseScale/=8;
-					slow_mouse=true; //also slow down touch-mouse and real mouse
+					slow_mouse=true;
 					break;
 				}
 			}
@@ -338,15 +338,13 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			{
 				if (triggerR2[i])
 				{
-					mouseScale/=8;
-					slow_mouse=true; //also slow down touch-mouse and real mouse
+					slow_mouse=true;
 					break;
 				}
 			}
 		}
 #endif
 		//speed up mouse motion if custom "fast mouse" button is held
-		fast_mouse=false;
 		if(mainMenu_customControls)
 		{
 			for (int i=0; i<nr_joysticks; i++)
@@ -378,8 +376,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 						)
 					)
 				{
-					mouseScale*=3;
-					fast_mouse=true; //signal to also speed up touch-mouse and real mouse
+					fast_mouse=true;
 					break;
 				}
 			}
@@ -391,13 +388,15 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			{
 				if (triggerL2[i])
 				{
-					mouseScale*=3;
-					fast_mouse=true; //signal to also speed up touch-mouse and real mouse
+					fast_mouse=true;
 					break;
 				}
 			}
 		}
 #endif
+		if (fast_mouse) mouseScale*=3;
+		if (slow_mouse) mouseScale/=8;
+
 		//VITA: always use an analog stick (default: right stick) for mouse pointer movements
 		//here we are using a small deadzone
 		//This can be disabled in the menu because it interferes with Joystick Port 0
