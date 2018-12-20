@@ -57,9 +57,9 @@ enum {
   MENUCONTROLS_DOWN,
   MENUCONTROLS_LEFT,
   MENUCONTROLS_RIGHT,
+  MENUCONTROLS_A,
   MENUCONTROLS_Y,
   MENUCONTROLS_X,
-  MENUCONTROLS_A,
   MENUCONTROLS_B,
   MENUCONTROLS_L,
   MENUCONTROLS_R,
@@ -548,12 +548,27 @@ static void draw_controlsMenu(int c)
 			write_text(tabstop1-4,menuLine,mapping);
 	}
 
-	// MENUCONTROLS_Y
+	// MENUCONTROLS_A
 #ifdef __SWITCH__
 	menuLine+=2;
 #else
 	menuLine+=3;
 #endif
+#if defined(__PSP2__)
+	write_text(leftMargin,menuLine,"Square");
+#elif defined(__SWITCH__)
+	write_text(leftMargin,menuLine,"   Y");
+#else
+	write_text(leftMargin,menuLine,"   (A)");
+#endif
+	getMapping(mainMenu_custom_A[ctrlNr]);
+	if ((menuControls!=MENUCONTROLS_A)||(bb))
+		write_text_inv(tabstop1-4,menuLine,mapping);
+	else
+		write_text(tabstop1-4,menuLine,mapping);
+
+	// MENUCONTROLS_Y
+	menuLine+=2;
 #if defined(__PSP2__)
 	write_text(leftMargin,menuLine,"Triangle");
 #elif defined(__SWITCH__)
@@ -578,21 +593,6 @@ static void draw_controlsMenu(int c)
 #endif
 	getMapping(mainMenu_custom_X[ctrlNr]);
 	if ((menuControls!=MENUCONTROLS_X)||(bb))
-		write_text_inv(tabstop1-4,menuLine,mapping);
-	else
-		write_text(tabstop1-4,menuLine,mapping);
-
-	// MENUCONTROLS_A
-	menuLine+=2;
-#if defined(__PSP2__)
-	write_text(leftMargin,menuLine,"Square");
-#elif defined(__SWITCH__)
-	write_text(leftMargin,menuLine,"   Y");
-#else
-	write_text(leftMargin,menuLine,"   (A)");
-#endif
-	getMapping(mainMenu_custom_A[ctrlNr]);
-	if ((menuControls!=MENUCONTROLS_A)||(bb))
 		write_text_inv(tabstop1-4,menuLine,mapping);
 	else
 		write_text(tabstop1-4,menuLine,mapping);
