@@ -29,16 +29,25 @@ Installation
 ======
 * Vita:
   * Install .vpk
-  * Obtain and copy BIOS files `kick13.rom` (Amiga 500, size: 262,144 bytes), and `kick31.rom` (Amiga 1200, size: 524,288 bytes) to `ux0:/data/uae4all/kickstarts`.
+  * Obtain and copy BIOS files `kick13.rom` (Amiga 500), and `kick31.rom` (Amiga 1200) to `ux0:/data/uae4all/kickstarts`.
   * Optional: copy over additional BIOS files `kick12.rom`, `kick20.rom`, `kickcustom.rom` (for e.g. version 3.1.4 or any other user-supplied BIOS) to the same folder.
 
 * Switch:
   * Download and unzip `uae4all2_switch.zip`
   * Copy the resulting folder `uae4all2` to `/switch/` onto your SDCard, ensure none of the "archive" flags is set.
   * You should now have the executable `/switch/uae4all2/uae4all2.nro` and a folder `/switch/uae4all2/data/` with the keyboard icons and other data files on your SDCard. 
-  * Obtain and copy BIOS files `kick13.rom` (Amiga 500, size: 262,144 bytes), and `kick31.rom` (Amiga 1200, size: 524,288 bytes) to your SDCard into `/switch/uae4all2/kickstarts/`.
+  * Obtain and copy BIOS files `kick13.rom` (Amiga 500), and `kick31.rom` (Amiga 1200) to your SDCard into `/switch/uae4all2/kickstarts/`.
   * Optional: copy over additional BIOS files `kick12.rom`, `kick20.rom`, `kickcustom.rom` (for e.g. version 3.1.4 or any other user-supplied BIOS) to the same folder.
   * Use your favorite Homebrew Launcher or Homebrew Loader to start Uaeall2
+
+* MD5 of verified working kickstart rom files, you can test yours at [onlinemd5](http://onlinemd5.com/):   
+```
+kick12.rom (256 kB): (MD5) 85AD74194E87C08904327DE1A9443B7A
+kick13.rom (256 kB): (MD5) 82A21C1890CAE844B3DF741F2762D48D  
+kick20.rom (512 kB): (MD5) FA4ACC75B49E880679FE02716AF24D71  
+kick31.rom (512 kB): (MD5) 646773759326FBAC3B2311FD8C8793EE  
+````
+Other files might work, too.
 
 Vita/Switch-exclusive Features
 ======
