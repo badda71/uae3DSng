@@ -127,7 +127,7 @@ Switch controls
 The default OK button in menu and on-screen keyboard is B. This can be changed to A in "more options."
 
 ZR button = slow-mouse (if custom controls are off)
-ZL button = slow-mouse (if custom controls are off)
+ZL button = fast-mouse (if custom controls are off)
 
 Split Joycon Mode: Split Joycon mode can be enabled/disabled in "more options." Upto four single Joycons are supported. Buttons can still be remapped. SL for player 1 is hardcoded to bring up the keyboard.  
 
