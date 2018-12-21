@@ -49,6 +49,8 @@ kick31.rom (512 kB): (MD5) 646773759326FBAC3B2311FD8C8793EE
 ````
 Other files might work, too.
 
+* You can purchase legal bios roms from [Amiga Forever](https://www.amigaforever.com). They work. But since they are encrypted, you have to copy over your .key file along with the roms.
+
 Vita/Switch-exclusive Features
 ======
 - Full speed emulation of most Amiga games with zero frameskip
