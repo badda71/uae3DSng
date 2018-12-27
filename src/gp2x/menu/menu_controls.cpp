@@ -30,8 +30,8 @@
 #define MAX_CUSTOM_ID 96
 #define MIN_CUSTOM_ID -28
 
-const char *text_str_controls_separator="----------------------------------";
-const char *text_str_controls_title=    "         Custom Controls         -";
+const char *text_str_controls_separator="---------------------------------------";
+const char *text_str_controls_title=    "         Custom Controls              -";
 char tmpchar[256];
 char mapping[32]="";
 int menuControls = 0;
@@ -411,7 +411,7 @@ static void draw_controlsMenu(int c)
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
-	text_draw_window(2,2,40,30,text_str_controls_title);
+	text_draw_window(2,2,41,30,text_str_controls_title);
 
 	// MENUCONTROLS_RETURNMAIN
 	if (menuControls == MENUCONTROLS_RETURNMAIN && bb)
@@ -472,6 +472,25 @@ static void draw_controlsMenu(int c)
 		write_text_inv(tabstop9,menuLine,"4");
 	else
 		write_text(tabstop9,menuLine,"4");
+
+#ifdef __SWITCH__
+	if ((mainMenu_custom_currentlyEditingControllerNr==4)&&((menuControls!=MENUCONTROLS_CUSTOM_CONTROLLER_NR)||(bb)))
+		write_text_inv(tabstop9+2,menuLine,"5");
+	else
+		write_text(tabstop9+2,menuLine,"5");
+	if ((mainMenu_custom_currentlyEditingControllerNr==5)&&((menuControls!=MENUCONTROLS_CUSTOM_CONTROLLER_NR)||(bb)))
+		write_text_inv(tabstop9+4,menuLine,"6");
+	else
+		write_text(tabstop9+4,menuLine,"6");
+	if ((mainMenu_custom_currentlyEditingControllerNr==6)&&((menuControls!=MENUCONTROLS_CUSTOM_CONTROLLER_NR)||(bb)))
+		write_text_inv(tabstop9+6,menuLine,"7");
+	else
+		write_text(tabstop9+6,menuLine,"7");
+	if ((mainMenu_custom_currentlyEditingControllerNr==7)&&((menuControls!=MENUCONTROLS_CUSTOM_CONTROLLER_NR)||(bb)))
+		write_text_inv(tabstop9+8,menuLine,"8");
+	else
+		write_text(tabstop9+8,menuLine,"8");
+#endif
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_controls_separator);
@@ -795,7 +814,7 @@ static int key_controlsMenu(int *c)
 				}
 				else if (right)
 				{
-					if (mainMenu_custom_currentlyEditingControllerNr<(4-1))
+					if (mainMenu_custom_currentlyEditingControllerNr<(MAX_NUM_CONTROLLERS-1))
 					{
 						mainMenu_custom_currentlyEditingControllerNr++;
 						remap_custom_controls();

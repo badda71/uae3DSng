@@ -1,13 +1,8 @@
 Changes in this Version
 ======
-1.81
+1.82
 
-- allow higher CPU speed hack (for Alien Breed 3D)
-- allow optional custom kickstart named kickcustom.rom (for 3.1.4 etc.)
-- buttons can now be mapped to quickload/quicksave for fast savestates 
-- a button can be mapped to "fast mouse", hold it down to speed up mouse
-- "slow mouse" or "fast mouse" buttons now also affect touch and real mice
-- populate custom controls with sensible defaults instead of all blank
+- support up to eight controllers on Switch
 
 Description
 =====
@@ -23,7 +18,7 @@ Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new l
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
-Thanks to my supporters on Patreon: Andyways, CountDuckula, Jesse Harlin, Özgür Karter, Matthew Machnee, and RadicalR.
+Thanks to my supporters on Patreon: Andyways, CountDuckula, Greg Gibson, Jesse Harlin, Özgür Karter, Matthew Machnee, and RadicalR.
 
 Installation
 ======
@@ -55,12 +50,12 @@ Vita/Switch-exclusive Features
 ======
 - Full speed emulation of most Amiga games with zero frameskip
 - Large, complete virtual keyboard with adjustable position and adjustable transparency
-- Three fully mappable custom control sets: map Vita buttons to any Amiga joystick or key input, three custom control sets supported
+- Three fully mappable custom control sets: map Vita/Switch buttons to any Amiga joystick or key input, three custom control sets supported
 - Multiple hard-file support: up to 4 hdf files (size <2GB each on Vita, size <4GB each on Switch) can be mounted simultaneously
-- Multiple controller support on Vita TV: up to four paired controllers can be fully mapped
+- Multiple controller support on Vita TV/Switch: up to four (eight on Switch) paired controllers can be fully mapped
 - Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
 - Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full screen
-- Custom autofire: any mapped Vita button can have autofire with adjustable rate
+- Custom autofire: any mapped Vita/Switch button can have autofire with adjustable rate
 - Savestate with hard-file support: state can be saved even when hard-files are used
 - Additional emulator settings: sprite-sprite collisions can be enabled, blitter settings can be changed
 - Adjustable stereo separation
@@ -71,8 +66,9 @@ Vita/Switch-exclusive Features
 - Additional savestate slot called auto, for automatic savestate loading
 - Bluetooth keyboard and mouse support (Vita only)
 - Supports loading files from ux0: or uma0: partition (Vita only)
-- Rear touch panel can be enabled for mouse pointer control (Vita only) 
+- Rear touch panel can be enabled for mouse pointer control (Vita only)
 - Split Joy-Con support (Switch only)
+- A "fast mouse" custom button can be mapped to speed up the mouse
 
 Controls
 =====
@@ -184,6 +180,10 @@ FAQ
 Games with known fixes
 ======
 
+- Blastar  
+  Issue: flickering scrolling  
+  Fix: set “Blitter: Normal” and reboot  
+
 - Lure of the Temptress (adf only)  
   Issue: hangs at title  
   Fix: use hdf version  
@@ -284,6 +284,10 @@ Compiling
 
 CHANGELOG
 =====
+1.82
+
+- support up to eight controllers on Switch
+
 1.81
 
 - allow higher CPU speed hack (for Alien Breed 3D)

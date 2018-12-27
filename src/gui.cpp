@@ -60,32 +60,32 @@
 
 extern int gp2xMouseEmuOn, gp2xButtonRemappingOn;
 extern bool switch_autofire;
-int justMovedUp[4]={0,0,0,0};
-int justMovedDown[4]={0,0,0,0};
-int justMovedLeft[4]={0,0,0,0}; 
-int justMovedRight[4]={0,0,0,0};
+int justMovedUp[MAX_NUM_CONTROLLERS]={};
+int justMovedDown[MAX_NUM_CONTROLLERS]={};
+int justMovedLeft[MAX_NUM_CONTROLLERS]={}; 
+int justMovedRight[MAX_NUM_CONTROLLERS]={};
 int justLComma=0, justLPeriod=0;
 #ifdef USE_UAE4ALL_VKBD
 int justLK=0;
 #endif
-int justPressedA[4]={0,0,0,0};
-int justPressedB[4]={0,0,0,0};
-int justPressedX[4]={0,0,0,0};
-int justPressedY[4]={0,0,0,0};
-int justPressedL[4]={0,0,0,0};
-int justPressedR[4]={0,0,0,0};
+int justPressedA[MAX_NUM_CONTROLLERS]={};
+int justPressedB[MAX_NUM_CONTROLLERS]={};
+int justPressedX[MAX_NUM_CONTROLLERS]={};
+int justPressedY[MAX_NUM_CONTROLLERS]={};
+int justPressedL[MAX_NUM_CONTROLLERS]={};
+int justPressedR[MAX_NUM_CONTROLLERS]={};
 #ifdef __SWITCH__
-int justPressedL2[4]={0,0,0,0};
-int justPressedR2[4]={0,0,0,0};
-int justPressedL3[4]={0,0,0,0};
-int justPressedR3[4]={0,0,0,0};
+int justPressedL2[MAX_NUM_CONTROLLERS]={};
+int justPressedR2[MAX_NUM_CONTROLLERS]={};
+int justPressedL3[MAX_NUM_CONTROLLERS]={};
+int justPressedR3[MAX_NUM_CONTROLLERS]={};
 #endif
 int justPressedQ=0;
 int stylusClickOverride=0;
 int stylusAdjustX=0, stylusAdjustY=0;
 int screenWidth = 640;
 
-static int customAutofireDelay[4]={ 0,0,0,0 };
+static int customAutofireDelay[MAX_NUM_CONTROLLERS]={};
 
 extern int mainMenu_autofire;
 
@@ -105,7 +105,7 @@ char *show_message_str=(char *)&_show_message_str[0];
 
 extern SDL_Surface *prSDLScreen;
 
-extern SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3;
+extern SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3, *uae4all_joy4, *uae4all_joy5, *uae4all_joy6, *uae4all_joy7;
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 //Predefined quick switch resolutions to select via TRIGGER R+START+DPAD LEFT/RIGHT
@@ -140,10 +140,10 @@ int lAnalogX=0;
 int lAnalogY=0;
 int rAnalogX=0;
 int rAnalogY=0;
-int lAnalogXCenter[4]={ 0, 0, 0, 0 };
-int lAnalogYCenter[4]={ 0, 0, 0, 0 };
-int rAnalogXCenter[4]={ 0, 0, 0, 0 };
-int rAnalogYCenter[4]={ 0, 0, 0, 0 };
+int lAnalogXCenter[MAX_NUM_CONTROLLERS]={};
+int lAnalogYCenter[MAX_NUM_CONTROLLERS]={};
+int rAnalogXCenter[MAX_NUM_CONTROLLERS]={};
+int rAnalogYCenter[MAX_NUM_CONTROLLERS]={};
 int haveJoysticksBeenCentered=0;
 extern int mainMenu_leftStickMouse;
 #endif // __PSP2__
@@ -170,24 +170,24 @@ int drawfinished=0;
 int moved_x = 0;
 int moved_y = 0;
 
-int dpadUp[4]={0,0,0,0};
-int dpadDown[4]={0,0,0,0};
-int dpadLeft[4]={0,0,0,0};
-int dpadRight[4]={0,0,0,0};
-int buttonA[4]={0,0,0,0}; // Vita Square, GP2X_BUTTON_B
-int buttonB[4]={0,0,0,0}; // Vita Circle, GP2X_BUTTON_A
-int buttonX[4]={0,0,0,0}; // Vita Cross, GP2X_BUTTON_X
-int buttonY[4]={0,0,0,0}; // Vita Triangle, GP2X_BUTTON_Y
-int triggerL[4]={0,0,0,0};
-int triggerR[4]={0,0,0,0};
+int dpadUp[MAX_NUM_CONTROLLERS]={};
+int dpadDown[MAX_NUM_CONTROLLERS]={};
+int dpadLeft[MAX_NUM_CONTROLLERS]={};
+int dpadRight[MAX_NUM_CONTROLLERS]={};
+int buttonA[MAX_NUM_CONTROLLERS]={}; // Vita Square, GP2X_BUTTON_B
+int buttonB[MAX_NUM_CONTROLLERS]={}; // Vita Circle, GP2X_BUTTON_A
+int buttonX[MAX_NUM_CONTROLLERS]={}; // Vita Cross, GP2X_BUTTON_X
+int buttonY[MAX_NUM_CONTROLLERS]={}; // Vita Triangle, GP2X_BUTTON_Y
+int triggerL[MAX_NUM_CONTROLLERS]={};
+int triggerR[MAX_NUM_CONTROLLERS]={};
 #ifdef __SWITCH__
-int triggerL2[4]={0,0,0,0};
-int triggerR2[4]={0,0,0,0};
-int triggerL3[4]={0,0,0,0};
-int triggerR3[4]={0,0,0,0};
+int triggerL2[MAX_NUM_CONTROLLERS]={};
+int triggerR2[MAX_NUM_CONTROLLERS]={};
+int triggerL3[MAX_NUM_CONTROLLERS]={};
+int triggerR3[MAX_NUM_CONTROLLERS]={};
 #endif
-int buttonSelect[4]={0,0,0,0};
-int buttonStart[4]={0,0,0,0};
+int buttonSelect[MAX_NUM_CONTROLLERS]={};
+int buttonStart[MAX_NUM_CONTROLLERS]={};
 
 extern int mainMenu_case;
 #ifdef WITH_TESTMODE
@@ -252,7 +252,7 @@ void update_joycon_mode() {
 #if defined(__PSP2__) || defined(__SWITCH__)
 void remap_custom_controls() // assign custom 1-3 to currently used custom set
 {
-	for (int i=0; i<4; i++)
+	for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
 	{
 		switch (mainMenu_custom_controlSet)
 		{
@@ -671,6 +671,18 @@ void gui_handle_events (void)
 			case 3:
 				currentJoy = uae4all_joy3;
 				break;
+			case 4:
+				currentJoy = uae4all_joy4;
+				break;
+			case 5:
+				currentJoy = uae4all_joy5;
+				break;
+			case 6:
+				currentJoy = uae4all_joy6;
+				break;
+			case 7:
+				currentJoy = uae4all_joy7;
+				break;
 		}
 		//Only Joystick 0 analog axis are important for mouse control, the others
 		//are used to have the dpad on the left stick but that is all
@@ -894,6 +906,18 @@ void gui_handle_events (void)
 					break;
 				case 3:
 					currentJoy = uae4all_joy3;
+					break;
+				case 4:
+					currentJoy = uae4all_joy4;
+					break;
+				case 5:
+					currentJoy = uae4all_joy5;
+					break;
+				case 6:
+					currentJoy = uae4all_joy6;
+					break;
+				case 7:
+					currentJoy = uae4all_joy7;
 					break;
 			}
 			lAnalogXCenter[i]=SDL_JoystickGetAxis(currentJoy, 0);

@@ -79,71 +79,71 @@ int mainMenu_tapDelay = 10;
 int mainMenu_customControls = 0;
 int mainMenu_custom_currentlyEditingControllerNr = 0;
 int mainMenu_custom_dpad = 0;
-int mainMenu_custom_up[4] = {0,0,0,0};
-int mainMenu_custom_down[4] = {0,0,0,0};
-int mainMenu_custom_left[4] = {0,0,0,0};
-int mainMenu_custom_right[4] = {0,0,0,0};
-int mainMenu_custom_A[4] = {0,0,0,0};
-int mainMenu_custom_B[4] = {0,0,0,0};
-int mainMenu_custom_X[4] = {0,0,0,0};
-int mainMenu_custom_Y[4] = {0,0,0,0};
-int mainMenu_custom_L[4] = {0,0,0,0};
-int mainMenu_custom_R[4] = {0,0,0,0};
+int mainMenu_custom_up[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_down[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_left[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_right[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_A[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_B[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_X[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_Y[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_L[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_R[MAX_NUM_CONTROLLERS] = { };
 #ifdef __SWITCH__
-int mainMenu_custom_L2[4] = {0,0,0,0};
-int mainMenu_custom_R2[4] = {0,0,0,0};
-int mainMenu_custom_L3[4] = {0,0,0,0};
-int mainMenu_custom_R3[4] = {0,0,0,0};
+int mainMenu_custom_L2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_R2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_L3[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom_R3[MAX_NUM_CONTROLLERS] = { };
 #endif
 #if defined(__PSP2__) || defined(__SWITCH__)
 int mainMenu_custom_controlSet = 0; //This controls which custom config is used
-int mainMenu_custom1_up[4] = {0,0,0,0};
-int mainMenu_custom1_down[4] = {0,0,0,0};
-int mainMenu_custom1_left[4] = {0,0,0,0};
-int mainMenu_custom1_right[4] = {0,0,0,0};
-int mainMenu_custom1_A[4] = {0,0,0,0};
-int mainMenu_custom1_B[4] = {0,0,0,0};
-int mainMenu_custom1_X[4] = {0,0,0,0};
-int mainMenu_custom1_Y[4] = {0,0,0,0};
-int mainMenu_custom1_L[4] = {0,0,0,0};
-int mainMenu_custom1_R[4] = {0,0,0,0};
+int mainMenu_custom1_up[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_down[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_left[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_right[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_A[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_B[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_X[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_Y[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_L[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_R[MAX_NUM_CONTROLLERS] = { };
 #ifdef __SWITCH__
-int mainMenu_custom1_L2[4] = {0,0,0,0};
-int mainMenu_custom1_R2[4] = {0,0,0,0};
-int mainMenu_custom1_L3[4] = {0,0,0,0};
-int mainMenu_custom1_R3[4] = {0,0,0,0};
+int mainMenu_custom1_L2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_R2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_L3[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom1_R3[MAX_NUM_CONTROLLERS] = { };
 #endif
-int mainMenu_custom2_up[4] = {0,0,0,0};
-int mainMenu_custom2_down[4] = {0,0,0,0};
-int mainMenu_custom2_left[4] = {0,0,0,0};
-int mainMenu_custom2_right[4] = {0,0,0,0};
-int mainMenu_custom2_A[4] = {0,0,0,0};
-int mainMenu_custom2_B[4] = {0,0,0,0};
-int mainMenu_custom2_X[4] = {0,0,0,0};
-int mainMenu_custom2_Y[4] = {0,0,0,0};
-int mainMenu_custom2_L[4] = {0,0,0,0};
-int mainMenu_custom2_R[4] = {0,0,0,0};
+int mainMenu_custom2_up[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_down[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_left[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_right[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_A[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_B[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_X[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_Y[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_L[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_R[MAX_NUM_CONTROLLERS] = { };
 #ifdef __SWITCH__
-int mainMenu_custom2_L2[4] = {0,0,0,0};
-int mainMenu_custom2_R2[4] = {0,0,0,0};
-int mainMenu_custom2_L3[4] = {0,0,0,0};
-int mainMenu_custom2_R3[4] = {0,0,0,0};
+int mainMenu_custom2_L2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_R2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_L3[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom2_R3[MAX_NUM_CONTROLLERS] = { };
 #endif
-int mainMenu_custom3_up[4] = {0,0,0,0};
-int mainMenu_custom3_down[4] = {0,0,0,0};
-int mainMenu_custom3_left[4] = {0,0,0,0};
-int mainMenu_custom3_right[4] = {0,0,0,0};
-int mainMenu_custom3_A[4] = {0,0,0,0};
-int mainMenu_custom3_B[4] = {0,0,0,0};
-int mainMenu_custom3_X[4] = {0,0,0,0};
-int mainMenu_custom3_Y[4] = {0,0,0,0};
-int mainMenu_custom3_L[4] = {0,0,0,0};
-int mainMenu_custom3_R[4] = {0,0,0,0};
+int mainMenu_custom3_up[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_down[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_left[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_right[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_A[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_B[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_X[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_Y[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_L[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_R[MAX_NUM_CONTROLLERS] = { };
 #ifdef __SWITCH__
-int mainMenu_custom3_L2[4] = {0,0,0,0};
-int mainMenu_custom3_R2[4] = {0,0,0,0};
-int mainMenu_custom3_L3[4] = {0,0,0,0};
-int mainMenu_custom3_R3[4] = {0,0,0,0};
+int mainMenu_custom3_L2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_R2[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_L3[MAX_NUM_CONTROLLERS] = { };
+int mainMenu_custom3_R3[MAX_NUM_CONTROLLERS] = { };
 #endif
 #endif
 int mainMenu_autofire = DEFAULT_AUTOFIRE;
@@ -281,7 +281,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_customControls = 0;
 	 mainMenu_custom_currentlyEditingControllerNr = 0;
     mainMenu_custom_dpad = 0;
-	 for (int i=0; i<4; i++) 
+	 for (int i=0; i<MAX_NUM_CONTROLLERS; i++) 
 	 {
 		 mainMenu_custom_up[i] = 0;
 		 mainMenu_custom_down[i] = 0;
@@ -302,7 +302,7 @@ void SetDefaultMenuSettings(int general)
 	}
 #if defined(__PSP2__) || defined(__SWITCH__)
 	 mainMenu_custom_controlSet = 0;
-	 for (int i=0; i<4; i++) 
+	 for (int i=0; i<MAX_NUM_CONTROLLERS; i++) 
 	 {
 		 mainMenu_custom1_up[i] = 0;
 		 mainMenu_custom1_down[i] = 0;
@@ -1270,7 +1270,7 @@ int saveconfig(int general)
 #else
 	 snprintf((char*)buffer, 255, "custom_controlSet=%d\n",mainMenu_custom_controlSet);
 	 fputs(buffer,f);
-	 for (int i=0; i<4; i++)
+	 for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
 	 {
 		 snprintf((char*)buffer, 255, "custom1_up_Ply%d=%d\n",i,mainMenu_custom1_up[i]);
 		 fputs(buffer,f);
@@ -1695,84 +1695,94 @@ void loadconfig(int general)
         fscanf(f,"custom_L=%d\n",&mainMenu_custom_L[0]);
         fscanf(f,"custom_R=%d\n",&mainMenu_custom_R[0]);
 #else
-		  fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
-        int config_1_73 = -1;
-        for (int i=0; i<4; i++)
-        {
-			  int j;
-			  fscanf(f,"custom1_up_Ply%d=%d\n",&j,&mainMenu_custom1_up[i]);
-			  fscanf(f,"custom1_down_Ply%d=%d\n",&j,&mainMenu_custom1_down[i]);
-			  fscanf(f,"custom1_left_Ply%d=%d\n",&j,&mainMenu_custom1_left[i]);
-			  fscanf(f,"custom1_right_Ply%d=%d\n",&j,&mainMenu_custom1_right[i]);
-			  fscanf(f,"custom1_A_Ply%d=%d\n",&j,&mainMenu_custom1_A[i]);
-			  fscanf(f,"custom1_B_Ply%d=%d\n",&j,&mainMenu_custom1_B[i]);
-			  fscanf(f,"custom1_X_Ply%d=%d\n",&j,&mainMenu_custom1_X[i]);
-			  fscanf(f,"custom1_Y_Ply%d=%d\n",&j,&mainMenu_custom1_Y[i]);
-			  fscanf(f,"custom1_L_Ply%d=%d\n",&j,&mainMenu_custom1_L[i]);
-			  fscanf(f,"custom1_R_Ply%d=%d\n",&j,&mainMenu_custom1_R[i]);
+		fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
+		int config_1_73 = -1;
+		int config_1_82 = 1;
+		for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
+		{
+			int j;
+			if (i==4) {
+				if (!fscanf(f,"custom1_up_Ply%d=%d\n",&j,&mainMenu_custom1_up[i])) {
+					config_1_82 = -1;
+					break;
+				}
+			} else
+				fscanf(f,"custom1_up_Ply%d=%d\n",&j,&mainMenu_custom1_up[i]);
+			fscanf(f,"custom1_down_Ply%d=%d\n",&j,&mainMenu_custom1_down[i]);
+			fscanf(f,"custom1_left_Ply%d=%d\n",&j,&mainMenu_custom1_left[i]);
+			fscanf(f,"custom1_right_Ply%d=%d\n",&j,&mainMenu_custom1_right[i]);
+			fscanf(f,"custom1_A_Ply%d=%d\n",&j,&mainMenu_custom1_A[i]);
+			fscanf(f,"custom1_B_Ply%d=%d\n",&j,&mainMenu_custom1_B[i]);
+			fscanf(f,"custom1_X_Ply%d=%d\n",&j,&mainMenu_custom1_X[i]);
+			fscanf(f,"custom1_Y_Ply%d=%d\n",&j,&mainMenu_custom1_Y[i]);
+			fscanf(f,"custom1_L_Ply%d=%d\n",&j,&mainMenu_custom1_L[i]);
+			fscanf(f,"custom1_R_Ply%d=%d\n",&j,&mainMenu_custom1_R[i]);
 #ifdef __SWITCH__
-				if (config_1_73 > 0) {
-					fscanf(f,"custom1_L2_Ply%d=%d\n",&j,&mainMenu_custom1_L2[i]);
+			if (config_1_73 > 0) {
+				fscanf(f,"custom1_L2_Ply%d=%d\n",&j,&mainMenu_custom1_L2[i]);
+				fscanf(f,"custom1_R2_Ply%d=%d\n",&j,&mainMenu_custom1_R2[i]);
+				fscanf(f,"custom1_L3_Ply%d=%d\n",&j,&mainMenu_custom1_L3[i]);
+				fscanf(f,"custom1_R3_Ply%d=%d\n",&j,&mainMenu_custom1_R3[i]);
+				fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+			} else if (config_1_73 == 0) {
+				fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+			} else if (config_1_73 < 0) {
+				if (fscanf(f,"custom1_L2_Ply%d=%d\n",&j,&mainMenu_custom1_L2[i])) {
 					fscanf(f,"custom1_R2_Ply%d=%d\n",&j,&mainMenu_custom1_R2[i]);
 					fscanf(f,"custom1_L3_Ply%d=%d\n",&j,&mainMenu_custom1_L3[i]);
 					fscanf(f,"custom1_R3_Ply%d=%d\n",&j,&mainMenu_custom1_R3[i]);
 					fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
-				} else if (config_1_73 == 0) {
-					fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
-				} else if (config_1_73 < 0) {
-					if (fscanf(f,"custom1_L2_Ply%d=%d\n",&j,&mainMenu_custom1_L2[i])) {
-						fscanf(f,"custom1_R2_Ply%d=%d\n",&j,&mainMenu_custom1_R2[i]);
-    					fscanf(f,"custom1_L3_Ply%d=%d\n",&j,&mainMenu_custom1_L3[i]);
-    					fscanf(f,"custom1_R3_Ply%d=%d\n",&j,&mainMenu_custom1_R3[i]);
-						fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
-						config_1_73 = 1;
-					} else {
-						fscanf(f,"2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
-						config_1_73 = 0;
-					}
+					config_1_73 = 1;
+				} else {
+					fscanf(f,"2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+					config_1_73 = 0;
 				}
-#else
-			  fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
-#endif
-			  fscanf(f,"custom2_down_Ply%d=%d\n",&j,&mainMenu_custom2_down[i]);
-			  fscanf(f,"custom2_left_Ply%d=%d\n",&j,&mainMenu_custom2_left[i]);
-			  fscanf(f,"custom2_right_Ply%d=%d\n",&j,&mainMenu_custom2_right[i]);
-			  fscanf(f,"custom2_A_Ply%d=%d\n",&j,&mainMenu_custom2_A[i]);
-			  fscanf(f,"custom2_B_Ply%d=%d\n",&j,&mainMenu_custom2_B[i]);
-			  fscanf(f,"custom2_X_Ply%d=%d\n",&j,&mainMenu_custom2_X[i]);
-			  fscanf(f,"custom2_Y_Ply%d=%d\n",&j,&mainMenu_custom2_Y[i]);
-			  fscanf(f,"custom2_L_Ply%d=%d\n",&j,&mainMenu_custom2_L[i]);
-			  fscanf(f,"custom2_R_Ply%d=%d\n",&j,&mainMenu_custom2_R[i]);
-#ifdef __SWITCH__
-			  if (config_1_73 != 0) {
-				  fscanf(f,"custom2_L2_Ply%d=%d\n",&j,&mainMenu_custom2_L2[i]);
-				  fscanf(f,"custom2_R2_Ply%d=%d\n",&j,&mainMenu_custom2_R2[i]);
-				  fscanf(f,"custom2_L3_Ply%d=%d\n",&j,&mainMenu_custom2_L3[i]);
-				  fscanf(f,"custom2_R3_Ply%d=%d\n",&j,&mainMenu_custom2_R3[i]);
-			  }
-#endif
-			  fscanf(f,"custom3_up_Ply%d=%d\n",&j,&mainMenu_custom3_up[i]);
-			  fscanf(f,"custom3_down_Ply%d=%d\n",&j,&mainMenu_custom3_down[i]);
-			  fscanf(f,"custom3_left_Ply%d=%d\n",&j,&mainMenu_custom3_left[i]);
-			  fscanf(f,"custom3_right_Ply%d=%d\n",&j,&mainMenu_custom3_right[i]);
-			  fscanf(f,"custom3_A_Ply%d=%d\n",&j,&mainMenu_custom3_A[i]);
-			  fscanf(f,"custom3_B_Ply%d=%d\n",&j,&mainMenu_custom3_B[i]);
-			  fscanf(f,"custom3_X_Ply%d=%d\n",&j,&mainMenu_custom3_X[i]);
-			  fscanf(f,"custom3_Y_Ply%d=%d\n",&j,&mainMenu_custom3_Y[i]);
-			  fscanf(f,"custom3_L_Ply%d=%d\n",&j,&mainMenu_custom3_L[i]);
-			  fscanf(f,"custom3_R_Ply%d=%d\n",&j,&mainMenu_custom3_R[i]);
-#ifdef __SWITCH__
-			  if (config_1_73 != 0) {
-				  fscanf(f,"custom3_L2_Ply%d=%d\n",&j,&mainMenu_custom3_L2[i]);
-				  fscanf(f,"custom3_R2_Ply%d=%d\n",&j,&mainMenu_custom3_R2[i]);
-				  fscanf(f,"custom3_L3_Ply%d=%d\n",&j,&mainMenu_custom3_L3[i]);
-				  fscanf(f,"custom3_R3_Ply%d=%d\n",&j,&mainMenu_custom3_R3[i]);
-			  }
-#endif
 			}
-			remap_custom_controls(); // update the custom variables with the appropriate set.
+#else
+			fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+#endif
+			fscanf(f,"custom2_down_Ply%d=%d\n",&j,&mainMenu_custom2_down[i]);
+			fscanf(f,"custom2_left_Ply%d=%d\n",&j,&mainMenu_custom2_left[i]);
+			fscanf(f,"custom2_right_Ply%d=%d\n",&j,&mainMenu_custom2_right[i]);
+			fscanf(f,"custom2_A_Ply%d=%d\n",&j,&mainMenu_custom2_A[i]);
+			fscanf(f,"custom2_B_Ply%d=%d\n",&j,&mainMenu_custom2_B[i]);
+			fscanf(f,"custom2_X_Ply%d=%d\n",&j,&mainMenu_custom2_X[i]);
+			fscanf(f,"custom2_Y_Ply%d=%d\n",&j,&mainMenu_custom2_Y[i]);
+			fscanf(f,"custom2_L_Ply%d=%d\n",&j,&mainMenu_custom2_L[i]);
+			fscanf(f,"custom2_R_Ply%d=%d\n",&j,&mainMenu_custom2_R[i]);
+#ifdef __SWITCH__
+			if (config_1_73 != 0) {
+				fscanf(f,"custom2_L2_Ply%d=%d\n",&j,&mainMenu_custom2_L2[i]);
+				fscanf(f,"custom2_R2_Ply%d=%d\n",&j,&mainMenu_custom2_R2[i]);
+				fscanf(f,"custom2_L3_Ply%d=%d\n",&j,&mainMenu_custom2_L3[i]);
+				fscanf(f,"custom2_R3_Ply%d=%d\n",&j,&mainMenu_custom2_R3[i]);
+			}
+#endif
+			fscanf(f,"custom3_up_Ply%d=%d\n",&j,&mainMenu_custom3_up[i]);
+			fscanf(f,"custom3_down_Ply%d=%d\n",&j,&mainMenu_custom3_down[i]);
+			fscanf(f,"custom3_left_Ply%d=%d\n",&j,&mainMenu_custom3_left[i]);
+			fscanf(f,"custom3_right_Ply%d=%d\n",&j,&mainMenu_custom3_right[i]);
+			fscanf(f,"custom3_A_Ply%d=%d\n",&j,&mainMenu_custom3_A[i]);
+			fscanf(f,"custom3_B_Ply%d=%d\n",&j,&mainMenu_custom3_B[i]);
+			fscanf(f,"custom3_X_Ply%d=%d\n",&j,&mainMenu_custom3_X[i]);
+			fscanf(f,"custom3_Y_Ply%d=%d\n",&j,&mainMenu_custom3_Y[i]);
+			fscanf(f,"custom3_L_Ply%d=%d\n",&j,&mainMenu_custom3_L[i]);
+			fscanf(f,"custom3_R_Ply%d=%d\n",&j,&mainMenu_custom3_R[i]);
+#ifdef __SWITCH__
+			if (config_1_73 != 0) {
+				fscanf(f,"custom3_L2_Ply%d=%d\n",&j,&mainMenu_custom3_L2[i]);
+				fscanf(f,"custom3_R2_Ply%d=%d\n",&j,&mainMenu_custom3_R2[i]);
+				fscanf(f,"custom3_L3_Ply%d=%d\n",&j,&mainMenu_custom3_L3[i]);
+				fscanf(f,"custom3_R3_Ply%d=%d\n",&j,&mainMenu_custom3_R3[i]);
+			}
+#endif
+		}
+		remap_custom_controls(); // update the custom variables with the appropriate set.
+		if (config_1_82 == -1) {
+			fscanf(f,"pu=%d\n",&mainMenu_CPU_model);
+		} else
 #endif //__PSP2__
-        fscanf(f,"cpu=%d\n",&mainMenu_CPU_model);
+		fscanf(f,"cpu=%d\n",&mainMenu_CPU_model);
         fscanf(f,"chipset=%d\n",&mainMenu_chipset);
         fscanf(f,"spritecollisions=%d\n",&mainMenu_spriteCollisions);
         fscanf(f,"cpu=%d\n",&mainMenu_CPU_speed);

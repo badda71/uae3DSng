@@ -37,24 +37,24 @@ static int can_change_vkbd_transparency=1;
 extern int gp2xMouseEmuOn;
 extern int gp2xButtonRemappingOn;
 #if defined(PANDORA) || defined (ANDROIDSDL)
-extern int dpadUp[4];
-extern int dpadDown[4];
-extern int dpadLeft[4];
-extern int dpadRight[4];
-extern int buttonA[4];
-extern int buttonB[4];
-extern int buttonX[4];
-extern int buttonY[4];
-extern int triggerL[4];
-extern int triggerR[4];
+extern int dpadUp[MAX_NUM_CONTROLLERS];
+extern int dpadDown[MAX_NUM_CONTROLLERS];
+extern int dpadLeft[MAX_NUM_CONTROLLERS];
+extern int dpadRight[MAX_NUM_CONTROLLERS];
+extern int buttonA[MAX_NUM_CONTROLLERS];
+extern int buttonB[MAX_NUM_CONTROLLERS];
+extern int buttonX[MAX_NUM_CONTROLLERS];
+extern int buttonY[MAX_NUM_CONTROLLERS];
+extern int triggerL[MAX_NUM_CONTROLLERS];
+extern int triggerR[MAX_NUM_CONTROLLERS];
 #ifdef __SWITCH__
-extern int triggerL2[4];
-extern int triggerR2[4];
-extern int triggerL3[4];
-extern int triggerR3[4];
+extern int triggerL2[MAX_NUM_CONTROLLERS];
+extern int triggerR2[MAX_NUM_CONTROLLERS];
+extern int triggerL3[MAX_NUM_CONTROLLERS];
+extern int triggerR3[MAX_NUM_CONTROLLERS];
 #endif
-extern int buttonSelect[4];
-extern int buttonStart[4];
+extern int buttonSelect[MAX_NUM_CONTROLLERS];
+extern int buttonStart[MAX_NUM_CONTROLLERS];
 extern int singleJoycons;
 #endif
 #if defined(__PSP2__) || defined(__SWITCH__)
@@ -81,7 +81,7 @@ bool parport_joystick_enabled = true;
 extern int joy2_dir, joy3_dir;
 extern int joy2_button, joy3_button;
 
-SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3;
+SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3, *uae4all_joy4, *uae4all_joy5, *uae4all_joy6, *uae4all_joy7;
 extern SDL_Surface *prSDLScreen;
 
 void read_joystick(int nr, unsigned int *dir, int *button)
@@ -846,9 +846,6 @@ void init_joystick(void)
 {
 	int i;
 	nr_joysticks = SDL_NumJoysticks();
-// only consider the first four controllers
-	if (nr_joysticks > 4)
-		nr_joysticks = 4;
 	if (nr_joysticks > 0)
 		uae4all_joy0 = SDL_JoystickOpen(0);
 	if (nr_joysticks > 1)
@@ -863,6 +860,24 @@ void init_joystick(void)
 		uae4all_joy3 = SDL_JoystickOpen(3);
 	else
 		uae4all_joy3 = NULL;
+	if (nr_joysticks > 4)
+		uae4all_joy4 = SDL_JoystickOpen(4);
+	else
+		uae4all_joy4 = NULL;
+	if (nr_joysticks > 5)
+		uae4all_joy5 = SDL_JoystickOpen(5);
+	else
+		uae4all_joy5 = NULL;
+	if (nr_joysticks > 6)
+		uae4all_joy6 = SDL_JoystickOpen(6);
+	else
+		uae4all_joy6 = NULL;
+	if (nr_joysticks > 7)
+		uae4all_joy7 = SDL_JoystickOpen(7);
+	else
+		uae4all_joy7 = NULL;
+	if (nr_joysticks > MAX_NUM_CONTROLLERS)
+		nr_joysticks = MAX_NUM_CONTROLLERS;
 }
 
 void close_joystick(void)
@@ -875,4 +890,12 @@ void close_joystick(void)
 		SDL_JoystickClose (uae4all_joy2);
 	if (nr_joysticks > 3)
 		SDL_JoystickClose (uae4all_joy3);
+	if (nr_joysticks > 4)
+		SDL_JoystickClose (uae4all_joy4);
+	if (nr_joysticks > 5)
+		SDL_JoystickClose (uae4all_joy5);
+	if (nr_joysticks > 6)
+		SDL_JoystickClose (uae4all_joy6);
+	if (nr_joysticks > 7)
+		SDL_JoystickClose (uae4all_joy7);
 }
