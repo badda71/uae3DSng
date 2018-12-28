@@ -3,6 +3,7 @@ Changes in this Version
 1.82
 
 - support up to eight controllers on Switch
+- allow faster menu navigation by holding down directions
 
 Description
 =====
@@ -287,6 +288,7 @@ CHANGELOG
 1.82
 
 - support up to eight controllers on Switch
+- allow faster menu navigation by holding down directions
 
 1.81
 

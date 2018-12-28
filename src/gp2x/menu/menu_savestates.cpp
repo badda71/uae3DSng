@@ -146,6 +146,32 @@ static inline int key_saveMenu(int *cp)
 	//if (delay<3) return end;
 	//delay=0;
 
+	static int holdingUp=0;
+	static int holdingDown=0;
+	static int holdingRight=0;
+	static int holdingLeft=0;
+	static Uint32 menu_last_press_time=0;
+	static Uint32 menu_last_move_time=0;
+	Uint32 now=SDL_GetTicks();
+	if (holdingLeft || holdingRight || holdingUp || holdingDown)
+	{
+		if (now-menu_last_press_time>MENU_MIN_HOLDING_TIME && now-menu_last_move_time>MENU_MOVE_DELAY)
+		{
+			menu_last_move_time=now;
+			SDL_Event ev;
+			ev.type = SDL_KEYDOWN;
+			if (holdingLeft)
+				ev.key.keysym.sym = SDLK_LEFT;
+			else if (holdingRight)
+				ev.key.keysym.sym = SDLK_RIGHT;
+			else if (holdingUp)
+				ev.key.keysym.sym = SDLK_UP;
+			else if (holdingDown)
+				ev.key.keysym.sym = SDLK_DOWN;
+			SDL_PushEvent(&ev);
+		}
+	}
+
 	while (SDL_PollEvent(&event) > 0)
 	{
 		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hit5=0;
@@ -172,6 +198,49 @@ static inline int key_saveMenu(int *cp)
 #endif
 			}
 		}
+
+		if (event.type == SDL_KEYUP)
+		{
+			switch(event.key.keysym.sym)
+			{
+				case SDLK_RIGHT:
+					holdingRight=0;
+					break;
+				case SDLK_LEFT:
+					holdingLeft=0;
+					break;
+				case SDLK_UP:
+					holdingUp=0;
+					break;
+				case SDLK_DOWN:
+					holdingDown=0;
+					break;
+				default:
+					break;
+			}
+		}
+		
+		if (left && !holdingLeft)
+		{
+			holdingLeft=1;
+			menu_last_press_time=now;
+		}
+		if (right && !holdingRight) 
+		{
+			holdingRight=1;
+			menu_last_press_time=now;
+		}
+		if (up && !holdingUp) 
+		{
+			holdingUp=1;
+			menu_last_press_time=now;
+		}
+		if (down && !holdingDown) 
+		{
+			holdingDown=1;
+			menu_last_press_time=now;
+		}
+
 		if (hit2) // does the user want to shut-down the whole menu?
 		{
 			if (emulating)
