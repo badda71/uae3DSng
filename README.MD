@@ -1,9 +1,9 @@
 Changes in this Version
 ======
-1.82
+1.83
 
-- support up to eight controllers on Switch
-- allow faster menu navigation by holding down directions
+- stop hotkeys from affecting game controls in some cases
+- always allow left stick to control on screen keyboard
 
 Description
 =====
@@ -285,6 +285,11 @@ Compiling
 
 CHANGELOG
 =====
+1.83
+
+- stop hotkeys from affecting game controls in some cases
+- always allow left stick to control on screen keyboard
+
 1.82
 
 - support up to eight controllers on Switch
