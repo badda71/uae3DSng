@@ -784,7 +784,11 @@ void gui_handle_events (void)
 #endif
 		{
 			// analog joystick acts as digital controls with proper circular deadzone
+#ifdef USE_UAE4ALL_VKBD
+			if (i==0 && mainMenu_leftStickMouse && !vkbd_mode)
+#else
 			if (i==0 && mainMenu_leftStickMouse)
+#endif
 			{
 				joyX=rX;
 				joyY=-rY;
