@@ -120,8 +120,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			nr = 1;
 
 	// are we trying to figure out the regular GP2X controls for the primary (or first two) joysticks?
-	int usingRegularControls = (!mainMenu_customControls) && ((mainMenu_joyPort == 0 && (nr == 0 || nr == 1)) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1));
-	
+#ifdef USE_UAE4ALL_VKBD
+	int usingRegularControls = ((!mainMenu_customControls) && ((mainMenu_joyPort == 0 && (nr == 0 || nr == 1)) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]) && !vkbd_mode);
+#else
+	int usingRegularControls = ((!mainMenu_customControls) && ((mainMenu_joyPort == 0 && (nr == 0 || nr == 1)) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]));
+#endif
 	//PSP2 updates joysticks in handle_events function which is always called 
 	//just before read_joystick is called. No need to update them again here
 #if !defined(__PSP2__) && !defined(__SWITCH__)
@@ -234,11 +237,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	}
 
 // regular button controls without custom remapping
-#ifdef USE_UAE4ALL_VKBD
-	if (usingRegularControls && !(gp2xMouseEmuOn) && !(gp2xButtonRemappingOn) && !vkbd_mode)
-#else
 	if (usingRegularControls && !(gp2xMouseEmuOn) && !(gp2xButtonRemappingOn))
-#endif
 	{
 		if (
 			(mainMenu_autofire & switch_autofire & delay>mainMenu_autofireRate)
@@ -287,9 +286,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 //Analog Mouse on PSP2, only update once per frame (when nr==1)
 #if defined(__PSP2__) || defined(__SWITCH__)
 #ifdef USE_UAE4ALL_VKBD
-	if (!vkbd_mode && (nr == 1))
+	if ((nr == 1) && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
 #else
-	if (nr == 1)
+	if (nr == 1 !(buttonStart[0] && triggerR[0]))
 #endif
 	{
 		//slow down mouse motion if custom "slow mouse" button is held
@@ -479,9 +478,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 #endif //__PSP2__
 
 #ifdef USE_UAE4ALL_VKBD
-	if(mainMenu_customControls && !vkbd_mode)
+	if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
 #else
-	if(mainMenu_customControls)
+	if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]))
 #endif
 	{
 		for (int i=0; i<nr_joysticks; i++)
@@ -578,9 +577,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if(!gp2xMouseEmuOn && !gp2xButtonRemappingOn)
 	{
 #ifdef USE_UAE4ALL_VKBD
-		if(mainMenu_customControls && !vkbd_mode)
+		if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
 #else
-		if(mainMenu_customControls)
+		if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]))
 #endif
 		{
 			for (int i=0; i<nr_joysticks; i++)

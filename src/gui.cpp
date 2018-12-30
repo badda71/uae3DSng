@@ -785,9 +785,9 @@ void gui_handle_events (void)
 		{
 			// analog joystick acts as digital controls with proper circular deadzone
 #ifdef USE_UAE4ALL_VKBD
-			if (i==0 && mainMenu_leftStickMouse && !vkbd_mode)
+			if (i==0 && mainMenu_leftStickMouse && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
 #else
-			if (i==0 && mainMenu_leftStickMouse)
+			if (i==0 && mainMenu_leftStickMouse && !(buttonStart[0] && triggerR[0]))
 #endif
 			{
 				joyX=rX;
@@ -1819,7 +1819,7 @@ if(!vkbd_mode)
 		}
 	}
 
-	if(!mainMenu_customControls && triggerR[0])
+	if(!mainMenu_customControls && triggerR[0] && !(buttonStart[0]))
 	{
 		//R+dpad = arrow keys in joystick mode
 		//dpad up
