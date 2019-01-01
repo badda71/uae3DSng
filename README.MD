@@ -4,6 +4,7 @@ Changes in this Version
 
 - stop hotkeys from affecting game controls in some cases
 - always allow left stick to control on screen keyboard
+- allow mapping of stick and dpad independently
 
 Description
 =====
@@ -289,6 +290,7 @@ CHANGELOG
 
 - stop hotkeys from affecting game controls in some cases
 - always allow left stick to control on screen keyboard
+- allow mapping of stick and dpad independently
 
 1.82
 

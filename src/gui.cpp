@@ -68,6 +68,10 @@ int justLComma=0, justLPeriod=0;
 #ifdef USE_UAE4ALL_VKBD
 int justLK=0;
 #endif
+int justMovedStickUp[MAX_NUM_CONTROLLERS]={};
+int justMovedStickDown[MAX_NUM_CONTROLLERS]={};
+int justMovedStickLeft[MAX_NUM_CONTROLLERS]={};
+int justMovedStickRight[MAX_NUM_CONTROLLERS]={};
 int justPressedA[MAX_NUM_CONTROLLERS]={};
 int justPressedB[MAX_NUM_CONTROLLERS]={};
 int justPressedX[MAX_NUM_CONTROLLERS]={};
@@ -174,6 +178,10 @@ int dpadUp[MAX_NUM_CONTROLLERS]={};
 int dpadDown[MAX_NUM_CONTROLLERS]={};
 int dpadLeft[MAX_NUM_CONTROLLERS]={};
 int dpadRight[MAX_NUM_CONTROLLERS]={};
+int stickUp[MAX_NUM_CONTROLLERS]={};
+int stickDown[MAX_NUM_CONTROLLERS]={};
+int stickLeft[MAX_NUM_CONTROLLERS]={};
+int stickRight[MAX_NUM_CONTROLLERS]={};
 int buttonA[MAX_NUM_CONTROLLERS]={}; // Vita Square, GP2X_BUTTON_B
 int buttonB[MAX_NUM_CONTROLLERS]={}; // Vita Circle, GP2X_BUTTON_A
 int buttonX[MAX_NUM_CONTROLLERS]={}; // Vita Cross, GP2X_BUTTON_X
@@ -261,6 +269,10 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 				mainMenu_custom_down[i] = mainMenu_custom1_down[i];
 				mainMenu_custom_left[i] = mainMenu_custom1_left[i];
 				mainMenu_custom_right[i] = mainMenu_custom1_right[i];
+				mainMenu_custom_stickup[i] = mainMenu_custom1_stickup[i];
+				mainMenu_custom_stickdown[i] = mainMenu_custom1_stickdown[i];
+				mainMenu_custom_stickleft[i] = mainMenu_custom1_stickleft[i];
+				mainMenu_custom_stickright[i] = mainMenu_custom1_stickright[i];
 				mainMenu_custom_A[i] = mainMenu_custom1_A[i];
 				mainMenu_custom_B[i] = mainMenu_custom1_B[i];
 				mainMenu_custom_X[i] = mainMenu_custom1_X[i];
@@ -279,6 +291,10 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 				mainMenu_custom_down[i] = mainMenu_custom2_down[i];
 				mainMenu_custom_left[i] = mainMenu_custom2_left[i];
 				mainMenu_custom_right[i] = mainMenu_custom2_right[i];
+				mainMenu_custom_stickup[i] = mainMenu_custom2_stickup[i];
+				mainMenu_custom_stickdown[i] = mainMenu_custom2_stickdown[i];
+				mainMenu_custom_stickleft[i] = mainMenu_custom2_stickleft[i];
+				mainMenu_custom_stickright[i] = mainMenu_custom2_stickright[i];
 				mainMenu_custom_A[i] = mainMenu_custom2_A[i];
 				mainMenu_custom_B[i] = mainMenu_custom2_B[i];
 				mainMenu_custom_X[i] = mainMenu_custom2_X[i];
@@ -297,6 +313,10 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 				mainMenu_custom_down[i] = mainMenu_custom3_down[i];
 				mainMenu_custom_left[i] = mainMenu_custom3_left[i];
 				mainMenu_custom_right[i] = mainMenu_custom3_right[i];
+				mainMenu_custom_stickup[i] = mainMenu_custom3_stickup[i];
+				mainMenu_custom_stickdown[i] = mainMenu_custom3_stickdown[i];
+				mainMenu_custom_stickleft[i] = mainMenu_custom3_stickleft[i];
+				mainMenu_custom_stickright[i] = mainMenu_custom3_stickright[i];
 				mainMenu_custom_A[i] = mainMenu_custom3_A[i];
 				mainMenu_custom_B[i] = mainMenu_custom3_B[i];
 				mainMenu_custom_X[i] = mainMenu_custom3_X[i];
@@ -723,7 +743,12 @@ void gui_handle_events (void)
 		dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, PAD_LEFT);
 		dpadUp[i]  = SDL_JoystickGetButton(currentJoy, PAD_UP);
 		dpadDown[i]  = SDL_JoystickGetButton(currentJoy, PAD_DOWN);
-		
+
+		stickUp[i] = 0;
+		stickDown[i] = 0;
+		stickLeft[i] = 0;
+		stickRight[i] = 0;
+
 		buttonA[i] = SDL_JoystickGetButton(currentJoy, PAD_SQUARE);
 		buttonB[i] = SDL_JoystickGetButton(currentJoy, PAD_CIRCLE);
 		buttonX[i] = SDL_JoystickGetButton(currentJoy, PAD_CROSS);
@@ -751,6 +776,10 @@ void gui_handle_events (void)
 			dpadLeft[i] = 0;
 			dpadUp[i] = 0;
 			dpadDown[i] = 0;
+			stickUp[i] = 0;
+			stickDown[i] = 0;
+			stickLeft[i] = 0;
+			stickRight[i] = 0;
 			triggerL2[i] = 0;
 			triggerR2[i] = 0;
 			
@@ -801,37 +830,58 @@ void gui_handle_events (void)
 		}
 		if ((joyX*joyX + joyY*joyY) > joyDeadZoneSquared)
 		{
+			int *up = 0;
+			int *down = 0;
+			int *left = 0;
+			int *right = 0;
+#ifdef __SWITCH__
+			if (mainMenu_customControls && !vkbd_mode && !(buttonStart[0] && triggerR[0]) && !singleJoycons)
+#else
+			if (mainMenu_customControls && !vkbd_mode && !(buttonStart[0] && triggerR[0]))
+#endif
+			{
+				up = &stickUp[i];
+				down = &stickDown[i];
+				left = &stickLeft[i];
+				right = &stickRight[i];
+			} else
+			{
+				up = &dpadUp[i];
+				down = &dpadDown[i];
+				left = &dpadLeft[i];
+				right = &dpadRight[i];
+			}
 			// upper right quadrant
 			if (joyY>0 && joyX>0)
 			{
 				if (joyY>slope*joyX)
-					dpadUp[i] = 1;
+					*up = 1;
 				if (joyX>slope*joyY)
-					dpadRight[i] = 1;
+					*right = 1;
 			}
 			// upper left quadrant
 			else if (joyY>0 && joyX<=0)
 			{
 				if (joyY>slope*(-joyX))
-					dpadUp[i] = 1;
+					*up = 1;
 				if ((-joyX)>slope*joyY)
-					dpadLeft[i] = 1;
+					*left = 1;
 			}
 			// lower right quadrant
 			else if (joyY<=0 && joyX>0)
 			{
 				if ((-joyY)>slope*joyX)
-					dpadDown[i] = 1;
+					*down = 1;
 				if (joyX>slope*(-joyY))
-					dpadRight[i] = 1;
+					*right = 1;
 			}
 			// lower left quadrant
 			else if (joyY<=0 && joyX<=0)
 			{
 				if ((-joyY)>slope*(-joyX))
-					dpadDown[i] = 1;
+					*down = 1;
 				if ((-joyX)>slope*(-joyY))
-					dpadLeft[i] = 1;
+					*left = 1;
 			}
 		}
 	}
@@ -1383,9 +1433,9 @@ if(!vkbd_mode)
 			if(mainMenu_custom_dpad == 0) // always true on Vita
 			{
 #ifdef __SWITCH__
-				for (int j = 0; j < 14; j++)
+				for (int j = 0; j < 18; j++)
 #else				
-				for (int j = 0; j < 10; j++)
+				for (int j = 0; j < 14; j++)
 #endif
 				{
 					switch (j)
@@ -1415,61 +1465,85 @@ if(!vkbd_mode)
 							mainMenu_custom = &(mainMenu_custom_right[i]);
 							break;
 						case 4:
+							//STICK UP
+							button = &(stickUp[i]);
+							justPressed = &(justMovedStickUp[i]);
+							mainMenu_custom = &(mainMenu_custom_stickup[i]);
+							break;
+						case 5:
+							//STICK DOWN
+							button = &(stickDown[i]);
+							justPressed = &(justMovedStickDown[i]);
+							mainMenu_custom = &(mainMenu_custom_stickdown[i]);
+							break;
+						case 6:
+							//STICK LEFT
+							button = &(stickLeft[i]);
+							justPressed = &(justMovedStickLeft[i]);
+							mainMenu_custom = &(mainMenu_custom_stickleft[i]);
+							break;
+						case 7:
+							//STICK RIGHT
+							button = &(stickRight[i]);
+							justPressed = &(justMovedStickRight[i]);
+							mainMenu_custom = &(mainMenu_custom_stickright[i]);
+							break;
+						case 8:
 							//(A)
 							button = &(buttonA[i]);
 							justPressed = &(justPressedA[i]);
 							mainMenu_custom = &(mainMenu_custom_A[i]);
 							break;
-						case 5:
+						case 9:
 							//(B)
 							button = &(buttonB[i]);
 							justPressed = &(justPressedB[i]);
 							mainMenu_custom = &(mainMenu_custom_B[i]);
 							break;
-						case 6:
+						case 10:
 							//(X)
 							button = &(buttonX[i]);
 							justPressed = &(justPressedX[i]);
 							mainMenu_custom = &(mainMenu_custom_X[i]);
 							break;
-						case 7:
+						case 11:
 							//(Y)
 							button = &(buttonY[i]);
 							justPressed = &(justPressedY[i]);
 							mainMenu_custom = &(mainMenu_custom_Y[i]);
 							break;
-						case 8:
+						case 12:
 							//(L)
 							button = &(triggerL[i]);
 							justPressed = &(justPressedL[i]);
 							mainMenu_custom = &(mainMenu_custom_L[i]);
 							break;
-						case 9:
+						case 13:
 							//(R)
 							button = &(triggerR[i]);
 							justPressed = &(justPressedR[i]);
 							mainMenu_custom = &(mainMenu_custom_R[i]);
 							break;
 #ifdef __SWITCH__
-						case 10:
+						case 14:
 							//(L2)
 							button = &(triggerL2[i]);
 							justPressed = &(justPressedL2[i]);
 							mainMenu_custom = &(mainMenu_custom_L2[i]);
 							break;
-						case 11:
+						case 15:
 							//(R2)
 							button = &(triggerR2[i]);
 							justPressed = &(justPressedR2[i]);
 							mainMenu_custom = &(mainMenu_custom_R2[i]);
 							break;
-						case 12:
+						case 16:
 							//(L3)
 							button = &(triggerL3[i]);
 							justPressed = &(justPressedL3[i]);
 							mainMenu_custom = &(mainMenu_custom_L3[i]);
 							break;
-						case 13:
+						case 17:
 							//(R3)
 							button = &(triggerR3[i]);
 							justPressed = &(justPressedR3[i]);

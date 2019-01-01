@@ -41,6 +41,10 @@ extern int dpadUp[MAX_NUM_CONTROLLERS];
 extern int dpadDown[MAX_NUM_CONTROLLERS];
 extern int dpadLeft[MAX_NUM_CONTROLLERS];
 extern int dpadRight[MAX_NUM_CONTROLLERS];
+extern int stickUp[MAX_NUM_CONTROLLERS];
+extern int stickDown[MAX_NUM_CONTROLLERS];
+extern int stickLeft[MAX_NUM_CONTROLLERS];
+extern int stickRight[MAX_NUM_CONTROLLERS];
 extern int buttonA[MAX_NUM_CONTROLLERS];
 extern int buttonB[MAX_NUM_CONTROLLERS];
 extern int buttonX[MAX_NUM_CONTROLLERS];
@@ -529,7 +533,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				top = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
-				if((mainMenu_custom_up[i]==u && dpadUp[i]) || (mainMenu_custom_down[i]==u && dpadDown[i]) || (mainMenu_custom_left[i]==u && dpadLeft[i]) || (mainMenu_custom_right[i]==u && dpadRight[i]))
+				if((mainMenu_custom_up[i]==u && dpadUp[i]) || (mainMenu_custom_down[i]==u && dpadDown[i]) || (mainMenu_custom_left[i]==u && dpadLeft[i]) || (mainMenu_custom_right[i]==u && dpadRight[i]) 
+				|| (mainMenu_custom_stickup[i]==u && stickUp[i]) || (mainMenu_custom_stickdown[i]==u && stickDown[i]) || (mainMenu_custom_stickleft[i]==u && stickLeft[i]) || (mainMenu_custom_stickright[i]==u && stickRight[i]))
 					top = 1;
 			}
 
@@ -542,7 +547,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				bot = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
-				if((mainMenu_custom_up[i]==d && dpadUp[i]) || (mainMenu_custom_down[i]==d && dpadDown[i]) || (mainMenu_custom_left[i]==d && dpadLeft[i]) || (mainMenu_custom_right[i]==d && dpadRight[i]))
+				if((mainMenu_custom_up[i]==d && dpadUp[i]) || (mainMenu_custom_down[i]==d && dpadDown[i]) || (mainMenu_custom_left[i]==d && dpadLeft[i]) || (mainMenu_custom_right[i]==d && dpadRight[i])
+				|| (mainMenu_custom_stickup[i]==d && stickUp[i]) || (mainMenu_custom_stickdown[i]==d && stickDown[i]) || (mainMenu_custom_stickleft[i]==d && stickLeft[i]) || (mainMenu_custom_stickright[i]==d && stickRight[i]))
 					bot = 1;
 			}
 
@@ -555,7 +561,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				left = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
-				if((mainMenu_custom_up[i]==l && dpadUp[i]) || (mainMenu_custom_down[i]==l && dpadDown[i]) || (mainMenu_custom_left[i]==l && dpadLeft[i]) || (mainMenu_custom_right[i]==l && dpadRight[i]))
+				if((mainMenu_custom_up[i]==l && dpadUp[i]) || (mainMenu_custom_down[i]==l && dpadDown[i]) || (mainMenu_custom_left[i]==l && dpadLeft[i]) || (mainMenu_custom_right[i]==l && dpadRight[i])
+				|| (mainMenu_custom_stickup[i]==l && stickUp[i]) || (mainMenu_custom_stickdown[i]==l && stickDown[i]) || (mainMenu_custom_stickleft[i]==l && stickLeft[i]) || (mainMenu_custom_stickright[i]==l && stickRight[i]))
 					left = 1;
 			}
 
@@ -568,7 +575,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				right = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
-				if((mainMenu_custom_up[i]==r && dpadUp[i]) || (mainMenu_custom_down[i]==r && dpadDown[i]) || (mainMenu_custom_left[i]==r && dpadLeft[i]) || (mainMenu_custom_right[i]==r && dpadRight[i]))
+				if((mainMenu_custom_up[i]==r && dpadUp[i]) || (mainMenu_custom_down[i]==r && dpadDown[i]) || (mainMenu_custom_left[i]==r && dpadLeft[i]) || (mainMenu_custom_right[i]==r && dpadRight[i])
+				|| (mainMenu_custom_stickup[i]==r && stickUp[i]) || (mainMenu_custom_stickdown[i]==r && stickDown[i]) || (mainMenu_custom_stickleft[i]==r && stickLeft[i]) || (mainMenu_custom_stickright[i]==r && stickRight[i]))
 					right = 1;
 			}
 		}
@@ -621,7 +629,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					*button = 1;
 				else if(mainMenu_custom_dpad == 0)
 				{
-					if((mainMenu_custom_up[i]==b1 && dpadUp[i]) || (mainMenu_custom_down[i]==b1 && dpadDown[i]) || (mainMenu_custom_left[i]==b1 && dpadLeft[i]) || (mainMenu_custom_right[i]==b1 && dpadRight[i]))
+					if((mainMenu_custom_up[i]==b1 && dpadUp[i]) || (mainMenu_custom_down[i]==b1 && dpadDown[i]) || (mainMenu_custom_left[i]==b1 && dpadLeft[i]) || (mainMenu_custom_right[i]==b1 && dpadRight[i])
+					|| (mainMenu_custom_stickup[i]==b1 && stickUp[i]) || (mainMenu_custom_stickdown[i]==b1 && stickDown[i]) || (mainMenu_custom_stickleft[i]==b1 && stickLeft[i]) || (mainMenu_custom_stickright[i]==b1 && stickRight[i]))
 						*button = 1;
 				}
 				if((mainMenu_custom_A[i]==b2 && buttonA[i]) || (mainMenu_custom_B[i]==b2 && buttonB[i]) || (mainMenu_custom_X[i]==b2 && buttonX[i]) || (mainMenu_custom_Y[i]==b2 && buttonY[i]) || (mainMenu_custom_L[i]==b2 && triggerL[i]) || (mainMenu_custom_R[i]==b2 && triggerR[i])
@@ -633,7 +642,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					*button |= 1 << 1;
 				else if(mainMenu_custom_dpad == 0)
 				{
-					if((mainMenu_custom_up[i]==b2 && dpadUp[i]) || (mainMenu_custom_down[i]==b2 && dpadDown[i]) || (mainMenu_custom_left[i]==b2 && dpadLeft[i]) || (mainMenu_custom_right[i]==b2 && dpadRight[i]))
+					if((mainMenu_custom_up[i]==b2 && dpadUp[i]) || (mainMenu_custom_down[i]==b2 && dpadDown[i]) || (mainMenu_custom_left[i]==b2 && dpadLeft[i]) || (mainMenu_custom_right[i]==b2 && dpadRight[i])
+					|| (mainMenu_custom_stickup[i]==b2 && stickUp[i]) || (mainMenu_custom_stickdown[i]==b2 && stickDown[i]) || (mainMenu_custom_stickleft[i]==b2 && stickLeft[i]) || (mainMenu_custom_stickright[i]==b2 && stickRight[i]))
 						*button |= 1 << 1;
 				}
 			}
