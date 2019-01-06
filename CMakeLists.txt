@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 83)
+set(VERSION_MINOR 84)
 
 if(BUILD_PSP2)
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -120,6 +120,7 @@ if(BUILD_PSP2)
     src/psp2/psp2_shader.cpp
     src/psp2/psp2-dirent.c
     src/psp2/psp2_touch.c
+    src/psp2/psp2_kbdvita.c
     src/neon_helper.s
     src/gp2x/memset.s
     src/gp2x/memcpy.s
@@ -154,6 +155,7 @@ if(BUILD_PSP2)
           SceSysmodule_stub SceDisplay_stub SceGxm_stub
           SceCtrl_stub ScePgf_stub ScePower_stub SceCommonDialog_stub
           SceAudio_stub SceShellSvc_stub SceHid_stub SceTouch_stub png jpeg z m c
+          SceAppUtil_stub
   )
 
   if (BUILD_DEBUG)
@@ -185,6 +187,7 @@ if(BUILD_NX)
   set(NX_SRC_FILES
     src/switch/switch_touch.c
     src/switch/sdl2_to_sdl1.cpp
+    src/switch/switch_kbd.c
   )
   set(SRC_FILES ${NX_SRC_FILES} ${SRC_FILES})
 

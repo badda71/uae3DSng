@@ -21,6 +21,15 @@ extern int screenWidth;
 extern int moveX;
 extern int moveY;
 
+
+#ifdef __SWITCH__
+#include "switch_kbd.h"
+#endif
+
+#ifdef __PSP2__
+#include "psp2_kbdvita.h"
+#endif
+
 #if !( defined(PANDORA) || defined(ANDROIDSDL) )
 extern int timeslice_mode;
 #endif
@@ -40,6 +49,8 @@ char filename0[256] = "";
 char filename1[256] = "";
 char filename2[256] = "";
 char filename3[256] = "";
+
+char config_load_filename[300] = "";
 
 int mainMenu_chipMemory = DEFAULT_CHIPMEM_SELECT;
 int mainMenu_slowMemory = 0;	/* off */
@@ -1204,7 +1215,21 @@ int saveconfig(int general)
     case 3:
         snprintf(path, 300, config_filename, launchDir);
         break;
+    case 4:
+#if defined(__SWITCH__) || defined(__PSP2__)
+        char buf[100] = "";
+#ifdef __SWITCH__
+        kbdswitch_get("Enter config name:", "myconfig", 100, 0, buf);
+#else
+        strcpy(buf, kbdvita_get("Enter config name:", "myconfig", 100, 0));
+#endif
+        snprintf(path, 300, "%s/conf/%s%s", launchDir, buf, ".conf");
+#else
+        return 0;
+#endif
+        break;
     }
+
 
     FILE *f=fopen(path,"w");
     if (!f) return 0;
@@ -1461,30 +1486,38 @@ int saveconfig(int general)
     snprintf((char*)buffer, 255, "cpu=%d\n",-mainMenu_CPU_speed);
     fputs(buffer,f);
 
-    if(general == 0) {
-        char namebuffer[256];
+    char namebuffer[256];
+    if (uae4all_image_file0[0]) {
         strcpy(namebuffer,uae4all_image_file0);
         replace (namebuffer,'|',' ');
         snprintf((char*)buffer, 255, "df0=%s\n",namebuffer);
         fputs(buffer,f);
-        if (uae4all_image_file1[0]) {
-            strcpy(namebuffer,uae4all_image_file1);
-            replace (namebuffer,'|',' ');
-            snprintf((char*)buffer, 255, "df1=%s\n",namebuffer);
-            fputs(buffer,f);
-        }
-        if (uae4all_image_file2[0]) {
-            strcpy(namebuffer,uae4all_image_file2);
-            replace (namebuffer,'|',' ');
-            snprintf((char*)buffer, 255, "df2=%s\n",namebuffer);
-            fputs(buffer,f);
-        }
-        if (uae4all_image_file3[0]) {
-            strcpy(namebuffer,uae4all_image_file3);
-            replace (namebuffer,'|',' ');
-            snprintf((char*)buffer, 255, "df3=%s\n",namebuffer);
-            fputs(buffer,f);
-        }
+    } else {
+        fputs("df0=\n",f);
+    }
+    if (uae4all_image_file1[0] && nr_drives > 1) {
+        strcpy(namebuffer,uae4all_image_file1);
+        replace (namebuffer,'|',' ');
+        snprintf((char*)buffer, 255, "df1=%s\n",namebuffer);
+        fputs(buffer,f);
+    } else {
+        fputs("df1=\n",f);
+    }
+    if (uae4all_image_file2[0] && nr_drives > 2) {
+        strcpy(namebuffer,uae4all_image_file2);
+        replace (namebuffer,'|',' ');
+        snprintf((char*)buffer, 255, "df2=%s\n",namebuffer);
+        fputs(buffer,f);
+    } else {
+            fputs("df2=\n",f);
+    }
+    if (uae4all_image_file3[0] && nr_drives > 3) {
+        strcpy(namebuffer,uae4all_image_file3);
+        replace (namebuffer,'|',' ');
+        snprintf((char*)buffer, 255, "df3=%s\n",namebuffer);
+        fputs(buffer,f);
+    } else {
+            fputs("df3=\n",f);
     }
     snprintf((char*)buffer, 255, "script=%d\n",mainMenu_enableScripts);
     fputs(buffer,f);
@@ -1594,7 +1627,6 @@ int saveconfig(int general)
  	fputs(buffer,f);
 #endif
 
-    char namebuffer[256];
     strcpy(namebuffer,custom_kickrom);
     replace (namebuffer,'|',' ');
     snprintf((char*)buffer, 255, "custom_kickrom=%s\n",namebuffer);
@@ -1619,6 +1651,7 @@ void loadconfig(int general)
 // general == 2: loading hdf-file-specific config after inserting hdf file #1
 // general == 3: loading config from guichan (unused)
 // general == 4: loading hd-dir-specific config after selecting hd dir
+// general == 5: loading general config via the load config... filerequester option on main menu 
 #if defined(__PSP2__) || defined(__SWITCH__)
 	if (general == 1)
 	{
@@ -1676,6 +1709,9 @@ void loadconfig(int general)
             create_configfilename(path, uae4all_hard_dir, 1);
         if(path[0] == '\0')
             return;
+    }
+    else if (general == 5) {
+        snprintf(path, 300, config_load_filename);
     }
 
     FILE *f=fopen(path,"rt");
@@ -1920,32 +1956,42 @@ void loadconfig(int general)
                     mainMenu_CPU_speed = 2;
             }
         }
-        if(general == 0) {
-            fscanf(f,"df0=%s\n",&filebuffer);
+
+        memset(filebuffer, 0, 256);
+        //fscanf cannot be used to read zero length strings, so read the equal sign, too
+        if (fscanf(f,"df0%s\n",filebuffer)) {
             replace(filebuffer,' ','|');
-            strcpy(uae4all_image_file0,filebuffer);
-            if(nr_drives > 1) {
-                memset(filebuffer, 0, 256);
-                fscanf(f,"df1=%s\n",&filebuffer);
-                replace(filebuffer,' ','|');
-                strcpy(uae4all_image_file1,filebuffer);
-                extractFileName(uae4all_image_file1,filename1);
-            }
-            if(nr_drives > 2) {
-                memset(filebuffer, 0, 256);
-                fscanf(f,"df2=%s\n",&filebuffer);
-                replace(filebuffer,' ','|');
-                strcpy(uae4all_image_file2,filebuffer);
-                extractFileName(uae4all_image_file2,filename2);
-            }
-            if(nr_drives > 3) {
-                memset(filebuffer, 0, 256);
-                fscanf(f,"df3=%s\n",&filebuffer);
-                replace(filebuffer,' ','|');
-                strcpy(uae4all_image_file3,filebuffer);
-                extractFileName(uae4all_image_file3,filename3);
-            }
+            strcpy(uae4all_image_file0,filebuffer+1);
+            extractFileName(uae4all_image_file0,filename0);
+        } else {
+            memset(uae4all_image_file0, 0, 256);
+            memset(filename0, 0, 256);
         }
+        if (fscanf(f,"df1%s\n",filebuffer)) {
+            replace(filebuffer,' ','|');
+            strcpy(uae4all_image_file1,filebuffer+1);
+            extractFileName(uae4all_image_file1,filename1);
+        } else {
+            memset(uae4all_image_file1, 0, 256);
+            memset(filename1, 0, 256);
+        }
+        if (fscanf(f,"df2%s\n",filebuffer)) {
+            replace(filebuffer,' ','|');
+            strcpy(uae4all_image_file2,filebuffer+1);
+            extractFileName(uae4all_image_file2,filename2);
+        } else {
+            memset(uae4all_image_file2, 0, 256);
+            memset(filename2, 0, 256);
+        }
+        if (fscanf(f,"df3%s\n",filebuffer)) {
+            replace(filebuffer,' ','|');
+            strcpy(uae4all_image_file3,filebuffer+1);
+            extractFileName(uae4all_image_file3,filename3);
+        } else {
+            memset(uae4all_image_file3, 0, 256);
+            memset(filename3, 0, 256);
+        }
+
         mainMenu_drives=nr_drives;
         // in versions <=1.70, some config files are missing the following
         // hd settings, so skip them if the `script=`` line is absent
@@ -2058,7 +2104,7 @@ void loadconfig(int general)
 		fscanf(f,"VSync=%d\n",&mainMenu_vsync);
 #endif
         memset(filebuffer, 0, 256);
-        fscanf(f,"custom_kickrom=%s\n",&filebuffer);
+        fscanf(f,"custom_kickrom=%s\n",filebuffer);
         replace(filebuffer,' ','|');
         if (filebuffer[0]) {
             strcpy(custom_kickrom, filebuffer);

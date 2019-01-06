@@ -379,7 +379,9 @@ int gui_init (void)
 			run_mainMenuGuichan();
 #else
 		init_text(1);
+#if !defined(__SWITCH__) && !defined(__PSP2__)
 		if (!uae4all_image_file0[0])
+#endif
 			run_mainMenu();
 		quit_text();
 #endif

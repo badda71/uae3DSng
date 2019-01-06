@@ -33,8 +33,8 @@
 static int justSwitchedSingleJoycons = 0;
 #endif
 
-const char *text_str_misc_separator="----------------------------------";
-static const char *text_str_misc_title=    "            Miscellanous         -";
+const char *text_str_misc_separator="-------------------------------------";
+static const char *text_str_misc_title=    "            Miscellanous            -";
 static const char *text_str_stylus_offset="StylusOffset";
 static const char *text_str_0px="0px";
 static const char *text_str_1px="1px";
