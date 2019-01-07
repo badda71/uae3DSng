@@ -475,6 +475,10 @@ static void draw_controlsMenu(int c)
 		write_text_inv(leftMargin+17,menuLine,"4");
 	else
 		write_text(leftMargin+17,menuLine,"4");
+	if ((mainMenu_custom_controlSet==4)&&((menuControls!=MENUCONTROLS_CUSTOMSET)||(bb)))
+		write_text_inv(leftMargin+19,menuLine,"5");
+	else
+		write_text(leftMargin+19,menuLine,"5");
 		
 #else
 	menuLine++;
@@ -500,15 +504,15 @@ static void draw_controlsMenu(int c)
 	{
 
 		// MENUCONTROLS_STICK
-		write_text(tabstop3+1,menuLine,"Edit");
+		write_text(tabstop3+1+5,menuLine,"Edit");
 		if ((editingStick==0)&&((menuControls!=MENUCONTROLS_STICK)||(bb)))
-			write_text_inv(tabstop6,menuLine,"Dpad");
+			write_text_inv(tabstop6+5,menuLine,"Dpad");
 		else
-			write_text(tabstop6,menuLine,"Dpad");
+			write_text(tabstop6+5,menuLine,"Dpad");
 		if ((editingStick==1)&&((menuControls!=MENUCONTROLS_STICK)||(bb)))
-			write_text_inv(tabstop9,menuLine,"Stick");
+			write_text_inv(tabstop9+4,menuLine,"Stick");
 		else
-			write_text(tabstop9,menuLine,"Stick");
+			write_text(tabstop9+4,menuLine,"Stick");
 
 		menuLine++;
 		write_text(leftMargin,menuLine,text_str_controls_separator);
