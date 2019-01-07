@@ -32,7 +32,7 @@ extern void update_joycon_mode(void);
 SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
 	if (!renderer) {
 		window = SDL_CreateWindow("uae4all2", 0, 0, 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
 		SDL_RenderClear(renderer);
 		SDL_DisplayMode DM;
 		SDL_GetCurrentDisplayMode(0, &DM);
