@@ -1008,7 +1008,7 @@ int run_mainMenu()
 				if (emulating)
 				{
 					int old_saveMenu_n_savestate = saveMenu_n_savestate;
-					saveMenu_n_savestate=4;
+					saveMenu_n_savestate=11;
 					make_savestate_filenames(savestate_filename,NULL);
 					f=fopen(savestate_filename,"rb");
 					if (f)
