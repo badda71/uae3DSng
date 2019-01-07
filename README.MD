@@ -4,7 +4,7 @@ Changes in this Version
 
 - implement config load with dialog, config save as, and config delete
 - increase number of savestates per game to 12
-- increase number of custom control sets to 5
+- increase number of custom control sets to 6
 - on Switch, fix some issues with VSync
 
 Description
@@ -53,7 +53,7 @@ Vita/Switch-exclusive Features
 ======
 - Full speed emulation of most Amiga games with zero frameskip
 - Large, complete virtual keyboard with adjustable position and adjustable transparency
-- Five fully mappable custom control sets: map Vita/Switch buttons to any Amiga joystick or key input
+- Six fully mappable custom control sets: map Vita/Switch buttons to any Amiga joystick or key input
 - Multiple hard-file support: up to 4 hdf files (size <2GB each on Vita, size <4GB each on Switch) can be mounted simultaneously
 - Multiple controller support on Vita TV/Switch: up to four (eight on Switch) paired controllers can be fully mapped
 - Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
@@ -291,7 +291,7 @@ CHANGELOG
 
 - implement config load with dialog, config save as, and config delete
 - increase number of savestates per game to 12
-- increase number of custom control sets to 5
+- increase number of custom control sets to 6
 - on Switch, fix some issues with VSync
 
 1.83
