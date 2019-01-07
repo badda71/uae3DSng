@@ -1,4 +1,4 @@
-[1][[1][0]#define _MENU_CONFIG_CPP
+#define _MENU_CONFIG_CPP
 
 #include "sysconfig.h"
 #include "sysdeps.h"
@@ -317,7 +317,7 @@ void SetDefaultMenuSettings(int general)
 			mainMenu_customPreset_L3[j][i] = 0;
 			mainMenu_customPreset_R3[j][i] = 0;
 #endif
-
+		}
 	}
 	// remember on Switch/Vita 
 	// X is the bottom button
@@ -1285,42 +1285,42 @@ int saveconfig(int general)
 	{
 		for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++)
 		{
-			snprintf((char*)buffer, 255, "custom%d_up_Ply%d=%d\n",j,i,mainMenu_customPreset_up[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_up_Ply%d=%d\n",j+1,i,mainMenu_customPreset_up[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_down_Ply%d=%d\n",j,i,mainMenu_customPreset_down[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_down_Ply%d=%d\n",j+1,i,mainMenu_customPreset_down[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_left_Ply%d=%d\n",j,i,mainMenu_customPreset_left[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_left_Ply%d=%d\n",j+1,i,mainMenu_customPreset_left[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_right_Ply%d=%d\n",j,i,mainMenu_customPreset_right[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_right_Ply%d=%d\n",j+1,i,mainMenu_customPreset_right[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickup_Ply%d=%d\n",j,i,mainMenu_customPreset_stickup[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_stickup_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickup[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickdown_Ply%d=%d\n",j,i,mainMenu_customPreset_stickdown[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_stickdown_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickdown[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickleft_Ply%d=%d\n",j,i,mainMenu_customPreset_stickleft[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_stickleft_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickleft[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickright_Ply%d=%d\n",j,i,mainMenu_customPreset_stickright[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_stickright_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickright[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_A_Ply%d=%d\n",j,i,mainMenu_customPreset_A[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_A_Ply%d=%d\n",j+1,i,mainMenu_customPreset_A[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_B_Ply%d=%d\n",j,i,mainMenu_customPreset_B[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_B_Ply%d=%d\n",j+1,i,mainMenu_customPreset_B[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_X_Ply%d=%d\n",j,i,mainMenu_customPreset_X[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_X_Ply%d=%d\n",j+1,i,mainMenu_customPreset_X[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_Y_Ply%d=%d\n",j,i,mainMenu_customPreset_Y[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_Y_Ply%d=%d\n",j+1,i,mainMenu_customPreset_Y[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_L_Ply%d=%d\n",j,i,mainMenu_customPreset_L[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_L_Ply%d=%d\n",j+1,i,mainMenu_customPreset_L[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_R_Ply%d=%d\n",j,i,mainMenu_customPreset_R[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_R_Ply%d=%d\n",j+1,i,mainMenu_customPreset_R[j][i]);
 			fputs(buffer,f);
 #ifdef __SWITCH__
-			snprintf((char*)buffer, 255, "custom%d_L2_Ply%d=%d\n",j,i,mainMenu_customPreset_L2[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_L2_Ply%d=%d\n",j+1,i,mainMenu_customPreset_L2[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_R2_Ply%d=%d\n",j,i,mainMenu_customPreset_R2[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_R2_Ply%d=%d\n",j+1,i,mainMenu_customPreset_R2[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_L3_Ply%d=%d\n",j,i,mainMenu_customPreset_L3[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_L3_Ply%d=%d\n",j+1,i,mainMenu_customPreset_L3[j][i]);
 			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_R3_Ply%d=%d\n",j,i,mainMenu_customPreset_R3[j][i]);
+			snprintf((char*)buffer, 255, "custom%d_R3_Ply%d=%d\n",j+1,i,mainMenu_customPreset_R3[j][i]);
 			fputs(buffer,f);
 #endif
 		}
@@ -1671,23 +1671,38 @@ void loadconfig(int general)
 		fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
 		int config_1_73 = -1;
 		int config_1_82 = 1;
+		int config_1_83 = 1;
+		int l=0;
+		int m=0;
 		for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
 		{
+			if (config_1_82==-1)
+				break;
 			for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++) {
-				int l,m;
 				if (j==0 && i==4) {
 					if (!fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j][i])) {
 						config_1_82 = -1;
 						break;
 					}
-				} else
+				} else {
 #ifdef __SWITCH__
-				if (!(i==0 && j==1))
+					if (!(i==0 && j==1)) {
 #endif
-					fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j][i]);
-				fscanf(f,"custom%d_down_Ply%d=%d\n",,&l,&m,&mainMenu_customPreset_down[j][i]);
-				fscanf(f,"custom%d_left_Ply%d=%d\n",,&l,&m,&mainMenu_customPreset_left[j][i]);
-				fscanf(f,"custom%d_right_Ply%d=%d\n",,&l,&m,&mainMenu_customPreset_right[j][i]);
+					if (!fscanf(f,"custom%d\n",&l)) {
+						config_1_82 = -1;
+						break;
+					}
+					if (j==3 && l!=4) {
+						break;
+					}
+					fscanf(f,"_up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j][i]);
+#ifdef __SWITCH__
+					}
+#endif
+				}
+				fscanf(f,"custom%d_down_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_down[j][i]);
+				fscanf(f,"custom%d_left_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_left[j][i]);
+				fscanf(f,"custom%d_right_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_right[j][i]);
 				if (fscanf(f,"custom%d_stickup_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_stickup[j][i]) > 1) {
 					fscanf(f,"custom%d_stickdown_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_stickdown[j][i]);
 					fscanf(f,"custom%d_stickleft_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_stickleft[j][i]);
@@ -1698,7 +1713,7 @@ void loadconfig(int general)
 					mainMenu_customPreset_stickdown[j][i] = mainMenu_customPreset_down[j][i];
 					mainMenu_customPreset_stickleft[j][i] = mainMenu_customPreset_left[j][i];
 					mainMenu_customPreset_stickright[j][i] = mainMenu_customPreset_right[j][i];
-					fscanf(f,"A_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_A[j][i]);
+					fscanf(f,"A_Ply%d=%d\n",&m,&mainMenu_customPreset_A[j][i]);
 				}
 				fscanf(f,"custom%d_B_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_B[j][i]);
 				fscanf(f,"custom%d_X_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_X[j][i]);
@@ -1735,8 +1750,8 @@ void loadconfig(int general)
 						fscanf(f,"custom%d_R3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R3[j][i]);
 					}
 				}
-			}
 #endif
+			}
 		}
 		remap_custom_controls(); // update the custom variables with the appropriate set.
 		if (config_1_82 == -1) {

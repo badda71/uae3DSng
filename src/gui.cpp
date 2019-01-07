@@ -283,6 +283,7 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 		mainMenu_custom_L3[i] = mainMenu_customPreset_L3[j][i];
 		mainMenu_custom_R3[i] = mainMenu_customPreset_R3[j][i];
 #endif
+	}
 }		
 #endif
 
@@ -1059,8 +1060,8 @@ if(!vkbd_mode)
 			if (mainMenu_customControls)
 			{
 				mainMenu_custom_controlSet++;
-				if (mainMenu_custom_controlset>=MAX_NUM_CUSTOM_PRESETS)
-					mainMenu_custom_controlset = 0;
+				if (mainMenu_custom_controlSet>=MAX_NUM_CUSTOM_PRESETS)
+					mainMenu_custom_controlSet = 0;
 				// zero triggerL before the control config switches
 				if(mainMenu_custom_L[0] == -1) buttonstate[0]=0;
 				else if(mainMenu_custom_L[0] == -2) buttonstate[2]=0;
