@@ -5,7 +5,8 @@ Changes in this Version
 - implement config load with dialog, config save as, and config delete
 - increase number of savestates per game to 12
 - increase number of custom control sets to 6
-- on Switch, fix some issues with VSync
+- on Switch, fix some issues with vsync
+- implement importing and exporting of savestates
 
 Description
 =====
@@ -292,7 +293,9 @@ CHANGELOG
 - implement config load with dialog, config save as, and config delete
 - increase number of savestates per game to 12
 - increase number of custom control sets to 6
-- on Switch, fix some issues with VSync
+- on Switch, fix some issues with vsync
+- implement importing and exporting of savestates
+
 
 1.83
 
