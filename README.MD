@@ -1,10 +1,10 @@
 Changes in this Version
 ======
-1.83
+1.84
 
-- stop hotkeys from affecting game controls in some cases
-- always allow left stick to control on screen keyboard
-- allow mapping of stick and dpad independently
+- implement config load with dialog, config save as, and config delete
+- increase number of savestates per game to 12
+- increase number of custom control sets to 5
 
 Description
 =====
@@ -52,7 +52,7 @@ Vita/Switch-exclusive Features
 ======
 - Full speed emulation of most Amiga games with zero frameskip
 - Large, complete virtual keyboard with adjustable position and adjustable transparency
-- Three fully mappable custom control sets: map Vita/Switch buttons to any Amiga joystick or key input, three custom control sets supported
+- Five fully mappable custom control sets: map Vita/Switch buttons to any Amiga joystick or key input
 - Multiple hard-file support: up to 4 hdf files (size <2GB each on Vita, size <4GB each on Switch) can be mounted simultaneously
 - Multiple controller support on Vita TV/Switch: up to four (eight on Switch) paired controllers can be fully mapped
 - Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
@@ -107,7 +107,7 @@ R+Dpad = Arrow keys
 
 When custom controls are on
 -----
-L+Start = Toggle between custom control set number 1, 2, and 3  
+L+Start = Toggle between custom control set number 1, 2, 3, 4 and 5  
 
 In this mode, Vita buttons can be mapped to any Amiga side keyboard key or joystick action. There's also a mapping option called "slow mouse." It will slow down the mouse pointer by a factor ten if that mapped button is held down. Up to four controllers can be mapped (for multiplayer on VitaTV and Switch). Four Amiga-side joysticks are supported. Joystick 3 and 4 are on the emulated parallel port joystick adapter.
 
@@ -286,6 +286,12 @@ Compiling
 
 CHANGELOG
 =====
+1.84
+
+- implement config load with dialog, config save as, and config delete
+- increase number of savestates per game to 12
+- increase number of custom control sets to 5
+
 1.83
 
 - stop hotkeys from affecting game controls in some cases
