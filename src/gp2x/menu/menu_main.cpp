@@ -711,10 +711,6 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				c=1;
 			else if(nr_drives<4 && c==4)
 				c=2;
-			else if (c>=13 && c<=17)
-				c=12;
-			else if (c==18)
-				c=13;
 			else
 				c--;
 			if (c < 0) c = 18;
@@ -727,20 +723,8 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				c=4;
 			else if(nr_drives<2 && c==0)
 				c=4;
-			else if (c>=13 && c<=17)
-				c=18;
 			else
 				c=(c+1)%19;
-		} 
-		else if (left)
-		{
-			if (c>13 && c<=17)
-				c--;
-		} 
-		else if (right)
-		{
-			if (c>=13 && c<17)
-				c++;
 		}
 
 	/* New Menu
