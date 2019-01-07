@@ -325,77 +325,27 @@ void mapback_custom_controls() // assign currently used custom set to custom con
 //or the currently displayed controller Nr
 {
 	int i = mainMenu_custom_currentlyEditingControllerNr;
-	switch (mainMenu_custom_controlSet)
-	{
-		case 0:
-			mainMenu_custom1_up[i] = mainMenu_custom_up[i];
-			mainMenu_custom1_down[i] = mainMenu_custom_down[i];
-			mainMenu_custom1_left[i] = mainMenu_custom_left[i];
-			mainMenu_custom1_right[i] = mainMenu_custom_right[i];
-			mainMenu_custom1_stickup[i] = mainMenu_custom_stickup[i];
-			mainMenu_custom1_stickdown[i] = mainMenu_custom_stickdown[i];
-			mainMenu_custom1_stickleft[i] = mainMenu_custom_stickleft[i];
-			mainMenu_custom1_stickright[i] = mainMenu_custom_stickright[i];
-			mainMenu_custom1_A[i] = mainMenu_custom_A[i];
-			mainMenu_custom1_B[i] = mainMenu_custom_B[i];
-			mainMenu_custom1_X[i] = mainMenu_custom_X[i];
-			mainMenu_custom1_Y[i] = mainMenu_custom_Y[i];
-			mainMenu_custom1_L[i] = mainMenu_custom_L[i];
-			mainMenu_custom1_R[i] = mainMenu_custom_R[i];
+	int j = mainMenu_custom_controlSet;
+	mainMenu_customPreset_up[j][i] = mainMenu_custom_up[i];
+	mainMenu_customPreset_down[j][i] = mainMenu_custom_down[i];
+	mainMenu_customPreset_left[j][i] = mainMenu_custom_left[i];
+	mainMenu_customPreset_right[j][i] = mainMenu_custom_right[i];
+	mainMenu_customPreset_stickup[j][i] = mainMenu_custom_stickup[i];
+	mainMenu_customPreset_stickdown[j][i] = mainMenu_custom_stickdown[i];
+	mainMenu_customPreset_stickleft[j][i] = mainMenu_custom_stickleft[i];
+	mainMenu_customPreset_stickright[j][i] = mainMenu_custom_stickright[i];
+	mainMenu_customPreset_A[j][i] = mainMenu_custom_A[i];
+	mainMenu_customPreset_B[j][i] = mainMenu_custom_B[i];
+	mainMenu_customPreset_X[j][i] = mainMenu_custom_X[i];
+	mainMenu_customPreset_Y[j][i] = mainMenu_custom_Y[i];
+	mainMenu_customPreset_L[j][i] = mainMenu_custom_L[i];
+	mainMenu_customPreset_R[j][i] = mainMenu_custom_R[i];
 #ifdef __SWITCH__
-			mainMenu_custom1_L2[i] = mainMenu_custom_L2[i];
-			mainMenu_custom1_R2[i] = mainMenu_custom_R2[i];
-			mainMenu_custom1_L3[i] = mainMenu_custom_L3[i];
-			mainMenu_custom1_R3[i] = mainMenu_custom_R3[i];
+	mainMenu_customPreset_L2[j][i] = mainMenu_custom_L2[i];
+	mainMenu_customPreset_R2[j][i] = mainMenu_custom_R2[i];
+	mainMenu_customPreset_L3[j][i] = mainMenu_custom_L3[i];
+	mainMenu_customPreset_R3[j][i] = mainMenu_custom_R3[i];
 #endif
-			break;
-		case 1:
-			mainMenu_custom2_up[i] = mainMenu_custom_up[i];
-			mainMenu_custom2_down[i] = mainMenu_custom_down[i];
-			mainMenu_custom2_left[i] = mainMenu_custom_left[i];
-			mainMenu_custom2_right[i] = mainMenu_custom_right[i];
-			mainMenu_custom2_stickup[i] = mainMenu_custom_stickup[i];
-			mainMenu_custom2_stickdown[i] = mainMenu_custom_stickdown[i];
-			mainMenu_custom2_stickleft[i] = mainMenu_custom_stickleft[i];
-			mainMenu_custom2_stickright[i] = mainMenu_custom_stickright[i];
-			mainMenu_custom2_A[i] = mainMenu_custom_A[i];
-			mainMenu_custom2_B[i] = mainMenu_custom_B[i];
-			mainMenu_custom2_X[i] = mainMenu_custom_X[i];
-			mainMenu_custom2_Y[i] = mainMenu_custom_Y[i];
-			mainMenu_custom2_L[i] = mainMenu_custom_L[i];
-			mainMenu_custom2_R[i] = mainMenu_custom_R[i];
-#ifdef __SWITCH__
-			mainMenu_custom2_L2[i] = mainMenu_custom_L2[i];
-			mainMenu_custom2_R2[i] = mainMenu_custom_R2[i];
-			mainMenu_custom2_L3[i] = mainMenu_custom_L3[i];
-			mainMenu_custom2_R3[i] = mainMenu_custom_R3[i];
-#endif
-			break;
-		case 2:
-			mainMenu_custom3_up[i] = mainMenu_custom_up[i];
-			mainMenu_custom3_down[i] = mainMenu_custom_down[i];
-			mainMenu_custom3_left[i] = mainMenu_custom_left[i];
-			mainMenu_custom3_right[i] = mainMenu_custom_right[i];
-			mainMenu_custom3_stickup[i] = mainMenu_custom_stickup[i];
-			mainMenu_custom3_stickdown[i] = mainMenu_custom_stickdown[i];
-			mainMenu_custom3_stickleft[i] = mainMenu_custom_stickleft[i];
-			mainMenu_custom3_stickright[i] = mainMenu_custom_stickright[i];
-			mainMenu_custom3_A[i] = mainMenu_custom_A[i];
-			mainMenu_custom3_B[i] = mainMenu_custom_B[i];
-			mainMenu_custom3_X[i] = mainMenu_custom_X[i];
-			mainMenu_custom3_Y[i] = mainMenu_custom_Y[i];
-			mainMenu_custom3_L[i] = mainMenu_custom_L[i];
-			mainMenu_custom3_R[i] = mainMenu_custom_R[i];
-#ifdef __SWITCH__
-			mainMenu_custom3_L2[i] = mainMenu_custom_L2[i];
-			mainMenu_custom3_R2[i] = mainMenu_custom_R2[i];
-			mainMenu_custom3_L3[i] = mainMenu_custom_L3[i];
-			mainMenu_custom3_R3[i] = mainMenu_custom_R3[i];
-#endif
-			break;
-		default:
-			break;
-	}
 }		
 #endif //__PSP2__
 
@@ -521,6 +471,10 @@ static void draw_controlsMenu(int c)
 		write_text_inv(leftMargin+15,menuLine,"3");
 	else
 		write_text(leftMargin+15,menuLine,"3");
+	if ((mainMenu_custom_controlSet==3)&&((menuControls!=MENUCONTROLS_CUSTOMSET)||(bb)))
+		write_text_inv(leftMargin+17,menuLine,"4");
+	else
+		write_text(leftMargin+17,menuLine,"4");
 		
 #else
 	menuLine++;
@@ -946,12 +900,12 @@ static int key_controlsMenu(int *c)
 					if (mainMenu_custom_controlSet>0)
 						mainMenu_custom_controlSet--;
 					else
-						mainMenu_custom_controlSet=2;
+						mainMenu_custom_controlSet=MAX_NUM_CUSTOM_PRESETS-1;
 					remap_custom_controls();
 				}
 				else if (right)
 				{
-					if (mainMenu_custom_controlSet<2)
+					if (mainMenu_custom_controlSet<MAX_NUM_CUSTOM_PRESETS-1)
 						mainMenu_custom_controlSet++;
 					else
 						mainMenu_custom_controlSet=0;
