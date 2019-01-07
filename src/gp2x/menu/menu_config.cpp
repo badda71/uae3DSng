@@ -1670,36 +1670,34 @@ void loadconfig(int general)
 #else
 		fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
 		int config_1_73 = -1;
-		int config_1_82 = 1;
-		int config_1_83 = 1;
+		int config_1_82 = -1;
+		int config_1_83 = -1;
 		int l=0;
 		int m=0;
 		for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
 		{
-			if (config_1_82==-1)
+			if (config_1_82==1)
 				break;
 			for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++) {
-				if (j==0 && i==4) {
-					if (!fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j][i])) {
-						config_1_82 = -1;
-						break;
-					}
-				} else {
 #ifdef __SWITCH__
-					if (!(i==0 && j==1)) {
+				if (!(i==0 && j==1)) {
 #endif
+				if (config_1_83 == -1) {
 					if (!fscanf(f,"custom%d\n",&l)) {
-						config_1_82 = -1;
+						config_1_82 = 1;
 						break;
 					}
 					if (j==3 && l!=4) {
+						config_1_83 = 1;
 						break;
 					}
-					fscanf(f,"_up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j][i]);
-#ifdef __SWITCH__
-					}
-#endif
 				}
+				else 
+					config_1_83 = -1;
+				fscanf(f,"_up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j][i]);
+#ifdef __SWITCH__
+				}
+#endif
 				fscanf(f,"custom%d_down_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_down[j][i]);
 				fscanf(f,"custom%d_left_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_left[j][i]);
 				fscanf(f,"custom%d_right_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_right[j][i]);
@@ -1722,28 +1720,18 @@ void loadconfig(int general)
 				fscanf(f,"custom%d_R_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R[j][i]);
 #ifdef __SWITCH__
 				if (j == 0 && i == 0) {
-					if (config_1_73 > 0) {
-						fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]);
+					if (fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]) > 1) {
 						fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
 						fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
 						fscanf(f,"custom%d_R3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R3[j][i]);
 						fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j+1][i]);
-					} else if (config_1_73 == 0) {
-						fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j+1][i]);
-					} else if (config_1_73 < 0) {
-						if (fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]) > 1) {
-							fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
-							fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
-							fscanf(f,"custom%d_R3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R3[j][i]);
-							fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j+1][i]);
-							config_1_73 = 1;
-						} else {
-							fscanf(f,"up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j+1][i]);
-							config_1_73 = 0;
-						}
+						config_1_73 = 0;
+					} else {
+						fscanf(f,"up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j+1][i]);
+						config_1_73 = 1;
 					}
 				} else {
-					if (config_1_73 != 0) {
+					if (config_1_73 == 0) {
 						fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]);
 						fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
 						fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
@@ -1754,7 +1742,7 @@ void loadconfig(int general)
 			}
 		}
 		remap_custom_controls(); // update the custom variables with the appropriate set.
-		if (config_1_82 == -1) {
+		if (config_1_82 == 1) {
 			fscanf(f,"pu=%d\n",&mainMenu_CPU_model);
 		} else
 #endif //__PSP2__
