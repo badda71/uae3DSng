@@ -25,12 +25,19 @@ static const char *text_str_0="0";
 static const char *text_str_1="1";
 static const char *text_str_2="2";
 static const char *text_str_3="3";
+static const char *text_str_4="4";
+static const char *text_str_5="5";
+static const char *text_str_6="6";
+static const char *text_str_7="7";
+static const char *text_str_8="8";
+static const char *text_str_9="9";
+static const char *text_str_10="10";
 static const char *text_str_auto="auto";
 static const char *text_str_loadmem="Load State";
 static const char *text_str_savemem="Save State";
 static const char *text_str_deletemem="Delete State";
 static const char *text_str_savestateslocation="Location";
-static const char *text_str_separator="----------------------";
+static const char *text_str_separator="-------------------------------------";
 static const char *text_str_exit="Back to Main Menu";
 
 extern int emulating;
@@ -43,6 +50,9 @@ extern void extractFileName(char * str,char *buffer);
 
 int saveMenu_case=-1;
 
+int leftMargin = 4;
+int tabstop1 = 14;
+
 enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_DELETE_MEM, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL };
 
 static inline void draw_savestatesMenu(int c)
@@ -54,80 +64,120 @@ static inline void draw_savestatesMenu(int c)
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
-	text_draw_window(6,4,28,20,text_str_title);
+	text_draw_window(3,4,39,20,text_str_title);
 
-	write_text(9,6,text_str_separator);
+	write_text(leftMargin,6,text_str_separator);
 	
-	write_text(9,7,text_str_savestate);
+	write_text(leftMargin,7,text_str_savestate);
+
 	if ((saveMenu_n_savestate==0)&&((c!=0)||(bb)))
-		write_text_inv(19,7,text_str_0);
+		write_text_inv(tabstop1,7,text_str_0);
 	else
-		write_text(19,7,text_str_0);
+		write_text(tabstop1,7,text_str_0);
+
 	if ((saveMenu_n_savestate==1)&&((c!=0)||(bb)))
-		write_text_inv(21,7,text_str_1);
+		write_text_inv(tabstop1+2,7,text_str_1);
 	else
-		write_text(21,7,text_str_1);
+		write_text(tabstop1+2,7,text_str_1);
+
 	if ((saveMenu_n_savestate==2)&&((c!=0)||(bb)))
-		write_text_inv(23,7,text_str_2);
+		write_text_inv(tabstop1+4,7,text_str_2);
 	else
-		write_text(23,7,text_str_2);
+		write_text(tabstop1+4,7,text_str_2);
+
 	if ((saveMenu_n_savestate==3)&&((c!=0)||(bb)))
-		write_text_inv(25,7,text_str_3);
+		write_text_inv(tabstop1+6,7,text_str_3);
 	else
-		write_text(25,7,text_str_3);
+		write_text(tabstop1+6,7,text_str_3);
+
 	if ((saveMenu_n_savestate==4)&&((c!=0)||(bb)))
-		write_text_inv(27,7,text_str_auto);
+		write_text_inv(tabstop1+8,7,text_str_4);
 	else
-		write_text(27,7,text_str_auto);
+		write_text(tabstop1+8,7,text_str_4);
 
-	write_text(9,8,text_str_separator);
+	if ((saveMenu_n_savestate==5)&&((c!=0)||(bb)))
+		write_text_inv(tabstop1+10,7,text_str_5);
+	else
+		write_text(tabstop1+10,7,text_str_5);
+	
+	if ((saveMenu_n_savestate==6)&&((c!=0)||(bb)))
+		write_text_inv(tabstop1+12,7,text_str_6);
+	else
+		write_text(tabstop1+12,7,text_str_6);
 
-	write_text(9,10,text_str_separator);
+	if ((saveMenu_n_savestate==7)&&((c!=0)||(bb)))
+		write_text_inv(tabstop1+14,7,text_str_7);
+	else
+		write_text(tabstop1+14,7,text_str_7);
+
+	if ((saveMenu_n_savestate==8)&&((c!=0)||(bb)))
+		write_text_inv(tabstop1+16,7,text_str_8);
+	else
+		write_text(tabstop1+16,7,text_str_8);
+
+	if ((saveMenu_n_savestate==9)&&((c!=0)||(bb)))
+		write_text_inv(tabstop1+18,7,text_str_9);
+	else
+		write_text(tabstop1+18,7,text_str_9);
+
+	if ((saveMenu_n_savestate==10)&&((c!=0)||(bb)))
+		write_text_inv(tabstop1+20,7,text_str_10);
+	else
+		write_text(tabstop1+20,7,text_str_10);
+	
+	if ((saveMenu_n_savestate==11)&&((c!=0)||(bb)))
+		write_text_inv(tabstop1+23,7,text_str_auto);
+	else
+		write_text(tabstop1+23,7,text_str_auto);
+
+	write_text(leftMargin,8,text_str_separator);
+
+	write_text(leftMargin,10,text_str_separator);
 
 	if ((c==1)&&(bb))
-		write_text_inv(9,11,text_str_loadmem);
+		write_text_inv(leftMargin,11,text_str_loadmem);
 	else
-		write_text(9,11,text_str_loadmem);
+		write_text(leftMargin,11,text_str_loadmem);
 
-	write_text(9,12,text_str_separator);
+	write_text(leftMargin,12,text_str_separator);
 
 	if ((c==2)&&(bb))
-		write_text_inv(9,13,text_str_savemem);
+		write_text_inv(leftMargin,13,text_str_savemem);
 	else
-		write_text(9,13,text_str_savemem);
+		write_text(leftMargin,13,text_str_savemem);
 
-	write_text(9,14,text_str_separator);
+	write_text(leftMargin,14,text_str_separator);
 
 	if ((c==3)&&(bb))
-		write_text_inv(9,15,text_str_deletemem);
+		write_text_inv(leftMargin,15,text_str_deletemem);
 	else
-		write_text(9,15,text_str_deletemem);
+		write_text(leftMargin,15,text_str_deletemem);
 
-	write_text(9,20,text_str_separator);
+	write_text(leftMargin,20,text_str_separator);
 
-	write_text(9,21,text_str_savestateslocation);
+	write_text(leftMargin,21,text_str_savestateslocation);
 	if (mainMenu_useSavesFolder==0)
 	{
 		if ((c!=4)||(bb))
-			write_text_inv(19,21,"Same as ROM ");
+			write_text_inv(tabstop1,21,"Same as ROM ");
 		else
-			write_text(19,21,"Same as ROM ");
+			write_text(tabstop1,21,"Same as ROM ");
 	}
 	else if (mainMenu_useSavesFolder==1)
 	{
 		if ((c!=4)||(bb))
-			write_text_inv(19,21,"Saves Folder");
+			write_text_inv(tabstop1,21,"Saves Folder");
 		else
-			write_text(19,21,"Saves Folder");
+			write_text(tabstop1,21,"Saves Folder");
 	}
 
-	write_text(9,22,text_str_separator);
+	write_text(leftMargin,22,text_str_separator);
 
 	if ((c==5)&&(bb))
-		write_text_inv(9,23,text_str_exit);
+		write_text_inv(leftMargin,23,text_str_exit);
 	else
-		write_text(9,23,text_str_exit);
-	write_text(9,24,text_str_separator);
+		write_text(leftMargin,23,text_str_exit);
+	write_text(leftMargin,24,text_str_separator);
 
 	text_flip();
 	b++;
@@ -270,11 +320,11 @@ static inline int key_saveMenu(int *cp)
 			if (saveMenu_n_savestate>0)
 				saveMenu_n_savestate--;
 			else
-				saveMenu_n_savestate=4;
+				saveMenu_n_savestate=11;
 		}
 		else if (right && c!=4)
 		{
-			if (saveMenu_n_savestate<4)
+			if (saveMenu_n_savestate<11)
 				saveMenu_n_savestate++;
 			else
 				saveMenu_n_savestate=0;
@@ -457,6 +507,41 @@ void make_savestate_filenames(char *save, char *thumb)
 				strcat(thumb,"-3.png"); 
 			break;
 		case 4:
+			strcat(save,"-4.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-4.png"); 
+			break;
+		case 5:
+			strcat(save,"-5.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-5.png"); 
+			break;
+		case 6:
+			strcat(save,"-6.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-6.png"); 
+			break;
+		case 7:
+			strcat(save,"-7.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-7.png"); 
+			break;
+		case 8:
+			strcat(save,"-8.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-8.png"); 
+			break;
+		case 9:
+			strcat(save,"-9.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-9.png"); 
+			break;
+		case 10:
+			strcat(save,"-10.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-10.png"); 
+			break;
+		case 11:
 			strcat(save,"-auto.asf"); 
 			if (thumb!=NULL)
 				strcat(thumb,"-auto.png"); 
