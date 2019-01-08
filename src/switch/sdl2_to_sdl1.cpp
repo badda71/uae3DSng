@@ -18,7 +18,7 @@ static float current_sw = 1.0;
 static float current_sh = 1.0;
 static int current_x = 0;
 static int current_y = 0;
-static int currently_docked = 0;
+static int currently_docked = -1;
 
 static int x_offset;
 static int y_offset;
@@ -70,14 +70,16 @@ void updateResolution() {
 }
 
 SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
-	if (isDocked()) {
-		display_width = 1920;
-		display_height = 1080;
-		currently_docked = 1;
-	} else {
-		display_width = 1280;
-		display_height = 720;
-		currently_docked = 0;
+	if (currently_docked == -1) {
+		if (isDocked()) {
+			display_width = 1920;
+			display_height = 1080;
+			currently_docked = 1;
+		} else {
+			display_width = 1280;
+			display_height = 720;
+			currently_docked = 0;
+		}
 	}
 
 	if (!renderer) {
