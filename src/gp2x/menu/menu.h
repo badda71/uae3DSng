@@ -8,7 +8,7 @@ extern SDL_Surface *prSDLScreen;
 #define MENU_FILE_BACKGROUND_1 DATA_PREFIX "background.bmp"
 #define MENU_FILE_WINDOW DATA_PREFIX "window.bmp"
 #define MENU_FILE_TEXT_0 DATA_PREFIX "text.bmp"
-#define MENU_FILE_TEXT_1 DATA_PREFIX "textWide.bmp"
+#define MENU_FILE_TEXT_1 DATA_PREFIX "text_wide.bmp"
 #define MENU_DIR_DEFAULT "."
 
 void init_kickstart();
