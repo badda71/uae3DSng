@@ -8,6 +8,8 @@ Changes in this Version
 - on Switch, fix some issues with vsync
 - implement importing and exporting of savestates
 - better menu font (thanks @wronghands)
+- option to select menu font
+- on Switch, use 1080p resolution in docked mode
 
 Description
 =====
@@ -21,7 +23,7 @@ Thanks to Cpasjuste for the original port and for jumping in and adding shader s
 
 Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new larger virtual keyboard images.
 
-Thanks to wronghands for the new, better-looking menu font.
+Thanks to wronghands for the new, better-looking menu font, and many ideas.
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
@@ -40,7 +42,7 @@ Installation
   * You should now have the executable `/switch/uae4all2/uae4all2.nro` and a folder `/switch/uae4all2/data/` with the keyboard icons and other data files on your SDCard. 
   * Obtain and copy BIOS files `kick13.rom` (Amiga 500), and `kick31.rom` (Amiga 1200) to your SDCard into `/switch/uae4all2/kickstarts/`.
   * Optional: copy over additional BIOS files `kick12.rom`, `kick20.rom`, `kickcustom.rom` (for e.g. version 3.1.4 or any other user-supplied BIOS) to the same folder.
-  * Use your favorite Homebrew Launcher or Homebrew Loader to start Uaeall2
+  * Use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
 
 * MD5 of verified working kickstart rom files, you can test yours at [onlinemd5](http://onlinemd5.com/):   
 ```
@@ -299,7 +301,8 @@ CHANGELOG
 - on Switch, fix some issues with vsync
 - implement importing and exporting of savestates
 - better menu font (thanks @wronghands)
-
+- option to select menu font
+- on Switch, use 1080p resolution in docked mode
 
 1.83
 
