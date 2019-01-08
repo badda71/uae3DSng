@@ -7,6 +7,7 @@ Changes in this Version
 - increase number of custom control sets to 6
 - on Switch, fix some issues with vsync
 - implement importing and exporting of savestates
+- better menu font (thanks @wronghands)
 
 Description
 =====
@@ -19,6 +20,8 @@ Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this gr
 Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
 
 Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new larger virtual keyboard images.
+
+Thanks to wronghands for the new, better-looking menu font.
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
@@ -295,6 +298,7 @@ CHANGELOG
 - increase number of custom control sets to 6
 - on Switch, fix some issues with vsync
 - implement importing and exporting of savestates
+- better menu font (thanks @wronghands)
 
 
 1.83
