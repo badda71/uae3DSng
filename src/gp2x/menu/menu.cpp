@@ -39,6 +39,7 @@ typedef struct private_hwdata {
 #endif
 
 extern int mainMenu_background;
+extern int mainMenu_font;
 extern int bReloadKickstart;
 
 #ifdef USE_GUICHAN
@@ -55,7 +56,7 @@ SDL_Surface *current_screenshot = NULL;
 #else
 #define VIDEO_FLAGS VIDEO_FLAGS_INIT | SDL_DOUBLEBUF
 #endif
-SDL_Surface *text_screen=NULL, *text_image, *text_background_0, *text_background_1, *text_window_background, *window_screen;
+SDL_Surface *text_screen=NULL, *text_image_0, *text_image_1, *text_background_0, *text_background_1, *text_window_background, *window_screen;
 
 static Uint32 menu_inv_color=0, menu_win0_color=0, menu_win1_color=0;
 static Uint32 menu_barra0_color=0, menu_barra1_color=0;
@@ -452,19 +453,34 @@ void init_text(int splash)
 		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w,prSDLScreen->h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w,prSDLScreen->h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 
-		tmp=SDL_LoadBMP(MENU_FILE_TEXT);
+		tmp=SDL_LoadBMP(MENU_FILE_TEXT_0);
 		if (text_screen==NULL || tmp==NULL)
 			exit(-1);
-		text_image=SDL_DisplayFormat(tmp);
+		text_image_0=SDL_DisplayFormat(tmp);
 		SDL_FreeSurface(tmp);
-		if (text_image==NULL)
+		if (text_image_0==NULL)
 			exit(-2);
 #ifdef USE_SDL2
-		SDL_SetColorKey(text_image,SDL_TRUE,SDL_MapRGB(text_image -> format, 0, 0, 0));
-		SDL_SetSurfaceRLE(text_image, 1);
+		SDL_SetColorKey(text_image_0,SDL_TRUE,SDL_MapRGB(text_image_0 -> format, 0, 0, 0));
+		SDL_SetSurfaceRLE(text_image_0, 1);
 #else
-		SDL_SetColorKey(text_image,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image -> format, 0, 0, 0));
+		SDL_SetColorKey(text_image_0,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image_0 -> format, 0, 0, 0));
 #endif
+
+		tmp=SDL_LoadBMP(MENU_FILE_TEXT_1);
+		if (text_screen==NULL || tmp==NULL)
+			exit(-1);
+		text_image_1=SDL_DisplayFormat(tmp);
+		SDL_FreeSurface(tmp);
+		if (text_image_1==NULL)
+			exit(-2);
+#ifdef USE_SDL2
+		SDL_SetColorKey(text_image_1,SDL_TRUE,SDL_MapRGB(text_image_1 -> format, 0, 0, 0));
+		SDL_SetSurfaceRLE(text_image_1, 1);
+#else
+		SDL_SetColorKey(text_image_1,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image_1 -> format, 0, 0, 0));
+#endif
+
 		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND_0);
 		if (tmp==NULL)
 			exit(-3);
@@ -560,8 +576,10 @@ skipintro:
 
 void quit_text(void)
 {
-	SDL_FreeSurface(text_image);
-	text_image = NULL;
+	SDL_FreeSurface(text_image_0);
+	SDL_FreeSurface(text_image_1);
+	text_image_0 = NULL;
+	text_image_1 = NULL;
 	SDL_FreeSurface(text_background_0);
 	SDL_FreeSurface(text_background_1);
 	text_background_0 = NULL;
@@ -615,9 +633,12 @@ void write_text_pos(int x, int y, char * str)
 		  dest.y = y;
 		  dest.w = 7;
 		  dest.h = 8;
-
-		  SDL_BlitSurface(text_image, &src,
-				  text_screen, &dest);
+		  if (mainMenu_font == 0)
+			  SDL_BlitSurface(text_image_0, &src,
+					  text_screen, &dest);
+		  else
+			  SDL_BlitSurface(text_image_1, &src,
+					  text_screen, &dest);
 		}
 		else if (c == -2 || c == -3)
 		{
@@ -678,9 +699,12 @@ void write_text(int x, int y, const char * str)
 		  dest.y = y * 7; //10;
 		  dest.w = 7;
 		  dest.h = 8;
-
-		  SDL_BlitSurface(text_image, &src,
-				  text_screen, &dest);
+		  if (mainMenu_font == 0) 
+			  SDL_BlitSurface(text_image_0, &src,
+					  text_screen, &dest);
+		  else
+			  SDL_BlitSurface(text_image_1, &src,
+					  text_screen, &dest);
 		}
 		else if (c == -2 || c == -3)
 		{

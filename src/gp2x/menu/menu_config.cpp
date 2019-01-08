@@ -83,6 +83,7 @@ int mainMenu_autofireRate = 8;
 int mainMenu_customAutofireButton = 0;
 int mainMenu_showStatus = DEFAULT_STATUSLN;
 int mainMenu_background = 0;
+int mainMenu_font = 0;
 int mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
 int mainMenu_mouseEmulation = 1;
 int mainMenu_stylusOffset = 0;
@@ -261,6 +262,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_customAutofireButton = 0;
     mainMenu_showStatus = DEFAULT_STATUSLN;
     mainMenu_background = 0;
+    mainMenu_font = 0;
     mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
     mainMenu_mouseEmulation = 1;
     mainMenu_stylusOffset = 0;
@@ -1179,6 +1181,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "background=%d\n",mainMenu_background);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "font=%d\n",mainMenu_font);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "mousemultiplier=%d\n",mainMenu_mouseMultiplier);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "mouseemulation=%d\n",mainMenu_mouseEmulation);
@@ -1591,6 +1595,7 @@ void loadconfig(int general)
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
         fscanf(f,"background=%d\n",&mainMenu_background);
+        fscanf(f,"font=%d\n",&mainMenu_font);
         fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier);
         //remain compatible with old configuration versions
         if (mainMenu_mouseMultiplier < 10) {

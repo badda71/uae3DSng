@@ -70,6 +70,7 @@ enum {
 	MENUDISPLAY_VKBDLANGUAGE,
 #endif
 	MENUDISPLAY_BACKGROUND,
+	MENUDISPLAY_FONT,
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
 	MENUDISPLAY_STEREO,
@@ -359,6 +360,18 @@ static void draw_displayMenu(int c)
 		write_text_inv(tabstop8-2, menuLine,"Moving");
 	else
 		write_text(tabstop8-2, menuLine,"Moving");
+		
+	// MENUDISPLAY_FONT
+	menuLine+=2;
+	write_text(leftMargin, menuLine,"Menu Font");
+	if ((mainMenu_font==0)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
+		write_text_inv(tabstop3,menuLine, "Narrow");
+	else
+		write_text(tabstop3, menuLine, "Narrow");
+	if ((mainMenu_font==1)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
+		write_text_inv(tabstop8-2, menuLine,"Wide");
+	else
+		write_text(tabstop8-2, menuLine,"Wide");
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
@@ -766,6 +779,10 @@ static int key_displayMenu(int *c)
 			case MENUDISPLAY_BACKGROUND:
 				if ((left)||(right))
 					mainMenu_background=!mainMenu_background;
+				break;
+			case MENUDISPLAY_FONT:
+				if ((left)||(right))
+					mainMenu_font=!mainMenu_font;
 				break;
 			case MENUDISPLAY_SOUND:
 					if (left)
