@@ -497,13 +497,11 @@ void show_error(const char *str)
 {
 	int i;
 
-	for(i=0;i<40;i++)
-	{
-		text_draw_background();
-		text_draw_window(64,64,160,40,"ERROR !");
-		write_text(9,9,str);
-		text_flip();
-	}
+	text_draw_background();
+	text_draw_window(64/7,64/8,160/7,40/8,"--- ERROR ---");
+	write_text(9,9,str);
+	text_flip();
+	
 	SDL_Delay(1000);
 }
 

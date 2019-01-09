@@ -459,10 +459,10 @@ void showWarning(const char *msg)
 {
 	text_draw_window(54/7,91/8,255/7,64/8,"--- Config ---");
 	write_text(12,14,msg);
-	write_text(11,16,"Press any button to continue");
+	//write_text(11,16,"Press any button to continue");
 	text_flip();
 	SDL_Event ev;
-	SDL_Delay(333);
+	SDL_Delay(1000);
 	while(SDL_PollEvent(&ev))
 	{
 		if (ev.type==SDL_QUIT)
