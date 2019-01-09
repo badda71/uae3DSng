@@ -64,6 +64,13 @@ void updateResolution() {
 			display_height = 720;
 			currently_docked = 0;
 		}
+		// remove leftover-garbage on screen
+		SDL_RenderClear(renderer);
+		SDL_RenderPresent(renderer);
+		SDL_RenderClear(renderer);
+		SDL_RenderPresent(renderer);
+		SDL_RenderClear(renderer);
+		SDL_RenderPresent(renderer);
 		SDL_SetWindowSize(window, display_width, display_height);
 		SDL_SetVideoModeScaling(current_x, current_y, current_sw, current_sh);
 	}
