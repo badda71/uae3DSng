@@ -1147,6 +1147,8 @@ int saveconfig(int general)
 #else
         strcpy(buf, kbdvita_get("Enter config name:", "myconfig", 100, 0));
 #endif
+        if (buf[0] == 0)
+            return 0;
         snprintf(path, 300, "%s/conf/%s%s", launchDir, buf, ".conf");
 #else
         return 0;

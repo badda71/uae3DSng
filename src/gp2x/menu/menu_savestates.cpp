@@ -688,24 +688,26 @@ int run_menuSavestates()
 				break;
 			case SAVE_MENU_CASE_EXPORT_MEM:
 				{
-				make_savestate_filenames(savestate_filename,NULL);
-				FILE *source=fopen(savestate_filename,"rb");
-				if (source)
-				{
-					fclose(source);
+					make_savestate_filenames(savestate_filename,NULL);
+					FILE *source=fopen(savestate_filename,"rb");
+					if (source)
+					{
+						fclose(source);
 #if defined(__SWITCH__) || defined(__PSP2__)
-			        char buf[100] = "";
+				        char buf[100] = "";
 #ifdef __SWITCH__
-			        kbdswitch_get("Enter savestate name:", "mysavestate", 100, 0, buf);
+				        kbdswitch_get("Enter savestate name:", "mysavestate", 100, 0, buf);
 #else
-			        strcpy(buf, kbdvita_get("Enter savestate name:", "mysavestate", 100, 0));
+				        strcpy(buf, kbdvita_get("Enter savestate name:", "mysavestate", 100, 0));
 #endif
-					char save_export_filename[255] = "";
-			        snprintf(save_export_filename, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
-					cp(savestate_filename, save_export_filename);
+						char save_export_filename[255] = "";
+						if (buf[0] != 0) {
+							snprintf(save_export_filename, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
+							cp(savestate_filename, save_export_filename);
+						}
 #else
-					saveMenu_case=-1;
-					break;
+						saveMenu_case=-1;
+						break;
 #endif
 					}
 					else
