@@ -9,7 +9,7 @@ Changes in this Version
 - implement importing and exporting of savestates
 - better menu font (thanks @wronghands)
 - option to select menu font
-- on Switch, use 1080p resolution in docked mode
+- on Switch, automatically use 1080p resolution in docked mode
 
 Description
 =====
@@ -302,7 +302,7 @@ CHANGELOG
 - implement importing and exporting of savestates
 - better menu font (thanks @wronghands)
 - option to select menu font
-- on Switch, use 1080p resolution in docked mode
+- on Switch, automatically use 1080p resolution in docked mode
 
 1.83
 
