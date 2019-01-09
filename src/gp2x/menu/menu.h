@@ -9,6 +9,7 @@ extern SDL_Surface *prSDLScreen;
 #define MENU_FILE_WINDOW DATA_PREFIX "window.bmp"
 #define MENU_FILE_TEXT_0 DATA_PREFIX "text.bmp"
 #define MENU_FILE_TEXT_1 DATA_PREFIX "text_wide.bmp"
+#define MENU_FILE_TEXT_2 DATA_PREFIX "text_original.bmp"
 #define MENU_DIR_DEFAULT "."
 
 void init_kickstart();
@@ -106,6 +107,7 @@ enum { MEMDISK_MENU_CASE_MAIN, MEMDISK_MENU_CASE_MISC };
 #define MENU_LOAD_KICKROM 5
 #define MENU_LOAD_DELETE_CONFIG 6
 #define MENU_LOAD_IMPORT_SAVE 7
+#define MENU_LOAD_DELETE_SAVE 8
 
 #ifdef __SWITCH__
 #define DEFAULT_SWAPAB 1

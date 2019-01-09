@@ -46,7 +46,8 @@ static const char *text_str_importmem="Import to Slot";
 static const char *text_str_exportmem="Export from Slot";
 static const char *text_str_loadmem="Load State";
 static const char *text_str_savemem="Save State";
-static const char *text_str_deletemem="Delete State";
+static const char *text_str_deletemem="Delete State (File Dialog)";
+static const char *text_str_deleteslot="Delete State (Selected Slot)";
 static const char *text_str_savestateslocation="Location";
 static const char *text_str_separator="-------------------------------------";
 static const char *text_str_exit="Return to Main Menu";
@@ -66,7 +67,7 @@ int tabstop1 = 14;
 
 char save_import_filename[300];
 
-enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_DELETE_MEM, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL, SAVE_MENU_CASE_IMPORT_MEM, SAVE_MENU_CASE_EXPORT_MEM};
+enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_DELETE_SLOT, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL, SAVE_MENU_CASE_IMPORT_MEM, SAVE_MENU_CASE_EXPORT_MEM, SAVE_MENU_CASE_DELETE_MEM};
 
 static inline void cp(char* source_name, char* dest_name)
 {
@@ -168,10 +169,12 @@ static inline void draw_savestatesMenu(int c)
 	else
 		write_text(leftMargin,menuLine,text_str_importmem);
 
+	menuLine+=2;
 	if ((c==3)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_exportmem);
 	else
 		write_text(leftMargin,menuLine,text_str_exportmem);
+
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
@@ -197,6 +200,12 @@ static inline void draw_savestatesMenu(int c)
 	else
 		write_text(leftMargin,menuLine,text_str_deletemem);
 
+	menuLine+=2;
+	if ((c==7)&&(bb))
+		write_text_inv(leftMargin,menuLine,text_str_deleteslot);
+	else
+		write_text(leftMargin,menuLine,text_str_deleteslot);
+
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
 	menuLine++;
@@ -204,14 +213,14 @@ static inline void draw_savestatesMenu(int c)
 	write_text(leftMargin,menuLine,text_str_savestateslocation);
 	if (mainMenu_useSavesFolder==0)
 	{
-		if ((c!=7)||(bb))
+		if ((c!=8)||(bb))
 			write_text_inv(tabstop1,menuLine,"Same as ROM ");
 		else
 			write_text(tabstop1,menuLine,"Same as ROM ");
 	}
 	else if (mainMenu_useSavesFolder==1)
 	{
-		if ((c!=7)||(bb))
+		if ((c!=8)||(bb))
 			write_text_inv(tabstop1,menuLine,"Saves Folder");
 		else
 			write_text(tabstop1,menuLine,"Saves Folder");
@@ -345,22 +354,22 @@ static inline int key_saveMenu(int *cp)
 		}
 		else if (up)
 		{
-			if (c>0) c=(c-1)%8;
-			else c=7;
+			if (c>0) c=(c-1)%9;
+			else c=8;
 		}
 		else if (down)
 		{
-			c=(c+1)%8;
+			c=(c+1)%9;
 		}
 		else
-		if (left && c!=7)
+		if (left && c!=8)
 		{
 			if (saveMenu_n_savestate>0)
 				saveMenu_n_savestate--;
 			else
 				saveMenu_n_savestate=11;
 		}
-		else if (right && c!=7)
+		else if (right && c!=8)
 		{
 			if (saveMenu_n_savestate<11)
 				saveMenu_n_savestate++;
@@ -391,7 +400,7 @@ static inline int key_saveMenu(int *cp)
 			saveMenu_case=SAVE_MENU_CASE_EXPORT_MEM;
 			end=1;
 			}
-			break;			
+			break;
 			case 4:
 			if (hit0)
 			{
@@ -402,18 +411,25 @@ static inline int key_saveMenu(int *cp)
 			case 5:
 			if (hit0)
 			{
-				saveMenu_case=SAVE_MENU_CASE_SAVE_MEM;
-				end=1;
+			saveMenu_case=SAVE_MENU_CASE_SAVE_MEM;
+			end=1;
 			}
 			break;
 			case 6:
 			if (hit0)
 			{
-				saveMenu_case=SAVE_MENU_CASE_DELETE_MEM;
-				end=1;
+			saveMenu_case=SAVE_MENU_CASE_DELETE_MEM;
+			end=1;
 			}
 			break;
 			case 7:
+			if (hit0)
+			{
+			saveMenu_case=SAVE_MENU_CASE_DELETE_SLOT;
+			end=1;
+			}
+			break;
+			case 8:
 			if (left || right)
 			{
 				if (mainMenu_useSavesFolder==0)
@@ -708,6 +724,24 @@ int run_menuSavestates()
 				saveMenu_case=1;
 				break;
 			case SAVE_MENU_CASE_DELETE_MEM:
+				{
+				char path[255];
+				snprintf(path, 255, "%s", SAVE_PREFIX);
+
+				if(run_menuLoad(path, MENU_LOAD_DELETE_SAVE)) {
+					FILE *source=fopen(save_import_filename,"rb");
+					if (source) {
+						fclose(source);
+						remove(save_import_filename);
+						show_error("File Deleted");
+					} else {
+						show_error("Nothing to delete."); 
+					}
+					saveMenu_case=-1;
+				}
+				}
+				break;
+			case SAVE_MENU_CASE_DELETE_SLOT:
 			{
 				make_savestate_filenames(savestate_filename,NULL);
 				FILE *f=fopen(savestate_filename,"rb");
