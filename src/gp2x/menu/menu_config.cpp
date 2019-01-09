@@ -1143,9 +1143,9 @@ int saveconfig(int general)
 #if defined(__SWITCH__) || defined(__PSP2__)
         char buf[100] = "";
 #ifdef __SWITCH__
-        kbdswitch_get("Enter config name:", "myconfig", 100, 0, buf);
+        kbdswitch_get("Enter config name:", "", 100, 0, buf);
 #else
-        strcpy(buf, kbdvita_get("Enter config name:", "myconfig", 100, 0));
+        strcpy(buf, kbdvita_get("Enter config name:", "", 100, 0));
 #endif
         if (buf[0] == 0)
             return 0;

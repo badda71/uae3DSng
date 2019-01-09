@@ -696,9 +696,9 @@ int run_menuSavestates()
 #if defined(__SWITCH__) || defined(__PSP2__)
 				        char buf[100] = "";
 #ifdef __SWITCH__
-				        kbdswitch_get("Enter savestate name:", "mysavestate", 100, 0, buf);
+				        kbdswitch_get("Enter savestate name:", "", 100, 0, buf);
 #else
-				        strcpy(buf, kbdvita_get("Enter savestate name:", "mysavestate", 100, 0));
+				        strcpy(buf, kbdvita_get("Enter savestate name:", "", 100, 0));
 #endif
 						char save_export_filename[255] = "";
 						if (buf[0] != 0) {
