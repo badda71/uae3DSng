@@ -656,20 +656,20 @@ int run_menuSavestates()
 		{
 			case SAVE_MENU_CASE_IMPORT_MEM:
 				{
-				make_savestate_filenames(savestate_filename,NULL);
-				char path[255];
-				snprintf(path, 255, "%s", SAVE_PREFIX);
+					make_savestate_filenames(savestate_filename,NULL);
+					char path[255];
+					snprintf(path, 255, "%s", SAVE_PREFIX);
 
-				if(run_menuLoad(path, MENU_LOAD_IMPORT_SAVE)) {
-					FILE *source=fopen(save_import_filename,"rb");
-					if (source) {
-						fclose(source);
-						remove(savestate_filename);
-						cp(save_import_filename,savestate_filename);
-						show_error("File Imported");
+					if(run_menuLoad(path, MENU_LOAD_IMPORT_SAVE)) {
+						FILE *source=fopen(save_import_filename,"rb");
+						if (source) {
+							fclose(source);
+							remove(savestate_filename);
+							cp(save_import_filename,savestate_filename);
+							show_error("File Imported");
+						}
 					}
 					saveMenu_case=-1;
-				}
 				}
 				break;
 			case SAVE_MENU_CASE_EXPORT_MEM:
@@ -689,33 +689,33 @@ int run_menuSavestates()
 					char save_export_filename[255] = "";
 			        snprintf(save_export_filename, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
 					cp(savestate_filename, save_export_filename);
-					saveMenu_case=-1;
 #else
+					saveMenu_case=-1;
 					break;
 #endif
+					}
+					else
+					{
+						show_error("Nothing to export.");
+					}
 				}
-				else
-				{
-					show_error("Nothing to export.");
-					saveMenu_case=-1;
-				}
-				}
+				saveMenu_case=-1;
 				break;
 			case SAVE_MENU_CASE_LOAD_MEM:
 				{
-				make_savestate_filenames(savestate_filename,NULL);
-				FILE *f=fopen(savestate_filename,"rb");
-				if (f)
-				{
-					fclose(f);
-					savestate_state = STATE_DORESTORE;
-					saveMenu_case=1;
-				}
-				else
-				{
-					show_error("File doesn't exist.");
-					saveMenu_case=-1;
-				}
+					make_savestate_filenames(savestate_filename,NULL);
+					FILE *f=fopen(savestate_filename,"rb");
+					if (f)
+					{
+						fclose(f);
+						savestate_state = STATE_DORESTORE;
+						saveMenu_case=1;
+					}
+					else
+					{
+						show_error("File doesn't exist.");
+						saveMenu_case=-1;
+					}
 				}
 				break;
 			case SAVE_MENU_CASE_SAVE_MEM:
@@ -725,20 +725,20 @@ int run_menuSavestates()
 				break;
 			case SAVE_MENU_CASE_DELETE_MEM:
 				{
-				char path[255];
-				snprintf(path, 255, "%s", SAVE_PREFIX);
+					char path[255];
+					snprintf(path, 255, "%s", SAVE_PREFIX);
 
-				if(run_menuLoad(path, MENU_LOAD_DELETE_SAVE)) {
-					FILE *source=fopen(save_import_filename,"rb");
-					if (source) {
-						fclose(source);
-						remove(save_import_filename);
-						show_error("File Deleted");
-					} else {
-						show_error("Nothing to delete."); 
+					if(run_menuLoad(path, MENU_LOAD_DELETE_SAVE)) {
+						FILE *source=fopen(save_import_filename,"rb");
+						if (source) {
+							fclose(source);
+							remove(save_import_filename);
+							show_error("File Deleted");
+						} else {
+							show_error("Nothing to delete."); 
+						}
 					}
 					saveMenu_case=-1;
-				}
 				}
 				break;
 			case SAVE_MENU_CASE_DELETE_SLOT:
