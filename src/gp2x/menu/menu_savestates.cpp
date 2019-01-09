@@ -14,7 +14,6 @@
 #include "gp2x.h"
 #include <SDL_ttf.h>
 #include "savestate.h"
-#include <fstream>
 
 #ifdef __SWITCH__
 #include "switch_kbd.h"
@@ -71,10 +70,25 @@ enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SA
 
 static inline void cp(char* source_name, char* dest_name)
 {
-    std::ifstream  src(source_name, std::ios::binary);
-    std::ofstream  dst(dest_name,   std::ios::binary);
+	FILE *src = fopen(source_name, "rb");
+	FILE *dst = fopen(dest_name, "wb");
+	char *buffer;
+	long lsize;
+	if (src && dst) {
+		fseek(src, 0, SEEK_END);   // non-portable
+		lsize = ftell(src);
+		fseek(src, 0, SEEK_SET);
+		//rewind(src);
+		buffer = (char*) malloc (sizeof(char)*lsize);
 
-    dst << src.rdbuf();
+		fread(buffer, 1, lsize, src);
+		fclose(src);
+
+		fwrite(buffer, sizeof(char), lsize, dst);
+		fclose(dst);
+		
+		free(buffer);
+	}
 }
 
 static inline void draw_savestatesMenu(int c)
