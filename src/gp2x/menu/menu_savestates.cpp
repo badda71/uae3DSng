@@ -11,6 +11,7 @@
 #include "sound.h"
 #include "gui.h"
 #include <SDL.h>
+#include <SDL_image.h>
 #include "gp2x.h"
 #include <SDL_ttf.h>
 #include "savestate.h"
@@ -26,6 +27,9 @@
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
+
+SDL_Surface *thumbnail_image = NULL;
+int savestate_empty = 1;
 
 static const char *text_str_title="SaveStates";
 static const char *text_str_savestate="SaveState";
@@ -57,7 +61,8 @@ extern int quit_pressed_in_submenu;
 extern int mainMenu_bootHD;
 extern int mainMenu_useSavesFolder;
 
-extern void extractFileName(char * str,char *buffer);
+extern void extractFileName(char *str,char *buffer);
+extern void stateFilenameToThumbFilename(char *src, char *dst);
 
 int saveMenu_case=-1;
 
@@ -101,7 +106,7 @@ static inline void draw_savestatesMenu(int c)
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
-	text_draw_window(3,2,39,20,text_str_title);
+	text_draw_window(3,2,39,30,text_str_title);
 
 	if ((c==0)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_exit);
@@ -177,33 +182,44 @@ static inline void draw_savestatesMenu(int c)
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
 	menuLine++;
-	
-	if ((c==2)&&(bb))
-		write_text_inv(leftMargin,menuLine,text_str_importmem);
-	else
-		write_text(leftMargin,menuLine,text_str_importmem);
 
-	menuLine+=2;
-	if ((c==3)&&(bb))
-		write_text_inv(leftMargin,menuLine,text_str_exportmem);
-	else
-		write_text(leftMargin,menuLine,text_str_exportmem);
+	if (!savestate_empty) {
+		if (thumbnail_image != NULL) {
+			draw_image_pos(thumbnail_image, (320 - thumbnail_image->w) / 2 , menuLine * 7);
+		} else {
+			write_text(tabstop1,menuLine+9,"No preview found");
+		}
+	} else {
+		write_text(tabstop1+3,menuLine+9,"Empty slot");
+	}
 
+	menuLine+=18;
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
 	menuLine++;
 
-	if ((c==4)&&(bb))
+	if ((c==2)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_loadmem);
 	else
 		write_text(leftMargin,menuLine,text_str_loadmem);
 	
+	if ((c==4)&&(bb))
+		write_text_inv(tabstop1+8,menuLine,text_str_importmem);
+	else
+		write_text(tabstop1+8,menuLine,text_str_importmem);
+
 	menuLine+=2;
-	if ((c==5)&&(bb))
+
+	if ((c==3)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_savemem);
 	else
 		write_text(leftMargin,menuLine,text_str_savemem);
+
+	if ((c==5)&&(bb))
+		write_text_inv(tabstop1+8,menuLine,text_str_exportmem);
+	else
+		write_text(tabstop1+8,menuLine,text_str_exportmem);
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
@@ -219,26 +235,6 @@ static inline void draw_savestatesMenu(int c)
 		write_text_inv(leftMargin,menuLine,text_str_deleteslot);
 	else
 		write_text(leftMargin,menuLine,text_str_deleteslot);
-
-	menuLine++;
-	write_text(leftMargin,menuLine,text_str_separator);
-	menuLine++;
-
-	write_text(leftMargin,menuLine,text_str_savestateslocation);
-	if (mainMenu_useSavesFolder==0)
-	{
-		if ((c!=8)||(bb))
-			write_text_inv(tabstop1,menuLine,"Same as ROM ");
-		else
-			write_text(tabstop1,menuLine,"Same as ROM ");
-	}
-	else if (mainMenu_useSavesFolder==1)
-	{
-		if ((c!=8)||(bb))
-			write_text_inv(tabstop1,menuLine,"Saves Folder");
-		else
-			write_text(tabstop1,menuLine,"Saves Folder");
-	}
 
 	text_flip();
 	b++;
@@ -368,27 +364,30 @@ static inline int key_saveMenu(int *cp)
 		}
 		else if (up)
 		{
-			if (c>0) c=(c-1)%9;
-			else c=8;
+			if (c>0) c=(c-1)%8;
+			else c=7;
 		}
 		else if (down)
 		{
-			c=(c+1)%9;
+			c=(c+1)%8;
 		}
-		else
-		if (left && c!=8)
+		else if (left)
 		{
 			if (saveMenu_n_savestate>0)
 				saveMenu_n_savestate--;
 			else
 				saveMenu_n_savestate=11;
+			make_savestate_filenames(savestate_filename, screenshot_filename);
+			load_savestate_thumbnail();
 		}
-		else if (right && c!=8)
+		else if (right)
 		{
 			if (saveMenu_n_savestate<11)
 				saveMenu_n_savestate++;
 			else
 				saveMenu_n_savestate=0;
+			make_savestate_filenames(savestate_filename, screenshot_filename);
+			load_savestate_thumbnail();
 		}
 		switch(c)
 		{
@@ -404,28 +403,28 @@ static inline int key_saveMenu(int *cp)
 			case 2:
 			if (hit0)
 			{
-			saveMenu_case=SAVE_MENU_CASE_IMPORT_MEM;
+			saveMenu_case=SAVE_MENU_CASE_LOAD_MEM;
 			end=1;
 			}
-			break;			
+			break;
 			case 3:
 			if (hit0)
 			{
-			saveMenu_case=SAVE_MENU_CASE_EXPORT_MEM;
+			saveMenu_case=SAVE_MENU_CASE_SAVE_MEM;
 			end=1;
 			}
 			break;
 			case 4:
 			if (hit0)
 			{
-			saveMenu_case=SAVE_MENU_CASE_LOAD_MEM;
+			saveMenu_case=SAVE_MENU_CASE_IMPORT_MEM;
 			end=1;
 			}
-			break;
+			break;			
 			case 5:
 			if (hit0)
 			{
-			saveMenu_case=SAVE_MENU_CASE_SAVE_MEM;
+			saveMenu_case=SAVE_MENU_CASE_EXPORT_MEM;
 			end=1;
 			}
 			break;
@@ -441,16 +440,6 @@ static inline int key_saveMenu(int *cp)
 			{
 			saveMenu_case=SAVE_MENU_CASE_DELETE_SLOT;
 			end=1;
-			}
-			break;
-			case 8:
-			if (left || right)
-			{
-				if (mainMenu_useSavesFolder==0)
-					mainMenu_useSavesFolder=1;
-				else
-					mainMenu_useSavesFolder=0;
-				make_savestate_filenames(savestate_filename, NULL);
 			}
 			break;
 		}
@@ -566,80 +555,81 @@ void make_savestate_filenames(char *save, char *thumb)
 		else if	(uae4all_image_file3[0]!='\0')
 			strcpy(save,uae4all_image_file3);
 	}
-	if (thumb!=NULL)
-		strcpy(thumb, save);
 	switch(saveMenu_n_savestate)
 	{
 		case 1:
 			strcat(save,"-1.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-1.png"); 
 			break;
 		case 2:
 			strcat(save,"-2.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-2.png"); 
 			break;
 		case 3:
 			strcat(save,"-3.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-3.png"); 
 			break;
 		case 4:
 			strcat(save,"-4.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-4.png"); 
 			break;
 		case 5:
 			strcat(save,"-5.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-5.png"); 
 			break;
 		case 6:
 			strcat(save,"-6.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-6.png"); 
 			break;
 		case 7:
 			strcat(save,"-7.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-7.png"); 
 			break;
 		case 8:
 			strcat(save,"-8.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-8.png"); 
 			break;
 		case 9:
 			strcat(save,"-9.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-9.png"); 
 			break;
 		case 10:
 			strcat(save,"-10.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-10.png"); 
 			break;
 		case 11:
 			strcat(save,"-auto.asf"); 
-			if (thumb!=NULL)
-				strcat(thumb,"-auto.png"); 
 			break;
 		default: 
 			strcat(save,".asf");
-			if (thumb!=NULL)
-				strcat(thumb,".png"); 
 	}
-	if (mainMenu_useSavesFolder==1) {
-		char buffer[256];
-		if (save[0]!='\0' && save!=NULL) {
-			memset(buffer, 0, 256);
-			extractFileName(save, buffer);
-			memset(save, 0, 255);
-			snprintf(save, 255, "%s%s", SAVE_PREFIX, buffer);
-		}
+	char buffer[256];
+	if (save[0]!='\0') {
+		memset(buffer, 0, 256);
+		extractFileName(save, buffer);
+		memset(save, 0, 255);
+		snprintf(save, 255, "%s%s", SAVE_PREFIX, buffer);
 	}
+	if (save[0]!='\0' && thumb!=NULL)
+		stateFilenameToThumbFilename(save, thumb);
 }
+
+void load_savestate_thumbnail() {
+	FILE *test=fopen(savestate_filename,"rb");
+	if (test) {
+		fclose(test);
+		savestate_empty = 0;
+		FILE *f=fopen(screenshot_filename,"rb");
+		if (f) {
+			fclose(f);
+			SDL_Surface *loadedImage = IMG_Load(screenshot_filename);
+			if(loadedImage != NULL) {
+				SDL_Rect src = {0, 0, 0, 0 };
+				SDL_Rect dst = {0, 0, 0, 0 };
+				src.h = loadedImage->h;
+				src.w = loadedImage->w;
+				dst.h = 132;
+				dst.w = (dst.h * src.w) / src.h;
+				if (src.w >= 640) dst.w /= 2;
+				thumbnail_image = SDL_CreateRGBSurface(loadedImage->flags, dst.w, dst.h, loadedImage->format->BitsPerPixel, loadedImage->format->Rmask, loadedImage->format->Gmask, loadedImage->format->Bmask, loadedImage->format->Amask);
+				SDL_SoftStretch(loadedImage, &src, thumbnail_image, &dst);
+				SDL_FreeSurface(loadedImage);
+			} else thumbnail_image = NULL;
+		} else thumbnail_image = NULL;
+	} else savestate_empty = 1;
+}
+
+
 
 int run_menuSavestates()
 {
@@ -652,6 +642,9 @@ int run_menuSavestates()
 		showWarning("Emulation has not started yet.");
 		return 0;
 	}
+	
+	make_savestate_filenames(savestate_filename,screenshot_filename);
+	load_savestate_thumbnail();
 
 	while(saveMenu_case<0)
 	{
@@ -667,17 +660,29 @@ int run_menuSavestates()
 		{
 			case SAVE_MENU_CASE_IMPORT_MEM:
 				{
-					make_savestate_filenames(savestate_filename,NULL);
+					make_savestate_filenames(savestate_filename,screenshot_filename);
 					char path[255];
 					snprintf(path, 255, "%s", SAVE_PREFIX);
 
 					if(run_menuLoad(path, MENU_LOAD_IMPORT_SAVE)) {
-						FILE *source=fopen(save_import_filename,"rb");
-						if (source) {
-							fclose(source);
+						FILE *f=fopen(save_import_filename,"rb");
+						if (f) {
+							// import savestate
+							fclose(f);
 							remove(savestate_filename);
 							cp(save_import_filename,savestate_filename);
+
+							// import thumbnail if it exists
+							remove(screenshot_filename);
+							char thumb[255] = "";
+							stateFilenameToThumbFilename(save_import_filename,thumb);
+							FILE *f2=fopen(thumb,"rb");
+							if (f2) {
+								fclose(f2);
+								cp(thumb,screenshot_filename);
+							}
 							showWarning("File imported.");
+							load_savestate_thumbnail();
 						}
 					}
 					saveMenu_case=-1;
@@ -685,22 +690,29 @@ int run_menuSavestates()
 				break;
 			case SAVE_MENU_CASE_EXPORT_MEM:
 				{
-					make_savestate_filenames(savestate_filename,NULL);
-					FILE *source=fopen(savestate_filename,"rb");
-					if (source)
+					make_savestate_filenames(savestate_filename,screenshot_filename);
+					FILE *f=fopen(savestate_filename,"rb");
+					if (f)
 					{
-						fclose(source);
+						fclose(f);
 #if defined(__SWITCH__) || defined(__PSP2__)
-				        char buf[100] = "";
+						char buf[100] = "";
 #ifdef __SWITCH__
-				        kbdswitch_get("Enter savestate name:", "", 100, 0, buf);
+						kbdswitch_get("Enter savestate name:", "", 100, 0, buf);
 #else
-				        strcpy(buf, kbdvita_get("Enter savestate name:", "", 100, 0));
+						strcpy(buf, kbdvita_get("Enter savestate name:", "", 100, 0));
 #endif
-						char save_export_filename[255] = "";
 						if (buf[0] != 0) {
-							snprintf(save_export_filename, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
-							cp(savestate_filename, save_export_filename);
+							char state[255] = "";
+							snprintf(state, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
+							cp(savestate_filename, state);
+							FILE *f2=fopen(screenshot_filename,"rb");
+							if (f2) {
+								fclose(f2);
+								char thumb[255] = "";
+								stateFilenameToThumbFilename(state, thumb);
+								cp(screenshot_filename, thumb);
+							}
 							showWarning("File exported.");
 						} else {
 							showWarning("Invalid filename.");
@@ -719,7 +731,7 @@ int run_menuSavestates()
 				break;
 			case SAVE_MENU_CASE_LOAD_MEM:
 				{
-					make_savestate_filenames(savestate_filename,NULL);
+					make_savestate_filenames(savestate_filename,screenshot_filename);
 					FILE *f=fopen(savestate_filename,"rb");
 					if (f)
 					{
@@ -735,7 +747,7 @@ int run_menuSavestates()
 				}
 				break;
 			case SAVE_MENU_CASE_SAVE_MEM:
-				make_savestate_filenames(savestate_filename,NULL);
+				make_savestate_filenames(savestate_filename,screenshot_filename);
 				savestate_state = STATE_DOSAVE;
 				saveMenu_case=1;
 				break;
@@ -745,11 +757,21 @@ int run_menuSavestates()
 					snprintf(path, 255, "%s", SAVE_PREFIX);
 
 					if(run_menuLoad(path, MENU_LOAD_DELETE_SAVE)) {
-						FILE *source=fopen(save_import_filename,"rb");
-						if (source) {
-							fclose(source);
+						FILE *f=fopen(save_import_filename,"rb");
+						if (f) {
+							fclose(f);
 							remove(save_import_filename);
+
+							// delete thumbnail
+							char thumb[255] = "";
+							stateFilenameToThumbFilename(save_import_filename, thumb);
+							FILE *f2=fopen(thumb,"rb");
+							if (f2) {
+								fclose(f2);
+								remove(thumb);
+							}
 							showWarning("File deleted.");
+							load_savestate_thumbnail();
 						} else {
 							showWarning("Nothing to delete."); 
 						}
@@ -759,13 +781,18 @@ int run_menuSavestates()
 				break;
 			case SAVE_MENU_CASE_DELETE_SLOT:
 			{
-				make_savestate_filenames(savestate_filename,NULL);
+				make_savestate_filenames(savestate_filename,screenshot_filename);
 				FILE *f=fopen(savestate_filename,"rb");
 				if (f) {
 					fclose(f);
-					if (remove(savestate_filename) == 0) {
-						showWarning("File deleted.");
+					remove(savestate_filename);
+					FILE *f2=fopen(screenshot_filename,"rb");
+					if (f2) {
+						fclose(f2);
+						remove(screenshot_filename);
 					}
+					showWarning("File deleted.");
+					load_savestate_thumbnail();
 				} else {
 					showWarning("File does not exist.");
 				}

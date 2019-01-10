@@ -199,8 +199,9 @@ void CreateScreenshot(int code)
 		w=32;
 		h=32;
 	}
+	
 	current_screenshot = SDL_CreateRGBSurface(prSDLScreen->flags,w,h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
-  SDL_BlitSurface(prSDLScreen, NULL, current_screenshot, NULL);
+	SDL_BlitSurface(prSDLScreen, NULL, current_screenshot, NULL);
 }
 
 
@@ -612,6 +613,11 @@ void quit_text(void)
 	text_screen = NULL;
 	SDL_FreeSurface(window_screen);
 	window_screen = NULL;
+}
+
+void draw_image_pos(SDL_Surface *img, int x, int y) {
+	SDL_Rect dst = { x, y, 0, 0 };
+	SDL_BlitSurface(img, NULL, text_screen, &dst);
 }
 
 void write_text(int x, int y, const char * str)

@@ -4,6 +4,11 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Recent changes
 ======
+1.86
+
+- implement thumbnail previews for savestates
+- savestates are now always saved to and loaded from the `saves` folder, never in the rom folder anymore
+
 1.85
 
 - make some notifications in menu more readable
@@ -87,6 +92,10 @@ Vita/Switch-exclusive Features
 - Rear touch panel can be enabled for mouse pointer control (Vita only)
 - Split Joy-Con support (Switch only)
 - A "fast mouse" custom button can be mapped to speed up the mouse
+- Automatic full 1080p support in docked mode (Switch only)
+- Savestate import/export to backup savestates
+- Config file management (load, save as, etc.)
+- Thumbnail previews for savestates
 
 Controls
 =====
@@ -302,6 +311,11 @@ Compiling
 
 CHANGELOG
 =====
+1.86
+
+- implement thumbnail previews for savestates
+- savestates are now always saved to and loaded from the `saves` folder, never in the rom folder anymore
+
 1.85
 
 - make some notifications in menu more readable

@@ -31,6 +31,8 @@ void _text_draw_window_bar(SDL_Surface *sf, int x, int y, int w, int h, int per,
 void CreateScreenshot(int code);
 int save_thumb(int code,char *path);
 int save_png(SDL_Surface* surface,char *path);
+void load_savestate_thumbnail();
+void draw_image_pos(SDL_Surface *img, int x, int y);
 
 int createScript(int bIcon=0);
 

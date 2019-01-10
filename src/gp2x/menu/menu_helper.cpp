@@ -67,6 +67,17 @@ void extractFileName(char *str, char *buffer) {
     strcpy(buffer, p);
 }
 
+void stateFilenameToThumbFilename(char *src, char *dst) {
+    char buffer[255] = "";
+    extractFileName(src, buffer);
+    char *p = buffer + strlen(buffer) - 4;
+    *p = 0;
+    p--;
+    strcat(p, ".png");
+    strcpy(dst, THUMB_PREFIX);
+    strcat(dst, buffer);
+}
+
 #ifdef ANDROIDSDL
 void update_onscreen()
 {

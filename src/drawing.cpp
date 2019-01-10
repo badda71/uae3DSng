@@ -74,13 +74,8 @@ static int var_VISIBLE_LEFT_BORDER = 73;
 static int var_VISIBLE_RIGHT_BORDER = 393;
 static int var_LINETOSCR_X_ADJUST_BYTES = 144;
 
-#ifdef USE_GUICHAN
-static char screenshot_filename_default[255]={
-	'/', 't', 'm', 'p', '/', 'n', 'u', 'l', 'l', '.', 'p', 'n', 'g', '\0'
-};
-char *screenshot_filename=(char *)&screenshot_filename_default[0];
-FILE *screenshot_file=NULL;
-#endif
+static char screenshot_filename_default[255] = { "" };
+char *screenshot_filename = (char *) &screenshot_filename_default[0];
 
 // newWidth is always in LORES
 void InitDisplayArea(int newWidth)
@@ -2320,9 +2315,7 @@ void vsync_handle_redraw (int long_frame, int lof_changed)
 			custom_prepare_savestate ();
 			savestate_state = STATE_SAVE;
 			pause_sound();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
 			save_thumb(SCREENSHOT, screenshot_filename);
-#endif
 			save_state (savestate_filename, "Description!");
 			resume_sound();
 			gui_set_message("Saved", 50);

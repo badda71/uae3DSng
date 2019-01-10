@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 85)
+set(VERSION_MINOR 86)
 
 if(BUILD_PSP2)
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -137,7 +137,7 @@ if(BUILD_PSP2)
           -DGP2X -DPANDORA -D__PSP2__ -DUSE_AUTOCONFIG -DUSE_ZFILE -DUSE_FAME_CORE -DWITH_TESTMODE
           -DUSE_SDL -DGCCCONSTFUNC="__attribute__\(\(const\)\)" -DUSE_UNDERSCORE
           -DSHM_SUPPORT_LINKS=0 -DUNALIGNED_PROFITABLE -DOPTIMIZED_FLAGS -DOS_WITHOUT_MEMORY_MANAGEMENT
-          -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"app0:/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\"
+          -DROM_PATH_PREFIX=\"ux0:/data/uae4all/roms/\" -DDATA_PREFIX=\"app0:/data/\" -DSAVE_PREFIX=\"ux0:/data/uae4all/saves/\" -DTHUMB_PREFIX=\"ux0:/data/uae4all/thumbs/\"
           -DUSE_UAE4ALL_VKBD
           -DUSE_ARMV7
           -DUSE_ARMNEON
@@ -218,6 +218,7 @@ if(BUILD_NX)
     -DROM_PATH_PREFIX=\"./roms/\"
     -DDATA_PREFIX=\"./data/\"
     -DSAVE_PREFIX=\"./saves/\"
+    -DTHUMB_PREFIX=\"./thumbs/\"
     -DUSE_UAE4ALL_VKBD
   )
 
@@ -293,6 +294,7 @@ if(BUILD_NX)
     COMMAND mkdir -p ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/kickstarts
     COMMAND mkdir -p ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/saves
     COMMAND mkdir -p ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/conf
+    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/thumbs
     COMMAND cp -f ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.nro ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/${PROJECT_NAME}.nro
     COMMAND cp -r ${CMAKE_SOURCE_DIR}/switchdata/data/* ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/data/
     COMMAND cd ${CMAKE_BINARY_DIR}/release && zip -r ../${PROJECT_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}_switch.zip ${PROJECT_NAME} && cd ${CMAKE_BINARY_DIR}

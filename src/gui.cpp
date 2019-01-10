@@ -348,11 +348,7 @@ int gui_init (void)
 int gui_update (void)
 {
 	extern char *savestate_filename;
-#ifdef USE_GUICHAN
 	extern char *screenshot_filename;
-#else
-	 char *screenshot_filename=NULL;
-#endif
 	strcpy(changed_df[0],uae4all_image_file0);
 	strcpy(changed_df[1],uae4all_image_file1);
 	strcpy(changed_df[2],uae4all_image_file2);
@@ -409,11 +405,7 @@ static void goMenu(void)
 	if (exitmode==1 || exitmode==2)
 	{
 		extern char *savestate_filename;
-#ifdef USE_GUICHAN
 		extern char *screenshot_filename;
-#else
-		char *screenshot_filename = NULL;
-#endif
 		extern int saveMenu_n_savestate;
 		for(int i=0;i<mainMenu_drives;i++)
 		{
@@ -439,11 +431,7 @@ static void goMenu(void)
 	if (exitmode==3)
 	{
 		extern char *savestate_filename;
-#ifdef USE_GUICHAN
 		extern char *screenshot_filename;
-#else
-		char *screenshot_filename = NULL;
-#endif
 		for(int i=0;i<mainMenu_drives;i++)
 		{
 			changed_df[i][0]=0;
@@ -482,9 +470,6 @@ static void goMenu(void)
 			disk_eject(i);
 		}
 		make_savestate_filenames(savestate_filename, screenshot_filename);
-#ifdef USE_GUICHAN
-		strcpy(screenshot_filename,uae4all_image_file0);
-#endif
 	}
 	if (exitmode==2)
 	{
@@ -1529,12 +1514,12 @@ if(!vkbd_mode)
 		}//end of nr_joysticks loop
 		if (quickSave)
 		{
-			make_savestate_filenames(savestate_filename,NULL);
+			make_savestate_filenames(savestate_filename,screenshot_filename);
 			savestate_state = STATE_DOSAVE;
 		} 
 		else if (quickLoad) 
 		{
-			make_savestate_filenames(savestate_filename,NULL);
+			make_savestate_filenames(savestate_filename,screenshot_filename);
 			FILE *f=fopen(savestate_filename, "rb");
 			keystate[SDLK_l]=0;
 			if(f)

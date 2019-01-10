@@ -1923,7 +1923,9 @@ void loadconfig(int general)
         if (filebuffer[0]) {
             strcpy(custom_kickrom, filebuffer);
         }
+        // ignore this option. All saves are always made into saves folder now
         fscanf(f,"useSavesFolder=%d\n",&mainMenu_useSavesFolder);
+        mainMenu_useSavesFolder = DEFAULT_USESAVESFOLDER;
 #ifdef __SWITCH__ 
         fscanf(f,"swapAB=%d\n",&mainMenu_swapAB);
         fscanf(f,"singleJoycons=%d\n",&mainMenu_singleJoycons);

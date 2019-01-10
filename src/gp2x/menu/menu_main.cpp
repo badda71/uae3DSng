@@ -1009,7 +1009,7 @@ int run_mainMenu()
 				{
 					int old_saveMenu_n_savestate = saveMenu_n_savestate;
 					saveMenu_n_savestate=11;
-					make_savestate_filenames(savestate_filename,NULL);
+					make_savestate_filenames(savestate_filename,screenshot_filename);
 					f=fopen(savestate_filename,"rb");
 					if (f)
 					{
@@ -1019,7 +1019,7 @@ int run_mainMenu()
 					} else 
 					{
 						saveMenu_n_savestate=old_saveMenu_n_savestate;
-						make_savestate_filenames(savestate_filename,NULL);
+						make_savestate_filenames(savestate_filename,screenshot_filename);
 					}
 				}
 			}
