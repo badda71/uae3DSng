@@ -498,7 +498,7 @@ void show_error(const char *str)
 	int i;
 
 	text_draw_background();
-	text_draw_window(64/7,64/8,160/7,40/8,"--- ERROR ---");
+	text_draw_window(63/7,64/8,160/7,40/8,"--- ERROR ---");
 	write_text(9,9,str);
 	text_flip();
 	
