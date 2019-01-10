@@ -497,9 +497,8 @@ void show_error(const char *str)
 {
 	int i;
 
-	text_draw_background();
-	text_draw_window(63/7,64/8,160/7,40/8,"--- ERROR ---");
-	write_text(9,9,str);
+	text_draw_window(54/7,91/8,255/7,64/8,"--- ERROR ---");
+	write_text(12,14,str);
 	text_flip();
 	
 	SDL_Delay(1000);
@@ -650,7 +649,7 @@ int run_menuSavestates()
 
 	if (!emulating)
 	{
-		show_error("Emulation hasn't started yet.");
+		showWarning("Emulation hasn't started yet.");
 		return 0;
 	}
 
@@ -678,7 +677,7 @@ int run_menuSavestates()
 							fclose(source);
 							remove(savestate_filename);
 							cp(save_import_filename,savestate_filename);
-							show_error("File Imported");
+							showWarning("File imported.");
 						}
 					}
 					saveMenu_case=-1;
@@ -702,6 +701,7 @@ int run_menuSavestates()
 						if (buf[0] != 0) {
 							snprintf(save_export_filename, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
 							cp(savestate_filename, save_export_filename);
+							showWarning("File exported.");
 						}
 #else
 						saveMenu_case=-1;
@@ -710,7 +710,7 @@ int run_menuSavestates()
 					}
 					else
 					{
-						show_error("Nothing to export.");
+						showWarning("Slot empty. Nothing to export.");
 					}
 				}
 				saveMenu_case=-1;
@@ -727,7 +727,7 @@ int run_menuSavestates()
 					}
 					else
 					{
-						show_error("File doesn't exist.");
+						showWarning("File doesn't exist.");
 						saveMenu_case=-1;
 					}
 				}
@@ -747,9 +747,9 @@ int run_menuSavestates()
 						if (source) {
 							fclose(source);
 							remove(save_import_filename);
-							show_error("File Deleted");
+							showWarning("File deleted.");
 						} else {
-							show_error("Nothing to delete."); 
+							showWarning("Nothing to delete."); 
 						}
 					}
 					saveMenu_case=-1;
@@ -762,9 +762,9 @@ int run_menuSavestates()
 				if (f) {
 					fclose(f);
 					if (remove(savestate_filename) == 0) {
-						show_error("File deleted");
+						showWarning("File deleted.");
 					} else {
-						show_error("File doesn't exist.");
+						showWarning("File doesn't exist.");
 					}
 				}
 				saveMenu_case=-1;

@@ -553,7 +553,7 @@ static int menuLoadLoop(char *curr_path)
 							break;
 						case MENU_LOAD_HDF:
 							if (strstr(filename, ".hdf") == NULL)
-								showWarning("HDF file must be selected");
+								showWarning("HDF file must be selected.");
 							else
 								if (current_hdf==0)
 									strcpy(uae4all_hard_file0, filename);
@@ -567,14 +567,14 @@ static int menuLoadLoop(char *curr_path)
 						case MENU_LOAD_CONFIG:
 						case MENU_LOAD_DELETE_CONFIG:
 							if (strstr(filename, ".conf") == NULL)
-								showWarning("CONF file must be selected");
+								showWarning("CONF file must be selected.");
 							else
 								strcpy(config_load_filename,filename);
 							break;
 						case MENU_LOAD_IMPORT_SAVE:
 						case MENU_LOAD_DELETE_SAVE:
 							if (strstr(filename, ".asf") == NULL)
-								showWarning("ASF file must be selected");
+								showWarning("ASF file must be selected.");
 							else
 								strcpy(save_import_filename,filename);
 							break;

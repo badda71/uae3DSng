@@ -597,7 +597,7 @@ static int key_memDiskMenu(int *c)
 				if (hit0)
 				{
 					if (saveconfig(2))
-						showWarning("Config saved for current HD");
+						showWarning("Config saved for current HD.");
 				}
 				break;
 			case MENUDISK_FLOPPYSPEED:

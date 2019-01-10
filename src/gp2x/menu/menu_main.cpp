@@ -457,7 +457,7 @@ static void draw_mainMenu(int c)
 
 void showWarning(const char *msg)
 {
-	text_draw_window(54/7,91/8,255/7,64/8,"--- Config ---");
+	text_draw_window(54/7,91/8,255/7,64/8,"--- Message ---");
 	write_text(12,14,msg);
 	//write_text(11,16,"Press any button to continue");
 	text_flip();
@@ -880,7 +880,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
 					if (saveconfig(4))
-						showWarning("Config saved");
+						showWarning("Config saved.");
 				}
 				break;
 			case 15:
@@ -895,7 +895,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
 					saveconfig(1);
-					showWarning("General config file saved");
+					showWarning("General config file saved.");
 				}
 				break;
 			case 17:
@@ -903,7 +903,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
 					if (saveconfig())
-						showWarning("Config saved for this game");
+						showWarning("Config saved for this game.");
 				}
 				break;
 			case 18:
@@ -1185,9 +1185,9 @@ int run_mainMenu()
 				if (f) {
 					fclose(f);
 					if (remove(config_load_filename) == 0) {
-						show_error("Config File deleted");
+						showWarning("Config File deleted");
 					} else {
-						show_error("Config File doesn't exist.");
+						showWarning("Config File doesn't exist.");
 					}
 				}
 			}
@@ -1197,7 +1197,7 @@ int run_mainMenu()
 		case MAIN_MENU_CASE_QUIT:
 			if (gui_data.hdled == HDLED_WRITE && force_quit == 0) 
 			{
-				show_error("Amiga is writing to HDF. Press PAD_right+L to force quit.");
+				showWarning("Amiga is writing to HDF. Press PAD_right+L to force quit.");
 				break;
 		   }
 #ifndef USE_SDLSOUND
