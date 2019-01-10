@@ -457,8 +457,8 @@ static void draw_mainMenu(int c)
 
 void showWarning(const char *msg)
 {
-	text_draw_window(4,9,37,6,"Message");
-	write_text(5,12,msg);
+	text_draw_window(4,9,37,4,"Message");
+	write_text(5,11,msg);
 	//write_text(11,16,"Press any button to continue");
 	text_flip();
 	SDL_Event ev;
@@ -1187,7 +1187,7 @@ int run_mainMenu()
 					if (remove(config_load_filename) == 0) {
 						showWarning("Config File deleted");
 					} else {
-						showWarning("Config File doesn't exist.");
+						showWarning("Config File does not exist.");
 					}
 				}
 			}

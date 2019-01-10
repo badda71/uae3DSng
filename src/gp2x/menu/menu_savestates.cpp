@@ -703,7 +703,7 @@ int run_menuSavestates()
 							cp(savestate_filename, save_export_filename);
 							showWarning("File exported.");
 						} else {
-							showWarning("Invalid filename. File not exported.");
+							showWarning("Invalid filename.");
 						}
 #else
 						saveMenu_case=-1;
@@ -729,7 +729,7 @@ int run_menuSavestates()
 					}
 					else
 					{
-						showWarning("File doesn't exist.");
+						showWarning("File does not exist.");
 						saveMenu_case=-1;
 					}
 				}
@@ -765,9 +765,9 @@ int run_menuSavestates()
 					fclose(f);
 					if (remove(savestate_filename) == 0) {
 						showWarning("File deleted.");
-					} else {
-						showWarning("File doesn't exist.");
 					}
+				} else {
+					showWarning("File does not exist.");
 				}
 				saveMenu_case=-1;
 				break;

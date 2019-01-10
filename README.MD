@@ -1,8 +1,11 @@
+Important note to Switch users: Since v1.84, please use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
+
 Recent changes
 ======
 1.85
 
 - make some notifications in menu more readable
+- fix some visual inconsistencies in the menu
 
 1.84
 
@@ -300,6 +303,7 @@ CHANGELOG
 1.85
 
 - make some notifications in menu more readable
+- fix some visual inconsistencies in the menu
 
 1.84
 
