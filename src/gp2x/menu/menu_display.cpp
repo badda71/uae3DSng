@@ -25,7 +25,7 @@
 #endif
 
 const char *text_str_display_separator="--------------------------------------";
-const char *text_str_display_title=    "   Display and Sound Settings    ";
+const char *text_str_display_title=    "Display and Sound Settings";
 static const char *text_str_sound="Sound";
 static const char *text_str_fast="Fast";
 static const char *text_str_accurate="Accurate";

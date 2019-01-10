@@ -93,7 +93,7 @@ static inline void cp(char* source_name, char* dest_name)
 
 static inline void draw_savestatesMenu(int c)
 {
-	int menuLine = 6;
+	int menuLine = 3;
 	static int b=0;
 	int bb=(b%6)/3;
 	SDL_Rect r;
@@ -101,7 +101,7 @@ static inline void draw_savestatesMenu(int c)
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
-	text_draw_window(3,4,39,20,text_str_title);
+	text_draw_window(3,2,39,20,text_str_title);
 
 	if ((c==0)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_exit);
@@ -649,7 +649,7 @@ int run_menuSavestates()
 
 	if (!emulating)
 	{
-		showWarning("Emulation hasn't started yet.");
+		showWarning("Emulation has not started yet.");
 		return 0;
 	}
 
@@ -702,6 +702,8 @@ int run_menuSavestates()
 							snprintf(save_export_filename, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
 							cp(savestate_filename, save_export_filename);
 							showWarning("File exported.");
+						} else {
+							showWarning("Invalid filename. File not exported.");
 						}
 #else
 						saveMenu_case=-1;

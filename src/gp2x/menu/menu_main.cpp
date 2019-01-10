@@ -457,8 +457,8 @@ static void draw_mainMenu(int c)
 
 void showWarning(const char *msg)
 {
-	text_draw_window(54/7,91/8,255/7,64/8,"--- Message ---");
-	write_text(12,14,msg);
+	text_draw_window(4,9,37,6,"Message");
+	write_text(5,12,msg);
 	//write_text(11,16,"Press any button to continue");
 	text_flip();
 	SDL_Event ev;

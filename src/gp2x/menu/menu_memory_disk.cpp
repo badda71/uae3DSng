@@ -33,7 +33,7 @@
 #endif
 
 const char *text_str_memdisk_separator="--------------------------------------";
-static const char *text_str_memdisk_title=    "     Memory and Disk Options     -";
+static const char *text_str_memdisk_title=    "Memory and Disk Options";
 const char *text_str_off="off";
 const char *text_str_on="on";
 const char *text_str_512K="512K";

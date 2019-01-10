@@ -33,8 +33,8 @@
 static int justSwitchedSingleJoycons = 0;
 #endif
 
-const char *text_str_misc_separator="-------------------------------------";
-static const char *text_str_misc_title=    "            Miscellanous            -";
+const char *text_str_misc_separator="--------------------------------------";
+static const char *text_str_misc_title=    "Miscellanous";
 static const char *text_str_stylus_offset="StylusOffset";
 static const char *text_str_0px="0px";
 static const char *text_str_1px="1px";
@@ -110,7 +110,7 @@ static void draw_miscMenu(int c)
 	int tabstop8 = 31;
 	int tabstop9 = 33;
 
-	int menuLine = 2;
+	int menuLine = 3;
 	static int b=0;
 	int bb=(b%6)/3;
 	SDL_Rect r;
@@ -121,7 +121,7 @@ static void draw_miscMenu(int c)
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
-	text_draw_window(2,1,40,30,text_str_misc_title);
+	text_draw_window(2,2,40,30,text_str_misc_title);
 
 	// MENUMISC_RETURNMAIN
 	if (menuMisc == MENUMISC_RETURNMAIN && bb)

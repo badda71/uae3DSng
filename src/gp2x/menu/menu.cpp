@@ -62,7 +62,7 @@ static Uint32 menu_inv_color=0, menu_win0_color=0, menu_win1_color=0;
 static Uint32 menu_barra0_color=0, menu_barra1_color=0;
 static Uint32 menu_win0_color_base=0, menu_win1_color_base=0;
 
-void write_text_pos(int x, int y, char * str);
+void write_text_pos(int x, int y, const char * str);
 void write_num(int x, int y, int v);
 int menu_msg_pos=330;
 int menu_moving=1;
@@ -614,85 +614,12 @@ void quit_text(void)
 	window_screen = NULL;
 }
 
-void write_text_pos(int x, int y, char * str)
+void write_text(int x, int y, const char * str)
 {
-  int i, c;
-  SDL_Rect src, dest;
-  SDL_Surface *text_image;
-
-  for (i = 0; i < strlen(str); i++)
-    {
-      c = -1;
-
-      if (str[i] >= '0' && str[i] <= '9')
-		c = str[i] - '0';
-      else if (str[i] >= 'A' && str[i] <= 'Z')
-		c = str[i] - 'A' + 10;
-      else if (str[i] >= 'a' && str[i] <= 'z')
-		c = str[i] - 'a' + 36;
-      else if (str[i] == '#')
-		c = 62;
-      else if (str[i] == '=')
-		c = 63;
-      else if (str[i] == '.')
-		c = 64;
-      else if (str[i] == '_')
-		c = -2;
-      else if (str[i] == '-')
-		c = -3;
-      else if (str[i] == '(')
-		c = 65;
-      else if (str[i] == ')')
-		c = 66;
-
-		if (c >= 0)
-		{
-		  src.x = c * 7;
-		  src.y = 0;
-		  src.w = 7;
-		  src.h = 8;
-
-		  dest.x = x + (i * 7);
-		  dest.y = y;
-		  dest.w = 7;
-		  dest.h = 8;
-		  switch (mainMenu_font) {
-			  case 0:
-			  	text_image = text_image_0;
-				break;
-			  case 1:
-			  	text_image = text_image_1;
-				break;
-			  case 2:
-			  	text_image = text_image_2;
-				break;
-			  default:
-			  	text_image = text_image_0;
-		  }
-		  if (text_image == NULL) {
-			  text_image = text_image_0;
-		  }
-		  SDL_BlitSurface(text_image, &src,
-				  text_screen, &dest);
-		}
-		else if (c == -2 || c == -3)
-		{
-		  dest.x = x + (i * 8);
-
-		  if (c == -2)
-			dest.y = y  + 7;
-		  else if (c == -3)
-			dest.y = y  + 3;
-
-		  dest.w = 7;
-		  dest.h = 1;
-
-		  SDL_FillRect(text_screen, &dest, menu_barra0_color);
-		}
-    }
+	write_text_pos(x * 7, y * 7, str);
 }
 
-void write_text(int x, int y, const char * str)
+void write_text_pos(int x, int y, const char * str)
 {
 	int i, c;
 	SDL_Rect src, dest;
@@ -731,8 +658,8 @@ void write_text(int x, int y, const char * str)
 		  src.w = 7;
 		  src.h = 8;
 
-		  dest.x = (x + i) * 7;
-		  dest.y = y * 7; //10;
+		  dest.x = x + i * 7;
+		  dest.y = y; //10;
 		  dest.w = 7;
 		  dest.h = 8;
 		  switch (mainMenu_font) {
@@ -756,12 +683,12 @@ void write_text(int x, int y, const char * str)
 		}
 		else if (c == -2 || c == -3)
 		{
-		  dest.x = (x + i) * 7;
+		  dest.x = x + i * 7;
 
 		  if (c == -2)
-			dest.y = y * 7 /*10*/ + 7;
+			dest.y = y /*10*/ + 7;
 		  else if (c == -3)
-			dest.y = y * 7 /*10*/ + 3;
+			dest.y = y /*10*/ + 3;
 		  dest.w = 7;
 		  dest.h = 1;
 
@@ -823,12 +750,12 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 {
 	int i,j;
 	int x_screen = x * 7;
-	int y_screen = y * 8;
+	int y_screen = y * 7 + 2;
 
 	int x_corn = x_screen-2;
-	int y_corn = y_screen-12;
+	int y_corn = y_screen-13;
 	int w_corn = (w*7)+4;
-	int h_corn = (h*8)+4+12;
+	int h_corn = (h*8)+4+13;
 
 	int x_shadow = x_corn+w_corn;
 	int y_shadow = y_corn+6;
@@ -859,8 +786,8 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 	dest.x = x_corn;
 	dest.y = y_corn;
 	dest.w = w_corn;
-
 	dest.h = h_corn;
+
 	SDL_FillRect(text_screen, &dest, menu_win1_color);
 
 	dest.x=x_screen;
@@ -869,7 +796,7 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 	dest.h=h*8;
 	SDL_BlitSurface(window_screen,&dest,text_screen,&dest);
 
-	write_text(x + ((w-strlen(title)) / 2), y-1, title);
+	write_text_pos((x + ((w - strlen(title)) / 2)) * 7, (y - 1) * 7 - 1, title);
 }
 
 void _text_draw_window(SDL_Surface *sf, int x, int y, int w, int h, const char *title)
