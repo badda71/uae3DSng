@@ -1,5 +1,9 @@
-Changes in this Version
+Recent changes
 ======
+1.85
+
+- make some notifications in menu more readable
+
 1.84
 
 - implement config load with dialog, config save as, and config delete
@@ -293,6 +297,10 @@ Compiling
 
 CHANGELOG
 =====
+1.85
+
+- make some notifications in menu more readable
+
 1.84
 
 - implement config load with dialog, config save as, and config delete
