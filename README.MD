@@ -1,4 +1,6 @@
-Important note to Switch users: Since v1.84, please use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
+Important note to Switch users
+======
+On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
 
 Recent changes
 ======
