@@ -7,7 +7,7 @@ Recent changes
 1.86
 
 - implement thumbnail previews for savestates
-- savestates are now always saved to and loaded from the `saves` folder, never in the rom folder anymore
+- savestates are now always stored in the saves folder, never in the rom folder
 
 1.85
 
@@ -314,7 +314,7 @@ CHANGELOG
 1.86
 
 - implement thumbnail previews for savestates
-- savestates are now always saved to and loaded from the `saves` folder, never in the rom folder anymore
+- savestates are now always stored in the saves folder, never in the rom folder
 
 1.85
 
