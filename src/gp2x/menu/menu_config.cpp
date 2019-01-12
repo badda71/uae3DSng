@@ -74,11 +74,7 @@ int mainMenu_CPU_speed = 0;
 int mainMenu_cpuSpeed = 600;
 
 int mainMenu_joyConf = 0;
-#if defined(__PSP2__) || defined(__SWITCH__)
 int mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
-#else
-int mainMenu_joyPort = 0; // Both ports
-#endif
 int mainMenu_autofireRate = 8;
 int mainMenu_customAutofireButton = 0;
 int mainMenu_showStatus = DEFAULT_STATUSLN;
@@ -253,11 +249,7 @@ void SetDefaultMenuSettings(int general)
 
     mainMenu_cpuSpeed = 600;
     mainMenu_joyConf = 0;
-#if defined(__PSP2__) || defined(__SWITCH__)
     mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
-#else
-    mainMenu_joyPort = 0;
-#endif
     mainMenu_autofireRate = 8;
     mainMenu_customAutofireButton = 0;
     mainMenu_showStatus = DEFAULT_STATUSLN;
@@ -1636,6 +1628,8 @@ void loadconfig(int general)
         fscanf(f,"joyconf=%d\n",&joybuffer);
         mainMenu_joyConf = (joybuffer & 0x0f);
         mainMenu_joyPort = ((joybuffer >> 4) & 0x0f);
+        if (mainMenu_joyPort == 0)
+            mainMenu_joyPort = 2;
         fscanf(f,"autofireRate=%d\n",&mainMenu_autofireRate);
         fscanf(f,"autofire=%d\n",&mainMenu_autofire);
         fscanf(f,"customAutofireButton=%d\n",&mainMenu_customAutofireButton);

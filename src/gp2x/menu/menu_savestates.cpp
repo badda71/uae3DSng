@@ -12,6 +12,13 @@
 #include "gui.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#ifdef USE_SDL2
+#include <SDL2_rotozoom.h>
+#else
+#ifndef __PSP2__
+#include <SDL_rotozoom.h>
+#endif
+#endif
 #include "gp2x.h"
 #include <SDL_ttf.h>
 #include "savestate.h"
@@ -183,9 +190,10 @@ static inline void draw_savestatesMenu(int c)
 	write_text(leftMargin,menuLine,text_str_separator);
 	menuLine++;
 
+	int menuLineForThumb = menuLine;
 	if (!savestate_empty) {
 		if (thumbnail_image != NULL) {
-			draw_image_pos(thumbnail_image, (320 - thumbnail_image->w) / 2 , menuLine * 7);
+			//draw_image_pos(thumbnail_image, (320 - thumbnail_image->w) / 2 , menuLine * 7);
 		} else {
 			write_text(tabstop1,menuLine+9,"No preview found");
 		}
@@ -236,7 +244,10 @@ static inline void draw_savestatesMenu(int c)
 	else
 		write_text(leftMargin,menuLine,text_str_deleteslot);
 
-	text_flip();
+	if (!savestate_empty && thumbnail_image != NULL)
+		text_flip_with_image(thumbnail_image, (320 - (thumbnail_image->w / 2)) / 2, menuLineForThumb * 7 + (132 - thumbnail_image->h / 2) / 2);
+	else
+		text_flip();
 	b++;
 }
 
@@ -605,6 +616,10 @@ void make_savestate_filenames(char *save, char *thumb)
 }
 
 void load_savestate_thumbnail() {
+	if (thumbnail_image) {
+		SDL_FreeSurface(thumbnail_image);
+		thumbnail_image = NULL;
+	}
 	FILE *test=fopen(savestate_filename,"rb");
 	if (test) {
 		fclose(test);
@@ -618,12 +633,21 @@ void load_savestate_thumbnail() {
 				SDL_Rect dst = {0, 0, 0, 0 };
 				src.h = loadedImage->h;
 				src.w = loadedImage->w;
-				dst.h = 132;
+#ifdef __PSP2__
+				dst.h = (src.h <= 132 * 2)? src.h : 132 * 2;
+#else
+				dst.h = 132 * 2;
+#endif
 				dst.w = (dst.h * src.w) / src.h;
 				if (src.w >= 640) dst.w /= 2;
+#ifdef __PSP2__
 				thumbnail_image = SDL_CreateRGBSurface(loadedImage->flags, dst.w, dst.h, loadedImage->format->BitsPerPixel, loadedImage->format->Rmask, loadedImage->format->Gmask, loadedImage->format->Bmask, loadedImage->format->Amask);
 				SDL_SoftStretch(loadedImage, &src, thumbnail_image, &dst);
+#else
+				thumbnail_image = zoomSurface(loadedImage, (float) dst.w / (float) src.w, (float) dst.h / (float) src.h, SMOOTHING_ON);
+#endif
 				SDL_FreeSurface(loadedImage);
+				loadedImage = NULL;
 			} else thumbnail_image = NULL;
 		} else thumbnail_image = NULL;
 	} else savestate_empty = 1;

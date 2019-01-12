@@ -37,6 +37,7 @@ void draw_image_pos(SDL_Surface *img, int x, int y);
 int createScript(int bIcon=0);
 
 void text_flip(void);
+void text_flip_with_image(SDL_Surface *img, int x, int y);
 void set_joyConf(void);
 void loadconfig(int general=0);
 int saveconfig(int general=0);

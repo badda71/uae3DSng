@@ -70,6 +70,8 @@ Uint32 menu_msg_time=0x12345678;
 int skipintro=1;
 int kickstart_warning=0;
 int displaying_menu = 1;
+int menu_screen_width = 640;
+int menu_screen_height = 480;
 
 static void obten_colores(void)
 {
@@ -337,10 +339,23 @@ else
 		update_window_color();
 }
 
+void text_flip_with_image(SDL_Surface *img, int x, int y)
+{
+#if !defined(__PSP2__) && !defined(__SWITCH__)
+	SDL_Delay(10);
+#endif
+	SDL_SoftStretch(text_screen,NULL,prSDLScreen,NULL);
+	SDL_Rect dst = { 2 * x, 2 * y , 0 , 0 };
+	SDL_BlitSurface(img, NULL, prSDLScreen, &dst);
+	SDL_Flip(prSDLScreen);
+}
+
 void text_flip(void)
 {
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	SDL_Delay(10);
-	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);
+#endif
+	SDL_SoftStretch(text_screen,NULL,prSDLScreen,NULL);
 	SDL_Flip(prSDLScreen);
 }
 
@@ -412,11 +427,11 @@ void init_text(int splash)
 
 	displaying_menu = 1;
 
-	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
-	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", 320, 240);
+	prSDLScreen = SDL_SetVideoMode(menu_screen_width, menu_screen_height, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
+	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", menu_screen_width, menu_screen_height);
 
 	float sh = (float) 480;
-	float sw = (float)320*((float)480/(float)240);
+	float sw = (float)menu_screen_width*((float)480/(float)menu_screen_height);
 	int x = (960-sw)/2;
 	int y = (544-sh)/2;
 
@@ -451,8 +466,8 @@ void init_text(int splash)
 
 	if (!text_screen)
 	{
-		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w,prSDLScreen->h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
-		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w,prSDLScreen->h,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w / 2,prSDLScreen->h / 2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w / 2,prSDLScreen->h / 2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 
 		tmp=SDL_LoadBMP(MENU_FILE_TEXT_0);
 		if (text_screen==NULL || tmp==NULL)
@@ -613,11 +628,6 @@ void quit_text(void)
 	text_screen = NULL;
 	SDL_FreeSurface(window_screen);
 	window_screen = NULL;
-}
-
-void draw_image_pos(SDL_Surface *img, int x, int y) {
-	SDL_Rect dst = { x, y, 0, 0 };
-	SDL_BlitSurface(img, NULL, text_screen, &dst);
 }
 
 void write_text(int x, int y, const char * str)

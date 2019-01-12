@@ -130,7 +130,7 @@ void SDL_SetVideoModeScaling(int x, int y, float sw, float sh) {
 		SDL_DestroyTexture(prescaled);
 		prescaled = NULL;
 	}
-	if (mainMenu_shader == 1) {
+	if (mainMenu_shader == 1 && !displaying_menu) {
 		prescale_factor_x = scaled_width / surface_width;
 		prescale_factor_y = scaled_height / surface_height;
 		prescaled_width = prescale_factor_x * surface_width;

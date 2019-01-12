@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 86)
+set(VERSION_MINOR 87)
 
 if(BUILD_PSP2)
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -255,6 +255,7 @@ if(BUILD_NX)
   set(LIBS
     SDL2 
     SDL2_image
+    SDL2_gfx
     EGL
     GLESv2
     glapi
