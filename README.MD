@@ -2,28 +2,12 @@ Important note to Switch users
 ======
 On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
 
-Recent changes
+Changes in this version
 ======
-1.86
+1.87
 
-- implement thumbnail previews for savestates
-- savestates are now always stored in the saves folder, never in the rom folder
-
-1.85
-
-- make some notifications in menu more readable
-- fix some visual inconsistencies in the menu
-
-1.84
-
-- implement config load with dialog, config save as, and config delete
-- increase number of savestates per game to 12
-- increase number of custom control sets to 6
-- on Switch, fix some issues with vsync
-- implement importing and exporting of savestates
-- better menu font (thanks @wronghands)
-- option to select menu font
-- on Switch, automatically use 1080p resolution in docked mode
+- improve savestate thumbnail quality
+- rename joystick port option to clarify what it means
 
 Description
 =====
@@ -311,6 +295,11 @@ Compiling
 
 CHANGELOG
 =====
+1.87
+
+- improve savestate thumbnail quality
+- rename joystick port option to clarify what it means
+
 1.86
 
 - implement thumbnail previews for savestates
