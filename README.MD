@@ -4,10 +4,9 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Changes in this version
 ======
-1.87
+1.88
 
-- improve savestate thumbnail quality
-- rename joystick port option to clarify what it means
+- add French on-screen keyboard (thanks @CrashMidnick)
 
 Description
 =====
@@ -22,6 +21,8 @@ Thanks to Cpasjuste for the original port and for jumping in and adding shader s
 Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new larger virtual keyboard images.
 
 Thanks to wronghands for the new, better-looking menu font, and many ideas.
+
+Thanks to CrashMidnick for the French virtual keyboard
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
@@ -295,6 +296,10 @@ Compiling
 
 CHANGELOG
 =====
+1.88
+
+- add French on-screen keyboard (thanks @CrashMidnick)
+
 1.87
 
 - improve savestate thumbnail quality

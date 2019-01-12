@@ -344,9 +344,14 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,"UK");
 
 	if ((mainMenu_vkbdLanguage==2)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
-		write_text_inv(tabstop5,menuLine,"GERMAN");
+		write_text_inv(tabstop5,menuLine,"German");
 	else
-		write_text(tabstop5,menuLine,"GERMAN");
+		write_text(tabstop5,menuLine,"German");
+
+	if ((mainMenu_vkbdLanguage==3)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
+		write_text_inv(tabstop5+8,menuLine,"French");
+	else
+		write_text(tabstop5+8,menuLine,"French");
 #endif
 
 	// MENUDISPLAY_BACKGROUND
@@ -775,8 +780,8 @@ static int key_displayMenu(int *c)
 				}
 				else if (right)
 				{
-					if (mainMenu_vkbdLanguage >= 2)
-						mainMenu_vkbdLanguage = 2;
+					if (mainMenu_vkbdLanguage >= 3)
+						mainMenu_vkbdLanguage = 3;
 					else
 						mainMenu_vkbdLanguage +=1;
 				}
