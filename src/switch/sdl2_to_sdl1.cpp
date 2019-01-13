@@ -106,10 +106,13 @@ void SDL_SetVideoModeScaling(int x, int y, float sw, float sh) {
 	current_x = x;
 	current_y = y;
 	if (mainMenu_shader != 0 && !displaying_menu) {
-		x_offset = (x * display_width) / 960;
-		y_offset = (y * display_height) / 544;
-		scaled_width = (sw * display_width) / 960;
-		scaled_height = (sh * display_height) / 544;
+		scaled_height = display_height;
+		if (mainMenu_displayHires)
+				scaled_width = ((visibleAreaWidth * display_height) / (float) (2 * mainMenu_displayedLines));
+		else
+				scaled_width = ((visibleAreaWidth * display_height) / (float) (mainMenu_displayedLines));
+		x_offset = (display_width - scaled_width) / 2;
+		y_offset = (display_height - scaled_height) / 2;
 	} else {
 		int screen_width = 320;
 		int screen_height = 240;
@@ -121,8 +124,8 @@ void SDL_SetVideoModeScaling(int x, int y, float sw, float sh) {
 				screen_height = mainMenu_displayedLines;
 		}
 		int scale_factor = MIN(display_height / screen_height, display_width / screen_width);
-		scaled_height = (float) (scale_factor * screen_height);
-		scaled_width = (float) (scale_factor * screen_width);
+		scaled_height = scale_factor * screen_height;
+		scaled_width = scale_factor * screen_width;
 		x_offset = (display_width - scaled_width) / 2;
 		y_offset = (display_height - scaled_height) / 2;
 	}
@@ -168,14 +171,12 @@ void SDL_Flip(SDL_Surface *surface) {
 			
 			SDL_SetRenderTarget(renderer, prescaled);
 			SDL_Rect dst_rect_prescale = { 0, 0, prescaled_width, prescaled_height };
-			SDL_Rect *src_rect_prescale = NULL;
-			SDL_RenderCopy(renderer, texture, src_rect_prescale, &dst_rect_prescale);
+			SDL_RenderCopy(renderer, texture, NULL, &dst_rect_prescale);
 
 			SDL_SetRenderTarget(renderer, NULL);
 			SDL_Rect dst_rect = { x_offset, y_offset, scaled_width , scaled_height };
-			SDL_Rect *src_rect = NULL;
 			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-			SDL_RenderCopy(renderer, prescaled, src_rect, &dst_rect);
+			SDL_RenderCopy(renderer, prescaled, NULL, &dst_rect);
 			SDL_RenderPresent(renderer);
 		} else {
 			texture = SDL_CreateTextureFromSurface(renderer, surface);
