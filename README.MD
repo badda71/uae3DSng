@@ -4,9 +4,9 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Changes in this version
 ======
-1.88
+1.89 (Switch only)
 
-- add French on-screen keyboard (thanks @CrashMidnick)
+- On Switch, fix scaling artifacts when sharp_bilinear_simple was selected. Pixels are even sharper now! 
 
 Description
 =====
@@ -296,6 +296,10 @@ Compiling
 
 CHANGELOG
 =====
+1.89 (Switch only)
+
+- On Switch, fix scaling artifacts when sharp_bilinear_simple was selected. Pixels are even sharper now! 
+
 1.88
 
 - add French on-screen keyboard (thanks @CrashMidnick)
