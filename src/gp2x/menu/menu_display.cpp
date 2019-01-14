@@ -59,8 +59,8 @@ enum {
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 	MENUDISPLAY_CUTLEFT,
 	MENUDISPLAY_CUTRIGHT,
-#endif
 	MENUDISPLAY_FRAMESKIP,
+#endif
 	MENUDISPLAY_REFRESHRATE,
 #if defined(__PSP2__) || defined(__SWITCH__)
 	MENUDISPLAY_SHADER,
@@ -68,6 +68,7 @@ enum {
 	MENUDISPLAY_STATUSLINE,
 #if defined(USE_UAE4ALL_VKBD)
 	MENUDISPLAY_VKBDLANGUAGE,
+	MENUDISPLAY_VKBDSTYLE,
 #endif
 	MENUDISPLAY_BACKGROUND,
 	MENUDISPLAY_FONT,
@@ -203,7 +204,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-#endif
+
 	// MENUDISPLAY_FRAMESKIP
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
@@ -251,10 +252,16 @@ static void draw_displayMenu(int c)
 		write_text_inv(tabstop9,menuLine,"8");
 	else
 		write_text(tabstop9,menuLine,"8");
+
+	menuLine+=2;
 #endif
 
+#else // !defined(__PSP2__) && !defined(__SWITCH__)
+	menuLine++;
+	write_text(leftMargin,menuLine,text_str_display_separator);
+	menuLine++;
+#endif
 	// MENUDISPLAY_REFRESHRATE
-	menuLine+=2;
 	write_text(leftMargin,menuLine,"Refresh Rate");
 	if ((!mainMenu_ntsc)&&((menuDisplay!=MENUDISPLAY_REFRESHRATE)||(bb)))
 		write_text_inv(tabstop1,menuLine,"50Hz");
@@ -332,7 +339,7 @@ static void draw_displayMenu(int c)
 #if defined(USE_UAE4ALL_VKBD)
 	// MENUDISPLAY_VKBDLANGUAGE
 	menuLine+=2;
-	write_text(leftMargin,menuLine,"Keyboard");
+	write_text(leftMargin,menuLine,"Keyb. Language");
 	if ((mainMenu_vkbdLanguage==0)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
 		write_text_inv(tabstop1,menuLine,"US");
 	else
@@ -352,6 +359,29 @@ static void draw_displayMenu(int c)
 		write_text_inv(tabstop5+8,menuLine,"French");
 	else
 		write_text(tabstop5+8,menuLine,"French");
+
+	// MENUDISPLAY_VKBDSTYLE
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Keyb. Style");
+	if ((mainMenu_vkbdStyle==0)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
+		write_text_inv(tabstop1,menuLine,"Original");
+	else
+		write_text(tabstop1,menuLine,"Original");
+
+	if ((mainMenu_vkbdStyle==1)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
+		write_text_inv(tabstop1+9,menuLine,"Warm");
+	else
+		write_text(tabstop1+9,menuLine,"Warm");
+
+	if ((mainMenu_vkbdStyle==2)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
+		write_text_inv(tabstop1+14,menuLine,"Cool");
+	else
+		write_text(tabstop1+14,menuLine,"Cool");
+
+	if ((mainMenu_vkbdStyle==3)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
+		write_text_inv(tabstop1+19,menuLine,"Dark");
+	else
+		write_text(tabstop1+19,menuLine,"Dark");
 #endif
 
 	// MENUDISPLAY_BACKGROUND
@@ -720,7 +750,6 @@ static int key_displayMenu(int *c)
 						mainMenu_cutRight++;
 				}
 				break;
-#endif
 			case MENUDISPLAY_FRAMESKIP:
 #ifdef PANDORA
 				if ((left)||(right))
@@ -742,6 +771,7 @@ static int key_displayMenu(int *c)
 				}
 #endif
 				break;
+#endif
 			case MENUDISPLAY_REFRESHRATE:
 				if ((left)||(right))
 						mainMenu_ntsc = !mainMenu_ntsc;
@@ -784,6 +814,22 @@ static int key_displayMenu(int *c)
 						mainMenu_vkbdLanguage = 3;
 					else
 						mainMenu_vkbdLanguage +=1;
+				}
+				break;
+			case MENUDISPLAY_VKBDSTYLE:
+				if (left)
+				{
+					if (mainMenu_vkbdStyle <= 0)
+						mainMenu_vkbdStyle = 0;
+					else 
+						mainMenu_vkbdStyle -= 1;
+				}
+				else if (right)
+				{
+					if (mainMenu_vkbdStyle >= 3)
+						mainMenu_vkbdStyle = 3;
+					else
+						mainMenu_vkbdStyle +=1;
 				}
 				break;
 #endif

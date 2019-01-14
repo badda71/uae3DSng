@@ -17,6 +17,7 @@ extern int keycode2amiga(SDL_keysym *prKeySym);
 
 extern int mainMenu_displayHires;
 extern int mainMenu_vkbdLanguage;
+extern int mainMenu_vkbdStyle;
 
 static int vkbd_x=VKBD_X;
 static int vkbd_y=VKBD_Y;
@@ -376,7 +377,7 @@ static t_vkbd_rect vkbd_rect_GER[]=
 	{{151, 49, 14, 11 }, 63,87,77,79, AK_COMMA},	// 78
 	{{166, 49, 14, 11 }, 64,87,78,80, AK_PERIOD},	// 79
 	{{181, 49, 14, 11 }, 65,88,79,81, AK_SLASH},	// 80
-	{{196, 49, 27, 11 }, 49,89,80,82, AK_RSH},	// 81
+	{{196, 49, 29, 11 }, 49,89,80,82, AK_RSH},	// 81
 	{{226, 49, 14, 11 }, 49,91,81,83, AK_UP},	// 82
 	{{241, 49, 29, 11 }, 66,92,82,84, AK_NP0},	// 83
 	{{271, 49, 14, 11 }, 67,69,83,69, AK_NPDEL},	// 84
@@ -482,7 +483,7 @@ static t_vkbd_rect vkbd_rect_FR[]=
 	{{151, 49, 14, 11 }, 63,87,77,79, AK_COMMA},	// 78
 	{{166, 49, 14, 11 }, 64,87,78,80, AK_PERIOD},	// 79
 	{{181, 49, 14, 11 }, 65,88,79,81, AK_SLASH},	// 80
-	{{196, 49, 27, 11 }, 49,89,80,82, AK_RSH},	// 81
+	{{196, 49, 29, 11 }, 49,89,80,82, AK_RSH},	// 81
 	{{226, 49, 14, 11 }, 49,91,81,83, AK_UP},	// 82
 	{{241, 49, 29, 11 }, 66,92,82,84, AK_NP0},	// 83
 	{{271, 49, 14, 11 }, 67,69,83,69, AK_NPDEL},	// 84
@@ -523,37 +524,44 @@ int vkbd_init(void)
 	char vkbdHiresFileName[256];
 	char vkbdShiftFileName[256];
 	char vkbdShiftHiresFileName[256];
-	switch (mainMenu_vkbdLanguage)
-	{
+	char vkdbStyleString[10];
+	char vkbdLanguageString[10];
+	switch (mainMenu_vkbdStyle) {
 		case 1:
-			snprintf(vkbdFileName, 256, "vkbdUKLarge.bmp");
-			snprintf(vkbdHiresFileName, 256, "vkbdUKLargeHires.bmp");
-			snprintf(vkbdShiftFileName, 256, "vkbdUKLargeShift.bmp");
-			snprintf(vkbdShiftHiresFileName, 256, "vkbdUKLargeShiftHires.bmp");
+			snprintf(vkdbStyleString, 10, "Warm");
+			break;
+		case 2:
+			snprintf(vkdbStyleString, 10, "Cool");
+			break;
+		case 3:
+			snprintf(vkdbStyleString, 10, "Dark");
+			break;
+		default:
+			snprintf(vkdbStyleString, 10, "Orig");
+			break;
+	}
+	switch (mainMenu_vkbdLanguage) {
+		case 1:
+			snprintf(vkbdLanguageString, 10, "UK");
 			vkbd_rect=vkbd_rect_UK;
 			break;
 		case 2:
-			snprintf(vkbdFileName, 256, "vkbdGERLarge.bmp");
-			snprintf(vkbdHiresFileName, 256, "vkbdGERLargeHires.bmp");
-			snprintf(vkbdShiftFileName, 256, "vkbdGERLargeShift.bmp");
-			snprintf(vkbdShiftHiresFileName, 256, "vkbdGERLargeShiftHires.bmp");
+			snprintf(vkbdLanguageString, 10, "Ger");
 			vkbd_rect=vkbd_rect_GER;
 			break;
 		case 3:
-			snprintf(vkbdFileName, 256, "vkbdFRLarge.bmp");
-			snprintf(vkbdHiresFileName, 256, "vkbdFRLargeHires.bmp");
-			snprintf(vkbdShiftFileName, 256, "vkbdFRLargeShift.bmp");
-			snprintf(vkbdShiftHiresFileName, 256, "vkbdFRLargeShiftHires.bmp");
+			snprintf(vkbdLanguageString, 10, "FR");
 			vkbd_rect=vkbd_rect_FR;
 			break;
 		default:
-			snprintf(vkbdFileName, 256, "vkbdUSLarge.bmp");
-			snprintf(vkbdHiresFileName, 256, "vkbdUSLargeHires.bmp");
-			snprintf(vkbdShiftFileName, 256, "vkbdUSLargeShift.bmp");
-			snprintf(vkbdShiftHiresFileName, 256, "vkbdUSLargeShiftHires.bmp");
+			snprintf(vkbdLanguageString, 10, "US");
 			vkbd_rect=vkbd_rect_US;
 			break;
 	}
+	snprintf(vkbdFileName, 256, "vkbd%s%sLarge.bmp", vkdbStyleString, vkbdLanguageString );
+	snprintf(vkbdHiresFileName, 256, "vkbd%s%sLargeHires.bmp", vkdbStyleString, vkbdLanguageString);
+	snprintf(vkbdShiftFileName, 256, "vkbd%s%sLargeShift.bmp", vkdbStyleString, vkbdLanguageString);
+	snprintf(vkbdShiftHiresFileName, 256, "vkbd%s%sLargeShiftHires.bmp", vkdbStyleString, vkbdLanguageString);
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdFileName);

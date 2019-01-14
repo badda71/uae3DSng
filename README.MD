@@ -4,9 +4,9 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Changes in this version
 ======
-1.89 (Switch only)
+1.90
 
-- On Switch, fix scaling artifacts when sharp_bilinear_simple was selected. Pixels are even sharper now! 
+- Add keyboard style option with many choices: original, warm, cool, dark (thanks @wronghands)
 
 Description
 =====
@@ -20,9 +20,9 @@ Thanks to Cpasjuste for the original port and for jumping in and adding shader s
 
 Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new larger virtual keyboard images.
 
-Thanks to wronghands for the new, better-looking menu font, and many ideas.
+Thanks to wronghands for the new, better-looking menu font, all the new keyboard styles, and many ideas.
 
-Thanks to CrashMidnick for the French virtual keyboard
+Thanks to CrashMidnick for the French virtual keyboard.
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
@@ -81,6 +81,7 @@ Vita/Switch-exclusive Features
 - Savestate import/export to backup savestates
 - Config file management (load, save as, etc.)
 - Thumbnail previews for savestates
+- Four different on-screen keyboard styles: original, warm, cool, and dark
 
 Controls
 =====
@@ -296,6 +297,10 @@ Compiling
 
 CHANGELOG
 =====
+1.90
+
+- Add keyboard style option with many choices: original, warm, cool, dark (thanks @wronghands)
+
 1.89 (Switch only)
 
 - On Switch, fix scaling artifacts when sharp_bilinear_simple was selected. Pixels are even sharper now! 

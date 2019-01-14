@@ -967,6 +967,7 @@ int run_mainMenu()
 	int old_sound_rate = sound_rate;
 	int old_stereo = mainMenu_soundStereo;
 	int old_vkbdLanguage = mainMenu_vkbdLanguage;
+    int old_vkbdStyle = mainMenu_vkbdStyle;
 	mainMenu_case=-1;
 	init_text(0);
 	
@@ -1229,7 +1230,7 @@ int run_mainMenu()
 		init_sound();
 	
 #if defined(USE_UAE4ALL_VKBD)
-	if (mainMenu_vkbdLanguage != old_vkbdLanguage)
+	if ((mainMenu_vkbdLanguage != old_vkbdLanguage) || (mainMenu_vkbdStyle != old_vkbdStyle))
 	{
 		vkbd_quit();
 		vkbd_init();

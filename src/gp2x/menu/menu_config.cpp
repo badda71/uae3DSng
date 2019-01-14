@@ -141,6 +141,7 @@ int mainMenu_cutRight = 0;
 int mainMenu_ntsc = DEFAULT_NTSC;
 int mainMenu_frameskip = 0;
 int mainMenu_vkbdLanguage = 0; //Default is US Keyboard
+int mainMenu_vkbdStyle = 0; //Default is original style
 int visibleAreaWidth = 320;
 
 
@@ -502,6 +503,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_ntsc = DEFAULT_NTSC;
     mainMenu_frameskip = 0;
     mainMenu_vkbdLanguage = 0; //Default is US Keyboard
+    mainMenu_vkbdStyle = 0; //Default is original style
     mainMenu_autofire = DEFAULT_AUTOFIRE;
 
 #if defined(__PSP2__) || defined(__SWITCH__)
@@ -1197,6 +1199,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "vkbdlanguage=%d\n",mainMenu_vkbdLanguage);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "vkbdstyle=%d\n",mainMenu_vkbdStyle);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "sound=%d\n",mainMenu_sound + mainMenu_soundStereo * 10);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "soundstereosep=%d\n",mainMenu_soundStereoSep);
@@ -1609,7 +1613,9 @@ void loadconfig(int general)
         fscanf(f,"syncthreshold=%d\n", &timeslice_mode);
 #endif
         fscanf(f,"frameskip=%d\n",&mainMenu_frameskip);
+        mainMenu_frameskip = 0; // ignore framsekip option
         fscanf(f,"vkbdlanguage=%d\n",&mainMenu_vkbdLanguage);
+        fscanf(f,"vkbdstyle=%d\n",&mainMenu_vkbdStyle);
         fscanf(f,"sound=%d\n",&mainMenu_sound );
         if (mainMenu_sound >= 10) {
             mainMenu_soundStereo = 1;

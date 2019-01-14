@@ -71,6 +71,7 @@ extern int mainMenu_cutRight;
 extern int mainMenu_ntsc;
 extern int mainMenu_frameskip;
 extern int mainMenu_vkbdLanguage;
+extern int mainMenu_vkbdStyle;
 extern int mainMenu_autofire;
 extern int visibleAreaWidth;
 
