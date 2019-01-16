@@ -918,6 +918,7 @@ void gui_handle_events (void)
 		}
 		goMenu();
 	}
+
 #else
 	dpadUp[0] = keystate[SDLK_UP];
 	dpadDown[0] = keystate[SDLK_DOWN];

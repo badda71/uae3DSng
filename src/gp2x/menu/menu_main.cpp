@@ -59,7 +59,6 @@ extern int gp2xMouseEmuOn;
 extern int gp2xButtonRemappingOn;
 
 extern int init_sound(void);
-extern void gp2x_stop_sound(void);
 extern void leave_program(void);
 extern void extractFileName(char * str,char *buffer);
 extern void update_display(void);
@@ -1201,25 +1200,7 @@ int run_mainMenu()
 				showWarning("Amiga is writing to HDF. Press PAD_right+L to force quit.");
 				break;
 		   }
-#ifndef USE_SDLSOUND
-			gp2x_stop_sound();
-#endif
-			saveAdfDir();	
-
-#if defined(__PSP2__) // NOT __SWITCH__
-			//unlock PS Button
-			sceShellUtilUnlock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
-#endif
-
-      	leave_program();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-			sync();
-#endif
-#ifdef __SWITCH__
-            mainMenu_singleJoycons = 0;
-            update_joycon_mode();
-#endif
-			exit(0);
+			exit_safely(0);
 			break;
 		default:
 			mainMenu_case=-1;

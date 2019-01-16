@@ -14,7 +14,7 @@ extern SDL_Surface *prSDLScreen;
 
 void init_kickstart();
 void showWarning(const char *msg);
-
+void exit_safely(int quit_via_home);
 void text_draw_background();
 void init_text(int splash);
 void quit_text(void);

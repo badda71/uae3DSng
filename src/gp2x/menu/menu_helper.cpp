@@ -36,6 +36,10 @@ typedef struct private_hwdata {
 #endif //PRIVATE_HW_DATA
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
 extern int screenWidth;
 extern int mainMenu_case;
 
@@ -46,6 +50,13 @@ extern char launchDir[300];
 extern char currentDir[300];
 
 extern int displaying_menu;
+
+extern void gp2x_stop_sound(void);
+
+#ifdef __SWITCH__
+extern void update_joycon_mode();
+#endif
+
 
 int saveAdfDir() {
     char path[300];
@@ -76,6 +87,31 @@ void stateFilenameToThumbFilename(char *src, char *dst) {
     strcat(p, ".png");
     strcpy(dst, THUMB_PREFIX);
     strcat(dst, buffer);
+}
+
+void exit_safely(int quit_via_home) {
+#ifndef USE_SDLSOUND
+	gp2x_stop_sound();
+#endif
+    saveAdfDir();	
+    
+#if defined(__PSP2__) // NOT __SWITCH__
+    //unlock PS Button
+    sceShellUtilUnlock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
+#endif
+    
+    leave_program();
+
+#if !defined(__PSP2__) && !defined(__SWITCH__)
+    sync();
+#endif
+#ifdef __SWITCH__
+    mainMenu_singleJoycons = 0;
+    update_joycon_mode();
+    if (quit_via_home)
+        appletUnlockExit();
+#endif
+    exit(0);
 }
 
 #ifdef ANDROIDSDL

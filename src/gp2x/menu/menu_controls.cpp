@@ -786,7 +786,7 @@ static int key_controlsMenu(int *c)
 					break;
 			}
 		}
-		
+
 		if (left && !holdingLeft)
 		{
 			holdingLeft=1;

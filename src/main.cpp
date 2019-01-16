@@ -259,6 +259,10 @@ void real_main (int argc, char **argv)
 	psp2InitTouch();
 #endif
 
+#if defined(__SWITCH__)
+    appletLockExit();
+#endif
+
 #ifdef USE_SDL
     SDL_Init (SDL_INIT_VIDEO | SDL_INIT_JOYSTICK 
 #if !defined(NO_SOUND) && !defined(GP2X)
