@@ -31,6 +31,10 @@
 #include "psp2_kbdvita.h"
 #endif
 
+#ifdef USE_SDL2
+#include "sdl2_to_sdl1.h"
+#endif
+
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
@@ -627,7 +631,11 @@ void load_savestate_thumbnail() {
 		FILE *f=fopen(screenshot_filename,"rb");
 		if (f) {
 			fclose(f);
-			SDL_Surface *loadedImage = IMG_Load(screenshot_filename);
+			SDL_Surface *tmp = IMG_Load(screenshot_filename);
+			SDL_Surface *loadedImage = SDL_DisplayFormat(tmp);
+			if (tmp != NULL) {
+				SDL_FreeSurface(tmp);
+			}
 			if(loadedImage != NULL) {
 				SDL_Rect src = {0, 0, 0, 0 };
 				SDL_Rect dst = {0, 0, 0, 0 };
@@ -647,7 +655,6 @@ void load_savestate_thumbnail() {
 				thumbnail_image = zoomSurface(loadedImage, (float) dst.w / (float) src.w, (float) dst.h / (float) src.h, SMOOTHING_ON);
 #endif
 				SDL_FreeSurface(loadedImage);
-				loadedImage = NULL;
 			} else thumbnail_image = NULL;
 		} else thumbnail_image = NULL;
 	} else savestate_empty = 1;
