@@ -7,6 +7,8 @@ Changes in this version
 1.90
 
 - Add keyboard style option with many choices: original, warm, cool, dark (thanks @wronghands)
+- On Switch, quit gracefully when using home button to exit
+- Speed up rendering of savestate menu when thumbnails are displayed
 
 Description
 =====
@@ -300,6 +302,8 @@ CHANGELOG
 1.90
 
 - Add keyboard style option with many choices: original, warm, cool, dark (thanks @wronghands)
+- On Switch, quit gracefully when using home button to exit
+- Speed up rendering of savestate menu when thumbnails are displayed
 
 1.89 (Switch only)
 
