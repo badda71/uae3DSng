@@ -249,7 +249,7 @@ static inline void draw_savestatesMenu(int c)
 		write_text(leftMargin,menuLine,text_str_deleteslot);
 
 	if (!savestate_empty && thumbnail_image != NULL)
-		text_flip_with_image(thumbnail_image, (320 - (thumbnail_image->w / 2)) / 2, menuLineForThumb * 7 + (132 - thumbnail_image->h / 2) / 2);
+		text_flip_with_image(thumbnail_image, (prSDLScreen->w - thumbnail_image->w) / 2, 2 * menuLineForThumb * 7 + (132 - thumbnail_image->h / 2));
 	else
 		text_flip();
 	b++;

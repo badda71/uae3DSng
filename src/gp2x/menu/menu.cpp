@@ -70,8 +70,14 @@ Uint32 menu_msg_time=0x12345678;
 int skipintro=1;
 int kickstart_warning=0;
 int displaying_menu = 1;
-int menu_screen_width = 640;
+
+#ifdef __PSP2__
+int menu_screen_width = 848;
 int menu_screen_height = 480;
+#else
+int menu_screen_width = 854;
+int menu_screen_height = 480;
+#endif
 
 static void obten_colores(void)
 {
@@ -315,14 +321,18 @@ if (mainMenu_background==0)
 else
 {
 	text_background = text_background_1;
-	int w=text_screen->w+text_background->w-1;
-	int h=text_screen->h+text_background->h-1;
+	int w=(text_screen->w+text_background->w-1);
+	int h=(text_screen->h+text_background->h-1);
 	if (menu_moving)
 	{
-		if (pos_x>=0) pos_x=-text_screen->w;
-		else pos_x++;
-		if (pos_y>=0) pos_y=-text_screen->h;
-		else pos_y++;
+		if (pos_x>=0) 
+			pos_x=-640;
+		else
+			pos_x++;
+		if (pos_y>=0)
+			pos_y=-480;
+		else
+			pos_y++;
 	}
 
 	for(i=pos_x;i<w;i+=text_background->w)
@@ -332,7 +342,9 @@ else
 			r.y=j;
 			r.w=text_background->w;
 			r.h=text_background->h;
-			SDL_BlitSurface(text_background,NULL,text_screen,&r);
+			if (r.x + r.w > 0 || r.y + r.h > 0) {
+				SDL_BlitSurface(text_background,NULL,text_screen,&r);
+			}
 		}
 };
 	if (menu_moving)
@@ -344,8 +356,16 @@ void text_flip_with_image(SDL_Surface *img, int x, int y)
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 	SDL_Delay(10);
 #endif
-	SDL_SoftStretch(text_screen,NULL,prSDLScreen,NULL);
-	SDL_Rect dst = { 2 * x, 2 * y , 0 , 0 };
+	SDL_Rect dst;
+	dst.x = 0;
+	dst.y = 0;
+	dst.w = 2 * text_screen->w;
+	dst.h = 2 * text_screen->h;
+	SDL_SoftStretch(text_screen,NULL,prSDLScreen,&dst);
+	dst.x = x;
+	dst.y = y;
+	dst.w = img->w;
+	dst.h = img->h;
 	SDL_BlitSurface(img, NULL, prSDLScreen, &dst);
 	SDL_Flip(prSDLScreen);
 }
@@ -355,7 +375,12 @@ void text_flip(void)
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 	SDL_Delay(10);
 #endif
-	SDL_SoftStretch(text_screen,NULL,prSDLScreen,NULL);
+	SDL_Rect dst;
+	dst.x = 0;
+	dst.y = 0;
+	dst.w = 2 * text_screen->w;
+	dst.h = 2 * text_screen->h;
+	SDL_SoftStretch(text_screen,NULL,prSDLScreen,&dst);
 	SDL_Flip(prSDLScreen);
 }
 
@@ -430,25 +455,24 @@ void init_text(int splash)
 	prSDLScreen = SDL_SetVideoMode(menu_screen_width, menu_screen_height, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", menu_screen_width, menu_screen_height);
 
-	float sh = (float) 480;
-	float sw = (float)menu_screen_width*((float)480/(float)menu_screen_height);
-	int x = (960-sw)/2;
-	int y = (544-sh)/2;
-
+	float sh = 480;
+	float sw = (sh * menu_screen_width) / menu_screen_height;
+	int x = (960 - sw) / 2;
+	int y = (544 - sh) / 2;
 	SDL_SetVideoModeScaling(x, y, sw, sh);
 	printf("init_text: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
 
 	//This requires a recent SDL-Vita branch SDL12 for example
    //https://github.com/rsn8887/SDL-Vita/tree/SDL12
    //to compile
-	SDL_SetVideoModeBilinear(0);
+	SDL_SetVideoModeBilinear(1);
 
 #ifdef __PSP2__ // NOT __SWITCH__
 	if(shader != NULL) {
         delete(shader);
         shader = NULL;
    }
-   shader = new PSP2Shader((PSP2Shader::Shader)0);
+   shader = new PSP2Shader((PSP2Shader::Shader)5);
 #endif
 
 #elif PANDORA
@@ -466,8 +490,8 @@ void init_text(int splash)
 
 	if (!text_screen)
 	{
-		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w / 2,prSDLScreen->h / 2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
-		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w / 2,prSDLScreen->h / 2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/2,prSDLScreen->h/2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/2,prSDLScreen->h/2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 
 		tmp=SDL_LoadBMP(MENU_FILE_TEXT_0);
 		if (text_screen==NULL || tmp==NULL)
@@ -541,7 +565,7 @@ void init_text(int splash)
 		{
 			//text_window_background
 			dest.y=24*y;
-			for(int x=0;x<10;x++)
+			for(int x=0;x<15;x++)
 			{
 				dest.x=32*x;
 				SDL_BlitSurface(tmp,NULL,window_screen,&dest);
@@ -632,7 +656,7 @@ void quit_text(void)
 
 void write_text(int x, int y, const char * str)
 {
-	write_text_pos(x * 7, y * 7, str);
+	write_text_pos((text_screen->w - 320) / 2 + x * 7, y * 7, str);
 }
 
 void write_text_pos(int x, int y, const char * str)
@@ -718,7 +742,7 @@ void write_text_pos(int x, int y, const char * str)
 void write_text_inv(int x, int y, const char * str)
 {
   SDL_Rect dest;
-  dest.x = (x * 7) -2 ;
+  dest.x = (text_screen->w - 320) / 2 + (x * 7) -2 ;
   dest.y = (y * 7) /*10*/ - 2;
   dest.w = (strlen(str) * 7) + 4;
   dest.h = 12;
@@ -764,8 +788,9 @@ void write_num_inv(int x, int y, int v)
 
 void text_draw_window(int x, int y, int w, int h, const char *title)
 {
+	int offset_x = (text_screen->w - 320) / 2;
 	int i,j;
-	int x_screen = x * 7;
+	int x_screen = offset_x + x * 7;
 	int y_screen = y * 7 + 2;
 
 	int x_corn = x_screen-2;
@@ -812,7 +837,7 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 	dest.h=h*8;
 	SDL_BlitSurface(window_screen,&dest,text_screen,&dest);
 
-	write_text_pos((x + ((w - strlen(title)) / 2)) * 7, (y - 1) * 7 - 1, title);
+	write_text_pos(offset_x + (x + ((w - strlen(title)) / 2)) * 7, (y - 1) * 7 - 1, title);
 }
 
 void _text_draw_window(SDL_Surface *sf, int x, int y, int w, int h, const char *title)

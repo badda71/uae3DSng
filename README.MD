@@ -4,11 +4,9 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Changes in this version
 ======
-1.90
+1.91
 
-- Add keyboard style option with many choices: original, warm, cool, dark (thanks @wronghands)
-- On Switch, quit gracefully when using home button to exit
-- Speed up rendering of savestate menu when thumbnails are displayed
+- Widescreen menu 
 
 Description
 =====
@@ -299,6 +297,10 @@ Compiling
 
 CHANGELOG
 =====
+1.91
+
+- Widescreen menu 
+
 1.90
 
 - Add keyboard style option with many choices: original, warm, cool, dark (thanks @wronghands)
