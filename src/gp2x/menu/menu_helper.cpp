@@ -40,6 +40,11 @@ typedef struct private_hwdata {
 #include <switch.h>
 #endif
 
+#if defined(__PSP2__) // NOT __SWITCH__
+//Allow locking PS Button
+#include <psp2/shellutil.h>
+#endif
+
 extern int screenWidth;
 extern int mainMenu_case;
 
