@@ -339,7 +339,7 @@ static void draw_displayMenu(int c)
 #if defined(USE_UAE4ALL_VKBD)
 	// MENUDISPLAY_VKBDLANGUAGE
 	menuLine+=2;
-	write_text(leftMargin,menuLine,"Keyb. Language");
+	write_text(leftMargin,menuLine,"Keyb. Lang.");
 	if ((mainMenu_vkbdLanguage==0)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
 		write_text_inv(tabstop1,menuLine,"US");
 	else
