@@ -79,8 +79,10 @@ int PSP2_PollEvent(SDL_Event *event) {
 	
 	int ret = SDL_PollEvent(event);
 
+#ifdef __SWITCH__
 	if (event != NULL && event->type == SDL_QUIT)
 		exit_safely(1);
+#endif
 
 	if(event != NULL && inside_menu) {
 
