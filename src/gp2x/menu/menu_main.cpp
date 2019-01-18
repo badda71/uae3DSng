@@ -68,7 +68,6 @@ extern void show_error(const char *);
 extern void close_joystick();
 extern void init_joystick();
 
-
 extern char launchDir[300];
 extern char currentDir[300];
 
@@ -1225,6 +1224,7 @@ int run_mainMenu()
 	init_joystick();
 	
 	update_display();
+
 #if defined(__PSP2__) || defined(__SWITCH__)
 	inside_menu = 0;
 #endif

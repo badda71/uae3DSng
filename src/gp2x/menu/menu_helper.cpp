@@ -209,9 +209,9 @@ void update_display() {
 
 #if defined(__PSP2__) || defined(__SWITCH__)
     if (prSDLScreen != NULL) {
-		for (int i=0; i<10; i++)
+        for (int i=0; i<10; i++)
 		{
-			SDL_FillRect(prSDLScreen,NULL,0);
+			SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));
 			SDL_Flip(prSDLScreen);
 		}
 #ifdef __PSP2__ // NOT __SWITCH__

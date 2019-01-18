@@ -88,6 +88,7 @@ SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
 		SDL_RenderClear(renderer);
 	}
+
 	SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 16, SDL_PIXELFORMAT_RGB565);
 	surface_width = w;
 	surface_height = h;

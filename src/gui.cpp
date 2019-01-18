@@ -488,6 +488,11 @@ static void goMenu(void)
 	gui_purge_events();
 	fpscounter_reset();
 	notice_screen_contents_lost();
+	
+	//remove gfx garbage in pixel array
+	lockscr();
+	memset((char *) prSDLScreen->pixels, 0, prSDLScreen->h*prSDLScreen->pitch);
+	unlockscr();
 }
 
 int customKey;
