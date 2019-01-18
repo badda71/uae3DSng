@@ -6,7 +6,9 @@ Changes in this version
 ======
 1.91
 
-- Widescreen menu 
+- widescreen menu
+- on Switch, physical keyboard and mouse support (re-compiled with latest SDL)
+- on Switch, no more slow-down when returning from sleep (re-compiled with latest SDL)
 
 Description
 =====
@@ -72,7 +74,7 @@ Vita/Switch-exclusive Features
 - Touchpad style pointer controls using the touchscreen
 - Parallel port joystick adapter support for multiplayer games with up to 4 joysticks.
 - Additional savestate slot called auto, for automatic savestate loading
-- Bluetooth keyboard and mouse support (Vita only)
+- Physical keyboard and mouse support (Bluetooth on Vita, USB on Switch)
 - Supports loading files from ux0: or uma0: partition (Vita only)
 - Rear touch panel can be enabled for mouse pointer control (Vita only)
 - Split Joy-Con support (Switch only)
@@ -157,9 +159,11 @@ SL = on-screen keyboard (player 1 only)
 Pressing stick while moving it = change keyboard transparency/position, control mouse pointer (player 1 only)  
 SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)  
 
-Bluetooth Keyboard / Mouse controls (Vita only)
+Physical Keyboard / Mouse controls
 -----
-Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
+On Vita (Bluetooth): Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
+
+On Switch (USB): Mouse + keyboard tested working with wireless Logitech USB keyboard and separate wireless Logitech USB mouse.
 
 Notes
 ======
@@ -299,7 +303,9 @@ CHANGELOG
 =====
 1.91
 
-- Widescreen menu 
+- widescreen menu
+- on Switch, physical keyboard and mouse support (re-compiled with latest SDL)
+- on Switch, no more slow-down when returning from sleep (re-compiled with latest SDL)
 
 1.90
 
