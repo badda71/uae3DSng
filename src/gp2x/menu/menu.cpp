@@ -237,10 +237,6 @@ void menu_raise(void)
 		text_flip();
 		SDL_Delay(10);
 	}
-#else
-	text_draw_background();
-	text_flip();
-	SDL_Delay(10);
 #endif
 }
 

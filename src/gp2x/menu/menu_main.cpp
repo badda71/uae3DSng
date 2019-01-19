@@ -930,10 +930,10 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 
 static void raise_mainMenu()
 {	
-	int i;
 	text_draw_background();
 	text_flip();
 #if !defined(__PSP2__) && !defined(__SWITCH__)
+	int i;
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -945,8 +945,8 @@ static void raise_mainMenu()
 
 static void unraise_mainMenu()
 {
-	int i;
 #if !defined(__PSP2__) && !defined(__SWITCH__)
+	int i;
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();
