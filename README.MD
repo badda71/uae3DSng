@@ -7,8 +7,8 @@ Changes in this version
 1.91
 
 - widescreen menu
-- physical keyboard and mouse support also on Switch (re-compiled with latest SDL)
-- on Switch, no more slow-down when returning from sleep (re-compiled with latest SDL)
+- physical keyboard and mouse support also on Switch. All keyboards I tried seem to work. Not many mice work. The Logitech M187 mouse seems to work fine.
+- on Switch, no more slow-down when returning from sleep (thanks @Cpasjuste)
 
 Description
 =====
@@ -163,7 +163,7 @@ Physical Keyboard / Mouse controls
 -----
 On Vita (Bluetooth): Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
 
-On Switch (USB): Mouse + keyboard tested working with "Logitech MK270 Wireless USB keyboard and mouse combo".
+On Switch (USB): All keyboards seem to work. Not all mice seem to work. A tested working mouse is the Logitech M187.
 
 Notes
 ======
@@ -304,8 +304,8 @@ CHANGELOG
 1.91
 
 - widescreen menu
-- physical keyboard and mouse support also on Switch (re-compiled with latest SDL)
-- on Switch, no more slow-down when returning from sleep (re-compiled with latest SDL)
+- physical keyboard and mouse support also on Switch. All keyboards I tried seem to work. Not many mice work. The Logitech M187 mouse seems to work fine.
+- on Switch, no more slow-down when returning from sleep (thanks @Cpasjuste)
 
 1.90
 
