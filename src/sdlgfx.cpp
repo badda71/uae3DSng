@@ -161,7 +161,7 @@ void flush_block ()
 		unsigned long start = read_processor_time();
 		if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
 #if defined(__PSP2__)
-			sceKernelDelayThreadCB(((next_synctime - start) - 1000) / 1000);
+			sceKernelDelayThreadCB((next_synctime - start) - 1000);
 #else
 			usleep((next_synctime - start) - 1000);
 #endif
