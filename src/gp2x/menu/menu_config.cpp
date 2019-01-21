@@ -1613,7 +1613,6 @@ void loadconfig(int general)
         fscanf(f,"syncthreshold=%d\n", &timeslice_mode);
 #endif
         fscanf(f,"frameskip=%d\n",&mainMenu_frameskip);
-        mainMenu_frameskip = 0; // ignore framsekip option
         fscanf(f,"vkbdlanguage=%d\n",&mainMenu_vkbdLanguage);
         fscanf(f,"vkbdstyle=%d\n",&mainMenu_vkbdStyle);
         fscanf(f,"sound=%d\n",&mainMenu_sound );

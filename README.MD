@@ -2,8 +2,12 @@ Important note to Switch users
 ======
 On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
 
-Changes in this version
+Recent Changes
 ======
+1.92
+
+- add frameskip option back in
+
 1.91
 
 - widescreen menu
@@ -18,7 +22,7 @@ Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this gr
 
 ![Photo of UAE4All2 running on Switch in tabletop mode](https://i.postimg.cc/3RD6Lr7j/Split-Joycon-b.jpg)
 
-Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
+Thanks to Cpasjuste for the original port, for jumping in and adding shader support, for making the assembler optimizations work, and for fixing audio playback on suspend/resume in SDL2 for Switch.
 
 Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new larger virtual keyboard images.
 
@@ -301,6 +305,10 @@ Compiling
 
 CHANGELOG
 =====
+1.92
+
+- add frameskip option back in
+
 1.91
 
 - widescreen menu

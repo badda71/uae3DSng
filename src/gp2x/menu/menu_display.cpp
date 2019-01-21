@@ -59,9 +59,9 @@ enum {
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 	MENUDISPLAY_CUTLEFT,
 	MENUDISPLAY_CUTRIGHT,
-	MENUDISPLAY_FRAMESKIP,
 #endif
 	MENUDISPLAY_REFRESHRATE,
+	MENUDISPLAY_FRAMESKIP,
 #if defined(__PSP2__) || defined(__SWITCH__)
 	MENUDISPLAY_SHADER,
 #endif
@@ -205,21 +205,37 @@ static void draw_displayMenu(int c)
 	else
 		write_text_inv(tabstop3,menuLine,value);
 
-	// MENUDISPLAY_FRAMESKIP
+#else // !defined(__PSP2__) && !defined(__SWITCH__)
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
 	menuLine++;
-	write_text(leftMargin,menuLine,"Frameskip");
-	if ((mainMenu_frameskip==0)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv(tabstop1,menuLine,"0");
+#endif
+	// MENUDISPLAY_REFRESHRATE
+	write_text(leftMargin,menuLine,"Refresh Rate");
+	if ((!mainMenu_ntsc)&&((menuDisplay!=MENUDISPLAY_REFRESHRATE)||(bb)))
+		write_text_inv(tabstop1,menuLine,"50Hz");
 	else
-		write_text(tabstop1,menuLine,"0");
+		write_text(tabstop1,menuLine,"50Hz");
+
+	if ((mainMenu_ntsc)&&((menuDisplay!=MENUDISPLAY_REFRESHRATE)||(bb)))
+		write_text_inv(tabstop3+1,menuLine,"60Hz");
+	else
+		write_text(tabstop3+1,menuLine,"60Hz");
+
+	// MENUDISPLAY_FRAMESKIP
 #ifdef PANDORA
-	if ((mainMenu_frameskip==1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv(tabstop3,menuLine,"1");
+	write_text(tabstop3+7,menuLine,"Frameskip");
+	if ((mainMenu_frameskip==0)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
+		write_text_inv(tabstop3+17,menuLine,"0");
 	else
-		write_text(tabstop3,menuLine,"1");
+		write_text(tabstop3+17,menuLine,"0");
+	if ((mainMenu_frameskip==1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
+		write_text_inv(tabstop3+19,menuLine,"1");
+	else
+		write_text(tabstop3+19,menuLine,"1");
 #else
+	menuLine+=2;
+	write_text(tabstop3+7,menuLine,"Frameskip");
 	if ((mainMenu_frameskip==1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
 		write_text_inv(tabstop2,menuLine,"1");
 	else
@@ -256,22 +272,6 @@ static void draw_displayMenu(int c)
 	menuLine+=2;
 #endif
 
-#else // !defined(__PSP2__) && !defined(__SWITCH__)
-	menuLine++;
-	write_text(leftMargin,menuLine,text_str_display_separator);
-	menuLine++;
-#endif
-	// MENUDISPLAY_REFRESHRATE
-	write_text(leftMargin,menuLine,"Refresh Rate");
-	if ((!mainMenu_ntsc)&&((menuDisplay!=MENUDISPLAY_REFRESHRATE)||(bb)))
-		write_text_inv(tabstop1,menuLine,"50Hz");
-	else
-		write_text(tabstop1,menuLine,"50Hz");
-
-	if ((mainMenu_ntsc)&&((menuDisplay!=MENUDISPLAY_REFRESHRATE)||(bb)))
-		write_text_inv(tabstop3+1,menuLine,"60Hz");
-	else
-		write_text(tabstop3+1,menuLine,"60Hz");
 #if defined(__PSP2__) || defined(__SWITCH__)	
 	//Shader settings on Vita
 	//MENUDISPLAY_SHADER
@@ -750,6 +750,7 @@ static int key_displayMenu(int *c)
 						mainMenu_cutRight++;
 				}
 				break;
+#endif
 			case MENUDISPLAY_FRAMESKIP:
 #ifdef PANDORA
 				if ((left)||(right))
@@ -771,7 +772,6 @@ static int key_displayMenu(int *c)
 				}
 #endif
 				break;
-#endif
 			case MENUDISPLAY_REFRESHRATE:
 				if ((left)||(right))
 						mainMenu_ntsc = !mainMenu_ntsc;
