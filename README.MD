@@ -7,6 +7,7 @@ Recent Changes
 1.92
 
 - add frameskip option back in
+- on Vita, also use 48 kHz as default sound frequency (seems to work a bit better)
 
 1.91
 
@@ -182,7 +183,7 @@ Notes
 - *Sprite Collisions:* Some games require sprite-to-sprite collisions. Sprite collisions can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
 - *Savestates:* Four regular savestates can be saved per game. There's also a slot for an automatic savestate, labeled "auto". If it exists, this will be loaded immediately when the .adf is inserted. To prevent this, delete the auto savestate by selecting it and choosing "delete savestate".
 - *Multiplayer:* Up to four controllers on Vita TV and Switch are supported and can be fully mapped. The mouse can be switched off because it interferes with the other joystick that controls player 2 in most games. If you pair new controllers on Vita TV and they do not seem to work, scan for them in the "custom controls" menu by pressing L. At the bottom it will say how many controllers have been found. This scanning is not neccessary on Switch. By default, parallel port Amiga joysticks 3 and 4 are controlled by VitaTV/Switch gamepads 3 and 4. They can also be mapped to other inputs using the custom controls screen.
-- *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results. On the Switch, the best sound is obtained with 48 kHz, which is the only frequency supported on Switch.
+- *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, I think 48 kHz gives the best results. On the Switch, 48 kHz is the only supported frequency.
 
 FAQ
 =====
@@ -308,6 +309,7 @@ CHANGELOG
 1.92
 
 - add frameskip option back in
+- on Vita, also use 48 kHz as default sound frequency (seems to work a bit better)
 
 1.91
 
