@@ -4,6 +4,10 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Recent Changes
 ======
+1.93 (Switch only)
+
+- fix mouse pointer getting stuck sometimes when using USB mouse (fixed in SDL)
+
 1.92
 
 - add frameskip option back in
@@ -306,6 +310,10 @@ Compiling
 
 CHANGELOG
 =====
+1.93 (Switch only)
+
+- fix mouse pointer getting stuck sometimes when using USB mouse (fixed in SDL)
+
 1.92
 
 - add frameskip option back in
