@@ -58,8 +58,6 @@ int mainMenu_fastMemory = 0;	/* off */
 
 int mainMenu_bootHD = DEFAULT_ENABLE_HD;
 int mainMenu_filesysUnits = 0;
-int hd_dir_unit_nr = -1;
-int hd_file_unit_nr = -1;
 
 int mainMenu_drives = DEFAULT_DRIVES;
 int mainMenu_floppyspeed = 100;
@@ -981,18 +979,12 @@ void set_joyConf()
 void kill_hd_configs()
 {
 	 //properly close all open hdf and hd dirs
-    if (hd_dir_unit_nr >= 0) 
-    {
-        kill_filesys_unit(currprefs.mountinfo, 0);
-        hd_dir_unit_nr = -1;
+    if (mainMenu_filesysUnits > 0) {
+    	for (int i=mainMenu_filesysUnits - 1; i >= 0; i--) {
+            kill_filesys_unit(currprefs.mountinfo, i);
+        }
+        mainMenu_filesysUnits = 0;
     }
-    if (hd_file_unit_nr >= 0) 
-    {
-    	for (int i=hd_file_unit_nr; i>=0; i--)
-        kill_filesys_unit(currprefs.mountinfo, i); 
-    }
-    hd_file_unit_nr = -1;
-    mainMenu_filesysUnits = 0;
 }
 
 void reset_hdConf()
@@ -1005,65 +997,47 @@ void reset_hdConf()
         // nothing to do, already killed above
         break;
     case 1:
-        if (hd_dir_unit_nr < 0) {
-            if (uae4all_hard_dir[0] != '\0') {
-                parse_filesys_spec(0, uae4all_hard_dir);
-                hd_dir_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_dir[0] != '\0') {
+            parse_filesys_spec(0, uae4all_hard_dir);
+            mainMenu_filesysUnits++;
         }
-        if (hd_file_unit_nr < 0) {
-            if (uae4all_hard_file0[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file0);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file1[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file1);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file2[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file2);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file3[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file3);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_file0[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file0);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file1[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file1);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file2[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file2);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file3[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file3);
+            mainMenu_filesysUnits++;
         }
         break;
     case 2:
-        if (hd_file_unit_nr < 0) {
-            if (uae4all_hard_file0[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file0);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file1[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file1);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file2[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file2);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file3[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file3);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_file0[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file0);
+            mainMenu_filesysUnits++;
         }
-        if (hd_dir_unit_nr < 0) {
-            if (uae4all_hard_dir[0] != '\0') {
-                parse_filesys_spec(0, uae4all_hard_dir);
-                hd_dir_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_file1[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file1);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file2[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file2);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file3[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file3);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_dir[0] != '\0') {
+            parse_filesys_spec(0, uae4all_hard_dir);
+            mainMenu_filesysUnits++;
         }
         break;
     }

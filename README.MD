@@ -4,6 +4,10 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Recent Changes
 ======
+1.94
+
+- fix hdf settings with non-zero hd dir causing wrong mounted drives
+
 1.93 (Switch only)
 
 - fix mouse pointer getting stuck sometimes when using USB mouse (fixed in SDL)
@@ -310,6 +314,10 @@ Compiling
 
 CHANGELOG
 =====
+1.94
+
+- fix hdf settings with non-zero hd dir causing wrong mounted drives
+
 1.93 (Switch only)
 
 - fix mouse pointer getting stuck sometimes when using USB mouse (fixed in SDL)
