@@ -312,7 +312,7 @@ struct zfile *zfile_open (const char *name, const char *mode)
 #if defined(__SWITCH__) || defined(__PSP2__)
     static int tempnr = 0;
     tempnr++;
-    snprintf(l->name, L_tmpnam, "%s/tmp/uaetmp-%06d", launchDir, tempnr);
+    snprintf(l->name, L_tmpnam, "%suaetmp-%06d", TMP_PREFIX, tempnr);
     if (! uncompress (name, l->name)) {
         unlink (l->name);
         free (l);
