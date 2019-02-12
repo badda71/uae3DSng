@@ -7,6 +7,7 @@ Recent Changes
 1.94
 
 - fix hdf settings with non-zero hd dir causing wrong mounted drives
+- implement .adz floppy disk format support
 
 1.93 (Switch only)
 
@@ -317,6 +318,7 @@ CHANGELOG
 1.94
 
 - fix hdf settings with non-zero hd dir causing wrong mounted drives
+- implement .adz floppy disk format support
 
 1.93 (Switch only)
 

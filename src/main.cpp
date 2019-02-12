@@ -281,6 +281,7 @@ void real_main (int argc, char **argv)
 	mkdir("ux0:/data/uae4all/conf", 0777);
 	mkdir("ux0:/data/uae4all/kickstarts", 0777);
     mkdir("ux0:/data/uae4all/thumbs", 0777);
+    mkdir("ux0:/data/uae4all/tmp", 0777);
 	strcpy(launchDir, "ux0:/data/uae4all");
 #elif defined(__SWITCH__)
 	mkdir("./roms", 0777);
@@ -288,6 +289,7 @@ void real_main (int argc, char **argv)
 	mkdir("./conf", 0777);
 	mkdir("./kickstarts", 0777);
 	mkdir("./thumbs", 0777);
+	mkdir("./tmp", 0777);
     strcpy(launchDir, ".");
 #else
 	getcwd(launchDir,250);

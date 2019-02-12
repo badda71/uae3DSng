@@ -186,23 +186,23 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #endif
 #ifdef __PSP2__
 	else if (current_drive==0)
-		text_draw_window(2,2,41,25," Insert .ADF into DF0 (Triangle = Info) ");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF0 (Triangle = Info)");
 	else if (current_drive==1)
-		text_draw_window(2,2,41,25," Insert .ADF into DF1 (Triangle = Info)");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF1 (Triangle = Info)");
 	else if (current_drive==2)
-		text_draw_window(2,2,41,25," Insert .ADF into DF2 (Triangle = Info)");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF2 (Triangle = Info)");
 	else if (current_drive==3)
-		text_draw_window(2,2,41,25," Insert .ADF into DF3 (Triangle = Info)");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF3 (Triangle = Info)");
 #else
 #ifdef __SWITCH__
 	else if (current_drive==0)
-		text_draw_window(2,2,41,25," Insert .ADF into DF0 (X = Info)");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF0 (X = Info)");
 	else if (current_drive==1)
-		text_draw_window(2,2,41,25," Insert .ADF into DF1 (X = Info)");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF1 (X = Info)");
 	else if (current_drive==2)
-		text_draw_window(2,2,41,25," Insert .ADF into DF2 (X = Info)");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF2 (X = Info)");
 	else if (current_drive==3)
-		text_draw_window(2,2,41,25," Insert .ADF into DF3 (X = Info)");
+		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF3 (X = Info)");
 #else
 	else if (current_drive==0)
 		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF0 ");
