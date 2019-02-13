@@ -10,21 +10,6 @@ Recent Changes
 - implement .adz floppy disk format support (read only)
 - widescreen file dialog to show longer filenames
 
-1.93 (Switch only)
-
-- fix mouse pointer getting stuck sometimes when using USB mouse (fixed in SDL)
-
-1.92
-
-- add frameskip option back in
-- on Vita, also use 48 kHz as default sound frequency (seems to work a bit better)
-
-1.91
-
-- widescreen menu
-- physical keyboard and mouse support also on Switch. All keyboards I tried seem to work. Not many mice work. The Logitech M187 mouse seems to work fine.
-- on Switch, no more slow-down when returning from sleep (thanks @Cpasjuste)
-
 Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this great Amiga emulator that was originally ported to the Vita by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
