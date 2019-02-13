@@ -979,12 +979,10 @@ void set_joyConf()
 void kill_hd_configs()
 {
 	 //properly close all open hdf and hd dirs
-    if (mainMenu_filesysUnits > 0) {
-    	for (int i=mainMenu_filesysUnits - 1; i >= 0; i--) {
-            kill_filesys_unit(currprefs.mountinfo, i);
-        }
-        mainMenu_filesysUnits = 0;
+	for (int i = 0; i < mainMenu_filesysUnits; i++) {
+        kill_filesys_unit(currprefs.mountinfo, 0);
     }
+    mainMenu_filesysUnits = 0;
 }
 
 void reset_hdConf()
@@ -1921,5 +1919,4 @@ void loadconfig(int general)
     }
     UpdateMemorySettings();
     set_joyConf();
-    reset_hdConf();
 }

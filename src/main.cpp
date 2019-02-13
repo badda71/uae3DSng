@@ -182,15 +182,10 @@ void reset_all_systems (void)
 {
     init_eventtab ();
     memory_reset ();
-    filesys_reset ();
-    filesys_start_threads ();
-#ifdef __SWITCH__
     // the following is a workaround to prevent failed fdopen commands for hdf files
-    // because, on Switch, the same file can not be opened multiple times
-    reset_hdConf();
     filesys_reset ();
+    reset_hdConf();
     filesys_start_threads ();
-#endif
 }
 
 /* Okay, this stuff looks strange, but it is here to encourage people who

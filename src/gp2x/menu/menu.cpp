@@ -729,7 +729,7 @@ void write_text_pos(int x, int y, const char * str)
 
 		  SDL_FillRect(text_screen, &dest, menu_barra0_color);
 		}
-		if (i>42)
+		if (i>60)
 			break;
     }
 }
