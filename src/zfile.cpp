@@ -24,6 +24,11 @@
 #include <android/log.h>
 #endif
 
+#if defined(__vita__) || defined(__SWITCH__)
+#include <unzip.h>
+#endif
+
+
 #ifdef WIN32
 #include <stdio.h>
 #include <fcntl.h>
@@ -223,11 +228,47 @@ static int lha (const char *src, const char *dst)
  */
 static int unzip (const char *src, const char *dst)
 {
+#if defined(__PSP2__) || defined(__SWITCH__)
+    if (!dst)
+        return 1;
+    int success = 0;
+    unz_file_info file_info;
+    uint32_t size = 0;
+
+    unzFile input = unzOpen(src);
+    if (input) {
+        unzGoToFirstFile(input);
+        unzGetCurrentFileInfo(input, &file_info, NULL, 0, NULL, 0, NULL, 0);
+        size = file_info.uncompressed_size;
+        if (size < 2048 * 1024 && size > 0) {
+            if (unzOpenCurrentFile(input) == UNZ_OK) {
+                FILE *output = fopen(dst,"wb");
+                if (output) {
+                    char *buf = (char *) malloc(size);
+                    //buf contains len bytes of decompressed data
+                    int len = unzReadCurrentFile(input, buf, size);
+                    if (len == size) {
+                        int written = fwrite(buf, sizeof(char), len, output);
+                        if (written == size) {
+                            success = 1;
+                        }
+                    }
+                    fclose(output);
+                    free(buf);
+                }
+                unzCloseCurrentFile(input);
+            }
+        }
+        unzClose(input);
+    }
+    return success;
+#else
     char cmd[1024];
     if (!dst)
 	return 1;
     sprintf (cmd, "unzip -p '%s' *.adf *.ADF *.Adf >%s", src, dst);
     return !system (cmd);
+#endif
 }
 
 /*

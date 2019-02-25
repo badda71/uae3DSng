@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 94)
+set(VERSION_MINOR 95)
 
 if(BUILD_PSP2)
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -81,6 +81,8 @@ set(SRC_FILES
         src/scsi-none.cpp
         src/sdlgfx.cpp
         src/writelog.cpp
+        src/unzip.c
+        src/ioapi.c
         src/zfile.cpp
         src/menu/fade.cpp
         src/gp2x/gp2x.cpp
@@ -230,7 +232,7 @@ if(BUILD_NX)
     -mtp=soft
 #-fPIE is neccessary to prevent crash on startup
     -fPIE
-    -O1
+    -O3
     -ffast-math
     -fno-asynchronous-unwind-tables
     -funroll-loops

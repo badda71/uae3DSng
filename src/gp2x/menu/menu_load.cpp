@@ -198,32 +198,32 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #endif
 #ifdef __PSP2__
 	else if (current_drive==0)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF0 (Triangle = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0 (Triangle = Info)");
 	else if (current_drive==1)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF1 (Triangle = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF1 (Triangle = Info)");
 	else if (current_drive==2)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF2 (Triangle = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF2 (Triangle = Info)");
 	else if (current_drive==3)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF3 (Triangle = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF3 (Triangle = Info)");
 #else
 #ifdef __SWITCH__
 	else if (current_drive==0)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF0 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0 (X = Info)");
 	else if (current_drive==1)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF1 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF1 (X = Info)");
 	else if (current_drive==2)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF2 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF2 (X = Info)");
 	else if (current_drive==3)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF3 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF3 (X = Info)");
 #else
 	else if (current_drive==0)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF0");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0");
 	else if (current_drive==1)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF1");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF1");
 	else if (current_drive==2)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF2");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF2");
 	else if (current_drive==3)
-		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ into DF3");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF3");
 #endif
 #endif
 	else

@@ -4,11 +4,10 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Recent Changes
 ======
-1.94
+1.95
 
-- fix hdf settings with non-zero hd dir causing wrong mounted drives
-- implement .adz floppy disk format support (read only)
-- widescreen file dialog to show longer filenames
+- add support for .zip floppy files (read-only)
+- on Switch, also compile with optimization level 3
 
 Description
 =====
@@ -301,6 +300,11 @@ Compiling
 
 CHANGELOG
 =====
+1.95
+
+- add support for .zip floppy files (read-only)
+- on Switch, also compile with optimization level 3
+
 1.94
 
 - fix hdf settings with non-zero hd dir causing wrong mounted drives
