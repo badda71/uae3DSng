@@ -13,9 +13,13 @@ Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this great Amiga emulator that was originally ported to the Vita by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
 
-![Screenshot of UAE4All2 running on Vita](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
+![Screenshot of UAE4All2 running on Switch](https://i.postimg.cc/Tw0MsKkG/1.jpg)
 
 ![Photo of UAE4All2 running on Switch in tabletop mode](https://i.postimg.cc/3RD6Lr7j/Split-Joycon-b.jpg)
+
+More Screenshots:
+
+ <a href="https://postimg.cc/SJFvR4ZD" target="_blank"><img src="https://i.postimg.cc/SJFvR4ZD/3.jpg" alt="3"/></a> <a href="https://postimg.cc/jLHkJ1mK" target="_blank"><img src="https://i.postimg.cc/jLHkJ1mK/4.jpg" alt="4"/></a> <a href="https://postimg.cc/cvdk7mG3" target="_blank"><img src="https://i.postimg.cc/cvdk7mG3/5.jpg" alt="5"/></a> <a href="https://postimg.cc/9zqkc0BD" target="_blank"><img src="https://i.postimg.cc/9zqkc0BD/6.jpg" alt="6"/></a> <a href="https://postimg.cc/2Lv9G95Q" target="_blank"><img src="https://i.postimg.cc/2Lv9G95Q/7.jpg" alt="7"/></a> <a href="https://postimg.cc/G9YXZNcY" target="_blank"><img src="https://i.postimg.cc/G9YXZNcY/8.jpg" alt="8"/></a> <a href="https://postimg.cc/PPQ2qwv5" target="_blank"><img src="https://i.postimg.cc/PPQ2qwv5/9.png" alt="9"/></a> <a href="https://postimg.cc/w1Ffwm9G" target="_blank"><img src="https://i.postimg.cc/w1Ffwm9G/10.jpg" alt="10"/></a> <a href="https://postimg.cc/1gjWQ1n0" target="_blank"><img src="https://i.postimg.cc/1gjWQ1n0/11.jpg" alt="11"/></a> <a href="https://postimg.cc/MMf9Z3VC" target="_blank"><img src="https://i.postimg.cc/MMf9Z3VC/12.jpg" alt="12"/></a> <a href="https://postimg.cc/qtRmSvRM" target="_blank"><img src="https://i.postimg.cc/qtRmSvRM/13.jpg" alt="13"/></a> <a href="https://postimg.cc/vxR347vc" target="_blank"><img src="https://i.postimg.cc/vxR347vc/14.jpg" alt="14"/></a> <a href="https://postimg.cc/WqMSgD9S" target="_blank"><img src="https://i.postimg.cc/WqMSgD9S/15.jpg" alt="15"/></a> <a href="https://postimg.cc/7fkKDV6R" target="_blank"><img src="https://i.postimg.cc/7fkKDV6R/16.jpg" alt="16"/></a>
 
 Thanks to Cpasjuste for the original port, for jumping in and adding shader support, for making the assembler optimizations work, and for fixing audio playback on suspend/resume in SDL2 for Switch.
 
@@ -162,7 +166,7 @@ Physical Keyboard / Mouse controls
 -----
 On Vita (Bluetooth): Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
 
-On Switch (USB): All keyboards seem to work. Not all mice seem to work. A tested working mouse is the Logitech M187.
+On Switch (USB): All keyboards seem to work. Not all mice seem to work. [Mouse compatibility sheet](https://docs.google.com/spreadsheets/d/1Drbo5-QuSX901MwtOytSMuqRGxeIkq2HELM806I9dj0/edit#gid=0) 
 
 Notes
 ======
@@ -200,6 +204,10 @@ Games with known fixes
   Issue: flickering scrolling  
   Fix: set “Blitter: Normal” and reboot  
 
+- Lionheart with A1200 config
+  Issue: some flickering graphics glitches in water and in cave, runs slow on Vita
+  Fix: run the floppy version using A500 config
+ 
 - Lure of the Temptress (adf only)  
   Issue: hangs at title  
   Fix: use hdf version  
@@ -215,6 +223,10 @@ Games with known fixes
 - Rainbow Islands (adf only)  
   Issue: hangs after title  
   Fix: use hdf version  
+
+- Reshoot R
+  Issue: hangs on title screen (CIA overlay issue)  
+  Fix: there's a test version of the emulator that fixes this game on Switch by force-disabling CIA overlay whenever AGA is selected, see [here](https://www.patreon.com/posts/uae4all2-switch-27451333), but it has not been tested much. The fix might break other games. Some problems with this game remain (blue background detail is missing, etc.), but it seems very playable. It requires A1200 config and setting "more options->sprite collisions: on". The Vita is too slow for this game.
 
 - Rock’n’Roll  
   Issue: gfx glitches / flickering  
