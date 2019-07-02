@@ -122,20 +122,21 @@ struct myRes
 		int top_pos;
 };
 static myRes quickSwitchModes[] = {
-	{192, 2},
-	{200, 2},
-	{216, 2},
-	{224, 2},
-	{240, 2},
-	{256, 2},
-	{270, 2},
-	{192, 14},
-	{200, 14},
-	{216, 14},
-	{224, 14},
-	{240, 14},
-	{256, 14},
-	{270, 14},
+	{192, 18},
+	{200, 18},
+	{216, 18},
+	{224, 18},
+	{240, 18},
+	{256, 18},
+	{270, 18},
+	{286, 0},
+	{192, 30},
+	{200, 30},
+	{216, 30},
+	{224, 30},
+	{240, 30},
+	{256, 30},
+	{270, 30},
 };
 extern int moveY;
 
@@ -1214,7 +1215,7 @@ if(!vkbd_mode)
 		//0
 		else if(keystate[SDLK_0])
 		{
-			if(mainMenu_displayedLines < 270)
+			if(mainMenu_displayedLines < 286)
 				mainMenu_displayedLines++;
 			update_display();
 		}

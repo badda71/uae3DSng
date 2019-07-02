@@ -693,7 +693,7 @@ static int key_displayMenu(int *c)
 				}
 				else if (right)
 				{
-					if (mainMenu_displayedLines<270)
+					if (mainMenu_displayedLines<286)
 						mainMenu_displayedLines++;
 				}
 				break;
@@ -716,12 +716,12 @@ static int key_displayMenu(int *c)
 			case MENUDISPLAY_VERTPOS:
 				if (left)
 				{
-					if (moveY>-42)
+					if (moveY>-26)
 						moveY--;
 				}
 				else if (right)
 				{
-					if (moveY<50)
+					if (moveY<66)
 						moveY++;
 				}
 				break;

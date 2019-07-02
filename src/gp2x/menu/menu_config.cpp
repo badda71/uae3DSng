@@ -495,7 +495,7 @@ void SetDefaultMenuSettings(int general)
 #endif //__PSP2__
     SetPresetMode(2);
     moveX = 0;
-    moveY = 0;
+    moveY = 16;
     mainMenu_cutLeft = 0;
     mainMenu_cutRight = 0;
     mainMenu_ntsc = DEFAULT_NTSC;
@@ -1217,7 +1217,7 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "moveX=%d\n",moveX);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "moveY=%d\n",moveY);
+    snprintf((char*)buffer, 255, "moveY=%d\n",moveY-16); // compatibility with versions <1.96
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "displayedLines=%d\n",mainMenu_displayedLines);
     fputs(buffer,f);
@@ -1628,6 +1628,7 @@ void loadconfig(int general)
         fscanf(f,"presetModeId=%d\n",&presetModeId);
         fscanf(f,"moveX=%d\n",&moveX);
         fscanf(f,"moveY=%d\n",&moveY);
+        moveY+=16; // compatibility with versions <1.96
         fscanf(f,"displayedLines=%d\n",&mainMenu_displayedLines);
         fscanf(f,"screenWidth=%d\n",&screenWidth);
         fscanf(f,"cutLeft=%d\n",&mainMenu_cutLeft);

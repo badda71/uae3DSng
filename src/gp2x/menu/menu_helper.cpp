@@ -209,7 +209,8 @@ void update_display() {
 
 #if defined(__PSP2__) || defined(__SWITCH__)
     if (prSDLScreen != NULL) {
-        for (int i=0; i<10; i++)
+        // clear old screen
+        for (int i=0; i<4; i++)
 		{
 			SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));
 			SDL_Flip(prSDLScreen);
@@ -281,6 +282,14 @@ void update_display() {
     }
     shader = new PSP2Shader((PSP2Shader::Shader)mainMenu_shader);
 #endif
+
+    // clear new screen
+    for (int i=0; i<4; i++)
+	{
+		SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));
+		SDL_Flip(prSDLScreen);
+	}
+
 #else
 #if defined(PANDORA) && !(defined(WIN32) || defined(AROS))
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF);

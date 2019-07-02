@@ -182,6 +182,8 @@ if(BUILD_PSP2)
           COMMAND cp ${PROJECT_NAME}.self vpk/eboot.bin
           COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
           COMMAND cd vpk && zip -r ../uae4all_${VERSION_MAJOR}.${VERSION_MINOR}.vpk . && cd ..
+          COMMAND zip -d ${CMAKE_BINARY_DIR}/uae4all_${VERSION_MAJOR}.${VERSION_MINOR}.vpk *.DS_Store || true
+          COMMAND zip -d ${CMAKE_BINARY_DIR}/uae4all_${VERSION_MAJOR}.${VERSION_MINOR}.vpk *__MAC* || true
   )
 endif(BUILD_PSP2)
 
@@ -303,6 +305,8 @@ if(BUILD_NX)
     COMMAND cp -f ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.nro ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/${PROJECT_NAME}.nro
     COMMAND cp -r ${CMAKE_SOURCE_DIR}/switchdata/data/* ${CMAKE_BINARY_DIR}/release/${PROJECT_NAME}/data/
     COMMAND cd ${CMAKE_BINARY_DIR}/release && zip -r ../${PROJECT_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}_switch.zip ${PROJECT_NAME} && cd ${CMAKE_BINARY_DIR}
+    COMMAND zip -d ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}_switch.zip *.DS_Store || true
+    COMMAND zip -d ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}_switch.zip *__MAC* || true
   )
 endif(BUILD_NX)
 
