@@ -4,10 +4,11 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Recent Changes
 ======
-1.95
+1.96
 
-- add support for .zip floppy files (read-only)
-- on Switch, also compile with optimization level 3
+- increase maximum displayed lines from 270 to 286, useful for overscan games like Babeanoid
+- fix cia overlay in AGA mode, fixes Reshoot-R hang at title screen
+- add instruction manual to Vita livearea screen
 
 Description
 =====
@@ -31,7 +32,7 @@ Thanks to CrashMidnick for the French virtual keyboard.
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
-Thanks to my supporters on Patreon: Andyways, CountDuckula, Greg Gibson, Jesse Harlin, Özgür Karter, Matthew Machnee, and RadicalR.
+Thanks to my supporters on Patreon: Andyways, CountDuckula, Jason Crawford, Greg Gibson, Jesse Harlin, Özgür Karter, Matthew Machnee, Milenko, and RadicalR.
 
 Installation
 ======
@@ -204,9 +205,9 @@ Games with known fixes
   Issue: flickering scrolling  
   Fix: set “Blitter: Normal” and reboot  
 
-- Lionheart with A1200 config
-  Issue: some flickering graphics glitches in water and in cave, runs slow on Vita
-  Fix: run the floppy version using A500 config
+- Lionheart with A1200 config  
+  Issue: some flickering graphics glitches in water and in cave, runs slow on Vita  
+  Fix: run the floppy version using A500 config  
  
 - Lure of the Temptress (adf only)  
   Issue: hangs at title  
@@ -223,10 +224,6 @@ Games with known fixes
 - Rainbow Islands (adf only)  
   Issue: hangs after title  
   Fix: use hdf version  
-
-- Reshoot R
-  Issue: hangs on title screen (CIA overlay issue)  
-  Fix: there's a test version of the emulator that fixes this game on Switch by force-disabling CIA overlay whenever AGA is selected, see [here](https://www.patreon.com/posts/uae4all2-switch-27451333), but it has not been tested much. The fix might break other games. Some problems with this game remain (blue background detail is missing, etc.), but it seems very playable. It requires A1200 config and setting "more options->sprite collisions: on". The Vita is too slow for this game.
 
 - Rock’n’Roll  
   Issue: gfx glitches / flickering  
@@ -265,8 +262,13 @@ Games with no fixes (or unknown fixes)
   Fix: unknown. This requires cycle exact, which is not supported.  
 
 - Prince of Persia  
-  Issue: : runs slow  
+  Issue: runs slow  
   Fix: unknown, but can play Usineur’s native Switch/Vita port [SDLPop](https://github.com/usineur/SDLPoP/releases)  
+
+- Reshoot R  
+  Issue: some of the blue background graphics are missing  
+  Fix: unknown, but the game is still playable.  
+
 
 Compiling
 ======
@@ -312,6 +314,12 @@ Compiling
 
 CHANGELOG
 =====
+1.96
+
+- increase maximum displayed lines from 270 to 286, useful for overscan games like Babeanoid
+- fix cia overlay in AGA mode, fixes Reshoot-R hang at title screen
+- add instruction manual to Vita livearea screen
+
 1.95
 
 - add support for .zip floppy files (read-only)
