@@ -268,6 +268,7 @@ if(BUILD_NX)
     nx
     png
     jpeg
+    webp
     z
     m
     c
