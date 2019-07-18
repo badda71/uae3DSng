@@ -126,6 +126,9 @@ static const char *text_str_more= "More Options";
 #else
 static const char *text_str_more= "More Options (B)";
 #endif
+#if defined(__SWITCH__)
+static const char *text_str_releasenotes= "Release Notes";
+#endif
 
 int mainMenu_case=-1;
 int mainMenu_system=-1;
@@ -233,6 +236,7 @@ static void draw_mainMenu(int c)
 	16 = save general config
 	17 = save config current game
 	18 = quit
+	19 = release notes (Switch only) 
 	*/
 	static int b=0;
 	int bb=(b%6)/3;
@@ -250,7 +254,8 @@ static void draw_mainMenu(int c)
 
 	text_draw_background();
 	text_draw_window(leftMargin-1,menuLine-1,35,40,text_str_title);
-	// 1
+
+	// 0
 	if ((c==0)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_df0);
 	else
@@ -260,7 +265,7 @@ static void draw_mainMenu(int c)
 	else
 		write_text_inv(13,menuLine,filename0);
 
-	// 2
+	// 1
 	menuLine+=2;
 	if(nr_drives > 1)
 	{
@@ -274,7 +279,7 @@ static void draw_mainMenu(int c)
 			write_text_inv(13,menuLine,filename1);
 	}
 
-	// 3
+	// 2
 	menuLine+=2;
 	if(nr_drives > 2)
 	{
@@ -288,7 +293,7 @@ static void draw_mainMenu(int c)
 			write_text_inv(13,menuLine,filename2);
 	}
 
-	// 4
+	// 3
 	menuLine+=2;
 	if(nr_drives > 3)
 	{
@@ -306,13 +311,13 @@ static void draw_mainMenu(int c)
 	write_text(leftMargin,menuLine,text_str_separator);
 	menuLine++;
 
-	// 5
+	// 4
 	if ((c==4)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_eject);
 	else
 		write_text(leftMargin, menuLine,text_str_eject);
 
-	// 6
+	// 5
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Number of Drives");
 	
@@ -340,7 +345,7 @@ static void draw_mainMenu(int c)
 	write_text(leftMargin,menuLine,text_str_separator);
 	menuLine++;
 
-	// 7
+	// 6
 	write_text(leftMargin,menuLine,"Preset System Setup:");
 
 	if ((mainMenu_system!=1)&&((c!=6)||(bb)))
@@ -353,35 +358,35 @@ static void draw_mainMenu(int c)
 	else
 		write_text(tabstop8,menuLine,"A1200");
 
-	// 8
+	// 7
 	menuLine+=2;
 	if ((c==7)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_hdnmem);
 	else
 		write_text(leftMargin,menuLine,text_str_hdnmem);
 
-	// 9
+	// 8
 	menuLine+=2;
 	if ((c==8)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_display);
 	else
 		write_text(leftMargin,menuLine,text_str_display);
 
-	// 10
+	// 9
 	menuLine+=2;
 	if ((c==9)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_savestates);
 	else
 		write_text(leftMargin,menuLine,text_str_savestates);
 
-	// 11
+	// 10
 	menuLine+=2;
 	if ((c==10)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_custom);
 	else
 		write_text(leftMargin,menuLine,text_str_custom);
 
-	// 12
+	// 11
 	menuLine+=2;
 	if ((c==11)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_more);
@@ -391,7 +396,7 @@ static void draw_mainMenu(int c)
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
 
-	// 13
+	// 12
 	menuLine++;
 	if ((c==12)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_reset);
@@ -401,7 +406,7 @@ static void draw_mainMenu(int c)
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
 
-	// 14
+	// 13
 	menuLine++;
 	write_text(leftMargin,menuLine,"Config");
 
@@ -410,26 +415,26 @@ static void draw_mainMenu(int c)
 	else
 		write_text(leftMargin+7,menuLine,"Load");
 
-	// 15
+	// 14
 	if ((c==14)&&(bb))
 		write_text_inv(leftMargin+13,menuLine,"Save As");
 	else
 		write_text(leftMargin+13,menuLine,"Save As");
 
-	// 16
+	// 15
 	if ((c==15)&&(bb))
 		write_text_inv(leftMargin+22,menuLine,"Delete");
 	else
 		write_text(leftMargin+22,menuLine,"Delete");
 
-	// 17
+	// 16
 	menuLine+=2;
 	if ((c==16)&&(bb))
 		write_text_inv(leftMargin+7,menuLine,"Save General");
 	else
 		write_text(leftMargin+7,menuLine,"Save General");
 
-	// 18
+	// 17
 	if ((c==17)&&(bb))
 		write_text_inv(leftMargin+20,menuLine,"Save Per-Game");
 	else
@@ -438,12 +443,20 @@ static void draw_mainMenu(int c)
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
 
-	// 19
+	// 18
 	menuLine++;
 	if ((c==18)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_exit);
 	else
 		write_text(leftMargin,menuLine,text_str_exit);
+
+#ifdef __SWITCH__
+	// 19
+	if ((c==19)&&(bb))
+		write_text_inv(leftMargin+20,menuLine,text_str_releasenotes);
+	else
+		write_text(leftMargin+20,menuLine,text_str_releasenotes);
+#endif
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
@@ -711,7 +724,11 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				c=2;
 			else
 				c--;
+#ifdef __SWITCH__
+			if (c < 0) c = 19;
+#else
 			if (c < 0) c = 18;
+#endif
 		}
 		else if (down)
 		{
@@ -722,7 +739,11 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 			else if(nr_drives<2 && c==0)
 				c=4;
 			else
+#ifdef __SWITCH__
+				c=(c+1)%20;
+#else
 				c=(c+1)%19;
+#endif
 		}
 
 	/* New Menu
@@ -745,6 +766,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 	16 = save general config
 	17 = save config current game
 	18 = exit
+	19 = release notes (Switch only)
 	*/
 		switch(c)
 		{
@@ -916,6 +938,17 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 					mainMenu_case=MAIN_MENU_CASE_QUIT;
 					end=1;
 				}
+				break;
+#ifdef __SWITCH__
+			case 19:
+				if (hit0)
+				{
+					WebWifiConfig conf;
+					webWifiCreate(&conf, NULL, "https://github.com/rsn8887/uae4all2/releases/latest", 0, 0);
+					webWifiShow(&conf, NULL);
+				}
+				break;
+#endif
 		}
 		if (back_c>=0)
 		{

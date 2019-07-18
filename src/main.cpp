@@ -227,6 +227,9 @@ void do_leave_program (void)
     SDL_Quit ();
 #endif
     memory_cleanup ();
+#ifdef __SWITCH__
+    socketExit();
+#endif
 }
 
 void start_program (void)
@@ -263,6 +266,7 @@ void real_main (int argc, char **argv)
 
 #if defined(__SWITCH__)
     appletLockExit();
+    socketInitializeDefault();
 #endif
 
 #ifdef USE_SDL

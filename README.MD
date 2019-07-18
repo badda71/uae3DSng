@@ -4,6 +4,10 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Recent Changes
 ======
+1.97 (Switch only)
+
+- add option to main menu that displays online instruction manual (opens web browser) 
+
 1.96
 
 - increase maximum displayed lines from 270 to 286, useful for overscan games like Babeanoid
@@ -289,7 +293,7 @@ Compiling
 
 * Switch:
   * Install DevkitPro: https://devkitpro.org/wiki/devkitPro_pacman#Using_Pacman
-  * Install required libs (libnx 1.6.0 and recent sdl2 are required):
+  * Install required libs (libnx >1.6.0 and recent sdl2 are required):
   ```
   sudo -E dkp-pacman -S switch-dev
   sudo -E dkp-pacman -S switch-sdl2
@@ -314,6 +318,10 @@ Compiling
 
 CHANGELOG
 =====
+1.97 (Switch only)
+
+- add option to main menu that displays online instruction manual (opens web browser) 
+
 1.96
 
 - increase maximum displayed lines from 270 to 286, useful for overscan games like Babeanoid
