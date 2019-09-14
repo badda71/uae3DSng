@@ -4,6 +4,10 @@ On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwis
 
 Recent Changes
 ======
+1.98 (Switch only)
+
+- recompile to add support for 9.0.0 firmware
+
 1.97 (Switch only)
 
 - add option to main menu that displays online instruction manual (opens web browser) 
@@ -318,6 +322,10 @@ Compiling
 
 CHANGELOG
 =====
+1.98 (Switch only)
+
+- recompile to add support for 9.0.0 firmware
+
 1.97 (Switch only)
 
 - add option to main menu that displays online instruction manual (opens web browser) 
