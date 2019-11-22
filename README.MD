@@ -213,6 +213,10 @@ Games with known fixes
   Issue: flickering scrolling  
   Fix: set “Blitter: Normal” and reboot  
 
+- Golden Axe
+  Issue: runs too fast
+  Fix: set “Blitter: Normal” and reboot  
+
 - Lionheart with A1200 config  
   Issue: some flickering graphics glitches in water and in cave, runs slow on Vita  
   Fix: run the floppy version using A500 config  
