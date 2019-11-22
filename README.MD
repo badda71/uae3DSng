@@ -213,8 +213,8 @@ Games with known fixes
   Issue: flickering scrolling  
   Fix: set “Blitter: Normal” and reboot  
 
-- Golden Axe
-  Issue: runs too fast
+- Golden Axe  
+  Issue: runs too fast  
   Fix: set “Blitter: Normal” and reboot  
 
 - Lionheart with A1200 config  
