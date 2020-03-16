@@ -1,15 +1,11 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<SDL.h>
 #include "sysconfig.h"
 #include "sysdeps.h"
 #include "config.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL/SDL.h>
 #include "gp2x.h"
 #include "inputmode.h"
-
-#ifdef USE_SDL2
-#include "sdl2_to_sdl1.h"
-#endif
 
 extern char launchDir [300];
 

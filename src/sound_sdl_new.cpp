@@ -3,19 +3,17 @@
   * (c) notaz, 2007
   */
 
+#include "sysconfig.h"
+#include "sysdeps.h"
+#include "config.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#ifndef __SWITCH__
-#include <semaphore.h>
-#endif
 #include <pthread.h>
 #include <errno.h>
 
-#include "sysconfig.h"
-#include "sysdeps.h"
-#include "config.h"
 #include "uae.h"
 #include "options.h"
 #include "memory-uae.h"
@@ -28,10 +26,6 @@
 
 #include "thread.h"
 #include <SDL.h>
-
-#ifdef ANDROIDSDL
-#include <android/log.h>
-#endif
 
 extern unsigned long next_sample_evtime;
 

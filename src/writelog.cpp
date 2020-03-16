@@ -7,36 +7,31 @@
   */
 #include "sysconfig.h"
 #include "sysdeps.h"
-#include "config.h"
+#include <3ds.h>
 
-#if defined(DEBUG_UAE4ALL) && defined(UAE_CONSOLE)
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+static void vlog_citra(const char *format, va_list arg ) {
+	char buf[2000];
+    vsnprintf(buf, 2000, format, arg);
+	svcOutputDebugString(buf, strlen(buf));
+}
+
+void log_citra(const char *format, ...)
+{
+    va_list argptr;
+    va_start(argptr, format);
+	vlog_citra(format, argptr);
+    va_end(argptr);
+}
 
 void write_log_standard (const char *fmt, ...)
 {
     va_list ap;
     va_start (ap, fmt);
-#ifdef HAVE_VFPRINTF
-    vfprintf (stdout, fmt, ap);
-#else
-    /* Technique stolen from GCC.  */
-    {
-	int x1, x2, x3, x4, x5, x6, x7, x8;
-	x1 = va_arg (ap, int);
-	x2 = va_arg (ap, int);
-	x3 = va_arg (ap, int);
-	x4 = va_arg (ap, int);
-	x5 = va_arg (ap, int);
-	x6 = va_arg (ap, int);
-	x7 = va_arg (ap, int);
-	x8 = va_arg (ap, int);
-	fprintf (stdout, fmt, x1, x2, x3, x4, x5, x6, x7, x8);
-    }
-#endif
+    vprintf (fmt, ap);
+	printf("\n");
+	vlog_citra(fmt, ap);
+	va_end (ap);
 }
 
-#endif // __PSP2__
-
-#endif
 

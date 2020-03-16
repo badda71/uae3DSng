@@ -1,3 +1,22 @@
+#define UAE_PATH "/3ds/uae3DS"
+#define ROM_PATH_PREFIX UAE_PATH "/roms/"
+#define DATA_PREFIX "romfs:/"
+//#define DATA_PREFIX UAE_PATH "/data/"
+#define SAVE_PREFIX UAE_PATH "/saves/"
+#define THUMB_PREFIX UAE_PATH "/thumbs/"
+#define TMP_PREFIX UAE_PATH "/tmp/"
+
+#define _3DS
+#define VERSION VERSION3DS
+#define GP2X
+#define PANDORA
+#define __SWITCH__
+#define __64BIT__
+#define USE_AUTOCONFIG
+#define USE_ZFILE
+#define USE_FAME_CORE
+#define USE_SDL
+
 /* src/sysconfig.h.  Generated automatically by configure.  */
 /* src/sysconfig.h.in.  Generated automatically from configure.in by autoheader.  */
 
@@ -386,7 +405,6 @@
 #ifdef __PSP2__ // NOT __SWITCH__
 #include <psp2/power.h>
 #endif
-#include "psp2_input.h"
 #ifdef DEBUG_UAE4ALL
 #include <psp2shell.h>
 #define printf psp2shell_print
@@ -400,4 +418,7 @@
 #endif
 
 #define MAX_NUM_CUSTOM_PRESETS 6
+
+#define MIN(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a < _b ? _a : _b; })
+#define MAX(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
 

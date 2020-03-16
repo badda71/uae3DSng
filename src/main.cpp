@@ -16,9 +16,6 @@ extern "C" int main( int argc, char *argv[] );
 #include "sysconfig.h"
 #include "sysdeps.h"
 #include <assert.h>
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
-#endif
 #include "config.h"
 #include "uae.h"
 #include "options.h"
@@ -46,8 +43,11 @@ extern "C" int main( int argc, char *argv[] );
 #include "menu.h" 
 #include "menu_config.h"
 #include "gp2xutil.h"
+#include "keyboard.h"
+
 /* PocketUAE */
 #include "native2amiga.h"
+#include <malloc.h>
 
 #ifdef USE_SDL
 #include "SDL.h"
@@ -55,10 +55,6 @@ extern SDL_Surface *current_screenshot;
 #endif
 #ifdef GP2X
 #include "gp2xutil.h"
-#endif
-
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
 #endif
 
 #if defined(__PSP2__) // NOT __SWITCH__
@@ -132,27 +128,6 @@ void default_prefs ()
 	}
 	else fclose(f);
 	
-#ifdef ANDROIDSDL
-	if (uae4all_init_rom(romfile)==-1)
-	{
-	  snprintf(romfile, 256, "%s/Android/data/com.cloanto.amigaforever.essentials/files/rom/%s",getenv("SDCARD"),af_kickstarts_rom_names[kickstart]);
-	  FILE *f3=fopen (romfile, "r" );
-	  if(!f3)
-	  {
-		  strcpy (romfile, "kick.rom");
-	  }
-	  else fclose(f3);
-	  
-	  snprintf(romkeyfile, 256, "%s/Android/data/com.cloanto.amigaforever.essentials/files/rom/%s",getenv("SDCARD"),"rom.key");	
-	  FILE *f4=fopen (romkeyfile, "r" );
-	  if(!f4)
-	  {
-		strcpy (romkeyfile, "rom.key");
-	  }
-	  else fclose(f4);
-	}
-#endif
-
 	/* 1MB */
     prefs_chipmem_size = 0x00100000;
     prefs_bogomem_size = 0;
@@ -164,9 +139,6 @@ int quit_program = 0;
 void uae_reset (void)
 {
     gui_purge_events();
-#ifdef USE_UAE4ALL_VKBD
-	vkbd_reset_sticky_keys(); // keyvalues clear on reset, so vkbd must reflect this
-#endif
     black_screen_now();
     quit_program = 2;
     set_special (SPCFLAG_BRK);
@@ -207,9 +179,6 @@ void do_leave_program (void)
 {
 #ifdef USE_SDL
 #if defined(__PSP2__) || defined(__SWITCH__) //On Vita, only remove keyboard graphics from memory when quitting the emu
-#ifdef USE_UAE4ALL_VKBD
-	vkbd_quit();
-#endif
 #ifdef __PSP2__ // NOT __SWITCH__
 	//De-Initialize touch panels
 	psp2QuitTouch();
@@ -228,7 +197,7 @@ void do_leave_program (void)
 #endif
     memory_cleanup ();
 #ifdef __SWITCH__
-    socketExit();
+    socExit();
 #endif
 }
 
@@ -242,32 +211,62 @@ void leave_program (void)
     do_leave_program ();
 }
 
+#define SOC_ALIGN       0x1000
+#define SOC_BUFFERSIZE  0x100000
+
+static u32 *SOC_buffer = NULL;
+
+typedef struct {
+	unsigned int sdlkey, key;
+	const char *name;
+} sdl_3dsbuttons;
+
+// mappings like dingoo SDL
+sdl_3dsbuttons buttons3ds[] = {
+	{KEY_A, DS_A, "A btn"},
+	{KEY_B, DS_B, "B btn"},
+	{KEY_X, DS_X, "X btn"},
+	{KEY_Y, DS_Y, "Y btn"},
+	{KEY_L, DS_L, "L btn"},
+	{KEY_R, DS_R, "R btn"},
+	{KEY_ZL, DS_ZL, "ZL btn"},
+	{KEY_ZR, DS_ZR, "ZR btn"},
+	{KEY_START, DS_START, "START btn"},
+	{KEY_SELECT, DS_SELECT, "SELECT btn"},
+	{KEY_DUP, DS_UP1, "DPAD UP"},
+	{KEY_DDOWN, DS_DOWN1, "DPAD DOWN"},
+	{KEY_DLEFT, DS_LEFT1, "DPAD LEFT"},
+	{KEY_DRIGHT, DS_RIGHT1, "DPAD RIGHT"},
+	{KEY_CSTICK_UP, DS_UP3, "CSTK UP"},
+	{KEY_CSTICK_DOWN, DS_DOWN3, "CSTK DOWN"},
+	{KEY_CSTICK_LEFT, DS_LEFT3, "CSTK LEFT"},
+	{KEY_CSTICK_RIGHT, DS_RIGHT3, "CSTK RIGHT"},
+	{KEY_TOUCH, DS_TOUCH, "TOUCH"},
+	{KEY_CPAD_UP, DS_UP2, "CPAD UP"},	// included in KEY_UP
+	{KEY_CPAD_DOWN, DS_DOWN2, "CPAD DOWN"},
+	{KEY_CPAD_LEFT, DS_LEFT2, "CPAD LEFT"},
+	{KEY_CPAD_RIGHT, DS_RIGHT2, "CPAD RIGHT"},
+	{0,0,0}
+};
+
 void real_main (int argc, char **argv)
 {
-#if defined(__PSP2__) // NOT __SWITCH__
-	scePowerSetArmClockFrequency(444);
-    scePowerSetGpuClockFrequency(222);
-    scePowerSetBusClockFrequency(222);
-    scePowerSetGpuXbarClockFrequency(222);
-#ifdef DEBUG_UAE4ALL
-	psp2shell_init(3333, 5);
-#endif
-#endif
+    //appletLockExit();
 
-#if defined(__PSP2__) // NOT __SWITCH__
-	//Initialize ShellUtil to allow us to disable "PS" Button (corrupts hdf files)
-	sceShellUtilInitEvents(0);
-	// prevent suspend (corrupts hdf files)
-	sceKernelPowerTick(SCE_KERNEL_POWER_TICK_DISABLE_AUTO_SUSPEND);
-	sceKernelPowerTick(SCE_KERNEL_POWER_TICK_DISABLE_OLED_OFF);
-	//Initialize touch panels
-	psp2InitTouch();
-#endif
+	// allocate buffer for SOC service
+	SOC_buffer = (u32*)memalign(SOC_ALIGN, SOC_BUFFERSIZE);
 
-#if defined(__SWITCH__)
-    appletLockExit();
-    socketInitializeDefault();
-#endif
+	if(SOC_buffer == NULL) {
+		write_log("soc buffer memalign: failed to allocate");
+		exit(0);
+	}
+
+	// Now intialise soc:u service
+	int ret;
+	if ((ret = socInit(SOC_buffer, SOC_BUFFERSIZE)) != 0) {
+    	write_log("socInit: 0x%08X\n", (unsigned int)ret);
+		exit(0);
+	}
 
 #ifdef USE_SDL
     SDL_Init (SDL_INIT_VIDEO | SDL_INIT_JOYSTICK 
@@ -276,68 +275,66 @@ void real_main (int argc, char **argv)
 #endif
 	);
 #endif
-  // Initialize timebase
-  g_uae_epoch = read_processor_time();
-  syncbase = 1000000; // Microseconds
 
-#if defined(__PSP2__) // NOT __SWITCH__
-	mkdir("ux0:/data/uae4all", 0777);
-	mkdir("ux0:/data/uae4all/roms", 0777);
-	mkdir("ux0:/data/uae4all/saves", 0777);
-	mkdir("ux0:/data/uae4all/conf", 0777);
-	mkdir("ux0:/data/uae4all/kickstarts", 0777);
-    mkdir("ux0:/data/uae4all/thumbs", 0777);
-    mkdir("ux0:/data/uae4all/tmp", 0777);
-	strcpy(launchDir, "ux0:/data/uae4all");
-#elif defined(__SWITCH__)
-	mkdir("./roms", 0777);
-	mkdir("./saves", 0777);
-	mkdir("./conf", 0777);
-	mkdir("./kickstarts", 0777);
-	mkdir("./thumbs", 0777);
-	mkdir("./tmp", 0777);
-    strcpy(launchDir, ".");
-#else
-	getcwd(launchDir,250);
-#endif
-    /* PocketUAE prefs */
+	// init romfs file system
+	romfsInit();
+	atexit((void (*)())romfsExit);
+
+	// init 3DS buttons to their values
+	for (int i=0; buttons3ds[i].key!=0; ++i)
+		SDL_N3DSKeyBind(buttons3ds[i].sdlkey, (SDLKey)buttons3ds[i].key);
+
+	// Initialize timebase
+	g_uae_epoch = read_processor_time();
+	syncbase = 1000000; // Microseconds
+
+	mkdir(UAE_PATH, 0777);
+	mkdir(UAE_PATH "/roms", 0777);
+	mkdir(UAE_PATH "/saves", 0777);
+	mkdir(UAE_PATH "/conf", 0777);
+	mkdir(UAE_PATH "/kickstarts", 0777);
+	mkdir(UAE_PATH "/thumbs", 0777);
+	mkdir(UAE_PATH "/tmp", 0777);
+	strcpy(launchDir, UAE_PATH);
+
+	/* PocketUAE prefs */
     default_prefs_uae (&currprefs);
     default_prefs();
 #ifdef GP2X
     gp2x_init(argc, argv);
 #endif
-		// Set everthing to default and clear HD settings
-		SetDefaultMenuSettings(1);
+	// Set everthing to default and clear HD settings
+	SetDefaultMenuSettings(1);
     
-     loadconfig (1);
-    if (! graphics_setup ()) {
+	loadconfig (1);
+	if (! graphics_setup ()) {
 		exit (1);
-    }
-    rtarea_init ();
+	}
+	rtarea_init ();
 
 	hardfile_install();
 
-    if (! setup_sound ()) {
+	if (! setup_sound ()) {
 		write_log ("Sound driver unavailable: Sound output disabled\n");
 		produce_sound = 0;
-    }
-    init_joystick ();
+	}
+	init_joystick ();
 
 	int err = gui_init ();
 	if (err == -1) {
-	    write_log ("Failed to initialize the GUI\n");
+		write_log ("Failed to initialize the GUI\n");
 	} else if (err == -2) {
-	    exit (0);
+		exit (0);
 	}
-    if (sound_available && produce_sound > 1 && ! init_audio ()) {
+	if (sound_available && produce_sound > 1 && ! init_audio ()) {
 		write_log ("Sound driver unavailable: Sound output disabled\n");
 		produce_sound = 0;
-    }
+	}
 
-    /* Install resident module to get 8MB chipmem, if requested */
-    rtarea_setup ();
+	/* Install resident module to get 8MB chipmem, if requested */
+	rtarea_setup ();
 
-    keybuf_init (); /* Must come after init_joystick */
+	keybuf_init (); /* Must come after init_joystick */
 
 #ifdef USE_AUTOCONFIG
     expansion_init ();
@@ -379,7 +376,7 @@ void default_prefs_uae (struct uae_prefs *p)
     p->cpu_level = M68000;
     
     p->fastmem_size = 0x00000000;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     p->z3fastmem_size = 0x00000000;
     p->gfxmem_size = 0x00000000;
 #endif

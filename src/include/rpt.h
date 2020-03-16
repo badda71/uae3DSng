@@ -13,8 +13,8 @@
 #include <psp2/kernel/processmgr.h>
 #endif
 
-#if defined(__SWITCH__)
-#include <switch.h>
+#if defined(_3DS)
+#include <3ds.h>
 #endif
 
 typedef unsigned long frame_time_t;

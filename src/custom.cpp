@@ -91,10 +91,8 @@ static uae_u32 fetched_aga1[MAX_PLANES];
 int buttonstate[3];
 int mouse_x, mouse_y;
 int joy0button, joy1button, joy2button, joy3button;
-unsigned int joy0dir, joy1dir, joy2dir, joy3dir;
-extern int mouseMoving;
-extern int fcounter;
-
+unsigned int joy0dir, joy1dir;
+//unsigned int joy2dir, joy3dir;
 
 /* Events */
 unsigned long int currcycle, nextevent;
@@ -130,9 +128,6 @@ int maxvpos = MAXVPOS_PAL;
 int minfirstline = MINFIRSTLINE_PAL;
 static int fmode;
 unsigned int beamcon0 = -1, new_beamcon0;
-#ifdef USE_UAE4ALL_VKBD
-extern int vkbd_mode;
-#endif
 
 /* This is but an educated guess. It seems to be correct, but this stuff
  * isn't documented well. */
@@ -2222,8 +2217,6 @@ static _INLINE_ void do_mouse_hack (void)
             diffy = diffy * 100;
           mouse_x += adjust(diffx / 100);
           mouse_y += adjust(diffy / 100);
-          mouseMoving = 1;
-          fcounter = 0;
         }
       }          
       break;
@@ -3773,8 +3766,8 @@ static void vsync_handler (void)
 		getjoystate (0, &joy1dir, &joy1button);
 		getjoystate (1, &joy0dir, &joy0button);
 		// parallel port joysticks
-		getjoystate (2, &joy2dir, &joy2button);
-		getjoystate (3, &joy3dir, &joy3button);
+//		getjoystate (2, &joy2dir, &joy2button);
+//		getjoystate (3, &joy3dir, &joy3button);
 		if (joy0button!=back_joy0button)
 	  {
 			back_joy0button= joy0button;

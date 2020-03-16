@@ -3424,7 +3424,7 @@ void filesys_install_code (void)
     /* Ouch. Make sure this is _always_ a multiple of two bytes. */
     filesys_initcode = here() + 8 + 0x30 + 4;
     
-    #include "filesys_bootrom.cpp"
+    #include "filesys_bootrom-c.h"
     /********************************/
     
 

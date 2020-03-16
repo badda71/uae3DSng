@@ -295,7 +295,7 @@ void restore_state (char *filename)
 	    restore_fram (len, filepos);
 	    continue;
 	} else if (!strcmp (name, "ZRAM")) {
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 	    restore_zram (len, filepos);
 #endif
 	    continue;
@@ -508,7 +508,7 @@ void save_state (char *filename, const char *description)
     save_chunk (f, dst, len, "BRAM");
     dst = save_fram (&len);
     save_chunk (f, dst, len, "FRAM");
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     dst = save_zram (&len);
     save_chunk (f, dst, len, "ZRAM");
 #else

@@ -20,10 +20,6 @@
 
 #include <zlib.h>
 
-#ifdef ANDROIDSDL
-#include <android/log.h>
-#endif
-
 #if defined(__vita__) || defined(__SWITCH__)
 #include <unzip.h>
 #endif
@@ -361,11 +357,7 @@ struct zfile *zfile_open (const char *name, const char *mode)
     }
     l->f = fopen (l->name, mode);
 #else
-#if ANDROIDSDL
-  strncpy(l->name, "./uaetmp-XXXXXX", L_tmpnam);
-#else
   strncpy(l->name, "/tmp/uaetmp-XXXXXX", L_tmpnam);
-#endif
   fd = mkstemp(l->name);
   
 	if (fd < 0)

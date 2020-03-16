@@ -1,3 +1,7 @@
+#include "sysconfig.h"
+#include "sysdeps.h"
+#include "config.h"
+
 #include <sys/file.h>
 
 #if !( defined(WIN32) || defined(__PSP2__))
@@ -8,14 +12,14 @@
 #include <sys/stat.h>
 
 #if !( defined(WIN32) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
-#include <sys/mman.h>
+//#include <sys/mman.h>
 #endif
 
 #include <unistd.h>
 #include <fcntl.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
-#include <sys/soundcard.h>
+#if !( defined(WIN32) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
+//#include <sys/soundcard.h>
 #endif
 
 #include <sys/time.h>
@@ -27,13 +31,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
-#include <linux/soundcard.h>
+#if !( defined(WIN32) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
+//#include <linux/soundcard.h>
 #endif
 
-#include "sysconfig.h"
-#include "sysdeps.h"
-#include "config.h"
 #include "SDL.h"
 #include "gp2x.h"
 #include "gp2xutil.h"
@@ -48,7 +49,6 @@ unsigned long memDev;
 
 extern SDL_Joystick *uae4all_joy0;
 
-static int mixerdev;
 int soundVolume = 50;
 int flashLED;
 
@@ -107,17 +107,14 @@ unsigned long gp2x_joystick_read(int allow_usb_joy)
 void gp2x_init(int argc, char **argv)
 {
 	unsigned long memdev;
-#ifndef AROS
-	mixerdev = open("/dev/mixer", O_RDWR);
-#endif
 	
 	SDL_ShowCursor(SDL_DISABLE);
 #if defined(__PSP2__) // NOT __SWITCH__
 	strcpy(launchDir, "ux0:/data/uae4all");
 	strcpy(currentDir, "ux0:/data/uae4all");
 #elif defined(__SWITCH__)
-	strcpy(launchDir, ".");
-	strcpy(currentDir, ".");
+	strcpy(launchDir, UAE_PATH);
+	strcpy(currentDir, UAE_PATH);
 #else
 	getcwd(launchDir, 250);
 	getcwd(currentDir, 250);

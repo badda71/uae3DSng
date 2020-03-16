@@ -31,10 +31,6 @@ extern unsigned prefs_fastmem_size;
 extern int prefs_gfx_framerate, changed_gfx_framerate;
 extern const char *kickstarts_rom_names[6];
 extern const char *extended_rom_names[6];
-#ifdef ANDROIDSDL
-extern const char *af_kickstarts_rom_names[4]; 
-#endif
-
 
 #define PREFS_GFX_WIDTH 320
 #define PREFS_GFX_HEIGHT 240
@@ -53,11 +49,11 @@ struct uae_prefs {
 
     int cpu_level;
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     uae_u32 z3fastmem_size;
 #endif
     uae_u32 fastmem_size;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     uae_u32 gfxmem_size;
 #endif
 

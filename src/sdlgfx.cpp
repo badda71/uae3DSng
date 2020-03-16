@@ -20,8 +20,8 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include <SDL.h>
-#include <SDL_endian.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_endian.h>
 
 #include "config.h"
 #include "uae.h"
@@ -35,9 +35,6 @@
 #include "keybuf.h"
 #include "gui.h"
 #include "debug.h"
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
-#endif
 #include "gp2x.h"
 #include "gp2xutil.h"
 #include "inputmode.h"
@@ -47,41 +44,23 @@
 #include "rpt.h"
 #include "events.h"
 
-#if defined(__PSP2__) || defined(__SWITCH__)
-#define SDL_PollEvent PSP2_PollEvent
-#endif
-
-#ifdef __PSP2__ // NOT __SWITCH__
-#include "psp2/psp2_touch.h"
-#endif
-
 #ifdef __SWITCH__
 #include "switch/switch_touch.h"
 #endif
 
 bool mouse_state = true;
-#if defined(__PSP2__) || defined(__SWITCH__)
 extern bool slow_mouse;
 extern bool fast_mouse;
-#else
-bool slow_mouse = false;
-#endif
 
 extern int moved_x;
 extern int moved_y;
 extern int stylusClickOverride;
-int mouseMoving = 0;
-int justClicked = 0;
-int fcounter = 0;
 extern int stylusAdjustX;
 extern int stylusAdjustY;
 int doStylusRightClick = 0;
 
 extern int gp2xMouseEmuOn;
 extern int gp2xButtonRemappingOn;
-#ifndef PANDORA
-extern int hasGp2xButtonRemapping;
-#endif
 
 int show_inputmode = 0;
 int show_volumecontrol;
@@ -96,12 +75,7 @@ unsigned gfx_rowbytes=0;
 
 Uint32 uae4all_numframes=0;
 
-#define VIDEO_FLAGS_INIT SDL_SWSURFACE|SDL_FULLSCREEN
-#ifdef ANDROIDSDL
-#define VIDEO_FLAGS VIDEO_FLAGS_INIT
-#else
-#define VIDEO_FLAGS VIDEO_FLAGS_INIT | SDL_DOUBLEBUF
-#endif
+#define VIDEO_FLAGS SDL_SWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF
 
 /* Uncomment for debugging output */
 /* #define DEBUG */
@@ -116,33 +90,12 @@ static int ncolors = 0;
 
 /* Keyboard and mouse */
 int uae4all_keystate[256];
-static int shiftWasPressed = 0;
-#ifdef PANDORA
-#define SIMULATE_SHIFT 0x200
-#define SIMULATE_RELEASED_SHIFT 0x400
-#endif
 
 static unsigned long previous_synctime = 0;
 static unsigned long next_synctime = 0;
 
 void flush_block ()
 {
-#if !defined(__PSP2__) //no need to unlock screen on Vita unless we have to
-	SDL_UnlockSurface(prSDLScreen);
-#endif
-#ifdef USE_UAE4ALL_VKBD	//draw vkbd and process user input
-#if defined(__PSP2__) //even on Vita, vkbd blitting requires unlock/lock
-	if (vkbd_mode)
-	{
-		SDL_UnlockSurface(prSDLScreen); 
-		vkbd_key=vkbd_process();
-		SDL_LockSurface(prSDLScreen);
-	}
-#else
-	if (vkbd_mode)
-		vkbd_key=vkbd_process();
-#endif
-#endif
 	if (show_inputmode)
 		inputmode_redraw();	
 	if (drawfinished)
@@ -150,21 +103,11 @@ void flush_block ()
 		drawfinished=0;
 		if (savestate_state == STATE_DOSAVE)
 		{
-#if defined(__PSP2__)
-			SDL_UnlockSurface(prSDLScreen);
 			CreateScreenshot(SCREENSHOT);
-			SDL_LockSurface(prSDLScreen);
-#else
-			CreateScreenshot(SCREENSHOT);
-#endif
 		}
 		unsigned long start = read_processor_time();
 		if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
-#if defined(__PSP2__)
-			SDL_Delay(((next_synctime - start) - 1000) / 1000);
-#else
 			usleep((next_synctime - start) - 1000);
-#endif
 		SDL_Flip(prSDLScreen);
 		last_synctime = read_processor_time();
 
@@ -178,45 +121,6 @@ void flush_block ()
 		else
 			next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
 	}
-#if defined(__SWITCH__)
-	SDL_LockSurface (prSDLScreen);
-#endif
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-	SDL_LockSurface (prSDLScreen);
-	if(stylusClickOverride)
-	{
-		justClicked = 0;
-		mouseMoving = 0;
-	}
-	else
-	{
-		if(justClicked)
-		{
-			buttonstate[0] = 0;
-			buttonstate[2] = 0;
-			justClicked = 0;
-		}
-
-		if(mouseMoving)
-		{
-			if(fcounter >= mainMenu_tapDelay)
-			{
-				if(doStylusRightClick)
-			  {
-					buttonstate[2] = 1;
-        }
-				else
-			  {
-					buttonstate[0] = 1;
-  				mouseMoving = 0;
-  				justClicked = 1;
-  				fcounter = 0;
-				}
-			}
-			fcounter++;
-		}
-	}
-#endif // __PSP2__
 	init_row_map();
 }
 
@@ -300,8 +204,6 @@ static void graphics_subinit (void)
 	else
 	{
 		prSDLScreenPixels=(uae_u16 *)prSDLScreen->pixels;
-		SDL_LockSurface(prSDLScreen);
-		SDL_UnlockSurface(prSDLScreen);
 		SDL_Flip(prSDLScreen);
 		SDL_ShowCursor(SDL_DISABLE);
 		/* Initialize structure for Amiga video modes */
@@ -332,16 +234,13 @@ int graphics_init (void)
     buttonstate[0] = buttonstate[1] = buttonstate[2] = 0;
     for (i = 256; i--;)
 		uae4all_keystate[i] = 0;
-  shiftWasPressed = 0;
   
     return 1;
 }
 
 static void graphics_subshutdown (void)
 {
-#ifndef AROS
     SDL_FreeSurface(prSDLScreen);
-#endif
 }
 
 void graphics_leave (void)
@@ -355,57 +254,6 @@ void graphics_leave (void)
  * between different keyboard languages. */
 static int kc_decode (SDL_keysym *prKeySym)
 {
-#ifdef PANDORA
-  // Special handling of Pandora keyboard:
-  // Some keys requires shift on Amiga, so we simulate shift...
-  switch (prKeySym->sym)
-  {
-    case SDLK_COLON:
-      return SIMULATE_SHIFT | AK_SEMICOLON;
-    case SDLK_QUESTION:
-      return SIMULATE_SHIFT | AK_SLASH;
-    case SDLK_HASH:
-      return SIMULATE_SHIFT | AK_3;
-    case SDLK_DOLLAR:
-      return SIMULATE_SHIFT | AK_4;
-    case SDLK_QUOTEDBL:
-      return SIMULATE_SHIFT | AK_QUOTE;
-    case SDLK_PLUS:
-      return SIMULATE_SHIFT | AK_EQUAL;
-    case SDLK_AT:
-      return SIMULATE_SHIFT | AK_2;
-    case SDLK_LEFTPAREN:
-      return SIMULATE_SHIFT | AK_9;
-    case SDLK_RIGHTPAREN:
-      return SIMULATE_SHIFT | AK_0;
-    case SDLK_EXCLAIM:
-      return SIMULATE_SHIFT | AK_1;
-    case SDLK_UNDERSCORE:
-      return SIMULATE_SHIFT | AK_MINUS;
-    case SDLK_2:
-      if(prKeySym->mod == KMOD_LSHIFT)
-        return SIMULATE_SHIFT | AK_LBRACKET;
-      break;
-    case SDLK_3:
-      if(prKeySym->mod == KMOD_LSHIFT)
-        return SIMULATE_SHIFT | AK_RBRACKET;
-      break;
-    case SDLK_4:
-      if(prKeySym->mod == KMOD_LSHIFT)
-        return SIMULATE_SHIFT | AK_BACKQUOTE;
-      break;
-    case SDLK_9:
-      if(prKeySym->mod == KMOD_LSHIFT)
-        return SIMULATE_RELEASED_SHIFT | AK_LBRACKET;
-      break;
-    case SDLK_0:
-      if(prKeySym->mod == KMOD_LSHIFT)
-        return SIMULATE_RELEASED_SHIFT | AK_RBRACKET;
-      break;
-    case 124: // code for '|'
-      return SIMULATE_SHIFT | AK_BACKSLASH;
-  }
-#endif
     switch (prKeySym->sym)
     {
     case SDLK_b: return AK_B;
@@ -544,44 +392,31 @@ void handle_events (void)
 	int i, j;
 	int iIsHotKey = 0;
 
-	/* Handle GUI events */
-	gui_handle_events ();
-
-#if defined(__PSP2__) || defined(__SWITCH__)
-/* SDL events on PSP2 with all keyboard/mouse inputs for BT keyboard and mouse, and touch */
-#ifdef __PSP2__	 // NOT __SWITCH__	
-	if (mainMenu_touchControls) {
-		psp2PollTouch();
-	}
-#endif
-#ifdef __SWITCH__
-	// need to call this once per frame
-	if (mainMenu_touchControls)
-		SWITCH_FinishSimulatedMouseClicks();
-#endif
     while (SDL_PollEvent(&rEvent))
 	{
-#ifdef __SWITCH__
-		if (mainMenu_touchControls)
-			SWITCH_HandleTouch(&rEvent);
-#endif
+		gui_handle_events (&rEvent);
+
 		switch (rEvent.type)
 		{
 		case SDL_QUIT:
 			uae_quit();
 			break;
 		case SDL_KEYDOWN:
-			iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
-			if (iAmigaKeyCode >= 0)
+			if ((rEvent.key.keysym.sym & 0x100) == 0)
 			{
-				if (!uae4all_keystate[iAmigaKeyCode])
+				iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
+				if (iAmigaKeyCode >= 0)
 				{
-					uae4all_keystate[iAmigaKeyCode] = 1;
-					record_key(iAmigaKeyCode << 1);
+					if (!uae4all_keystate[iAmigaKeyCode])
+					{
+						uae4all_keystate[iAmigaKeyCode] = 1;
+						record_key(iAmigaKeyCode << 1);
+					}
 				}
 			}
 			break;
 		case SDL_KEYUP:
+			if ((rEvent.key.keysym.sym & 0x100) == 0)
 			{
 				iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
 				if (iAmigaKeyCode >= 0)
@@ -592,10 +427,10 @@ void handle_events (void)
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			buttonstate[(rEvent.button.button-1)%3] = 1;
+//			buttonstate[(rEvent.button.button-1)%3] = 1;
 			break;
 		case SDL_MOUSEBUTTONUP:
-			buttonstate[(rEvent.button.button-1)%3] = 0;
+//			buttonstate[(rEvent.button.button-1)%3] = 0;
 			break;
 		case SDL_MOUSEMOTION:
 			mouse_state = true;
@@ -607,304 +442,18 @@ void handle_events (void)
 
 			lastmx += rEvent.motion.xrel * mouseScale;
 			lastmy += rEvent.motion.yrel * mouseScale;
-			if(rEvent.motion.x == 0)
+			// move mouse if touching mousepad edges
+			if(rEvent.motion.x < 5)
 				lastmx -= mouseScale * 4;
-			if(rEvent.motion.y == 0)
+			if(rEvent.motion.y < 5)
 				lastmy -= mouseScale * 4;
-			if(rEvent.motion.x == visibleAreaWidth-1)
+			if(rEvent.motion.x >= 395)
 				lastmx += mouseScale * 4;
-			if(rEvent.motion.y == mainMenu_displayedLines-1)
+			if(rEvent.motion.y >= 235)
 				lastmy += mouseScale * 4;
 			newmousecounters = 1;
 			break;
 		}
-	}
-#else
-/* Event handling on non-PSP2 systems involves special hooks for certain keys */    
-    while (SDL_PollEvent(&rEvent))
-    {
-		switch (rEvent.type)
-		{
-		case SDL_QUIT:
-			uae_quit();
-			break;
-		case SDL_KEYDOWN:
-			if(rEvent.key.keysym.sym==SDLK_PAGEUP)
-				slow_mouse=true;
-			if(gp2xMouseEmuOn)
-			{
-				if(rEvent.key.keysym.sym==SDLK_RSHIFT)
-				{
-					uae4all_keystate[AK_LALT] = 1;
-					record_key(AK_LALT << 1);
-				}
-				if(rEvent.key.keysym.sym==SDLK_RCTRL || rEvent.key.keysym.sym==SDLK_END || rEvent.key.keysym.sym==SDLK_HOME)
-				{
-					uae4all_keystate[AK_RALT] = 1;
-					record_key(AK_RALT << 1);
-				}
-				if(rEvent.key.keysym.sym==SDLK_PAGEDOWN)
-				{
-					uae4all_keystate[AK_DN] = 1;
-					record_key(AK_DN << 1);
-				}
-			}
-#ifdef ANDROIDSDL
-			if (rEvent.key.keysym.sym==SDLK_F11)
-#else
-			if (rEvent.key.keysym.sym==SDLK_LALT)
-#endif
-			{
-#ifdef USE_UAE4ALL_VKBD
-				if (!vkbd_mode)
-#endif
-				{
-					// only do this if the virtual keyboard isn't visible
-					// state moves thus:
-					// joystick mode (with virt keyboard on L and R)
-					// mouse mode (with mouse buttons on L and R)
-					// if specified:
-					// remapping mode (with whatever's been supplied)
-					// back to start of state
-					
-#ifndef PANDORA
-					if (!hasGp2xButtonRemapping)
-					{
-						// skip the remapping state
-						gp2xMouseEmuOn = !gp2xMouseEmuOn;
-					}
-					else
-					{
-#endif
-						// start condition is gp2xMouseEmuOn = 0, gp2xButtonRemappingOn = 0
-						if (!gp2xButtonRemappingOn && !gp2xMouseEmuOn)
-						{
-							// move to mouse emu mode
-							gp2xMouseEmuOn = 1;
-							gp2xButtonRemappingOn = 0;
-						}
-						else if (gp2xMouseEmuOn && !gp2xButtonRemappingOn)
-						{
-						// move to button remapping mode
-						gp2xMouseEmuOn = 0;
-						gp2xButtonRemappingOn = 1;
-						}
-						else if (!gp2xMouseEmuOn && gp2xButtonRemappingOn)
-						{
-							gp2xMouseEmuOn = 0;
-							gp2xButtonRemappingOn = 0;
-						}
-							if (!gp2xMouseEmuOn)
-								togglemouse();
-#ifndef PANDORA
-					}
-#endif
-				show_inputmode = 1;
-				}
-			}
-#ifdef USE_UAE4ALL_VKBD
-			else if ((!gp2xMouseEmuOn) && (!gp2xButtonRemappingOn) && (!vkbd_mode) && (vkbd_button2!=(SDLKey)0))
-			{
-				if (vkbd_button2) // button2 keyboard was a planned feature, not yet implemented
-					rEvent.key.keysym.sym=vkbd_button2;
-				else
-					break;
-			}
-#endif //UAE_UAE4ALL_VKBD
-
-#ifndef PANDORA
-			if (gp2xButtonRemappingOn)
-#endif
-			{
-				if (rEvent.key.keysym.sym==SDLK_RSHIFT || rEvent.key.keysym.sym==SDLK_RCTRL)
-					doStylusRightClick = 1;
-			}
-			if (rEvent.key.keysym.sym!=SDLK_UP && rEvent.key.keysym.sym!=SDLK_DOWN && rEvent.key.keysym.sym!=SDLK_LEFT &&
-				rEvent.key.keysym.sym!=SDLK_RIGHT && rEvent.key.keysym.sym!=SDLK_PAGEUP && rEvent.key.keysym.sym!=SDLK_PAGEDOWN &&
-#ifdef ANDROIDSDL
-				rEvent.key.keysym.sym!=SDLK_HOME && rEvent.key.keysym.sym!=SDLK_END && rEvent.key.keysym.sym!=SDLK_F11 &&
-				rEvent.key.keysym.sym!=SDLK_F12 && rEvent.key.keysym.sym!=SDLK_F13 && rEvent.key.keysym.sym!=SDLK_RCTRL)
-#else
-				rEvent.key.keysym.sym!=SDLK_HOME && rEvent.key.keysym.sym!=SDLK_END && rEvent.key.keysym.sym!=SDLK_LALT &&
-				rEvent.key.keysym.sym!=SDLK_LCTRL && rEvent.key.keysym.sym!=SDLK_RSHIFT && rEvent.key.keysym.sym!=SDLK_RCTRL)
-#endif
-			{
-				iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
-				if (iAmigaKeyCode >= 0)
-				{
-#ifdef PANDORA
-				  if(iAmigaKeyCode & SIMULATE_SHIFT)
-			    {
-            // We need to simulate shift
-            iAmigaKeyCode = iAmigaKeyCode & 0x1ff;
-            shiftWasPressed = uae4all_keystate[AK_LSH];
-            if(!shiftWasPressed)
-            {
-              uae4all_keystate[AK_LSH] = 1;
-              record_key(AK_LSH << 1);
-            }
-			    }
-				  if(iAmigaKeyCode & SIMULATE_RELEASED_SHIFT)
-			    {
-            // We need to simulate released shift
-            iAmigaKeyCode = iAmigaKeyCode & 0x1ff;
-            shiftWasPressed = uae4all_keystate[AK_LSH];
-            if(shiftWasPressed)
-            {
-              uae4all_keystate[AK_LSH] = 0;
-              record_key((AK_LSH << 1) | 1);
-            }
-			    }
-#endif
-					if (!uae4all_keystate[iAmigaKeyCode])
-					{
-						uae4all_keystate[iAmigaKeyCode] = 1;
-						record_key(iAmigaKeyCode << 1);
-					}
-				}
-			}
-			break;
-		case SDL_KEYUP:
-			if(rEvent.key.keysym.sym==SDLK_PAGEUP)
-				slow_mouse = false;
-			if(gp2xMouseEmuOn)
-			{
-				if(rEvent.key.keysym.sym==SDLK_RSHIFT)
-				{
-					uae4all_keystate[AK_LALT] = 0;
-					record_key((AK_LALT << 1) | 1);
-				}
-				if(rEvent.key.keysym.sym==SDLK_RCTRL || rEvent.key.keysym.sym==SDLK_END || rEvent.key.keysym.sym==SDLK_HOME)
-				{
-					uae4all_keystate[AK_RALT] = 0;
-					record_key((AK_RALT << 1) | 1);
-				}
-				if(rEvent.key.keysym.sym==SDLK_PAGEDOWN)
-				{
-					uae4all_keystate[AK_DN] = 0;
-					record_key((AK_DN << 1) | 1);
-				}
-			}
-#ifndef PANDORA
-			if (gp2xButtonRemappingOn)
-#endif
-			{
-				if (rEvent.key.keysym.sym==SDLK_RSHIFT || rEvent.key.keysym.sym==SDLK_RCTRL)
-			  {
-					doStylusRightClick = 0;
-  				mouseMoving = 0;
-  				justClicked = 0;
-  				fcounter = 0;
-  				buttonstate[2] = 0;
-				}
-			}
-#ifdef ANDROIDSDL
-			if (rEvent.key.keysym.sym==SDLK_F11)
-#else
-			if (rEvent.key.keysym.sym==SDLK_LALT)
-#endif
-			{
-				show_inputmode = 0;
-			}
-			if (rEvent.key.keysym.sym!=SDLK_UP && rEvent.key.keysym.sym!=SDLK_DOWN && rEvent.key.keysym.sym!=SDLK_LEFT &&
-				rEvent.key.keysym.sym!=SDLK_RIGHT && rEvent.key.keysym.sym!=SDLK_PAGEUP && rEvent.key.keysym.sym!=SDLK_PAGEDOWN &&
-#ifdef ANDROIDSDL
-				rEvent.key.keysym.sym!=SDLK_HOME && rEvent.key.keysym.sym!=SDLK_END && rEvent.key.keysym.sym!=SDLK_F11 &&
-				rEvent.key.keysym.sym!=SDLK_F12 && rEvent.key.keysym.sym!=SDLK_F13 && rEvent.key.keysym.sym!=SDLK_RCTRL)
-#else
-				rEvent.key.keysym.sym!=SDLK_HOME && rEvent.key.keysym.sym!=SDLK_END && rEvent.key.keysym.sym!=SDLK_LALT &&
-				rEvent.key.keysym.sym!=SDLK_LCTRL && rEvent.key.keysym.sym!=SDLK_RSHIFT && rEvent.key.keysym.sym!=SDLK_RCTRL)
-#endif
-			{
-				iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
-				if (iAmigaKeyCode >= 0)
-				{
-#ifdef PANDORA
-				  if(iAmigaKeyCode & SIMULATE_SHIFT)
-			    {
-            // We needed to simulate shift
-            iAmigaKeyCode = iAmigaKeyCode & 0x1ff;
-            if(!shiftWasPressed)
-            {
-              uae4all_keystate[AK_LSH] = 0;
-              record_key((AK_LSH << 1) | 1);
-              shiftWasPressed = 0;
-            }
-			    }
-				  if(iAmigaKeyCode & SIMULATE_RELEASED_SHIFT)
-			    {
-            // We needed to simulate released shift
-            iAmigaKeyCode = iAmigaKeyCode & 0x1ff;
-            if(shiftWasPressed)
-            {
-              uae4all_keystate[AK_LSH] = 1;
-              record_key(AK_LSH << 1);
-              shiftWasPressed = 0;
-            }
-			    }
-#endif
-					uae4all_keystate[iAmigaKeyCode] = 0;
-					record_key((iAmigaKeyCode << 1) | 1);
-				}
-			}
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-		if (!gp2xButtonRemappingOn)
-			buttonstate[(rEvent.button.button-1)%3] = 1;
-			break;
-		case SDL_MOUSEBUTTONUP:
-		if (!gp2xButtonRemappingOn)
-			buttonstate[(rEvent.button.button-1)%3] = 0;
-			break;
-		case SDL_MOUSEMOTION:
-			mouse_state = true;
-			if(gp2xButtonRemappingOn)
-			{
-				lastmx = 16 * (rEvent.motion.x*2 - mainMenu_stylusOffset + moved_x + stylusAdjustX >> 1);
-				lastmy = 16 * (rEvent.motion.y*2 - mainMenu_stylusOffset + moved_y + stylusAdjustY >> 1);
-				//mouseMoving = 1;
-			}
-			else if(slow_mouse)
-			{
-				lastmx += 16 * rEvent.motion.xrel;
-				lastmy += 16 * rEvent.motion.yrel;
-				if(rEvent.motion.x == 0)
-					lastmx -= 2*16;
-				if(rEvent.motion.y == 0)
-					lastmy -= 2*16;
-				if(rEvent.motion.x == visibleAreaWidth-1)
-					lastmx += 2*16;
-				if(rEvent.motion.y == mainMenu_displayedLines-1)
-					lastmy += 2*16;
-			}
-			else
-			{
-				int mouseScale = mainMenu_mouseMultiplier * 4 * 16;
-				mouseScale /= 100;
-
-				lastmx += rEvent.motion.xrel * mouseScale;
-				lastmy += rEvent.motion.yrel * mouseScale;
-				if(rEvent.motion.x == 0)
-					lastmx -= mouseScale * 4;
-				if(rEvent.motion.y == 0)
-					lastmy -= mouseScale * 4;
-				if(rEvent.motion.x == visibleAreaWidth-1)
-					lastmx += mouseScale * 4;
-				if(rEvent.motion.y == mainMenu_displayedLines-1)
-					lastmy += mouseScale * 4;
-			}
-			newmousecounters = 1;
-			break;
-		}
-	}
-
-#endif // __PSP2__
-
-	if (mouse_state==false)
-	{
-		mouse_x = 0;
-		mouse_y = 0;
-		newmousecounters = 1;
 	}
 }
 
@@ -915,13 +464,11 @@ int needmousehack (void)
 
 int lockscr (void)
 {
-    SDL_LockSurface(prSDLScreen);
     return 1;
 }
 
 void unlockscr (void)
 {
-    SDL_UnlockSurface(prSDLScreen);
 }
 
 void gui_purge_events(void)

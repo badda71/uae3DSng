@@ -9,6 +9,9 @@
          For more info read MiniZip_info.txt
 
 */
+#include "sysconfig.h"
+#include "sysdeps.h"
+#include "config.h"
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define IOAPI_NO_64

@@ -387,37 +387,6 @@ static uae_u8 parconvert (uae_u8 v, int jd, int shift)
 	return v;
 }
 
-/* io-pins floating: dir=1 -> return data, dir=0 -> always return 1 */
-static uae_u8 handle_parport_joystick (int port, uae_u8 pra, uae_u8 dra)
-{
-	uae_u8 v;
-    bool parport_joystick_enabled = true;
-	switch (port)
-	{
-	case 0:
-		v = (pra & dra) | (dra ^ 0xff);
-		if (parport_joystick_enabled) {
-			v = parconvert (v, joy2dir, 0);
-			v = parconvert (v, joy3dir, 4);
-		}
-		return v;
-	case 1:
-		v = ((pra & dra) | (dra ^ 0xff)) & 0x7;
-		if (parport_joystick_enabled) {
-			if (joy2button & 0x01)
-				v &= ~4;
-			if (joy3button & 0x01)
-				v &= ~1;
-			if (joy2button & 0x02 || joy3button & 0x02)
-				v &= ~2; /* spare */
-		}
-		return v;
-	default:
-		abort ();
-		return 0;
-	}
-}
-
 static uae_u8 ReadCIAA (unsigned int addr)
 {
     unsigned int tmp;
@@ -438,22 +407,9 @@ static uae_u8 ReadCIAA (unsigned int addr)
 	    tmp = (tmp & ~0x80) | (ciaapra & 0x80);
 	return tmp;
     case 1:
-    tmp = handle_parport_joystick (0, ciaaprb, ciaadrb);
-    if (ciaacrb & 2) {
-        int pb7 = 0;
-        if (ciaacrb & 4)
-            pb7 = ciaacrb & 1;
-        tmp &= ~0x80;
-        tmp |= pb7 ? 0x80 : 00;
-    }
-    if (ciaacra & 2) {
-        int pb6 = 0;
-        if (ciaacra & 4)
-            pb6 = ciaacra & 1;
-        tmp &= ~0x40;
-        tmp |= pb6 ? 0x40 : 00;
-    }
-    return tmp;
+	/* Returning 0xFF is necessary for Tie Break - otherwise its joystick
+	   code won't work.  */
+	return 0xFF;
     case 2:
 	return ciaadra;
     case 3:
@@ -505,9 +461,9 @@ static uae_u8 ReadCIAB (unsigned int addr)
 
     switch (addr & 0xf) {
     case 0:
-    tmp = 0;
-    tmp |= handle_parport_joystick (1, ciabpra, ciabdra);
-    return tmp;
+	/* Returning some 1 bits is necessary for Tie Break - otherwise its joystick
+	   code won't work.  */
+	return ciabpra | 3;
     case 1:
 	return ciabprb;
     case 2:

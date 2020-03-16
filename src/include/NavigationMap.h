@@ -36,7 +36,7 @@ NavigationMap navMap[] =
   { "3.1", "OCS", "28MHz", "2.0", "AROS" },
   { "AROS", "ECS", "PandSpeed", "3.1", "BlitterMode" },
 #endif
-#if defined(AROS) || defined(WIN32) || defined(ANDROIDSDL)
+#if defined(AROS) || defined(WIN32)
   { "3.1", "OCS", "56MHz", "2.0", "AROS" },
   { "AROS", "ECS", "112MHz", "3.1", "CustomRom" },
 #endif
@@ -155,7 +155,7 @@ NavigationMap navMap[] =
   { "Port0", "ControlCfg2", "Light", "tabbedArea", "Port1" },
   { "Port1", "ControlCfg4", "Medium", "Port0", "Both" },
 
-#if defined(AROS) || defined(WIN32) || defined(ANDROIDSDL)
+#if defined(AROS) || defined(WIN32)
   { "Both", "ControlCfg4", "Heavy", "Port1", "Reset" },
 #else
   { "Both", "ControlCfg4", "Heavy", "Port1", "StatusOn" },
@@ -170,7 +170,7 @@ NavigationMap navMap[] =
   { "Mouse.25", "Light", "TapNormal", "tabbedArea", "Mouse.5" },
   { "Mouse.5", "Medium", "TapShort", "Mouse.25", "Mouse1x" },
   { "Mouse1x", "Heavy", "TapNo", "Mouse.5", "Mouse2x" },
-#if defined(AROS) || defined(WIN32) || defined(ANDROIDSDL)
+#if defined(AROS) || defined(WIN32)
   { "Mouse2x", "Heavy", "StatusLine", "Mouse1x", "Mouse4x" },
   { "Mouse4x", "Heavy", "StatusLine", "Mouse2x", "StylusOffset" },
 #else
@@ -180,7 +180,7 @@ NavigationMap navMap[] =
 
   { "TapNormal", "Mouse.25", "ControlCfg1", "tabbedArea", "TapShort" },
   { "TapShort", "Mouse.5", "ControlCfg3", "TapNormal", "TapNo" },
-#if defined(AROS) || defined(WIN32) || defined(ANDROIDSDL)
+#if defined(AROS) || defined(WIN32)
   { "TapNo", "Mouse1x", "ControlCfg3", "TapShort", "StatusLine" },
   
   { "StatusLine", "Mouse4x", "ControlCfg3", "TapNo", "StylusOffset" },
@@ -211,25 +211,7 @@ NavigationMap navMap[] =
   { "CtrlDown", "CtrlB", "CustomCtrlOff", "---", "---" },
   { "CtrlLeft", "CtrlX", "CustomCtrlOff", "---", "---" },
   { "CtrlRight", "CtrlY", "DPadCustom", "---", "---" },
-  
-#ifdef ANDROIDSDL
-    // Tab On-Screen Control
-  { "OnScrCtrl", "QckSwtch2", "OnScrButton3", "tabbedArea", "OnScrTextInput" },
-  { "OnScrButton3", "OnScrCtrl", "QckSwtchOff", "tabbedArea", "OnScrButton4" },
-  { "OnScrTextInput", "QckSwtch2", "OnScrButton4", "OnScrCtrl", "OnScrDpad" },
-  { "OnScrButton4", "OnScrTextInput", "QckSwtchOff", "OnScrButton3", "OnScrButton5" },
-  { "OnScrDpad", "QckSwtch2", "OnScrButton5", "OnScrTextInput", "OnScrButton1" },
-  { "OnScrButton5", "OnScrDpad", "QckSwtchOff", "OnScrButton4", "OnScrButton6" },
-  { "OnScrButton1", "OnScrButton6", "OnScrButton6", "OnScrDpad", "OnScrButton2" },
-  { "OnScrButton6", "OnScrButton1", "OnScrButton1", "OnScrButton5", "CustomPos" },
-  { "OnScrButton2", "CustomPos", "CustomPos", "OnScrButton1", "FloatJoy" },
-  { "CustomPos", "OnScrButton2", "OnScrButton2", "OnScrButton6", "Reset" },
-  { "QckSwtchOff", "OnScrButton4", "QckSwtch1", "tabbedArea", "ConfManager" },
-  { "QckSwtch1", "QckSwtchOff", "QckSwtch2", "tabbedArea", "Save Config" },
-  { "QckSwtch2", "QckSwtch1", "OnScrCtrl", "tabbedArea", "A500" },
-  { "FloatJoy", "CustomPos", "CustomPos", "OnScrButton2", "Reset" },
-#endif 
-  
+
   // File dialog
   { "dirList1", "cmdCancel1", "cmdOk", "---", "---" },
   { "cmdCancel1", "cmdOk", "cmdOk", "dirList1", "dirList1" },
@@ -245,14 +227,8 @@ NavigationMap navMap[] =
   { "configList", "cfgLoad", "cfgLoad", "---", "---" },
   { "cfgSave", "cfgText", "configList", "cfgLoad", "cfgDelete" },
   { "cfgDelete", "configList", "configList", "cfgSave", "cfgCancel" },
-#ifdef ANDROIDSDL
-  { "cfgLoad", "cfgText", "configList", "cfgVKeybd", "cfgSave" },
-  { "cfgCancel", "configList", "configList", "cfgDelete", "cfgVKeybd" },
-  { "cfgVKeybd", "configList", "configList", "cfgCancel", "cfgLoad" },
-#else
   { "cfgLoad", "cfgText", "configList", "cfgCancel", "cfgSave" },
   { "cfgCancel", "configList", "configList", "cfgDelete", "cfgLoad" },
-#endif
   
   { "END", "", "", "", "" }
 };

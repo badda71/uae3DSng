@@ -6,6 +6,31 @@
   * (c) 1995 Bernd Schmidt
   */
 
+// 3DS buttons
+#define DS_A 0x111
+#define DS_B 0x112
+#define DS_X 0x113
+#define DS_Y 0x114
+#define DS_L 0x115
+#define DS_R 0x116
+#define DS_ZL 0x117
+#define DS_ZR 0x118
+#define DS_START 0x119
+#define DS_SELECT 0x11a
+#define DS_UP1 0x11b
+#define DS_DOWN1 0x11c
+#define DS_LEFT1 0x11d
+#define DS_RIGHT1 0x11e
+#define DS_UP2 0x11f
+#define DS_DOWN2 0x120
+#define DS_LEFT2 0x121
+#define DS_RIGHT2 0x122
+#define DS_UP3 0x123
+#define DS_DOWN3 0x124
+#define DS_LEFT3 0x125
+#define DS_RIGHT3 0x126
+#define DS_TOUCH 0x127
+
 /* First, two dummies */
 #define AK_mousestuff 0x100
 #define AK_inhibit 0x101

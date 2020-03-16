@@ -72,7 +72,7 @@
 /* ********************************************************** */
 /* 08 - 0A  */
 /* er_Flags */
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 #define Z3_MEM_64KB	0x02
 #define Z3_MEM_128KB	0x03
 #define Z3_MEM_256KB	0x04
@@ -473,7 +473,7 @@ addrbank filesys_bank = {
     default_xlate, default_check, NULL
 };
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 /*
  *  Z3fastmem Memory
  */
@@ -689,7 +689,7 @@ static void expamem_init_filesys (void)
     memcpy (filesysory, expamem, 0x3000);
 }
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 /*
  * Zorro III expansion memory
  */
@@ -795,7 +795,7 @@ static long fast_filepos;
 static void allocate_expamem (void)
 {
     currprefs.fastmem_size = changed_prefs.fastmem_size;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     currprefs.z3fastmem_size = changed_prefs.z3fastmem_size;
     currprefs.gfxmem_size = changed_prefs.gfxmem_size;
 #endif
@@ -815,7 +815,7 @@ static void allocate_expamem (void)
     		}
     	}
     }
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     if (allocated_z3fastmem != currprefs.z3fastmem_size) {
     	if (z3fastmem)
     		mapped_free (z3fastmem);
@@ -860,7 +860,7 @@ static void allocate_expamem (void)
     		map_banks (&fastmem_bank, fastmem_start >> 16, currprefs.fastmem_size >> 16,
     				allocated_fastmem);
     	}
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     	if (allocated_z3fastmem > 0) {
     		fseek ((FILE *) savestate_file, z3_filepos, SEEK_SET);
     		fread (z3fastmem, 1, allocated_z3fastmem, (FILE *) savestate_file);
@@ -898,7 +898,7 @@ void expamem_reset (void)
       card_init[cardno] = expamem_init_fastcard;
       card_map[cardno++] = expamem_map_fastcard;
    }
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
    if (z3fastmem != NULL) {
       card_init[cardno] = expamem_init_z3fastmem;
       card_map[cardno++] = expamem_map_z3fastmem;
@@ -924,12 +924,12 @@ void expamem_reset (void)
 
 void expansion_init (void)
 {
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     z3fastmem = 0;
     gfxmemory = 0;
 #endif
     fastmemory = 0;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     allocated_z3fastmem = 0;
     allocated_gfxmem = 0;
 #endif
@@ -950,7 +950,7 @@ void expansion_cleanup (void)
 {
     if (fastmemory)
 	mapped_free (fastmemory);
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     if (z3fastmem)
 	mapped_free (z3fastmem);
     if (gfxmemory)
@@ -959,7 +959,7 @@ void expansion_cleanup (void)
     if (filesysory)
 	mapped_free (filesysory);
     fastmemory = 0;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     z3fastmem = 0;
     gfxmemory = 0;
 #endif
@@ -974,7 +974,7 @@ uae_u8 *save_fram (int *len)
     return fastmemory;
 }
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 uae_u8 *save_zram (int *len)
 {
     *len = allocated_z3fastmem;
@@ -988,7 +988,7 @@ void restore_fram (uae_u32 len, size_t filepos)
     changed_prefs.fastmem_size = len;
 }
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 void restore_zram (uae_u32 len, size_t filepos)
 {
     z3_filepos = filepos;
@@ -1001,7 +1001,7 @@ uae_u8 *save_expansion (int *len)
     uae_u8 *dstbak,*dst;
     dstbak = dst = (uae_u8 *)malloc (16);
     save_u32 (fastmem_start);
-#if defined(PANDORA) || defined(ANDROIDSDL)
+#if defined(PANDORA)
     save_u32 (0);
 #else
     save_u32 (z3fastmem_start);
@@ -1013,7 +1013,7 @@ uae_u8 *save_expansion (int *len)
 uae_u8 *restore_expansion (uae_u8 *src)
 {
     fastmem_start = restore_u32 ();
-#if defined(PANDORA) || defined(ANDROIDSDL)
+#if defined(PANDORA)
     restore_u32 ();
 #else
     z3fastmem_start = restore_u32 ();

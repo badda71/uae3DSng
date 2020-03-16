@@ -1,5 +1,8 @@
 //
 // Created by rsn8887 on 05/18/18.
+#include "sysconfig.h"
+#include "sysdeps.h"
+#include "config.h"
 
 #if defined(__vita__)
 #include <psp2/kernel/processmgr.h>
@@ -7,8 +10,8 @@
 #define displayHeight 544.0
 #endif
 
-#if defined(__SWITCH__)
 #define SCE_TOUCH_PORT_MAX_NUM 1
+#if defined(__SWITCH__)
 #define displayWidth 1280.0
 #define displayHeight 720.0
 #endif
@@ -97,6 +100,7 @@ static void preprocessEvents(SDL_Event *event) {
 	// pointer motion: single finger drag
 	// left button drag and drop: dual finger drag
 	// right button drag and drop: triple finger drag
+/*
 	if (event->type == SDL_FINGERDOWN || event->type == SDL_FINGERUP || event->type == SDL_FINGERMOTION) {
 		// front (0) or back (1) panel
 		SDL_TouchID port = event->tfinger.touchId;
@@ -116,9 +120,11 @@ static void preprocessEvents(SDL_Event *event) {
 			}
 		}
 	}
+	*/
 }
 
 static void preprocessFingerDown(SDL_Event *event) {
+/*
 	// front (0) or back (1) panel
 	SDL_TouchID port = event->tfinger.touchId;
 	// id (for multitouch)
@@ -148,9 +154,11 @@ static void preprocessFingerDown(SDL_Event *event) {
 			break;
 		}
 	}
+	*/
 }
 
 static void preprocessFingerUp(SDL_Event *event) {
+/*
 	// front (0) or back (1) panel
 	SDL_TouchID port = event->tfinger.touchId;
 	// id (for multitouch)
@@ -215,9 +223,11 @@ static void preprocessFingerUp(SDL_Event *event) {
 			}
 		}
 	}
+	*/
 }
 
 static void preprocessFingerMotion(SDL_Event *event) {
+/*
 	// front (0) or back (1) panel
 	SDL_TouchID port = event->tfinger.touchId;
 	// id (for multitouch)
@@ -317,6 +327,7 @@ static void preprocessFingerMotion(SDL_Event *event) {
 			}
 		}
 	}
+	*/
 }
 
 void SWITCH_FinishSimulatedMouseClicks() {

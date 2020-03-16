@@ -32,12 +32,8 @@ typedef int uae_thread_id;
 
 #else
 
-#include "SDL.h"
-#include "SDL_thread.h"
-
-#ifdef USE_SDL2
-#include "sdl2_to_sdl1.h"
-#endif
+#include "SDL/SDL.h"
+#include "SDL/SDL_thread.h"
 
 /* Sempahores. We use POSIX semaphores; if you are porting this to a machine
  * with different ones, make them look like POSIX semaphores. */

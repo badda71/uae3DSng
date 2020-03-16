@@ -3,7 +3,7 @@
 #ifndef SWITCH_TOUCH_H
 #define SWITCH_TOUCH_H
 
-#include <SDL2/SDL.h>
+#include <SDL/SDL.h>
 #if defined(__vita__)
 #include <psp2/touch.h>
 #endif

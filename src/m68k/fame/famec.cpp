@@ -6,6 +6,7 @@
 /* Ultima actualizacion: 08-10-2006                                         */
 /* Based on the excellent FAMEC emulator by St�phane Dallongueville          */
 /****************************************************************************/
+#include "sysconfig.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -637,7 +638,7 @@ void m68k_init(int force_table)
 /*     M68K_NO_SUP_ADDR_SPACE (2):  No se puede resetear porque no hay mapa   */
 /*             de memoria supervisor de extraccion de opcodes                 */
 /******************************************************************************/
-u32 m68k_reset(void)
+unsigned m68k_reset(void)
 {
 	u32 i=0;
 
@@ -693,7 +694,7 @@ M68K_CONTEXT *m68k_get_context(void)
 /* No recibe parametros                                                     */
 /* Retorna 68k PC                                                           */
 /****************************************************************************/
-u32 m68k_get_pc(void)
+unsigned m68k_get_pc(void)
 {
 	return (m68kcontext.execinfo & M68K_RUNNING)?(hostptr)PC-BasePC:m68kcontext.pc;
 }
@@ -705,7 +706,7 @@ u32 m68k_get_pc(void)
 /*           0  La operacion se ha realizado satisfactoriamente        */
 /*           1  El indice del registro no es valido (fuera de limites) */
 /***********************************************************************/
-s32 m68k_set_register(m68k_register reg, u32 value)
+extern "C" int m68k_set_register(m68k_register reg, unsigned value)
 {
 	switch(reg)
 	{
@@ -770,7 +771,7 @@ s32 m68k_set_register(m68k_register reg, u32 value)
 /*  Parametro: Direccion de la palabra y tipo de acceso  */
 /*  Retorno: La palabra o -1 en caso de dir. no valida   */
 /*********************************************************/
-s32 m68k_fetch(u32 addr)
+extern "C" int m68k_fetch(unsigned addr)
 {
 	s32 val;
   hostptr Base;
@@ -1664,7 +1665,7 @@ static u32 getDivs68kCycles(s32 dividend, s16 divisor)
 /* m68k_emulate()                                                          */
 /* Parametros: Numero de ciclos a ejecutar                                 */
 /***************************************************************************/
-void m68k_emulate(s32 cycles)
+extern "C" void m68k_emulate(int cycles)
 {
   M68K_CONTEXT *pm68kcontext = &m68kcontext;
   

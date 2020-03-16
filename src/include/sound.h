@@ -15,7 +15,7 @@ extern void finish_sound_buffer (void);
 
 #define DEFAULT_SOUND_BITS 16
 
-#if defined(PANDORA) || defined(ANDROIDSDL)
+#if defined(PANDORA)
 #define DEFAULT_SOUND_CHANNELS 2
 #else
 #define DEFAULT_SOUND_CHANNELS 1

@@ -1,11 +1,13 @@
+#include "sysconfig.h"
+#include "sysdeps.h"
 #include <string.h>
 #include <stdbool.h>
 
-#include <switch.h>
+#include <3ds.h>
 #include "switch_kbd.h"
 
 void kbdswitch_get(char *title, const char *initial_text, int maxLen, int multiline, char *buf) {
-	
+/*	
 	Result rc=0;
 	
 	SwkbdConfig kbd;
@@ -37,5 +39,5 @@ void kbdswitch_get(char *title, const char *initial_text, int maxLen, int multil
 		rc = swkbdShow(&kbd, buf, maxLen);
 		
 		swkbdClose(&kbd);
-	}
+	}*/
 }

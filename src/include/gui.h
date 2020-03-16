@@ -5,12 +5,13 @@
   *
   * Copyright 1996 Bernd Schmidt
   */
+#include <SDL/SDL.h>
 
 extern int gui_init (void);
 extern int gui_update (void);
 extern void gui_exit (void);
 extern void gui_led (int, int);
-extern void gui_handle_events (void);
+extern void gui_handle_events (SDL_Event *);
 extern void gui_purge_events (void);
 extern void gui_filename (int, const char *);
 extern void gui_fps (int fps);
@@ -62,5 +63,5 @@ extern void uae4all_show_time(void);
 extern void remap_custom_controls();
 
 /* Function to create savestate filename
-and screenshot filename if USE_GUICHAN is defined */
+and screenshot filename */
 extern void make_savestate_filenames(char *save, char *thumb);

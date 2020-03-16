@@ -62,12 +62,12 @@ int statfs ();
 #endif
 
 #if HAVE_SYS_MOUNT_H
-# include <sys/mount.h>
+//# include <sys/mount.h>
 #endif
 
 #if HAVE_SYS_VFS_H
 #ifndef AROS
-# include <sys/vfs.h>
+//# include <sys/vfs.h>
 #endif
 #endif
 
@@ -85,7 +85,7 @@ int statfs ();
 
 #if HAVE_SYS_STATFS_H
 #ifndef AROS
-# include <sys/statfs.h>
+//# include <sys/statfs.h>
 #endif
 #endif
 
@@ -126,7 +126,7 @@ safe_read
   return n_chars;
 }
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(_3DS) || defined(__PSP2__) || defined(__SWITCH__)
 #ifdef __PSP2__ // NOT __SWITCH__
 #include <psp2/io/devctl.h>
 #endif

@@ -26,7 +26,7 @@ extern uae_u16 *chipmemory_word;
 extern uae_u32 allocated_chipmem;
 extern uae_u32 allocated_fastmem;
 extern uae_u32 allocated_bogomem;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 extern uae_u32 allocated_gfxmem;
 extern uae_u32 allocated_z3fastmem;
 extern uae_u32 allocated_a3000mem;
@@ -39,7 +39,7 @@ extern uae_u32 allocated_a3000mem;
 
 #define chipmem_start 0x00000000
 #define bogomem_start 0x00C00000
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 #define a3000mem_start 0x07000000
 #endif
 #define kickmem_start 0x00F80000
@@ -91,7 +91,7 @@ extern void expamem_init (void);
 extern void expamem_reset (void);
 extern void rtarea_cleanup (void);
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 extern uae_u32 gfxmem_start;
 extern uae_u8 *gfxmemory;
 extern uae_u32 gfxmem_mask;

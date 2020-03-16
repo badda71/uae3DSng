@@ -20,9 +20,6 @@
 #include "m68k/m68k_intrf.h"
 #include "autoconf.h"
 #include "savestate.h"
-#ifdef ANDROIDSDL
-#include <android/log.h> 
-#endif
 
 int bReloadKickstart = 0;
 
@@ -33,9 +30,6 @@ unsigned prefs_bogomem_size;
 
 const char *kickstarts_rom_names[] = { "kick12.rom\0", "kick13.rom\0", "kick20.rom\0", "kick31.rom\0", "kickcustom.rom\0", "aros-amiga-m68k-rom.bin\0" };
 const char *extended_rom_names[] = { "\0", "\0", "\0", "\0", "\0", "aros-amiga-m68k-ext.bin\0" };
-#ifdef ANDROIDSDL
-const char *af_kickstarts_rom_names[] = { "amiga-os-120.rom\0", "amiga-os-130.rom\0", "amiga-os-204.rom\0", "amiga-os-310-a1200.rom\0" };
-#endif
 
 void clear_fame_mem_dummy(void);
 
@@ -44,7 +38,7 @@ int ersatzkickfile = 0;
 uae_u32 allocated_chipmem=0;
 uae_u32 allocated_fastmem=0;
 uae_u32 allocated_bogomem=0;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 uae_u32 allocated_gfxmem=0;
 uae_u32 allocated_z3fastmem=0;
 uae_u32 allocated_a3000mem=0;
@@ -105,7 +99,7 @@ int REGPARAM2 dummy_check (uaecptr addr, uae_u32 size)
     return 0;
 }
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 /* A3000 "motherboard resources" bank.  */
 static uae_u32 mbres_lget (uaecptr) REGPARAM;
 static uae_u32 mbres_wget (uaecptr) REGPARAM;
@@ -343,7 +337,7 @@ uae_u8 REGPARAM2 *bogomem_xlate (uaecptr addr)
     return bogomemory + addr;
 }
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 /* A3000 motherboard fast memory */
 
 static uae_u8 *a3000memory;
@@ -683,7 +677,7 @@ addrbank dummy_bank = {
 
 };
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 addrbank mbres_bank = {
     mbres_lget, mbres_wget, mbres_bget,
     mbres_lput, mbres_wput, mbres_bput,
@@ -706,7 +700,7 @@ addrbank bogomem_bank = {
 
 };
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
 addrbank a3000mem_bank = {
     a3000mem_lget, a3000mem_wget, a3000mem_bget,
     a3000mem_lput, a3000mem_wput, a3000mem_bput,
@@ -735,35 +729,22 @@ static int decode_cloanto_rom (uae_u8 *mem, int size, int real_size)
   uae_u8 *p;
   long cnt, t;
   int keysize;
-  
-#ifdef ANDROIDSDL
-  __android_log_print(ANDROID_LOG_INFO, "UAE", "decode_cloanto_rom %s", romkeyfile);
-#endif
 
   if (strlen (romkeyfile) == 0) {
     return 0;
   } else {
     keyf = fopen (romkeyfile, "rb");
     if (keyf == 0)  {
-#ifdef ANDROIDSDL
-      __android_log_print(ANDROID_LOG_ERROR, "UAE",  "Error opening keyfile \"%s\"\n", romkeyfile );
-#endif
       return 0;
     }
   
     p = (uae_u8 *)xmalloc (524288);
     keysize = fread (p, 1, 524288, keyf);
     if (keysize == 0 || p == 0) {
-#ifdef ANDROIDSDL
-      __android_log_print(ANDROID_LOG_ERROR, "UAE",  "Error reading keyfile \"%s\"\n", romkeyfile );
-#endif
       fclose (keyf);
       free (p);
       return 0;
     }
-#ifdef ANDROIDSDL
-    __android_log_print(ANDROID_LOG_INFO, "UAE",  "rom size: %d %d, keyfile size: %d\n", size, real_size, keysize );
-#endif
     for (t = cnt = 0; cnt < size; cnt++, t = (t + 1) % keysize)  {
       mem[cnt] ^= p[t];
       if (real_size == cnt + 1)
@@ -1078,7 +1059,7 @@ void memory_reset (void)
     
     map_banks (&clock_bank, 0xDC, 1, 0);
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     if (a3000memory != 0)
     {
        map_banks (&a3000mem_bank, a3000mem_start >> 16, allocated_a3000mem >> 16, allocated_a3000mem);
@@ -1124,7 +1105,7 @@ void memory_init (void)
 {
     allocated_chipmem = 0;
     allocated_bogomem = 0;
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     allocated_a3000mem = 0;
     a3000memory = 0;
 #endif
@@ -1147,7 +1128,7 @@ void memory_init (void)
 
 void memory_cleanup (void)
 {
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     if (a3000memory)
 	mapped_free (a3000memory);
 #endif
@@ -1160,7 +1141,7 @@ void memory_cleanup (void)
     if (chipmemory)
 	mapped_free (chipmemory);
 
-#if !( defined(PANDORA) || defined(ANDROIDSDL) )
+#if !( defined(PANDORA) )
     a3000memory = 0;
 #endif
     bogomemory = 0;
