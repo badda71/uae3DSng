@@ -65,64 +65,10 @@ int mainMenu_CPU_speed = 0;
 
 int mainMenu_cpuSpeed = 600;
 
-int mainMenu_joyConf = 0;
 int mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
 int mainMenu_autofireRate = 8;
-int mainMenu_customAutofireButton = 0;
-int mainMenu_showStatus = DEFAULT_STATUSLN;
-int mainMenu_background = 0;
-int mainMenu_font = 0;
 int mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
 int mainMenu_mouseEmulation = 1;
-int mainMenu_stylusOffset = 0;
-int mainMenu_tapDelay = 10;
-int mainMenu_customControls = 0;
-int mainMenu_custom_currentlyEditingControllerNr = 0;
-int mainMenu_custom_dpad = 0;
-int mainMenu_custom_up[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_down[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_left[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_right[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_stickup[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_stickdown[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_stickleft[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_stickright[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_A[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_B[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_X[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_Y[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_L[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_R[MAX_NUM_CONTROLLERS] = { };
-#ifdef __SWITCH__
-int mainMenu_custom_L2[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_R2[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_L3[MAX_NUM_CONTROLLERS] = { };
-int mainMenu_custom_R3[MAX_NUM_CONTROLLERS] = { };
-#endif
-#if defined(__PSP2__) || defined(__SWITCH__)
-int mainMenu_custom_controlSet = 0; //This controls which custom config is used
-int mainMenu_customPreset_up[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_down[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_left[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_right[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_stickup[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_stickdown[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_stickleft[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_stickright[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_A[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_B[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_X[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_Y[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_L[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_R[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-#ifdef __SWITCH__
-int mainMenu_customPreset_L2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_R2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_L3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-int mainMenu_customPreset_R3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-#endif
-#endif
-int mainMenu_autofire = DEFAULT_AUTOFIRE;
 
 int mainMenu_displayedLines = 240;
 int mainMenu_displayHires = 0;
@@ -137,27 +83,8 @@ int visibleAreaWidth = 400;
 
 int saveMenu_n_savestate = 0;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
-#if defined(__SWITCH__)
-int mainMenu_shader = 1;
-#else
-int mainMenu_shader = 5;
-#endif
-int mainMenu_leftStickMouse = 0;
-int mainMenu_touchControls = 1;
-int mainMenu_deadZone = 1000;
-#endif
-#ifdef __SWITCH__
-int mainMenu_swapAB = DEFAULT_SWAPAB;
-int mainMenu_singleJoycons = DEFAULT_SINGLEJOYCONS;
-#endif
-
 // The following params in use, but can't be changed with gui
 int mainMenu_autosave = DEFAULT_AUTOSAVE;
-int mainMenu_button1 = GP2X_BUTTON_X;
-int mainMenu_button2 = GP2X_BUTTON_A;
-int mainMenu_autofireButton1 = GP2X_BUTTON_B;
-int mainMenu_jump = -1;
 
 // The following params not in use, but stored to write them back to the config file
 int gp2xClockSpeed = -1;
@@ -207,252 +134,10 @@ void SetDefaultMenuSettings(int general)
     mainMenu_CPU_speed = 0;
 
     mainMenu_cpuSpeed = 600;
-    mainMenu_joyConf = 0;
     mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
     mainMenu_autofireRate = 8;
-    mainMenu_customAutofireButton = 0;
-    mainMenu_showStatus = DEFAULT_STATUSLN;
-    mainMenu_background = 0;
-    mainMenu_font = 0;
     mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
     mainMenu_mouseEmulation = 1;
-    mainMenu_stylusOffset = 0;
-    mainMenu_tapDelay = 10;
-    mainMenu_customControls = 0;
-	mainMenu_custom_currentlyEditingControllerNr = 0;
-    mainMenu_custom_dpad = 0;
-	 for (int i=0; i<MAX_NUM_CONTROLLERS; i++) 
-	 {
-		 mainMenu_custom_up[i] = 0;
-		 mainMenu_custom_down[i] = 0;
-		 mainMenu_custom_left[i] = 0;
-		 mainMenu_custom_right[i] = 0;
-		 mainMenu_custom_stickup[i] = 0;
-		 mainMenu_custom_stickdown[i] = 0;
-		 mainMenu_custom_stickleft[i] = 0;
-		 mainMenu_custom_stickright[i] = 0;
-		 mainMenu_custom_A[i] = 0;
-		 mainMenu_custom_B[i] = 0;
-		 mainMenu_custom_X[i] = 0;
-		 mainMenu_custom_Y[i] = 0;
-		 mainMenu_custom_L[i] = 0;
-		 mainMenu_custom_R[i] = 0;
-#ifdef __SWITCH__
-		 mainMenu_custom_L2[i] = 0;
-		 mainMenu_custom_R2[i] = 0;
-		 mainMenu_custom_L3[i] = 0;
-		 mainMenu_custom_R3[i] = 0;
-#endif
-	}
-#if defined(__PSP2__) || defined(__SWITCH__)
-	 mainMenu_custom_controlSet = 0;
-	 for (int i=0; i<MAX_NUM_CONTROLLERS; i++) 
-	 {
-		 for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++)
-		 {
-			mainMenu_customPreset_up[j][i] = 0;
-			mainMenu_customPreset_down[j][i] = 0;
-			mainMenu_customPreset_left[j][i] = 0;
-			mainMenu_customPreset_right[j][i] = 0;
-			mainMenu_customPreset_stickup[j][i] = 0;
-			mainMenu_customPreset_stickdown[j][i] = 0;
-			mainMenu_customPreset_stickleft[j][i] = 0;
-			mainMenu_customPreset_stickright[j][i] = 0;
-			mainMenu_customPreset_A[j][i] = 0;
-			mainMenu_customPreset_B[j][i] = 0;
-			mainMenu_customPreset_X[j][i] = 0;
-			mainMenu_customPreset_Y[j][i] = 0;
-			mainMenu_customPreset_L[j][i] = 0;
-			mainMenu_customPreset_R[j][i] = 0;
-#ifdef __SWITCH__
-			mainMenu_customPreset_L2[j][i] = 0;
-			mainMenu_customPreset_R2[j][i] = 0;
-			mainMenu_customPreset_L3[j][i] = 0;
-			mainMenu_customPreset_R3[j][i] = 0;
-#endif
-		}
-	}
-	// remember on Switch/Vita 
-	// X is the bottom button
-	// B is the right button
-	// Y is the top button
-	// A is the left button
-	// custom control set 1 defaults
-	// controller 1 defaults
-	mainMenu_customPreset_up[0][0] = -5; // ply1 joy up
-	mainMenu_customPreset_down[0][0] = -6; // ply1 joy down
-	mainMenu_customPreset_left[0][0] = -7; // ply1 joy left
-	mainMenu_customPreset_right[0][0] = -8; // ply1 joy right
-	mainMenu_customPreset_stickup[0][0] = -5; // ply1 joy up
-	mainMenu_customPreset_stickdown[0][0] = -6; // ply1 joy down
-	mainMenu_customPreset_stickleft[0][0] = -7; // ply1 joy left
-	mainMenu_customPreset_stickright[0][0] = -8; // ply1 joy right
-	mainMenu_customPreset_X[0][0] = -5; // ply1 joy up (jump)
-	mainMenu_customPreset_B[0][0] = 23; // space
-	mainMenu_customPreset_A[0][0] = -3; // ply1 fire 1
-	mainMenu_customPreset_Y[0][0] = -4; // ply1 fire 2
-	mainMenu_customPreset_L[0][0] = -2; // right mouse
-	mainMenu_customPreset_R[0][0] = -1; // left mouse
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[0][0] = -26; // fast mouse
-	mainMenu_customPreset_R2[0][0] = -25; // slow mouse
-	mainMenu_customPreset_L3[0][0] = 0;
-	mainMenu_customPreset_R3[0][0] = 0;
-#endif
-	// controller 2 defaults
-	mainMenu_customPreset_up[0][1] = -9; // ply2 joy up
-	mainMenu_customPreset_down[0][1] = -10; // ply2 joy down
-	mainMenu_customPreset_left[0][1] = -11; // ply2 joy left
-	mainMenu_customPreset_right[0][1] = -12; // ply2 joy right
-	mainMenu_customPreset_stickup[0][1] = -9; // ply2 joy up
-	mainMenu_customPreset_stickdown[0][1] = -10; // ply2 joy down
-	mainMenu_customPreset_stickleft[0][1] = -11; // ply2 joy left
-	mainMenu_customPreset_stickright[0][1] = -12; // ply2 joy right
-	mainMenu_customPreset_X[0][1] = -9; // ply2 joy up (jump)
-	mainMenu_customPreset_B[0][1] = 0;
-	mainMenu_customPreset_A[0][1] = -1; // left mouse (ply2 fire 1)
-	mainMenu_customPreset_Y[0][1] = -2; // right mouse (ply2 fire 2)
-	mainMenu_customPreset_L[0][1] = 0;
-	mainMenu_customPreset_R[0][1] = 0;
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[0][1] = 0;
-	mainMenu_customPreset_R2[0][1] = 0;
-	mainMenu_customPreset_L3[0][1] = 0;
-	mainMenu_customPreset_R3[0][1] = 0;
-#endif
-	//controller 3 defaults
-	mainMenu_customPreset_up[0][2] = -15; // ply3 joy up
-	mainMenu_customPreset_down[0][2] = -16; // ply3 joy down
-	mainMenu_customPreset_left[0][2] = -17; // ply3 joy left
-	mainMenu_customPreset_right[0][2] = -18; // ply3 joy right
-	mainMenu_customPreset_stickup[0][2] = -15; // ply3 joy up
-	mainMenu_customPreset_stickdown[0][2] = -16; // ply3 joy down
-	mainMenu_customPreset_stickleft[0][2] = -17; // ply3 joy left
-	mainMenu_customPreset_stickright[0][2] = -18; // ply3 joy right
-	mainMenu_customPreset_X[0][2] = -15; // ply3 joy up (jump)
-	mainMenu_customPreset_B[0][2] = 0;
-	mainMenu_customPreset_A[0][2] = -13; // ply3 fire 1
-	mainMenu_customPreset_Y[0][2] = -14; // ply3 fire 2
-	mainMenu_customPreset_L[0][2] = 0;
-	mainMenu_customPreset_R[0][2] = 0;
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[0][2] = 0;
-	mainMenu_customPreset_R2[0][2] = 0;
-	mainMenu_customPreset_L3[0][2] = 0;
-	mainMenu_customPreset_R3[0][2] = 0;
-#endif
-	//controller 4 defaults
-	mainMenu_customPreset_up[0][3] = -21; // ply4 joy up
-	mainMenu_customPreset_down[0][3] = -22; // ply4 joy down
-	mainMenu_customPreset_left[0][3] = -23; // ply4 joy left
-	mainMenu_customPreset_right[0][3] = -24; // ply4 joy right
-	mainMenu_customPreset_stickup[0][3] = -21; // ply4 joy up
-	mainMenu_customPreset_stickdown[0][3] = -22; // ply4 joy down
-	mainMenu_customPreset_stickleft[0][3] = -23; // ply4 joy left
-	mainMenu_customPreset_stickright[0][3] = -24; // ply4 joy right
-	mainMenu_customPreset_X[0][3] = -21; // ply4 joy up (jump)
-	mainMenu_customPreset_B[0][3] = 0;
-	mainMenu_customPreset_A[0][3] = -19; // ply4 fire 1
-	mainMenu_customPreset_Y[0][3] = -20; // ply4 fire 2
-	mainMenu_customPreset_L[0][3] = 0;
-	mainMenu_customPreset_R[0][3] = 0;
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[0][3] = 0;
-	mainMenu_customPreset_R2[0][3] = 0;
-	mainMenu_customPreset_L3[0][3] = 0;
-	mainMenu_customPreset_R3[0][3] = 0;
-#endif
-
-	// custom control set 2 defaults
-	// controller 1 defaults (for Pinball Dreams & Slam Tilt)
-	mainMenu_customPreset_up[1][0] = 0;
-	mainMenu_customPreset_down[1][0] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_left[1][0] = 33; // left alt (left flipper)
-	mainMenu_customPreset_right[1][0] = 30; // right shift (magna saver)
-	mainMenu_customPreset_stickup[1][0] = 0;
-	mainMenu_customPreset_stickdown[1][0] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_stickleft[1][0] = 33; // left alt (left flipper)
-	mainMenu_customPreset_stickright[1][0] = 30; // right shift (magna saver)
-	mainMenu_customPreset_X[1][0] = 23; // space (nudge center)
-	mainMenu_customPreset_B[1][0] = 34; // right alt (right flipper)
-	mainMenu_customPreset_A[1][0] = 26; // return (launch ball)
-	mainMenu_customPreset_Y[1][0] = 87; // F1 (start 1 player game)
-	mainMenu_customPreset_L[1][0] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R[1][0] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[1][0] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R2[1][0] = 34; // right alt (right flipper)
-	mainMenu_customPreset_L3[1][0] = 0;
-	mainMenu_customPreset_R3[1][0] = 0;
-#endif
-
-	// controller 2 defaults (for Pinball Dreams & Slam Tilt)
-	mainMenu_customPreset_up[1][1] = 0;
-	mainMenu_customPreset_down[1][1] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_left[1][1] = 33; // left alt (left flipper)
-	mainMenu_customPreset_right[1][1] = 30; // right shift (magna saver)
-	mainMenu_customPreset_stickup[1][1] = 0;
-	mainMenu_customPreset_stickdown[1][1] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_stickleft[1][1] = 33; // left alt (left flipper)
-	mainMenu_customPreset_stickright[1][1] = 30; // right shift (magna saver)
-	mainMenu_customPreset_X[1][1] = 23; // space (nudge center)
-	mainMenu_customPreset_B[1][1] = 34; // right alt (right flipper)
-	mainMenu_customPreset_A[1][1] = 26; // return (launch ball)
-	mainMenu_customPreset_Y[1][1] = 88; // F2 (start 2 player game)
-	mainMenu_customPreset_L[1][1] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R[1][1] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[1][1] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R2[1][1] = 34; // right alt (right flipper)
-	mainMenu_customPreset_L3[1][1] = 0;
-	mainMenu_customPreset_R3[1][1] = 0;
-#endif
-
-	// controller 3 defaults (for Pinball Dreams & Slam Tilt)
-	mainMenu_customPreset_up[1][2] = 0;
-	mainMenu_customPreset_down[1][2] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_left[1][2] = 33; // left alt (left flipper)
-	mainMenu_customPreset_right[1][2] = 30; // right shift (magna saver)
-	mainMenu_customPreset_stickup[1][2] = 0;
-	mainMenu_customPreset_stickdown[1][2] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_stickleft[1][2] = 33; // left alt (left flipper)
-	mainMenu_customPreset_stickright[1][2] = 30; // right shift (magna saver)
-	mainMenu_customPreset_X[1][2] = 23; // space (nudge center)
-	mainMenu_customPreset_B[1][2] = 34; // right alt (right flipper)
-	mainMenu_customPreset_A[1][2] = 26; // return (launch ball)
-	mainMenu_customPreset_Y[1][2] = 89; // F3 (start 3 player game)
-	mainMenu_customPreset_L[1][2] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R[1][2] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[1][2] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R2[1][2] = 34; // right alt (right flipper)
-	mainMenu_customPreset_L3[1][2] = 0;
-	mainMenu_customPreset_R3[1][2] = 0;
-#endif
-
-	// controller 4 defaults (for Pinball Dreams & Slam Tilt)
-	mainMenu_customPreset_up[1][3] = 0;
-	mainMenu_customPreset_down[1][3] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_left[1][3] = 33; // left alt (left flipper)
-	mainMenu_customPreset_right[1][3] = 30; // right shift (magna saver)
-	mainMenu_customPreset_stickup[1][3] = 0;
-	mainMenu_customPreset_stickdown[1][3] = 2; // arrow down (spring launch ball)
-	mainMenu_customPreset_stickleft[1][3] = 33; // left alt (left flipper)
-	mainMenu_customPreset_stickright[1][3] = 30; // right shift (magna saver)
-	mainMenu_customPreset_X[1][3] = 23; // space (nudge center)
-	mainMenu_customPreset_B[1][3] = 34; // right alt (right flipper)
-	mainMenu_customPreset_A[1][3] = 26; // return (launch ball)
-	mainMenu_customPreset_Y[1][3] = 90; // F4 (start 4 player game)
-	mainMenu_customPreset_L[1][3] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R[1][3] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
-	mainMenu_customPreset_L2[1][3] = 33; // left alt (left flipper)
-	mainMenu_customPreset_R2[1][3] = 34; // right alt (right flipper)
-	mainMenu_customPreset_L3[1][3] = 0;
-	mainMenu_customPreset_R3[1][3] = 0;
-#endif
-	remap_custom_controls();
-#endif //__PSP2__
     SetPresetMode(2);
     moveX = 0;
     moveY = 16;
@@ -460,28 +145,9 @@ void SetDefaultMenuSettings(int general)
     mainMenu_cutRight = 0;
     mainMenu_ntsc = DEFAULT_NTSC;
     mainMenu_frameskip = 0;
-    mainMenu_autofire = DEFAULT_AUTOFIRE;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
-#ifdef __SWITCH__
-    mainMenu_shader = 1;
-#else
-    mainMenu_shader = 5;
-#endif
-    mainMenu_leftStickMouse = 0;
-    mainMenu_touchControls = 1;
-    mainMenu_deadZone = 1000;
-#endif
-#ifdef __SWITCH__
-    mainMenu_swapAB = DEFAULT_SWAPAB;
-    mainMenu_singleJoycons = DEFAULT_SINGLEJOYCONS;
-#endif
     // The following params can't be changed in gui
     mainMenu_autosave = DEFAULT_AUTOSAVE;
-    mainMenu_button1 = GP2X_BUTTON_X;
-    mainMenu_button2 = GP2X_BUTTON_A;
-    mainMenu_autofireButton1 = GP2X_BUTTON_B;
-    mainMenu_jump = -1;
 
     gp2xClockSpeed = -1;
     mainMenu_scanlines = 0;
@@ -907,32 +573,6 @@ void SetPresetMode(int mode)
     }
 }
 
-
-void set_joyConf()
-{
-    if(mainMenu_joyConf==0) {
-        mainMenu_button1=GP2X_BUTTON_X;
-        mainMenu_button2=GP2X_BUTTON_A;
-        mainMenu_jump=-1;
-        mainMenu_autofireButton1=GP2X_BUTTON_B;
-    } else if(mainMenu_joyConf==1) {
-        mainMenu_button1=GP2X_BUTTON_B;
-        mainMenu_button2=GP2X_BUTTON_A;
-        mainMenu_jump=-1;
-        mainMenu_autofireButton1=GP2X_BUTTON_X;
-    } else if(mainMenu_joyConf==2) {
-        mainMenu_button1=GP2X_BUTTON_Y;
-        mainMenu_button2=GP2X_BUTTON_A;
-        mainMenu_jump=GP2X_BUTTON_X;
-        mainMenu_autofireButton1=GP2X_BUTTON_B;
-    } else if(mainMenu_joyConf==3) {
-        mainMenu_button1=GP2X_BUTTON_B;
-        mainMenu_button2=GP2X_BUTTON_A;
-        mainMenu_jump=GP2X_BUTTON_X;
-        mainMenu_autofireButton1=GP2X_BUTTON_Y;
-    }
-}
-
 void kill_hd_configs()
 {
 	 //properly close all open hdf and hd dirs
@@ -1076,37 +716,9 @@ int saveconfig(int general)
     snprintf((char*)buffer, 255, "scaling=%d\n",mainMenu_enableHWscaling);
 #endif
     fputs(buffer,f);
-#if defined(__PSP2__) || defined(__SWITCH__)
-    snprintf((char*)buffer, 255, "shader=%d\n",mainMenu_shader);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "leftstickmouse=%d\n",mainMenu_leftStickMouse);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "touchcontrols=%d\n",mainMenu_touchControls);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "deadzone=%d\n",mainMenu_deadZone);
-    fputs(buffer,f);
-#endif
-    snprintf((char*)buffer, 255, "showstatus=%d\n",mainMenu_showStatus);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "background=%d\n",mainMenu_background);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "font=%d\n",mainMenu_font);
-    fputs(buffer,f);
     snprintf((char*)buffer, 255, "mousemultiplier=%d\n",mainMenu_mouseMultiplier);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "mouseemulation=%d\n",mainMenu_mouseEmulation);
-    fputs(buffer,f);
-#if defined(PANDORA)
-    snprintf((char*)buffer, 255, "systemclock=%d\n",5);   // mainMenu_throttle never changes -> removed
-#else
-    snprintf((char*)buffer, 255, "systemclock=%d\n",mainMenu_throttle);
-#endif
-    fputs(buffer,f);
-#if defined(PANDORA)
-    snprintf((char*)buffer, 255, "syncthreshold=%d\n",2); // timeslice_mode never changes -> removed
-#else
-    snprintf((char*)buffer, 255, "syncthreshold=%d\n",timeslice_mode);
-#endif
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "frameskip=%d\n",mainMenu_frameskip);
     fputs(buffer,f);
@@ -1120,25 +732,11 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "gp2xclock=%d\n",gp2xClockSpeed);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "joyconf=%d\n",mainMenu_joyConf + (mainMenu_joyPort << 4));
+    snprintf((char*)buffer, 255, "joyport=%d\n", mainMenu_joyPort);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "autofireRate=%d\n",mainMenu_autofireRate);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "autofire=%d\n",mainMenu_autofire);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "customAutofireButton=%d\n",mainMenu_customAutofireButton);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "stylusOffset=%d\n",mainMenu_stylusOffset);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "tapDelay=%d\n",mainMenu_tapDelay);
-    fputs(buffer,f);
     snprintf((char*)buffer, 255, "scanlines=%d\n",mainMenu_scanlines);
-    fputs(buffer,f);
-#if defined(PANDORA)
-    snprintf((char*)buffer, 255, "ham=%d\n",1);
-#else
-    snprintf((char*)buffer, 255, "ham=%d\n",mainMenu_ham);
-#endif
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "enableScreenshots=%d\n",mainMenu_enableScreenshots);
     fputs(buffer,f);
@@ -1154,89 +752,10 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "moveX=%d\n",moveX);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "moveY=%d\n",moveY-16); // compatibility with versions <1.96
+    snprintf((char*)buffer, 255, "moveY=%d\n",moveY);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "displayedLines=%d\n",mainMenu_displayedLines);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "screenWidth=%d\n",screenWidth);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "cutLeft=%d\n",mainMenu_cutLeft);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "cutRight=%d\n",mainMenu_cutRight);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "customControls=%d\n",mainMenu_customControls);
-    fputs(buffer,f);
-#if !defined(__PSP2__) && !defined(__SWITCH__)    
-    snprintf((char*)buffer, 255, "custom_dpad=%d\n",mainMenu_custom_dpad);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_up=%d\n",mainMenu_custom_up[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_down=%d\n",mainMenu_custom_down[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_left=%d\n",mainMenu_custom_left[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_right=%d\n",mainMenu_custom_right[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_A=%d\n",mainMenu_custom_A[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_B=%d\n",mainMenu_custom_B[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_X=%d\n",mainMenu_custom_X[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_Y=%d\n",mainMenu_custom_Y[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_L=%d\n",mainMenu_custom_L[0]);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "custom_R=%d\n",mainMenu_custom_R[0]);
-    fputs(buffer,f);
-#else
-	snprintf((char*)buffer, 255, "custom_controlSet=%d\n",mainMenu_custom_controlSet);
-	fputs(buffer,f);
-	for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
-	{
-		for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++)
-		{
-			snprintf((char*)buffer, 255, "custom%d_up_Ply%d=%d\n",j+1,i,mainMenu_customPreset_up[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_down_Ply%d=%d\n",j+1,i,mainMenu_customPreset_down[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_left_Ply%d=%d\n",j+1,i,mainMenu_customPreset_left[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_right_Ply%d=%d\n",j+1,i,mainMenu_customPreset_right[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickup_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickup[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickdown_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickdown[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickleft_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickleft[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_stickright_Ply%d=%d\n",j+1,i,mainMenu_customPreset_stickright[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_A_Ply%d=%d\n",j+1,i,mainMenu_customPreset_A[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_B_Ply%d=%d\n",j+1,i,mainMenu_customPreset_B[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_X_Ply%d=%d\n",j+1,i,mainMenu_customPreset_X[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_Y_Ply%d=%d\n",j+1,i,mainMenu_customPreset_Y[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_L_Ply%d=%d\n",j+1,i,mainMenu_customPreset_L[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_R_Ply%d=%d\n",j+1,i,mainMenu_customPreset_R[j][i]);
-			fputs(buffer,f);
-#ifdef __SWITCH__
-			snprintf((char*)buffer, 255, "custom%d_L2_Ply%d=%d\n",j+1,i,mainMenu_customPreset_L2[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_R2_Ply%d=%d\n",j+1,i,mainMenu_customPreset_R2[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_L3_Ply%d=%d\n",j+1,i,mainMenu_customPreset_L3[j][i]);
-			fputs(buffer,f);
-			snprintf((char*)buffer, 255, "custom%d_R3_Ply%d=%d\n",j+1,i,mainMenu_customPreset_R3[j][i]);
-			fputs(buffer,f);
-#endif
-		}
-	}
-#endif
     snprintf((char*)buffer, 255, "cpu=%d\n",mainMenu_CPU_model);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "chipset=%d\n",mainMenu_chipset);
@@ -1331,12 +850,6 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "useSavesFolder=%d\n",mainMenu_useSavesFolder);
     fputs(buffer,f);
-#ifdef __SWITCH__
-    snprintf((char*)buffer, 255, "swapAB=%d\n",mainMenu_swapAB);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "singleJoycons=%d\n",mainMenu_singleJoycons);
-    fputs(buffer,f);
-#endif
     fclose(f);
     return 1;
 }
@@ -1420,18 +933,6 @@ void loadconfig(int general)
 #else
         fscanf(f,"scaling=%d\n",&mainMenu_enableHWscaling);
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
-        fscanf(f,"shader=%d\n",&mainMenu_shader);
-#if defined(__SWITCH__)
-        if (mainMenu_shader > 3) mainMenu_shader = 1;
-#endif
-        fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);
-        fscanf(f,"touchcontrols=%d\n",&mainMenu_touchControls);
-        fscanf(f,"deadzone=%d\n",&mainMenu_deadZone);        
-#endif
-        fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
-        fscanf(f,"background=%d\n",&mainMenu_background);
-        fscanf(f,"font=%d\n",&mainMenu_font);
         fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier);
         //remain compatible with old configuration versions
         if (mainMenu_mouseMultiplier < 10) {
@@ -1443,13 +944,6 @@ void loadconfig(int general)
             }
         }
         fscanf(f,"mouseemulation=%d\n",&mainMenu_mouseEmulation );
-#if defined(PANDORA)
-        fscanf(f,"systemclock=%d\n",&dummy);    // mainMenu_throttle never changes -> removed
-        fscanf(f,"syncthreshold=%d\n", &dummy); // timeslice_mode never changes -> removed
-#else
-        fscanf(f,"systemclock=%d\n",&mainMenu_throttle);
-        fscanf(f,"syncthreshold=%d\n", &timeslice_mode);
-#endif
         fscanf(f,"frameskip=%d\n",&mainMenu_frameskip);
         fscanf(f,"sound=%d\n",&mainMenu_sound );
         if (mainMenu_sound >= 10) {
@@ -1459,31 +953,11 @@ void loadconfig(int general)
             mainMenu_soundStereo = 0;
         fscanf(f,"soundstereosep=%d\n",&mainMenu_soundStereoSep );
         fscanf(f,"soundrate=%d\n",&sound_rate);
-#ifdef __SWITCH__
-        // only 48 kHz supported on Switch
-        sound_rate = DEFAULT_SOUND_FREQ;
-#endif
         fscanf(f,"autosave=%d\n",&mainMenu_autosave);
         fscanf(f,"gp2xclock=%d\n", &gp2xClockSpeed);
-        int joybuffer = 0;
-        fscanf(f,"joyconf=%d\n",&joybuffer);
-        mainMenu_joyConf = (joybuffer & 0x0f);
-        mainMenu_joyPort = ((joybuffer >> 4) & 0x0f);
-        if (mainMenu_joyPort == 0)
-            mainMenu_joyPort = 2;
+        fscanf(f,"joyport=%d\n",&mainMenu_joyPort);
         fscanf(f,"autofireRate=%d\n",&mainMenu_autofireRate);
-        fscanf(f,"autofire=%d\n",&mainMenu_autofire);
-        fscanf(f,"customAutofireButton=%d\n",&mainMenu_customAutofireButton);
-// Never actually load the custom Autofire button to reduce user confusion
-        mainMenu_customAutofireButton = 0;
-        fscanf(f,"stylusOffset=%d\n",&mainMenu_stylusOffset);
-        fscanf(f,"tapDelay=%d\n",&mainMenu_tapDelay);
         fscanf(f,"scanlines=%d\n",&mainMenu_scanlines);
-#if defined(PANDORA)
-        fscanf(f,"ham=%d\n",&dummy);
-#else
-        fscanf(f,"ham=%d\n",&mainMenu_ham);
-#endif
         fscanf(f,"enableScreenshots=%d\n",&mainMenu_enableScreenshots);
         fscanf(f,"floppyspeed=%d\n",&mainMenu_floppyspeed);
         fscanf(f,"drives=%d\n",&nr_drives);
@@ -1492,103 +966,7 @@ void loadconfig(int general)
         fscanf(f,"presetModeId=%d\n",&presetModeId);
         fscanf(f,"moveX=%d\n",&moveX);
         fscanf(f,"moveY=%d\n",&moveY);
-        moveY+=16; // compatibility with versions <1.96
         fscanf(f,"displayedLines=%d\n",&mainMenu_displayedLines);
-        fscanf(f,"screenWidth=%d\n",&screenWidth);
-        fscanf(f,"cutLeft=%d\n",&mainMenu_cutLeft);
-        fscanf(f,"cutRight=%d\n",&mainMenu_cutRight);
-        fscanf(f,"customControls=%d\n",&mainMenu_customControls);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-        fscanf(f,"custom_dpad=%d\n",&mainMenu_custom_dpad);
-        fscanf(f,"custom_up=%d\n",&mainMenu_custom_up[0]);
-        fscanf(f,"custom_down=%d\n",&mainMenu_custom_down[0]);
-        fscanf(f,"custom_left=%d\n",&mainMenu_custom_left[0]);
-        fscanf(f,"custom_right=%d\n",&mainMenu_custom_right[0]);
-        fscanf(f,"custom_A=%d\n",&mainMenu_custom_A[0]);
-        fscanf(f,"custom_B=%d\n",&mainMenu_custom_B[0]);
-        fscanf(f,"custom_X=%d\n",&mainMenu_custom_X[0]);
-        fscanf(f,"custom_Y=%d\n",&mainMenu_custom_Y[0]);
-        fscanf(f,"custom_L=%d\n",&mainMenu_custom_L[0]);
-        fscanf(f,"custom_R=%d\n",&mainMenu_custom_R[0]);
-#else
-		fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
-		int config_1_73 = -1;
-		int config_1_82 = -1;
-		int config_1_83 = -1;
-		int l=0;
-		int m=0;
-		for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
-		{
-			if (config_1_82==1)
-				break;
-			for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++) {
-#ifdef __SWITCH__
-				if (!(i==0 && j==1)) {
-#endif
-				if (config_1_83 == -1) {
-					if (!fscanf(f,"custom%d\n",&l)) {
-						config_1_82 = 1;
-						break;
-					}
-					if (j==3 && l!=4) {
-						config_1_83 = 1;
-						break;
-					}
-				}
-				else 
-					config_1_83 = -1;
-				fscanf(f,"_up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j][i]);
-#ifdef __SWITCH__
-				}
-#endif
-				fscanf(f,"custom%d_down_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_down[j][i]);
-				fscanf(f,"custom%d_left_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_left[j][i]);
-				fscanf(f,"custom%d_right_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_right[j][i]);
-				if (fscanf(f,"custom%d_stickup_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_stickup[j][i]) > 1) {
-					fscanf(f,"custom%d_stickdown_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_stickdown[j][i]);
-					fscanf(f,"custom%d_stickleft_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_stickleft[j][i]);
-					fscanf(f,"custom%d_stickright_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_stickright[j][i]);
-					fscanf(f,"custom%d_A_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_A[j][i]);
-				} else {
-					mainMenu_customPreset_stickup[j][i] = mainMenu_customPreset_up[j][i];
-					mainMenu_customPreset_stickdown[j][i] = mainMenu_customPreset_down[j][i];
-					mainMenu_customPreset_stickleft[j][i] = mainMenu_customPreset_left[j][i];
-					mainMenu_customPreset_stickright[j][i] = mainMenu_customPreset_right[j][i];
-					fscanf(f,"A_Ply%d=%d\n",&m,&mainMenu_customPreset_A[j][i]);
-				}
-				fscanf(f,"custom%d_B_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_B[j][i]);
-				fscanf(f,"custom%d_X_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_X[j][i]);
-				fscanf(f,"custom%d_Y_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_Y[j][i]);
-				fscanf(f,"custom%d_L_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L[j][i]);
-				fscanf(f,"custom%d_R_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R[j][i]);
-#ifdef __SWITCH__
-				if (j == 0 && i == 0) {
-					if (fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]) > 1) {
-						fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
-						fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
-						fscanf(f,"custom%d_R3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R3[j][i]);
-						fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j+1][i]);
-						config_1_73 = 0;
-					} else {
-						fscanf(f,"up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j+1][i]);
-						config_1_73 = 1;
-					}
-				} else {
-					if (config_1_73 == 0) {
-						fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]);
-						fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
-						fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
-						fscanf(f,"custom%d_R3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R3[j][i]);
-					}
-				}
-#endif
-			}
-		}
-		remap_custom_controls(); // update the custom variables with the appropriate set.
-		if (config_1_82 == 1) {
-			fscanf(f,"pu=%d\n",&mainMenu_CPU_model);
-		} else
-#endif //__PSP2__
 		fscanf(f,"cpu=%d\n",&mainMenu_CPU_model);
         fscanf(f,"chipset=%d\n",&mainMenu_chipset);
         fscanf(f,"spritecollisions=%d\n",&mainMenu_spriteCollisions);
@@ -1730,10 +1108,6 @@ void loadconfig(int general)
         // ignore this option. All saves are always made into saves folder now
         fscanf(f,"useSavesFolder=%d\n",&mainMenu_useSavesFolder);
         mainMenu_useSavesFolder = DEFAULT_USESAVESFOLDER;
-#ifdef __SWITCH__ 
-        fscanf(f,"swapAB=%d\n",&mainMenu_swapAB);
-        fscanf(f,"singleJoycons=%d\n",&mainMenu_singleJoycons);
-#endif
         fclose(f);
     }
 // make sure the just-loaded mainMenu_displayedLines is not changed by setPresetMode
@@ -1748,5 +1122,4 @@ void loadconfig(int general)
 #endif
     }
     UpdateMemorySettings();
-    set_joyConf();
 }

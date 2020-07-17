@@ -2251,8 +2251,8 @@ static _INLINE_ void finish_drawing_frame (void)
 		int where,i1;
 		int active_line = i + thisframe_y_adjust_real;
 
-    if(active_line >= linestate_first_undecided)
-			break;
+		if(active_line >= linestate_first_undecided)
+				break;
 
 		i1 = i + min_ypos_for_screen;
 		where = amiga2aspect_line_map[i1];
@@ -2264,25 +2264,21 @@ static _INLINE_ void finish_drawing_frame (void)
 		pfield_draw_line (active_line, where);
 	}
 
-		/* HD LED off delay */
-		static int countdown = HDLED_TIMEOUT;
-		if (gui_data.hdled != HDLED_OFF) 
-		{
-			if (countdown-- <= 0) {
-				gui_data.hdled = HDLED_OFF;
-				countdown = HDLED_TIMEOUT;
-			}
-		} else {
+	/* HD LED off delay */
+	static int countdown = HDLED_TIMEOUT;
+	if (gui_data.hdled != HDLED_OFF) 
+	{
+		if (countdown-- <= 0) {
+			gui_data.hdled = HDLED_OFF;
 			countdown = HDLED_TIMEOUT;
 		}
+	} else {
+		countdown = HDLED_TIMEOUT;
+	}
 
-	if (mainMenu_showStatus)
-	{
-
-		for (i = 0; i < TD_TOTAL_HEIGHT; i++) {
-			int line = mainMenu_displayedLines - TD_TOTAL_HEIGHT + i;
-			draw_status_line (line);
-		}
+	for (i = 0; i < TD_TOTAL_HEIGHT; i++) {
+		int line = mainMenu_displayedLines - TD_TOTAL_HEIGHT + i;
+		draw_status_line (line);
 	}
 	drawfinished=1;
 	do_flush_screen ();

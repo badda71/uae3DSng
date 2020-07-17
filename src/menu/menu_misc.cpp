@@ -26,13 +26,11 @@
 
 const char *text_str_misc_separator="----------------------------------------";
 static const char *text_str_misc_title=    "Miscellanous";
-static const char *text_str_stylus_offset="StylusOffset";
 static const char *text_str_0px="0px";
 static const char *text_str_1px="1px";
 static const char *text_str_3px="3px";
 static const char *text_str_5px="5px";
 static const char *text_str_8px="8px";
-static const char *text_str_tap_delay="Tap delay";
 static const char *text_str_normal="normal";
 static const char *text_str_short="short";
 static const char *text_str_none="no";
@@ -51,31 +49,10 @@ enum {
 	MENUMISC_CPUSPEED,
 	MENUMISC_BLITTER,
 	MENUMISC_SPRITECOLLISIONS,
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-#ifdef PANDORA
-	MENUMISC_PANDORASPEED,
-#endif
-#endif // __PSP2__
-	MENUMISC_CONTROLCFG,
 	MENUMISC_JOYSTICK,
 	MENUMISC_AUTOFIRERATE,
-#if defined(__PSP2__) || defined(__SWITCH__)
-	MENUMISC_CUSTOMAUTOFIREBUTTON,
-#endif
-#if defined(__PSP2__) || defined(__SWITCH__)
 	MENUMISC_MOUSEEMULATION,
-	MENUMISC_LEFTSTICKMOUSE,
-#endif
 	MENUMISC_MOUSEMULTIPLIER,
-#if !defined(__PSP2__) && !defined(__SWITCH__) // No stylus on Vita
-	MENUMISC_STYLUSOFFSET,
-#endif
-#if defined(__PSP2__) || defined(__SWITCH__)
-	MENUMISC_DEADZONE,
-	MENUMISC_TOUCHCONTROLS,
-#else
-	MENUMISC_TAPDELAY,
-#endif
 	MENUMISC_END
 };
 	
@@ -232,38 +209,8 @@ static void draw_miscMenu(int c)
 	write_text_pos(leftMargin,menuLine,text_str_misc_separator);
 	menuLine+=8;
 
-	// MENUMISC_CONTROLCFG
-	write_text_pos(leftMargin,menuLine,"Control Config");
-
-	if ((mainMenu_joyConf==0)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv_pos(tabstop2,menuLine,"1");
-	else
-		write_text_pos(tabstop2,menuLine,"1");
-
-	if ((mainMenu_joyConf==1)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv_pos(tabstop3,menuLine,"2");
-	else
-		write_text_pos(tabstop3,menuLine,"2");
-
-	if ((mainMenu_joyConf==2)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv_pos(tabstop4,menuLine,"3");
-	else
-		write_text_pos(tabstop4,menuLine,"3");
-
-	if ((mainMenu_joyConf==3)&&((menuMisc!=MENUMISC_CONTROLCFG)||(bb)))
-		write_text_inv_pos(tabstop5,menuLine,"4");
-	else
-		write_text_pos(tabstop5,menuLine,"4");
-
-	menuLine+=12;
-	if (mainMenu_joyConf==0) write_text_pos(leftMargin,menuLine,"(Y=Autofire B=Fire X=Space A=2nd)");
-	else if (mainMenu_joyConf==1) write_text_pos(leftMargin,menuLine,"(Y=Fire B=Autofire X=Space A=2nd)");
-	else if (mainMenu_joyConf==2) write_text_pos(leftMargin,menuLine,"(Y=Autofire B=Jump X=Fire A=2nd)");
-	else if (mainMenu_joyConf==3) write_text_pos(leftMargin,menuLine,"(Y=Fire B=Jump X=Autofire A=2nd)");
-
   // MENUMISC_JOYSTICK
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Controller 1");
+	write_text_pos(leftMargin,menuLine,"Joystick on");
   
 	if ((mainMenu_joyPort==1)&&((menuMisc!=MENUMISC_JOYSTICK)||(bb)))
 		write_text_inv_pos(tabstop2,menuLine,"Amiga Port0");
@@ -294,77 +241,20 @@ static void draw_miscMenu(int c)
 	else
 		write_text_pos(tabstop9-1*8,menuLine,"Heavy");
 
-#if defined(__PSP2__) || defined(__SWITCH__)
-	// MENUMISC_CUSTOMAUTOFIREBUTTON
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Custom Autofire Button");
-
-	switch (mainMenu_customAutofireButton)
-	{
-		case 0:
-			strcpy(tmpString,"None");
-			break;
-		case 1:
-			strcpy(tmpString,"Y");
-			break;
-		case 2:
-			strcpy(tmpString,"X");
-			break;
-		case 3:
-			strcpy(tmpString,"A");
-			break;
-		case 4:
-			strcpy(tmpString,"B");
-			break;
-		case 5:
-			strcpy(tmpString,"L");
-			break;
-		case 6:
-			strcpy(tmpString,"R");
-			break;
-		case 7:
-			strcpy(tmpString,"ZL");
-			break;
-		case 8:
-			strcpy(tmpString,"ZR");
-			break;
-	}
-	if ((menuMisc!=MENUMISC_CUSTOMAUTOFIREBUTTON)||(bb))
-		write_text_inv_pos(tabstop6,menuLine,tmpString);
-	else
-		write_text_pos(tabstop6,menuLine,tmpString);
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,text_str_misc_separator);
 	menuLine+=8;
 
 	// MENUMISC_MOUSEEMULATION
-	write_text_pos(leftMargin,menuLine,"Mouse");	
+	write_text_pos(leftMargin,menuLine,"C-Pad Mouse");	
 	if ((mainMenu_mouseEmulation==0) && ((menuMisc!=MENUMISC_MOUSEEMULATION)||(bb)))
-		write_text_inv_pos(tabstop1-8*8,menuLine,"Off");
+		write_text_inv_pos(tabstop2,menuLine,"Off");
 	else
-		write_text_pos(tabstop1-8*8,menuLine,"Off");
+		write_text_pos(tabstop2,menuLine,"Off");
 	if ((mainMenu_mouseEmulation==1) && ((menuMisc!=MENUMISC_MOUSEEMULATION)||(bb)))
-		write_text_inv_pos(tabstop3-8*8,menuLine,"On");
+		write_text_inv_pos(tabstop4,menuLine,"On");
 	else
-		write_text_pos(tabstop3-8*8,menuLine,"On");	
-	write_text_pos(tabstop3-5*8,menuLine,"(can disturb 2nd player)");
-	// MENUMISC_LEFTSTICKMOUSE
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Mouse Control");	
-	if (mainMenu_leftStickMouse==0)
-	{
-		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
-			write_text_inv_pos(tabstop2,menuLine,"Right Stick");
-		else
-			write_text_pos(tabstop2,menuLine,"Right Stick  ");
-	} 
-	else if (mainMenu_leftStickMouse==1)
-	{
-		if ((menuMisc!=MENUMISC_LEFTSTICKMOUSE)||(bb))
-			write_text_inv_pos(tabstop2,menuLine,"Left Stick");
-		else
-			write_text_pos(tabstop2,menuLine,"Left Stick  ");
-	}
+		write_text_pos(tabstop4,menuLine,"On");	
 
 	// MENUMISC_MOUSEMULTIPLIER
 	menuLine+=12;
@@ -375,72 +265,6 @@ static void draw_miscMenu(int c)
 		write_text_inv_pos(tabstop2,menuLine,cpuSpeed);
 	else
 		write_text_pos(tabstop2,menuLine,cpuSpeed);
-#endif
-
-#if defined(__PSP2__) || defined(__SWITCH__)
-
-	//Analog Stick Deadzone settings on Vita
-	//MENUMISC_DEADZONE
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Mouse Deadzone");
-  	snprintf((char*)cpuSpeed, 8, "%d", mainMenu_deadZone);
-  	if ((menuMisc!=MENUMISC_DEADZONE)||(bb))
-		write_text_inv_pos(tabstop2,menuLine,cpuSpeed);
-	else
-		write_text_pos(tabstop2,menuLine,cpuSpeed);
-
-	// MENUMISC_TOUCHCONTROLS
-	write_text_pos(tabstop6-2*8,menuLine,"Touch");
-	if (mainMenu_touchControls==0)
-	{
-		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
-			write_text_inv_pos(tabstop9,menuLine,"Off");
-		else
-			write_text_pos(tabstop9,menuLine,"Off  ");
-	}
-	else if (mainMenu_touchControls==1)
-	{
-		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
-			write_text_inv_pos(tabstop9,menuLine,"Front");
-		else
-			write_text_pos(tabstop9,menuLine,"Front  ");
-	}
-	else if (mainMenu_touchControls==2)
-	{
-		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
-#ifdef __SWITCH__
-			write_text_inv_pos(tabstop9,menuLine,"Front");
-#else
-			write_text_inv_pos(tabstop9,menuLine,"Both");
-#endif
-		else
-#ifdef __SWITCH__
-			write_text_pos(tabstop9,menuLine,"Front  ");
-#else
-			write_text_pos(tabstop9,menuLine,"Both  ");
-#endif
-	}
-
-#else
-	// MENUMISC_TAPDELAY
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,text_str_tap_delay);
-
-	if ((mainMenu_tapDelay==10)&&((menuMisc!=MENUMISC_TAPDELAY)||(bb)))
-		write_text_inv_pos(tabstop1,menuLine,text_str_normal);
-	else
-		write_text_pos(tabstop1,menuLine,text_str_normal);
-
-	if ((mainMenu_tapDelay==5)&&((menuMisc!=MENUMISC_TAPDELAY)||(bb)))
-		write_text_inv_pos(tabstop5,menuLine,text_str_short);
-	else
-		write_text_pos(tabstop5,menuLine,text_str_short);
-
-	if ((mainMenu_tapDelay==2)&&((menuMisc!=MENUMISC_TAPDELAY)||(bb)))
-		write_text_inv_pos(tabstop9,menuLine,text_str_none);
-	else
-		write_text_pos(tabstop9,menuLine,text_str_none);
-#endif
 
 	text_flip();
 	b++;
@@ -654,64 +478,6 @@ static int key_miscMenu(int *c)
 						mainMenu_CPU_speed=0;
 				}
 				break;
-
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-#ifdef PANDORA
-			case MENUMISC_PANDORASPEED:
-				if(left)
-					mainMenu_cpuSpeed-=10;
-				else if(right)
-					mainMenu_cpuSpeed+=10;
-				break;
-#endif
-#endif //__PSP2__
-#if defined(__PSP2__) || defined(__SWITCH__)
-			case MENUMISC_LEFTSTICKMOUSE:
-				if (left || right) 
-					mainMenu_leftStickMouse = !mainMenu_leftStickMouse;
-				break;
-			case MENUMISC_TOUCHCONTROLS:
-#ifdef __SWITCH__
-				if (mainMenu_touchControls == 2)
-					mainMenu_touchControls = 1;
-				if (left || right)
-					mainMenu_touchControls = !mainMenu_touchControls;
-				break;
-#else
-				if (left) 
-				{
-					if (mainMenu_touchControls>0)
-						mainMenu_touchControls--;
-					else
-						mainMenu_touchControls=2;
-				}
-				else if (right) 
-				{
-					if (mainMenu_touchControls<2)
-						mainMenu_touchControls++;
-					else
-						mainMenu_touchControls=0;
-				}
-				break;
-#endif
-#endif
-
-			case MENUMISC_CONTROLCFG:
-				if (left)
-				{
-					if (mainMenu_joyConf>0)
-						mainMenu_joyConf--;
-					else
-						mainMenu_joyConf=3;
-				}
-				else if (right)
-				{
-					if (mainMenu_joyConf<3)
-						mainMenu_joyConf++;
-					else
-						mainMenu_joyConf=0;
-				}
- 				break;
 			case MENUMISC_JOYSTICK:
 				if (left)
 				{
@@ -748,31 +514,6 @@ static int key_miscMenu(int *c)
 						mainMenu_autofireRate=2;
 				}
  				break;
-#if defined(__PSP2__) || defined(__SWITCH__)
-			case MENUMISC_CUSTOMAUTOFIREBUTTON:
-				if (left)
-				{
-					if (mainMenu_customAutofireButton > 0)
-						mainMenu_customAutofireButton--;
-					else
-						mainMenu_customAutofireButton=0;
-				}
-				else if (right)
-				{
-#ifdef __SWITCH__
-					if (mainMenu_customAutofireButton < 8)
-						mainMenu_customAutofireButton++;
-					else
-						mainMenu_customAutofireButton=8;
-#else
-					if (mainMenu_customAutofireButton < 6)
-						mainMenu_customAutofireButton++;
-					else
-						mainMenu_customAutofireButton=6;
-#endif
-				}
-				break;
-#endif
 			case MENUMISC_MOUSEMULTIPLIER:
 				if (left)
 				{
@@ -789,96 +530,10 @@ static int key_miscMenu(int *c)
 						mainMenu_mouseMultiplier += 25;
 				}
 				break;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-			case MENUMISC_STYLUSOFFSET:
-				if (left)
-				{
-					if (mainMenu_stylusOffset == 0)
-						mainMenu_stylusOffset = 16;
-					else if (mainMenu_stylusOffset == 2)
-						mainMenu_stylusOffset = 0;
-					else if (mainMenu_stylusOffset == 6)
-						mainMenu_stylusOffset = 2;
-					else if (mainMenu_stylusOffset == 10)
-						mainMenu_stylusOffset = 6;
-					else
-						mainMenu_stylusOffset = 10;
-				}
-				else if (right)
-				{
-					if (mainMenu_stylusOffset == 0)
-						mainMenu_stylusOffset = 2;
-					else if (mainMenu_stylusOffset == 2)
-						mainMenu_stylusOffset = 6;
-					else if (mainMenu_stylusOffset == 6)
-						mainMenu_stylusOffset = 10;
-					else if (mainMenu_stylusOffset == 10)
-						mainMenu_stylusOffset = 16;
-					else
-						mainMenu_stylusOffset = 0;
-				}
-				break;
-#endif //__PSP2__
-
-#if defined(__PSP2__) || defined(__SWITCH__)
-			case MENUMISC_DEADZONE:
-				if (left)
-				{
-					if (mainMenu_deadZone <= 0)
-						mainMenu_deadZone=0;
-					else if (mainMenu_deadZone >= 20000)
-						mainMenu_deadZone-=10000;
-					else if (mainMenu_deadZone >= 2000)
-						mainMenu_deadZone-=1000;
-					else if (mainMenu_deadZone >= 200)
-						mainMenu_deadZone-=100;
-					else if (mainMenu_deadZone >= 20)
-						mainMenu_deadZone-=10;
-					else if (mainMenu_deadZone >= 1)
-						mainMenu_deadZone-=1;
-				}
-				else if (right)
-				{
-					if (mainMenu_deadZone >= 30000)
-						mainMenu_deadZone=30000;
-					else if (mainMenu_deadZone >= 10000)
-						mainMenu_deadZone+=10000;
-					else if (mainMenu_deadZone>=1000)
-						mainMenu_deadZone+=1000;
-					else if (mainMenu_deadZone>=100)
-						mainMenu_deadZone+=100;
-					else if (mainMenu_deadZone>=10)
-						mainMenu_deadZone+=10;
-					else if (mainMenu_deadZone>=0)
-						mainMenu_deadZone+=1;
-				}
-				break;
 			case MENUMISC_MOUSEEMULATION:
 				if ((left)||(right))
 					mainMenu_mouseEmulation = !mainMenu_mouseEmulation;
 				break;
-#else
-			case MENUMISC_TAPDELAY:
-				if (left)
-				{
-					if (mainMenu_tapDelay == 10)
-						mainMenu_tapDelay = 2;
-					else if (mainMenu_tapDelay == 5)
-						mainMenu_tapDelay = 10;
-					else
-						mainMenu_tapDelay = 5;
-				}
-				else if (right)
-				{
-					if (mainMenu_tapDelay == 10)
-						mainMenu_tapDelay = 5;
-					else if (mainMenu_tapDelay == 5)
-						mainMenu_tapDelay = 2;
-					else
-						mainMenu_tapDelay = 10;
-				}
-				break;
-#endif
 		}
 	}
 
@@ -929,7 +584,6 @@ int run_menuMisc()
 		draw_miscMenu(c);
 		end=key_miscMenu(&c);
 	}
-	set_joyConf();
 	unraise_miscMenu();
 	return end;
 }

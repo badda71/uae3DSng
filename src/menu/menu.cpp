@@ -439,7 +439,7 @@ int text_messagebox(char *title, char *message, mb_mode mode) {
 		int yo=0;
 		SDL_Event e;
 		text_draw_background();
-		text_draw_window(x * FONT_W - MSGBOX_PADDING, y * FONT_H - MSGBOX_PADDING, width*FONT_W + MSGBOX_PADDING*2, height*FONT_H + MSGBOX_PADDING*2, title);
+		text_draw_window(x - MSGBOX_PADDING / FONT_W, y - MSGBOX_PADDING / FONT_H, width + MSGBOX_PADDING*2/FONT_H, height + MSGBOX_PADDING*2/FONT_H, title);
 
 		char *n=NULL;
 		for (c=message; *c!=0; c=n)

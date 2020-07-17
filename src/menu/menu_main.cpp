@@ -69,7 +69,6 @@ static const char *text_str_eject="Eject All Drives";
 const char *text_str_separator="---------------------------------";
 static const char *text_str_reset="Reset (R)";
 static const char *text_str_exit= "Quit (L)";
-static const char *text_str_custom= "Custom Control Config";
 static const char *text_str_more= "More Options";
 static const char *text_str_releasenotes= "Release Notes";
 
@@ -84,6 +83,27 @@ int force_quit=0;
 
 int lastCpuSpeed=600;
 int ntsc=0;
+
+enum { 
+	MENUMAIN_DF0 = 0,
+	MENUMAIN_DF1,
+	MENUMAIN_DF2,
+	MENUMAIN_DF3,
+	MENUMAIN_EJECT,
+	MENUMAIN_NRDRIVES,
+	MENUMAIN_SYSSETUP,
+	MENUMAIN_HDOPTIONS,
+	MENUMAIN_DISPOPTIONS,
+	MENUMAIN_SAVE,
+	MENUMAIN_MISC,
+	MENUMAIN_RESET,
+	MENUMAIN_CONF_LOAD,
+	MENUMAIN_CONF_DEL,
+	MENUMAIN_CONF_SAVEGEN,
+	MENUMAIN_CONF_SAVESPEC,
+	MENUMAIN_QUIT,
+	MENUMAIN_END
+};
 
 static void draw_mainMenu(int c)
 {
@@ -107,8 +127,8 @@ static void draw_mainMenu(int c)
 	text_draw_background();
 	text_draw_window(leftMargin/8,menuLine/8,menuWidth,menuHeight,text_str_title);
 
-	// 0
-	if ((c==0)&&(bb))
+	// MENUMAIN_DF0
+	if ((c==MENUMAIN_DF0)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_df0);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_df0);
@@ -117,11 +137,11 @@ static void draw_mainMenu(int c)
 	else
 		write_text_inv_pos(leftMargin+6*8,menuLine,filename0);
 
-	// 1
+	// MENUMAIN_DF1
 	menuLine+=12;
 	if(nr_drives > 1)
 	{
-		if((c==1)&&(bb))
+		if((c==MENUMAIN_DF1)&&(bb))
 			write_text_inv_pos(leftMargin,menuLine,text_str_df1);
 		else
 			write_text_pos(leftMargin,menuLine,text_str_df1);
@@ -131,11 +151,11 @@ static void draw_mainMenu(int c)
 			write_text_inv_pos(leftMargin+6*8,menuLine,filename1);
 	}
 
-	// 2
+	// MENUMAIN_DF2
 	menuLine+=12;
 	if(nr_drives > 2)
 	{
-		if ((c==2)&&(bb))
+		if ((c==MENUMAIN_DF2)&&(bb))
 			write_text_inv_pos(leftMargin,menuLine,text_str_df2);
 		else
 			write_text_pos(leftMargin,menuLine,text_str_df2);
@@ -145,11 +165,11 @@ static void draw_mainMenu(int c)
 			write_text_inv_pos(leftMargin+6*8,menuLine,filename2);
 	}
 
-	// 3
+	// MENUMAIN_DF3
 	menuLine+=12;
 	if(nr_drives > 3)
 	{
-		if ((c==3)&&(bb))
+		if ((c==MENUMAIN_DF3)&&(bb))
 			write_text_inv_pos(leftMargin,menuLine,text_str_df3);
 		else
 			write_text_pos(leftMargin,menuLine,text_str_df3);
@@ -163,32 +183,32 @@ static void draw_mainMenu(int c)
 	write_text_pos(leftMargin,menuLine,text_str_separator);
 	menuLine+=8;
 
-	// 4
-	if ((c==4)&&(bb))
+	// MENUMAIN_EJECT
+	if ((c==MENUMAIN_EJECT)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_eject);
 	else
 		write_text_pos(leftMargin, menuLine,text_str_eject);
 
-	// 5
+	// MENUMAIN_NRDRIVES
 	menuLine+=12;
 	write_text_pos(leftMargin,menuLine,"Number of Drives");
 	
-	if ((nr_drives==1)&&((c!=5)||(bb)))
+	if ((nr_drives==1)&&((c!=MENUMAIN_NRDRIVES)||(bb)))
 		write_text_inv_pos(tabstop3,menuLine,"1");
 	else
 		write_text_pos(tabstop3,menuLine,"1");
 
-	if ((nr_drives==2)&&((c!=5)||(bb)))
+	if ((nr_drives==2)&&((c!=MENUMAIN_NRDRIVES)||(bb)))
 		write_text_inv_pos(tabstop4,menuLine,"2");
 	else
 		write_text_pos(tabstop4,menuLine,"2");
 
-	if ((nr_drives==3)&&((c!=5)||(bb)))
+	if ((nr_drives==3)&&((c!=MENUMAIN_NRDRIVES)||(bb)))
 		write_text_inv_pos(tabstop5,menuLine,"3");
 	else
 		write_text_pos(tabstop5,menuLine,"3");
 
-	if ((nr_drives==4)&&((c!=5)||(bb)))
+	if ((nr_drives==4)&&((c!=MENUMAIN_NRDRIVES)||(bb)))
 		write_text_inv_pos(tabstop6,menuLine,"4");
 	else
 		write_text_pos(tabstop6,menuLine,"4");
@@ -197,50 +217,43 @@ static void draw_mainMenu(int c)
 	write_text_pos(leftMargin,menuLine,text_str_separator);
 	menuLine+=8;
 
-	// 6
+	// MENUMAIN_SYSSETUP
 	write_text_pos(leftMargin,menuLine,"Preset System Setup:");
 
-	if ((mainMenu_system!=1)&&((c!=6)||(bb)))
+	if ((mainMenu_system!=1)&&((c!=MENUMAIN_SYSSETUP)||(bb)))
 		write_text_inv_pos(tabstop5+1,menuLine,"A500");
 	else
 		write_text_pos(tabstop5+1,menuLine,"A500");
 
-	if ((mainMenu_system!=0)&&((c!=6)||(bb)))
+	if ((mainMenu_system!=0)&&((c!=MENUMAIN_SYSSETUP)||(bb)))
 		write_text_inv_pos(tabstop8,menuLine,"A1200");
 	else
 		write_text_pos(tabstop8,menuLine,"A1200");
 
-	// 7
+	// MENUMAIN_HDOPTIONS
 	menuLine+=12;
-	if ((c==7)&&(bb))
+	if ((c==MENUMAIN_HDOPTIONS)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_hdnmem);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_hdnmem);
 
-	// 8
+	// MENUMAIN_DISPOPTIONS
 	menuLine+=12;
-	if ((c==8)&&(bb))
+	if ((c==MENUMAIN_DISPOPTIONS)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_display);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_display);
 
-	// 9
+	// MENUMAIN_SAVE
 	menuLine+=12;
-	if ((c==9)&&(bb))
+	if ((c==MENUMAIN_SAVE)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_savestates);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_savestates);
 
-	// 10
+	// MENUMAIN_MISC
 	menuLine+=12;
-	if ((c==10)&&(bb))
-		write_text_inv_pos(leftMargin,menuLine,text_str_custom);
-	else
-		write_text_pos(leftMargin,menuLine,text_str_custom);
-
-	// 11
-	menuLine+=12;
-	if ((c==11)&&(bb))
+	if ((c==MENUMAIN_MISC)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_more);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_more);
@@ -248,9 +261,9 @@ static void draw_mainMenu(int c)
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,text_str_separator);
 
-	// 12
+	// MENUMAIN_RESET
 	menuLine+=8;
-	if ((c==12)&&(bb))
+	if ((c==MENUMAIN_RESET)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_reset);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_reset);
@@ -258,30 +271,30 @@ static void draw_mainMenu(int c)
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,text_str_separator);
 
-	// 13
+	// MENUMAIN_CONF_LOAD
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,"Config");
 
-	if ((c==13)&&(bb))
+	if ((c==MENUMAIN_CONF_LOAD)&&(bb))
 		write_text_inv_pos(leftMargin+7*8,menuLine,"Load");
 	else
 		write_text_pos(leftMargin+7*8,menuLine,"Load");
 
-	// 15
-	if ((c==15)&&(bb))
+	// MENUMAIN_CONF_DEL
+	if ((c==MENUMAIN_CONF_DEL)&&(bb))
 		write_text_inv_pos(leftMargin+22*8,menuLine,"Delete");
 	else
 		write_text_pos(leftMargin+22*8,menuLine,"Delete");
 
-	// 16
+	// MENUMAIN_CONF_SAVEGEN
 	menuLine+=12;
-	if ((c==16)&&(bb))
+	if ((c==MENUMAIN_CONF_SAVEGEN)&&(bb))
 		write_text_inv_pos(leftMargin+7*8,menuLine,"Save General");
 	else
 		write_text_pos(leftMargin+7*8,menuLine,"Save General");
 
-	// 17
-	if ((c==17)&&(bb))
+	// MENUMAIN_CONF_SAVESPEC
+	if ((c==MENUMAIN_CONF_SAVESPEC)&&(bb))
 		write_text_inv_pos(leftMargin+20*8,menuLine,"Save Per-Game");
 	else
 		write_text_pos(leftMargin+20*8,menuLine,"Save Per-Game");
@@ -289,9 +302,9 @@ static void draw_mainMenu(int c)
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,text_str_separator);
 
-	// 18
+	// MENUMAIN_QUIT
 	menuLine+=8;
-	if ((c==18)&&(bb))
+	if ((c==MENUMAIN_QUIT)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_exit);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_exit);
@@ -416,21 +429,14 @@ static int key_mainMenu(int *cp)
 			// reset
 			back_c = c;
 			hit0 = 1;
-			c = 12;
+			c = MENUMAIN_RESET;
 		}
 		else if (hit5)
 		{
 			// more options
 			back_c = c;
 			hit0 = 1;
-			c = 11;
-		}
-		else if (hit6)
-		{
-			// custom controls
-			back_c = c;
-			hit0 = 1;
-			c = 10;
+			c = MENUMAIN_MISC;
 		}
 		else if (hitH)
 		{
@@ -479,51 +485,31 @@ static int key_mainMenu(int *cp)
 		}
 		else if (up)
 		{
-			if(nr_drives<2 && c==4)
-				c=0;
-			else if(nr_drives<3 && c==4)
-				c=1;
-			else if(nr_drives<4 && c==4)
-				c=2;
+			if(nr_drives<2 && c==MENUMAIN_EJECT)
+				c=MENUMAIN_DF0;
+			else if(nr_drives<3 && c==MENUMAIN_EJECT)
+				c=MENUMAIN_DF1;
+			else if(nr_drives<4 && c==MENUMAIN_EJECT)
+				c=MENUMAIN_DF2;
 			else
 				c--;
-			if (c < 0) c = 18;
+			if (c < MENUMAIN_DF0) c = MENUMAIN_QUIT;
 		}
 		else if (down)
 		{
-			if(nr_drives<4 && c==2)
-				c=4;
-			else if(nr_drives<3 && c==1)
-				c=4;
-			else if(nr_drives<2 && c==0)
-				c=4;
+			if(nr_drives<4 && c==MENUMAIN_DF2)
+				c=MENUMAIN_EJECT;
+			else if(nr_drives<3 && c==MENUMAIN_DF1)
+				c=MENUMAIN_EJECT;
+			else if(nr_drives<2 && c==MENUMAIN_DF0)
+				c=MENUMAIN_EJECT;
 			else
-				c=(c+1)%19;
+				c=(c+1)%MENUMAIN_END;
 		}
 
-	/* New Menu
-	0 = DF0:
-	1 = DF1:
-	2 = DF2:
-	3 = DF3:
-	4 = eject all drives
-	5 = number of drives
-	6 = preset system setup
-	7 = display settings
-	8 = sound
-	9 = savestates
-	10 = custom controls
-	11 = more options
-	12 = reset
-	13 = load config
-	15 = delete config
-	16 = save general config
-	17 = save config current game
-	18 = exit
-	*/
 		switch(c)
 		{
-			case 0:
+			case MENUMAIN_DF0:
 				if (hit0)
 				{
 					current_drive=0;
@@ -531,7 +517,7 @@ static int key_mainMenu(int *cp)
 					end=1;
 				}
 				break;
-			case 1:
+			case MENUMAIN_DF1:
 				if (hit0)
 				{
 					current_drive=1;
@@ -539,7 +525,7 @@ static int key_mainMenu(int *cp)
 					end=1;
 				}
 				break;
-			case 2:
+			case MENUMAIN_DF2:
 				if (hit0)
 				{
 					current_drive=2;
@@ -547,7 +533,7 @@ static int key_mainMenu(int *cp)
 					end=1;
 				}
 				break;
-			case 3:
+			case MENUMAIN_DF3:
 				if (hit0)
 				{
 					current_drive=3;
@@ -555,7 +541,7 @@ static int key_mainMenu(int *cp)
 					end=1;
 				}
 				break;
-			case 4:
+			case MENUMAIN_EJECT:
 				if (hit0)
 				{
 					strcpy(uae4all_image_file0, "");
@@ -564,7 +550,7 @@ static int key_mainMenu(int *cp)
 					strcpy(uae4all_image_file3, "");
 				}
 				break;
-			case 5:
+			case MENUMAIN_NRDRIVES:
 				if (left)
 				{
 					if (nr_drives>1)
@@ -580,7 +566,7 @@ static int key_mainMenu(int *cp)
 						nr_drives=1;
 				}	
 				break;
-			case 6:
+			case MENUMAIN_SYSSETUP:
 				if (left)
 				{
 					if (mainMenu_system==0)
@@ -598,64 +584,56 @@ static int key_mainMenu(int *cp)
 					setSystem();
 				}
 				break;
-			case 7:
+			case MENUMAIN_HDOPTIONS:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_MEMDISK;
 					end=1;
 				}
 				break;
-			case 8:
+			case MENUMAIN_DISPOPTIONS:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_DISPLAY;
 					end=1;
 				}
 				break;
-			case 9:
+			case MENUMAIN_SAVE:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVESTATES;
 					end=1;
 				}
 				break;
-			case 10:
-				if (hit0)
-				{
-					mainMenu_case=MAIN_MENU_CASE_CONTROLS;
-					end=1;
-				}
-				break;
-			case 11:
+			case MENUMAIN_MISC:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_MISC;
-					printf("Launch main menu MISC\n");
 					end=1;
 				}
 				break;
-			case 12:
+			case MENUMAIN_RESET:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_RESET;
 					end=1;
 				}
 				break;
-			case 13:
+			case MENUMAIN_CONF_LOAD:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_LOAD_CONFIG;
 					end=1;
 				}
 				break;
-			case 15:
+			case MENUMAIN_CONF_DEL:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_DELETE_CONFIG;
 					end=1;
 				}
 				break;
-			case 16:
+			case MENUMAIN_CONF_SAVEGEN:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
@@ -663,7 +641,7 @@ static int key_mainMenu(int *cp)
 					showWarning("General config file saved.");
 				}
 				break;
-			case 17:
+			case MENUMAIN_CONF_SAVESPEC:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
@@ -671,7 +649,7 @@ static int key_mainMenu(int *cp)
 						showWarning("Config saved for this game.");
 				}
 				break;
-			case 18:
+			case MENUMAIN_QUIT:
 				if (hit0 && right)
 				{
 					force_quit=1;
@@ -869,24 +847,6 @@ int run_mainMenu()
 		case MAIN_MENU_CASE_RUN:
 			setCpuSpeed();
 			mainMenu_case=1;
-			break;
-		case MAIN_MENU_CASE_CONTROLS:
-			{
-				run_menuControls();
-				if (quit_pressed_in_submenu) //User quit menu while in sub-menu
-				{
-					if (emulating)
-					{
-						setCpuSpeed();
-						mainMenu_case=1;
-					}
-					else
-						mainMenu_case=-1;
-					quit_pressed_in_submenu=0;
-				}
-				else
-					mainMenu_case=-1;
-			}
 			break;
 		case MAIN_MENU_CASE_DISPLAY:
 			{

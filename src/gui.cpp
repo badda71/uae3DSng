@@ -72,8 +72,6 @@ int screenWidth = 640;
 
 static int customAutofireDelay[MAX_NUM_CONTROLLERS]={};
 
-extern int mainMenu_autofire;
-
 extern int nr_joysticks;
 
 extern struct gui_info gui_data;
@@ -131,7 +129,6 @@ int lAnalogYCenter[MAX_NUM_CONTROLLERS]={};
 int rAnalogXCenter[MAX_NUM_CONTROLLERS]={};
 int rAnalogYCenter[MAX_NUM_CONTROLLERS]={};
 int haveJoysticksBeenCentered=0;
-extern int mainMenu_leftStickMouse;
 #endif // __PSP2__
 
 extern int uae4all_keystate[];
@@ -153,29 +150,6 @@ int drawfinished=0;
 int moved_x = 0;
 int moved_y = 0;
 
-int dpadUp[MAX_NUM_CONTROLLERS]={};
-int dpadDown[MAX_NUM_CONTROLLERS]={};
-int dpadLeft[MAX_NUM_CONTROLLERS]={};
-int dpadRight[MAX_NUM_CONTROLLERS]={};
-int stickUp[MAX_NUM_CONTROLLERS]={};
-int stickDown[MAX_NUM_CONTROLLERS]={};
-int stickLeft[MAX_NUM_CONTROLLERS]={};
-int stickRight[MAX_NUM_CONTROLLERS]={};
-int buttonA[MAX_NUM_CONTROLLERS]={}; // Vita Square, GP2X_BUTTON_B
-int buttonB[MAX_NUM_CONTROLLERS]={}; // Vita Circle, GP2X_BUTTON_A
-int buttonX[MAX_NUM_CONTROLLERS]={}; // Vita Cross, GP2X_BUTTON_X
-int buttonY[MAX_NUM_CONTROLLERS]={}; // Vita Triangle, GP2X_BUTTON_Y
-int triggerL[MAX_NUM_CONTROLLERS]={};
-int triggerR[MAX_NUM_CONTROLLERS]={};
-#ifdef __SWITCH__
-int triggerL2[MAX_NUM_CONTROLLERS]={};
-int triggerR2[MAX_NUM_CONTROLLERS]={};
-int triggerL3[MAX_NUM_CONTROLLERS]={};
-int triggerR3[MAX_NUM_CONTROLLERS]={};
-#endif
-int buttonSelect[MAX_NUM_CONTROLLERS]={};
-int buttonStart[MAX_NUM_CONTROLLERS]={};
-
 extern int mainMenu_case;
 #ifdef WITH_TESTMODE
 int no_limiter = 0;
@@ -187,93 +161,6 @@ int emulated_top=0;
 int emulated_bot=0;
 int emulated_button1=0;
 int emulated_button2=0;
-
-#ifdef __SWITCH__
-int singleJoycons = 0;  // are single Joycons being used at the moment?
-void update_joycon_mode() {
-	return;
-/*
-	int handheld = hidGetHandheldMode();
-	int coalesceControllers = 0;
-	int splitControllers = 0;
-	if (!handheld) {
-		if (mainMenu_singleJoycons) {
-			if (!singleJoycons) {
-				splitControllers = 1;
-				singleJoycons = 1;
-			}
-		} else if (singleJoycons) {
-			coalesceControllers = 1;
-			singleJoycons = 0;
-		}
-	} else {
-		if (singleJoycons) {
-			coalesceControllers = 1;
-			singleJoycons = 0;
-		}
-	}
-	if (coalesceControllers) {
-		// find all left/right single JoyCon pairs and join them together
-		for (int id = 0; id < 8; id++) {
-			hidSetNpadJoyAssignmentModeDual((HidControllerID) id);
-		}
-		int lastRightId = 8;		
-		for (int id0 = 0; id0 < 8; id0++) {
-			if (hidGetControllerType((HidControllerID) id0) & TYPE_JOYCON_LEFT) {
-				for (int id1=lastRightId-1; id1>=0; id1--) {
-					if (hidGetControllerType((HidControllerID) id1) & TYPE_JOYCON_RIGHT) {
-						lastRightId=id1;
-						// prevent missing player numbers
-						if (id0 < id1) {
-							hidMergeSingleJoyAsDualJoy((HidControllerID) id0, (HidControllerID) id1);
-						} else if (id0 > id1) {
-							hidMergeSingleJoyAsDualJoy((HidControllerID) id1, (HidControllerID) id0);
-						}
-						break;
-					}
-				}
-			}	
-		}
-	}
-	if (splitControllers) {
-		for (int id=0; id<8; id++) {
-			hidSetNpadJoyAssignmentModeSingleByDefault((HidControllerID) id);
-		}
-		hidSetNpadJoyHoldType(HidJoyHoldType_Horizontal);
-		hidScanInput();
-	}*/
-}
-#endif
-
-#if defined(__PSP2__) || defined(__SWITCH__)
-void remap_custom_controls() // assign custom 1-3 to currently used custom set
-{
-	for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
-	{
-		int j=mainMenu_custom_controlSet;
-		mainMenu_custom_up[i] = mainMenu_customPreset_up[j][i];
-		mainMenu_custom_down[i] = mainMenu_customPreset_down[j][i];
-		mainMenu_custom_left[i] = mainMenu_customPreset_left[j][i];
-		mainMenu_custom_right[i] = mainMenu_customPreset_right[j][i];
-		mainMenu_custom_stickup[i] = mainMenu_customPreset_stickup[j][i];
-		mainMenu_custom_stickdown[i] = mainMenu_customPreset_stickdown[j][i];
-		mainMenu_custom_stickleft[i] = mainMenu_customPreset_stickleft[j][i];
-		mainMenu_custom_stickright[i] = mainMenu_customPreset_stickright[j][i];
-		mainMenu_custom_A[i] = mainMenu_customPreset_A[j][i];
-		mainMenu_custom_B[i] = mainMenu_customPreset_B[j][i];
-		mainMenu_custom_X[i] = mainMenu_customPreset_X[j][i];
-		mainMenu_custom_Y[i] = mainMenu_customPreset_Y[j][i];
-		mainMenu_custom_L[i] = mainMenu_customPreset_L[j][i];
-		mainMenu_custom_R[i] = mainMenu_customPreset_R[j][i];
-#ifdef __SWITCH__
-		mainMenu_custom_L2[i] = mainMenu_customPreset_L2[j][i];
-		mainMenu_custom_R2[i] = mainMenu_customPreset_R2[j][i];
-		mainMenu_custom_L3[i] = mainMenu_customPreset_L3[j][i];
-		mainMenu_custom_R3[i] = mainMenu_customPreset_R3[j][i];
-#endif
-	}
-}		
-#endif
 
 static void getChanges(void)
 {
@@ -453,111 +340,6 @@ static void goMenu(void)
 	lockscr();
 	memset((char *) prSDLScreen->pixels, 0, prSDLScreen->h*prSDLScreen->pitch);
 	unlockscr();
-}
-
-int customKey;
-void getMapping(int customId)
-{
-	switch(customId)
-	{
-		case 1: customKey=AK_UP; break;
-		case 2: customKey=AK_DN; break;
-		case 3: customKey=AK_LF; break;
-		case 4: customKey=AK_RT; break;
-		case 5: customKey=AK_NP0; break;
-		case 6: customKey=AK_NP1; break;
-		case 7: customKey=AK_NP2; break;
-		case 8: customKey=AK_NP3; break;
-		case 9: customKey=AK_NP4; break;
-		case 10: customKey=AK_NP5; break;
-		case 11: customKey=AK_NP6; break;
-		case 12: customKey=AK_NP7; break;
-		case 13: customKey=AK_NP8; break;
-		case 14: customKey=AK_NP9; break;
-		case 15: customKey=AK_ENT; break;
-		case 16: customKey=AK_NPDIV; break;
-		case 17: customKey=AK_NPMUL; break;
-		case 18: customKey=AK_NPSUB; break;
-		case 19: customKey=AK_NPADD; break;
-		case 20: customKey=AK_NPDEL; break;
-		case 21: customKey=AK_NPLPAREN; break;
-		case 22: customKey=AK_NPRPAREN; break;
-		case 23: customKey=AK_SPC; break;
-		case 24: customKey=AK_BS; break;
-		case 25: customKey=AK_TAB; break;
-		case 26: customKey=AK_RET; break;
-		case 27: customKey=AK_ESC; break;
-		case 28: customKey=AK_DEL; break;
-		case 29: customKey=AK_LSH; break;
-		case 30: customKey=AK_RSH; break;
-		case 31: customKey=AK_CAPSLOCK; break;
-		case 32: customKey=AK_CTRL; break;
-		case 33: customKey=AK_LALT; break;
-		case 34: customKey=AK_RALT; break;
-		case 35: customKey=AK_LAMI; break;
-		case 36: customKey=AK_RAMI; break;
-		case 37: customKey=AK_HELP; break;
-		case 38: customKey=AK_LBRACKET; break;
-		case 39: customKey=AK_RBRACKET; break;
-		case 40: customKey=AK_SEMICOLON; break;
-		case 41: customKey=AK_COMMA; break;
-		case 42: customKey=AK_PERIOD; break;
-		case 43: customKey=AK_SLASH; break;
-		case 44: customKey=AK_BACKSLASH; break;
-		case 45: customKey=AK_QUOTE; break;
-		case 46: customKey=AK_NUMBERSIGN; break;
-		case 47: customKey=AK_LTGT; break;
-		case 48: customKey=AK_BACKQUOTE; break;
-		case 49: customKey=AK_MINUS; break;
-		case 50: customKey=AK_EQUAL; break;
-		case 51: customKey=AK_A; break;
-		case 52: customKey=AK_B; break;
-		case 53: customKey=AK_C; break;
-		case 54: customKey=AK_D; break;
-		case 55: customKey=AK_E; break;
-		case 56: customKey=AK_F; break;
-		case 57: customKey=AK_G; break;
-		case 58: customKey=AK_H; break;
-		case 59: customKey=AK_I; break;
-		case 60: customKey=AK_J; break;
-		case 61: customKey=AK_K; break;
-		case 62: customKey=AK_L; break;
-		case 63: customKey=AK_M; break;
-		case 64: customKey=AK_N; break;
-		case 65: customKey=AK_O; break;
-		case 66: customKey=AK_P; break;
-		case 67: customKey=AK_Q; break;
-		case 68: customKey=AK_R; break;
-		case 69: customKey=AK_S; break;
-		case 70: customKey=AK_T; break;
-		case 71: customKey=AK_U; break;
-		case 72: customKey=AK_V; break;
-		case 73: customKey=AK_W; break;
-		case 74: customKey=AK_X; break;
-		case 75: customKey=AK_Y; break;
-		case 76: customKey=AK_Z; break;
-		case 77: customKey=AK_1; break;
-		case 78: customKey=AK_2; break;
-		case 79: customKey=AK_3; break;
-		case 80: customKey=AK_4; break;
-		case 81: customKey=AK_5; break;
-		case 82: customKey=AK_6; break;
-		case 83: customKey=AK_7; break;
-		case 84: customKey=AK_8; break;
-		case 85: customKey=AK_9; break;
-		case 86: customKey=AK_0; break;
-		case 87: customKey=AK_F1; break;
-		case 88: customKey=AK_F2; break;
-		case 89: customKey=AK_F3; break;
-		case 90: customKey=AK_F4; break;
-		case 91: customKey=AK_F5; break;
-		case 92: customKey=AK_F6; break;
-		case 93: customKey=AK_F7; break;
-		case 94: customKey=AK_F8; break;
-		case 95: customKey=AK_F9; break;
-		case 96: customKey=AK_F10; break;
-		default: customKey=0;
-	}
 }
 
 void gui_handle_events (SDL_Event *e)

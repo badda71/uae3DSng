@@ -46,50 +46,14 @@ enum {
 	MENUDISPLAY_PRESETWIDTH,
 	MENUDISPLAY_PRESETHEIGHT,
 	MENUDISPLAY_DISPLINES,
-#if !defined(__PSP2__) && !defined(__SWITCH__) //screenwidth has no meaning on Vita and is never used
-	MENUDISPLAY_SCREENWIDTH,
-#endif
 	MENUDISPLAY_VERTPOS,
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-	MENUDISPLAY_CUTLEFT,
-	MENUDISPLAY_CUTRIGHT,
-#endif
 	MENUDISPLAY_REFRESHRATE,
 	MENUDISPLAY_FRAMESKIP,
-#if defined(__PSP2__) || defined(__SWITCH__)
-	MENUDISPLAY_SHADER,
-#endif
-	MENUDISPLAY_STATUSLINE,
-	MENUDISPLAY_BACKGROUND,
-	MENUDISPLAY_FONT,
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
 	MENUDISPLAY_STEREO,
 	MENUDISPLAY_END
 };
-
-#if defined(__PSP2__)
-enum {
-	SHADER_NONE = 0,
-	SHADER_LCD3X,
-	SHADER_AAA,
-	SHADER_SCALE2X,
-	SHADER_SHARP_BILINEAR,
-	SHADER_SHARP_BILINEAR_SIMPLE,
-	SHADER_FXAA,
-	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
-};
-#endif
-
-#if defined(__SWITCH__)
-enum {
-	SHADER_NONE = 0,
-	SHADER_SHARP_BILINEAR_SIMPLE,
-	SHADER_BILINEAR,
-	SHADER_POINT,
-	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
-};
-#endif
 
 static void draw_displayMenu(int c)
 {
@@ -160,16 +124,6 @@ static void draw_displayMenu(int c)
 		write_text_pos(tabstop3,menuLine,value);
 	else
 		write_text_inv_pos(tabstop3,menuLine,value);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-	// MENUDISPLAY_SCREENWIDTH
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Screen Width");
-	sprintf(value, "%d", screenWidth);
-	if ((menuDisplay!=MENUDISPLAY_SCREENWIDTH)||(bb))
-		write_text_pos(tabstop3,menuLine,value);
-	else
-		write_text_inv_pos(tabstop3,menuLine,value);
-#endif
 	// MENUDISPLAY_VERTPOS
 	menuLine+=12;
 	write_text_pos(leftMargin,menuLine,"Vertical Position");
@@ -178,30 +132,10 @@ static void draw_displayMenu(int c)
 		write_text_pos(tabstop3,menuLine,value);
 	else
 		write_text_inv_pos(tabstop3,menuLine,value);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-	// MENUDISPLAY_CUTLEFT
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Cut Left");
-	sprintf(value, "%d", mainMenu_cutLeft);
-	if ((menuDisplay!=MENUDISPLAY_CUTLEFT)||(bb))
-		write_text_pos(tabstop3,menuLine,value);
-	else
-		write_text_inv_pos(tabstop3,menuLine,value);
-
-	// MENUDISPLAY_CUTRIGHT
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Cut Right");
-	sprintf(value, "%d", mainMenu_cutRight);
-	if ((menuDisplay!=MENUDISPLAY_CUTRIGHT)||(bb))
-		write_text_pos(tabstop3,menuLine,value);
-	else
-		write_text_inv_pos(tabstop3,menuLine,value);
-
-#else // !defined(__PSP2__) && !defined(__SWITCH__)
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,text_str_display_separator);
 	menuLine+=8;
-#endif
+
 	// MENUDISPLAY_REFRESHRATE
 	write_text_pos(leftMargin,menuLine,"Refresh Rate");
 	if ((!mainMenu_ntsc)&&((menuDisplay!=MENUDISPLAY_REFRESHRATE)||(bb)))
@@ -214,20 +148,13 @@ static void draw_displayMenu(int c)
 	else
 		write_text_pos(tabstop3+1*8,menuLine,"60Hz");
 
-	// MENUDISPLAY_FRAMESKIP
-#ifdef PANDORA
-	write_text_pos(tabstop3+7*8,menuLine,"Frameskip");
-	if ((mainMenu_frameskip==0)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop3+17*8,menuLine,"0");
-	else
-		write_text_pos(tabstop3+17*8,menuLine,"0");
-	if ((mainMenu_frameskip==1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop3+19*8,menuLine,"1");
-	else
-		write_text_pos(tabstop3+19*8,menuLine,"1");
-#else
+	// 	MENUDISPLAY_FRAMESKIP
 	menuLine+=12;
-	write_text_pos(tabstop3+7*8,menuLine,"Frameskip");
+	write_text_pos(leftMargin,menuLine,"Frameskip");
+	if ((mainMenu_frameskip==0)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
+		write_text_inv_pos(tabstop1,menuLine,"0");
+	else
+		write_text_pos(tabstop1,menuLine,"0");	
 	if ((mainMenu_frameskip==1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
 		write_text_inv_pos(tabstop2,menuLine,"1");
 	else
@@ -261,108 +188,8 @@ static void draw_displayMenu(int c)
 	else
 		write_text_pos(tabstop9,menuLine,"8");
 
-	menuLine+=12;
-#endif
-
-#if defined(__PSP2__) || defined(__SWITCH__)	
-	//Shader settings on Vita
-	//MENUDISPLAY_SHADER
-	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Shader");
-  
-  	switch (mainMenu_shader)
-  	{
-#ifdef __SWITCH__
-		case SHADER_NONE:
-			snprintf((char*)value, 25, "NONE (auto 2x/3x/4x)");
-			break;
-		case SHADER_SHARP_BILINEAR_SIMPLE:
-			snprintf((char*)value, 25, "SHARP_BILINEAR_SIMPLE");
-			break;		
-		case SHADER_BILINEAR:
-			snprintf((char*)value, 25, "BILINEAR");
-			break;
-		case SHADER_POINT:
-			snprintf((char*)value, 25, "POINT");
-			break;
-#else
-		case SHADER_NONE:
-			snprintf((char*)value, 25, "NONE (perfect 2x)");
-			break;
-		case SHADER_LCD3X:
-			snprintf((char*)value, 25, "LCD3X");
-			break;
-		case SHADER_SCALE2X:
-			snprintf((char*)value, 25, "SCALE2X");
-			break;
-		case SHADER_AAA:
-			snprintf((char*)value, 25, "AAA");
-			break;
-		case SHADER_SHARP_BILINEAR:
-			snprintf((char*)value, 25, "SHARP_BILINEAR");
-			break;
-		case SHADER_SHARP_BILINEAR_SIMPLE:
-			snprintf((char*)value, 25, "SHARP_BILINEAR_SIMPLE");
-			break;
-		case SHADER_FXAA:
-			snprintf((char*)value, 25, "FXAA");
-			break;
-#endif
-		default:
-			break;
-	}
-	if ((menuDisplay!=MENUDISPLAY_SHADER)||(bb))
-		write_text_inv_pos(tabstop1,menuLine,value);
-	else
-		write_text_pos(tabstop1,menuLine,value);
-#endif
-	// MENUDISPLAY_STATUSLINE
-	menuLine+=12;
-	write_text_pos(leftMargin, menuLine,text_str_status_line);
-	if ((!mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
-		write_text_inv_pos(tabstop1,menuLine, "Off");
-	else
-		write_text_pos(tabstop1, menuLine, "Off");
-	if ((mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
-		write_text_inv_pos(tabstop3, menuLine,"On");
-	else
-		write_text_pos(tabstop3, menuLine,"On");
-
-	// MENUDISPLAY_BACKGROUND
-	menuLine+=12;
-	write_text_pos(leftMargin, menuLine,"Menu Background");
-	if ((mainMenu_background==0)&&((menuDisplay!=MENUDISPLAY_BACKGROUND)||(bb)))
-		write_text_inv_pos(tabstop3,menuLine, "Static");
-	else
-		write_text_pos(tabstop3, menuLine, "Static");
-	if ((mainMenu_background==1)&&((menuDisplay!=MENUDISPLAY_BACKGROUND)||(bb)))
-		write_text_inv_pos(tabstop8-2*8, menuLine,"Moving");
-	else
-		write_text_pos(tabstop8-2*8, menuLine,"Moving");
-		
-	// MENUDISPLAY_FONT
-	menuLine+=12;
-	write_text_pos(leftMargin, menuLine,"Menu Font");
-	if ((mainMenu_font==0)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
-		write_text_inv_pos(tabstop3,menuLine, "Narrow");
-	else
-		write_text_pos(tabstop3, menuLine, "Narrow");
-
-	if ((mainMenu_font==1)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
-		write_text_inv_pos(tabstop3+7*8, menuLine,"Wide");
-	else
-		write_text_pos(tabstop3+7*8, menuLine,"Wide");
-
-	if ((mainMenu_font==2)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
-		write_text_inv_pos(tabstop3+12*8, menuLine,"Original");
-	else
-		write_text_pos(tabstop3+12*8, menuLine,"Original");
-
-	menuLine+=8;
-	write_text_pos(leftMargin,menuLine,text_str_display_separator);
-	menuLine+=8;
-
 	// MENUDISPLAY_SOUND
+	menuLine+=12;
 	write_text_pos(leftMargin,menuLine,text_str_sound);
 	if ((mainMenu_sound==0)&&((menuDisplay!=MENUDISPLAY_SOUND)||(bb)))
 		write_text_inv_pos(tabstop1,menuLine,text_str_off);
@@ -581,22 +408,6 @@ static int key_displayMenu(int *c)
 						mainMenu_displayedLines++;
 				}
 				break;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-			case MENUDISPLAY_SCREENWIDTH:
-				if (left)
-				{
-					screenWidth-=10;
-					if (screenWidth<200)
-						screenWidth=200;
-				}
-				else if (right)
-				{
-					screenWidth+=10;
-					if (screenWidth>800)
-						screenWidth=800;
-				}
-				break;
-#endif
 			case MENUDISPLAY_VERTPOS:
 				if (left)
 				{
@@ -609,37 +420,7 @@ static int key_displayMenu(int *c)
 						moveY++;
 				}
 				break;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-			case MENUDISPLAY_CUTLEFT:
-				if (left)
-				{
-					if (mainMenu_cutLeft>0)
-						mainMenu_cutLeft--;
-				}
-				else if (right)
-				{
-					if (mainMenu_cutLeft<100)
-						mainMenu_cutLeft++;
-				}
-				break;
-			case MENUDISPLAY_CUTRIGHT:
-				if (left)
-				{
-					if (mainMenu_cutRight>0)
-						mainMenu_cutRight--;
-				}
-				else if (right)
-				{
-					if (mainMenu_cutRight<100)
-						mainMenu_cutRight++;
-				}
-				break;
-#endif
 			case MENUDISPLAY_FRAMESKIP:
-#ifdef PANDORA
-				if ((left)||(right))
-						mainMenu_frameskip = !mainMenu_frameskip;
-#else
 				if (left)
 				{
 					if (mainMenu_frameskip>0)
@@ -654,53 +435,10 @@ static int key_displayMenu(int *c)
 					else
 						mainMenu_frameskip=0;
 				}
-#endif
 				break;
 			case MENUDISPLAY_REFRESHRATE:
 				if ((left)||(right))
 						mainMenu_ntsc = !mainMenu_ntsc;
-				break;
-#if defined(__PSP2__) || defined(__SWITCH__) //shader choice on VITA
-			case MENUDISPLAY_SHADER:
-				if (left)
-				{
-					if (mainMenu_shader <= 0)
-						mainMenu_shader = 0;
-					else 
-						mainMenu_shader -= 1;
-				}
-				else if (right)
-				{
-					if (mainMenu_shader >= NUM_SHADERS-1)
-						mainMenu_shader = NUM_SHADERS-1;
-					else
-						mainMenu_shader +=1;
-				}
-				break;
-#endif
-			case MENUDISPLAY_STATUSLINE:
-				if ((left)||(right))
-					mainMenu_showStatus=!mainMenu_showStatus;
-				break;
-
-			case MENUDISPLAY_BACKGROUND:
-				if ((left)||(right))
-					mainMenu_background=!mainMenu_background;
-				break;
-			case MENUDISPLAY_FONT:
-				if (left) {
-					if ((mainMenu_font > 0) && (mainMenu_font <= 2)) {
-						mainMenu_font--;
-					} else {
-						mainMenu_font = 2;
-					}
-				} else if (right) {
-					if ((mainMenu_font < 2) && (mainMenu_font >= 0)) {
-						mainMenu_font++;
-					} else {
-						mainMenu_font = 0;
-					}
-				}
 				break;
 			case MENUDISPLAY_SOUND:
 					if (left)
@@ -725,7 +463,6 @@ static int key_displayMenu(int *c)
 				case MENUDISPLAY_SNDRATE:
 					if ((left)||(right))
 					{
-#ifndef __SWITCH__
 						static int rates[] = { 8000, 11025, 22050, 32000, 44100, 48000 };
 						int sel;
 						for (sel = 0; sel < sizeof(rates) / sizeof(rates[0]); sel++)
@@ -734,7 +471,6 @@ static int key_displayMenu(int *c)
 						if (sel < 0) sel = 5;
 						if (sel > 5) sel = 0;
 						sound_rate = rates[sel];
-#endif
 					}
 					break;
 		
@@ -822,7 +558,6 @@ int run_menuDisplay()
 		draw_displayMenu(c);
 		end=key_displayMenu(&c);
 	}
-	set_joyConf();
 	unraise_displayMenu();
 	return end;
 }

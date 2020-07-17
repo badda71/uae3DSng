@@ -59,9 +59,6 @@ extern char uae4all_hard_file3[256];
 extern void uae4all_update_time(void);
 extern void uae4all_show_time(void);
 
-/* Function to update the custom key config to one of three presets on Vita */
-extern void remap_custom_controls();
-
 /* Function to create savestate filename
 and screenshot filename */
 extern void make_savestate_filenames(char *save, char *thumb);
