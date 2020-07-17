@@ -137,22 +137,7 @@ void init_kickstart()
 	if (uae4all_init_rom(romfile))
 	{
 		init_text(0);
-		text_draw_background();
-		text_draw_window(2, 6, 42, 12, "--- ERROR ---");
-		write_text(6, 12, "kickstart rom(s) not found!");
-		write_text(8, 14, "Press any button to exit");
-		text_flip();
-		SDL_Delay(333);
-
-		SDL_Event ev;
-		while(true) {
-			while (SDL_PollEvent(&ev)) {
-				switch (ev.type) {
-					case SDL_JOYBUTTONDOWN:
-						exit(0);
-				}
-			}
-		}
+		text_messagebox("--- ERROR ---", "kickstart rom(s) not found!", MB_OK);
 		kickstart_warning=1;
 	}
 	else

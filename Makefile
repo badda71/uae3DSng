@@ -317,7 +317,7 @@ $(OUTPUT).elf	:	$(OFILES) $(SUBLIBS)
 
 %.opp: %.cpp
 	@echo $(notdir $<)
-	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
+	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 # cia/3ds generation targets

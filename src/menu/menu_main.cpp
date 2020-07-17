@@ -267,12 +267,6 @@ static void draw_mainMenu(int c)
 	else
 		write_text_pos(leftMargin+7*8,menuLine,"Load");
 
-	// 14
-	if ((c==14)&&(bb))
-		write_text_inv_pos(leftMargin+13*8,menuLine,"Save As");
-	else
-		write_text_pos(leftMargin+13*8,menuLine,"Save As");
-
 	// 15
 	if ((c==15)&&(bb))
 		write_text_inv_pos(leftMargin+22*8,menuLine,"Delete");
@@ -309,18 +303,7 @@ static void draw_mainMenu(int c)
 
 void showWarning(const char *msg)
 {
-	text_draw_window(4,9,37,4,"Message");
-	write_text_pos(5,11,msg);
-	//write_text_pos(11,16,"Press any button to continue");
-	text_flip();
-	SDL_Event ev;
-	SDL_Delay(1000);
-	while(SDL_PollEvent(&ev))
-	{
-		if (ev.type==SDL_QUIT)
-			exit(1);
-		SDL_Delay(10);
-	}
+	text_messagebox("Message",msg,MB_OK);
 }
 
 void setSystem()
@@ -533,7 +516,6 @@ static int key_mainMenu(int *cp)
 	11 = more options
 	12 = reset
 	13 = load config
-	14 = save config as...
 	15 = delete config
 	16 = save general config
 	17 = save config current game
@@ -664,14 +646,6 @@ static int key_mainMenu(int *cp)
 				{
 					mainMenu_case=MAIN_MENU_CASE_LOAD_CONFIG;
 					end=1;
-				}
-				break;
-			case 14:
-				if (hit0)
-				{
-					mainMenu_case=MAIN_MENU_CASE_SAVE;
-					if (saveconfig(4))
-						showWarning("Config saved.");
 				}
 				break;
 			case 15:

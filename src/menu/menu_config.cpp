@@ -21,14 +21,6 @@ extern int moveX;
 extern int moveY;
 
 
-#ifdef __SWITCH__
-#include "switch_kbd.h"
-#endif
-
-#ifdef __PSP2__
-#include "psp2_kbdvita.h"
-#endif
-
 #if !( defined(PANDORA) )
 extern int timeslice_mode;
 #endif
@@ -1047,7 +1039,6 @@ int create_configfilename(char *dest, char *basename, int fromDir)
 int saveconfig(int general)
 {
     char path[300];
-    char *p;
     switch(general) {
     case 0:
         if (!uae4all_image_file0[0])
@@ -1069,21 +1060,6 @@ int saveconfig(int general)
         break;
     case 3:
         snprintf(path, 300, config_filename, launchDir);
-        break;
-    case 4:
-#if defined(__SWITCH__) || defined(__PSP2__)
-        char buf[100] = "";
-#ifdef __SWITCH__
-        kbdswitch_get("Enter config name:", "", 100, 0, buf);
-#else
-        strcpy(buf, kbdvita_get("Enter config name:", "", 100, 0));
-#endif
-        if (buf[0] == 0)
-            return 0;
-        snprintf(path, 300, "%s/conf/%s%s", launchDir, buf, ".conf");
-#else
-        return 0;
-#endif
         break;
     }
 

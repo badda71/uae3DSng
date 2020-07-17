@@ -17,7 +17,6 @@
 #include <SDL/SDL_ttf.h>
 #include "savestate.h"
 
-#include "switch_kbd.h"
 #include "keyboard.h"
 #include "uibottom.h"
 
@@ -416,15 +415,8 @@ static inline void unraise_saveMenu()
 
 void show_error(const char *str)
 {
-	int i;
-
-	text_draw_window(54/7,91/8,255/7,64/8,"--- ERROR ---");
-	write_text_pos(12,14,str);
-	text_flip();
-	
-	SDL_Delay(1000);
+	text_messagebox("--- ERROR ---", str, MB_OK);
 }
-
 
 void make_savestate_filenames(char *save, char *thumb)
 {
@@ -643,32 +635,8 @@ int run_menuSavestates()
 					if (f)
 					{
 						fclose(f);
-#if defined(__SWITCH__) || defined(__PSP2__)
-						char buf[100] = "";
-#ifdef __SWITCH__
-						kbdswitch_get("Enter savestate name:", "", 100, 0, buf);
-#else
-						strcpy(buf, kbdvita_get("Enter savestate name:", "", 100, 0));
-#endif
-						if (buf[0] != 0) {
-							char state[255] = "";
-							snprintf(state, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
-							cp(savestate_filename, state);
-							FILE *f2=fopen(screenshot_filename,"rb");
-							if (f2) {
-								fclose(f2);
-								char thumb[255] = "";
-								stateFilenameToThumbFilename(state, thumb);
-								cp(screenshot_filename, thumb);
-							}
-							showWarning("File exported.");
-						} else {
-							showWarning("Invalid filename.");
-						}
-#else
 						saveMenu_case=-1;
 						break;
-#endif
 					}
 					else
 					{

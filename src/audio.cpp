@@ -483,7 +483,6 @@ void audio_channel_enable_dma(int n_channel)
 
 #define audio_channel_disable_dma_1(NCHAN) \
 { \
-    struct audio_channel_data *cdp = &audio_channel[NCHAN]; \
     if (audio_channel_state[NCHAN] == 1 || audio_channel_state[NCHAN] == 5) { \
 	audio_channel_state[NCHAN] = 0; \
 	audio_channel_current_sample[NCHAN] = 0; \

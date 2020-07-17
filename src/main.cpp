@@ -58,21 +58,6 @@ extern SDL_Surface *current_screenshot;
 #include "gp2xutil.h"
 #endif
 
-#if defined(__PSP2__) // NOT __SWITCH__
-//Allow locking PS Button
-#include <psp2/shellutil.h>
-//Touch input
-#include "psp2_touch.h"
-#ifdef DEBUG_UAE4ALL
-#include <psp2shell.h>
-#endif
-#endif
-
-#if defined(__SWITCH__)
-//Touch input
-#include "switch_touch.h"
-#endif
-
 long int version = 256*65536L*UAEMAJOR + 65536L*UAEMINOR + UAESUBREV;
 
 struct uae_prefs currprefs, changed_prefs; 

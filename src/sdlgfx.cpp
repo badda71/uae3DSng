@@ -46,10 +46,6 @@
 #include "uibottom.h"
 #include "uae3ds.h"
 
-#ifdef __SWITCH__
-#include "switch/switch_touch.h"
-#endif
-
 bool mouse_state = true;
 extern bool slow_mouse;
 extern bool fast_mouse;

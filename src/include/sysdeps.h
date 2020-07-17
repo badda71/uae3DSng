@@ -198,7 +198,7 @@ typedef struct { uae_u8 RGB[3]; } RGB;
 typedef uint16_t uae_u16;
 typedef int16_t uae_s16;
 
-typedef uint32_t uae_u32;
+typedef unsigned int uae_u32;
 typedef int32_t uae_s32;
 
 #undef uae_s64
