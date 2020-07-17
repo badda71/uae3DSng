@@ -24,6 +24,7 @@
 /* PocketUAE config file. Used for parsing PocketUAE-like options. */
 #include "cfgfile.h" 
 #include "keyboard.h"
+#include "uibottom.h"
 
 const char *text_str_memdisk_separator="--------------------------------------";
 static const char *text_str_memdisk_title=    "Harddisk and Memory Options";
@@ -335,6 +336,7 @@ static int key_memDiskMenu(int *c)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		if (uib_handle_event(&event)) continue;
 		left=right=up=down=hit0=hit1=hit2=del=0;
 		if (event.type == SDL_QUIT)
 			end=-1;

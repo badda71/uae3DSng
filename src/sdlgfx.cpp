@@ -43,6 +43,8 @@
 #include "savestate.h"
 #include "rpt.h"
 #include "events.h"
+#include "uibottom.h"
+#include "uae3ds.h"
 
 #ifdef __SWITCH__
 #include "switch/switch_touch.h"
@@ -392,8 +394,14 @@ void handle_events (void)
 	int i, j;
 	int iIsHotKey = 0;
 
+	// must be called once per frame to expire mouse button presses
+	uib_handle_tap_processing(NULL);
+
     while (SDL_PollEvent(&rEvent))
 	{
+		if (uib_handle_event(&rEvent)) continue;
+		uae3ds_mapping_apply(&rEvent);
+
 		gui_handle_events (&rEvent);
 
 		switch (rEvent.type)
@@ -427,10 +435,10 @@ void handle_events (void)
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-//			buttonstate[(rEvent.button.button-1)%3] = 1;
+			buttonstate[(rEvent.button.button-1)%3] = 1;
 			break;
 		case SDL_MOUSEBUTTONUP:
-//			buttonstate[(rEvent.button.button-1)%3] = 0;
+			buttonstate[(rEvent.button.button-1)%3] = 0;
 			break;
 		case SDL_MOUSEMOTION:
 			mouse_state = true;
@@ -455,6 +463,7 @@ void handle_events (void)
 			break;
 		}
 	}
+	uib_update();
 }
 
 int needmousehack (void)

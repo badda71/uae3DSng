@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <SDL.h>
 #include "keyboard.h"
+#include "uibottom.h"
 
 #ifndef PATH_MAX
 	#define PATH_MAX 256
@@ -266,8 +267,10 @@ static int menuLoadLoop(char *curr_path)
 		//unsigned long keys;
 		draw_dirlist(curr_path, namelist, n, sel);
 		
-		while (SDL_PollEvent(&event) > 0 && hit0+hit1+hitL==0)
+		while (SDL_PollEvent(&event) > 0)
 		{
+			if (uib_handle_event(&event)) continue;
+			if (hit0+hit1+hitL != 0) break;
 			left=right=up=down=hit0=hit1=hit2=hit3=hit4=hitL=0;
 			if (event.type == SDL_KEYDOWN)
 			{

@@ -106,12 +106,11 @@ CXXFLAGS	:= $(ARCH) $(COMMON_CFLAGS) $(MORECFLAGS) $(INCLUDE) -fno-rtti -fpermis
 
 LDFLAGS		=	-specs=3dsx.specs $(ARCH) $(COMMON_CFLAGS) $(MORECFLAGS) -Wl,-Map,$(notdir $*.map)
 
-# SUBLIBS		:=  UAE3DS_SDL
+SUBLIBS		:=  UAE3DS_SDL
 
 LIBS := \
     -lSDL_image \
     -lSDL_gfx \
-    -lSDL \
     -lpng \
     -ljpeg \
     -lz \

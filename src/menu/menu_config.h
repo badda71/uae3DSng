@@ -10,6 +10,13 @@ extern void remap_custom_controls();
 #endif
 
 #ifndef _MENU_CONFIG_CPP
+extern int mainMenu_max_tap_time;
+extern int mainMenu_click_time;
+extern int mainMenu_single_tap_timeout;
+extern int mainMenu_max_double_tap_time;
+extern int mainMenu_locked_drag_timeout;
+extern int mainMenu_tap_and_drag_gesture;
+extern int mainMenu_locked_drags;
 
 extern int mainMenu_chipMemory;
 extern int mainMenu_slowMemory;

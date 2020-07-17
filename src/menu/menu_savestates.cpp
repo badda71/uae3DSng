@@ -19,6 +19,7 @@
 
 #include "switch_kbd.h"
 #include "keyboard.h"
+#include "uibottom.h"
 
 SDL_Surface *thumbnail_image = NULL;
 int savestate_empty = 1;
@@ -247,6 +248,7 @@ static inline int key_saveMenu(int *cp)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		if (uib_handle_event(&event)) continue;
 		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hit5=0;
 		if (event.type == SDL_KEYDOWN)
 		{

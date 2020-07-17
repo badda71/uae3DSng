@@ -44,6 +44,7 @@ extern "C" int main( int argc, char *argv[] );
 #include "menu_config.h"
 #include "gp2xutil.h"
 #include "keyboard.h"
+#include "uibottom.h"
 
 /* PocketUAE */
 #include "native2amiga.h"
@@ -318,6 +319,8 @@ void real_main (int argc, char **argv)
 		write_log ("Sound driver unavailable: Sound output disabled\n");
 		produce_sound = 0;
 	}
+	uib_init();
+
 	init_joystick ();
 
 	int err = gui_init ();

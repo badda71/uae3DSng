@@ -96,7 +96,7 @@ void update_display() {
 
 	displaying_menu = 0;
 
-    prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_CONSOLEBOTTOM);
+    prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE);
 log_citra("update_display: SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
 
     float sh;

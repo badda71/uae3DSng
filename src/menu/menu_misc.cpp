@@ -20,6 +20,7 @@
 #include "custom.h"
 #include "menu_config.h"
 #include "keyboard.h"
+#include "uibottom.h"
 
 #include <3ds.h>
 
@@ -453,6 +454,7 @@ static int key_miscMenu(int *c)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		if (uib_handle_event(&event)) continue;
 		left=right=up=down=hit0=hit1=hit2=0;
 		if (event.type == SDL_KEYDOWN)
 		{

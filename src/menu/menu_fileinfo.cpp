@@ -13,6 +13,7 @@
 #include "options.h"
 #include "sound.h"
 #include "gp2x.h"
+#include "uibottom.h"
 
 static const char *text_str_fileinfo_title=    "File info";
 char* fileInfo_fileName;
@@ -57,6 +58,7 @@ static int key_fileinfoMenu(int *c)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		if (uib_handle_event(&event)) continue;
 		if (event.type == SDL_QUIT)
 			end=-1;
 		else if (event.type == SDL_KEYUP )

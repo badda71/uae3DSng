@@ -19,6 +19,7 @@
 #include <SDL/SDL_ttf.h>
 #include "menu_config.h"
 #include "keyboard.h"
+#include "uibottom.h"
 
 #define MAX_CUSTOM_ID 96
 #define MIN_CUSTOM_ID -28
@@ -633,6 +634,7 @@ static int key_controlsMenu(int *c)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		if (uib_handle_event(&event)) continue;
 		left=right=up=down=hit0=hit1=hit2=hit3=del=0;
 		if (event.type == SDL_KEYDOWN)
 		{

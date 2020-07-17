@@ -9,6 +9,22 @@ extern SDL_Surface *prSDLScreen;
 #define MENU_FILE_TEXT DATA_PREFIX "8x8font.bmp"
 #define MENU_DIR_DEFAULT "."
 
+typedef enum {
+	MB_NONE,
+	MB_OK,
+	MB_YESNO
+} mb_mode;
+
+enum str_alignment {
+	ALIGN_LEFT,
+	ALIGN_RIGHT,
+	ALIGN_CENTER
+};
+
+enum font_size {
+	FONT_NORMAL
+};
+
 void init_kickstart();
 void showWarning(const char *msg);
 void exit_safely(int quit_via_home);
@@ -32,6 +48,8 @@ int save_thumb(int code,char *path);
 int save_png(SDL_Surface* surface,char *path);
 void load_savestate_thumbnail();
 void draw_image_pos(SDL_Surface *img, int x, int y);
+void write_text_full (SDL_Surface *s, const char *str, int x, int y, int maxchars, enum str_alignment align, enum font_size size, Uint32 col, int inv);
+int text_messagebox(char *title, char *text, mb_mode mode);
 
 int createScript(int bIcon=0);
 
@@ -111,12 +129,9 @@ enum { MEMDISK_MENU_CASE_MAIN, MEMDISK_MENU_CASE_MISC };
 #define MENU_MIN_HOLDING_TIME 200
 #define MENU_MOVE_DELAY 50
 
-enum str_alignment {
-	ALIGN_LEFT,
-	ALIGN_RIGHT,
-	ALIGN_CENTER
-};
-
-enum font_size {
-	FONT_NORMAL
-};
+extern Uint32 menu_text_color;			// text
+extern Uint32 menu_text_color_inactive;	// inactive text
+extern Uint32 menu_inv_color;			// blink text underlay
+extern Uint32 menu_inv2_color;			// light text underlay (almost like background)
+extern Uint32 menu_win0_color;			// window dropshadow
+extern Uint32 menu_win1_color;			// window frame

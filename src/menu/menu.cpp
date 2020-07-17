@@ -14,6 +14,8 @@
 #include "sound.h"
 #include <png.h>
 #include "xwin.h"
+#include "uibottom.h"
+#include "keyboard.h"
 
 extern int bReloadKickstart;
 
@@ -126,7 +128,7 @@ void text_flip(void)
 {
 	SDL_Delay(10);
 //	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);
-//	uib_update();
+	uib_update();
 	SDL_Flip(prSDLScreen);
 }
 
@@ -165,7 +167,7 @@ void init_text(int splash)
 	displaying_menu = 1;
 	SDL_Surface *tmp;
 
-	prSDLScreen=SDL_SetVideoMode(400,240,16,SDL_CONSOLEBOTTOM);
+	prSDLScreen=SDL_SetVideoMode(400,240,16,SDL_HWSURFACE);
 	SDL_ShowCursor(SDL_DISABLE);
 	text_screen=prSDLScreen;
 	if (text_screen==NULL)
@@ -402,4 +404,128 @@ void _text_draw_window_bar(SDL_Surface *sf, int x, int y, int w, int h, int per,
 	text_screen=sf;
 	text_draw_window_bar(x,y,w,h,per,max,title);
 	text_screen=back;
+}
+
+#define FONT_H 8
+#define FONT_W 8
+#define MSGBOX_PADDING 8
+
+int text_messagebox(char *title, char *message, mb_mode mode) {
+	int height = 1;
+	int width = strlen(title) + 4,w;
+	char buf[200];
+	char *c;
+	extern SDL_Surface *text_screen;
+
+	int maxwidth = (text_screen->w - MSGBOX_PADDING * 2) / FONT_W - 2;
+	int maxheight = text_screen->h / FONT_H - 3 - MSGBOX_PADDING * 2 / FONT_H;;
+
+	for (c=message, w=0; *c!=0; c++)
+	{
+		if (*c == '\n')
+		{
+			++height;
+			if (width<w) width=w;
+			w=0;
+		}
+		else
+		{
+			++w;
+			if (w > maxwidth) {
+ 				++height;
+				width=maxwidth;
+				w=0;
+			}
+		}
+	}
+	if (width<w) width=w;
+	height += mode==MB_NONE ? 0 : 2;
+	if (mode == MB_OK && width<4) width=4;
+	if (mode == MB_YESNO && width<9) width=9;
+	if (width > maxwidth) width = maxwidth;
+	if (height > maxwidth) height = maxheight;
+
+	int x= (text_screen->w / FONT_W - width) / 2;
+	int y= (text_screen->h / FONT_H - height) / 2;
+	
+	int selected=0;
+	int frame = 0;
+	do {
+		int yo=0;
+		SDL_Event e;
+		text_draw_background();
+		text_draw_window(x * FONT_W - MSGBOX_PADDING, y * FONT_H - MSGBOX_PADDING, width*FONT_W + MSGBOX_PADDING*2, height*FONT_H + MSGBOX_PADDING*2, title);
+
+		char *n=NULL;
+		for (c=message; *c!=0; c=n)
+		{
+			n=strchr(c,'\n');
+			if (!n) n=c+strlen(c);
+			if (n-c > width) n=c+width;
+			snprintf(buf, n-c+1, "%s", c);
+			write_text(x, y+yo, buf);
+			++yo;
+			if (*n == '\n') ++n;
+		}
+
+		int flash = frame / 3;
+
+		if (mode != MB_NONE &&
+			SDL_PollEvent(&e) &&
+			!uib_handle_event(&e) &&
+			e.type==SDL_KEYDOWN)
+		{
+			switch (e.key.keysym.sym) {
+			case DS_RIGHT1:
+			case DS_RIGHT2:
+			case DS_RIGHT3:
+			case AK_RT:
+			case DS_DOWN1:
+			case DS_DOWN2:
+			case DS_DOWN3:
+			case AK_DN:
+			case DS_LEFT1:
+			case DS_LEFT2:
+			case DS_LEFT3:
+			case AK_LF:
+			case DS_UP1:
+			case DS_UP2:
+			case DS_UP3:
+			case AK_UP: if (mode == MB_YESNO) selected = (selected+1) % 2; break;
+			case DS_A:
+			case DS_START:
+			case AK_RET:
+			case AK_SPC: return selected; break;
+			case AK_ESC:
+			case DS_B: return -1; break;
+			}
+		}
+		switch (mode) {
+			case MB_OK:
+				write_text(x+width/2-2, y+yo+1, "    ");
+				if (flash)
+					write_text_inv(x+width/2-1, y+yo+1, "OK");
+				else
+					write_text(x+width/2-1, y+yo+1, "OK");
+				break;
+			case MB_YESNO:
+				write_text(x+width/2-5, y+yo+1, "         ");
+				if (flash && selected==0)
+					write_text_inv(x+width/2-4, y+yo+1, "YES");
+				else
+					write_text(x+width/2-4, y+yo+1, "YES");
+				if (flash && selected==1)
+					write_text_inv(x+width/2+1, y+yo+1, "NO");
+				else
+					write_text(x+width/2+1, y+yo+1, "NO");
+				break;
+		}
+		// text_flip() but without the SDL_Delay
+		uib_update();
+		SDL_Flip(prSDLScreen);
+		if (mode == MB_NONE) break;
+		SDL_Delay(20);
+		frame = (frame + 1) % 6;
+	} while (1);
+	return 0;
 }

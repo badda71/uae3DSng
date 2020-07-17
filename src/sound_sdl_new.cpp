@@ -87,7 +87,6 @@ static int s_oldrate = 0, s_oldbits = 0, s_oldstereo = 0;
 static int sound_thread_active = 0, sound_thread_exit = 0;
 static uae_sem_t sound_sem, callback_sem;
 
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 static int cnt = 0;
 
 static void sound_thread_mixer(void *ud, Uint8 *stream, int len)

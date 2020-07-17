@@ -22,7 +22,8 @@
 #include "custom.h"
 #include "savestate.h"
 #include <3ds.h>
- 
+#include "uibottom.h"
+
 int inside_menu = 0;
 
 extern int kickstart;
@@ -363,6 +364,7 @@ static int key_mainMenu(int *cp)
 
 	while (SDL_PollEvent(&event) > 0)
 	{
+		if (uib_handle_event(&event)) continue;
 		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hit5=hit6=hitH=hitS=hitQ=hitN1=hitN2=hitN3=hitN4=0;
 		if (event.type == SDL_QUIT)
 		{
