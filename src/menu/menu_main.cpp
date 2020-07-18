@@ -44,8 +44,6 @@ extern void update_display(void);
 extern int saveAdfDir(void);
 extern void setCpuSpeed(void);
 extern void show_error(const char *);
-extern void close_joystick();
-extern void init_joystick();
 
 extern char launchDir[300];
 extern char currentDir[300];
@@ -706,6 +704,21 @@ static void unraise_mainMenu()
 	text_flip();*/
 }
 
+void reset_mainMenu()
+{
+	setCpuSpeed();
+	gp2xMouseEmuOn=0;
+	gp2xButtonRemappingOn=0;
+	mainMenu_drives=nr_drives;
+	if (kickstart!=oldkickstart) 
+	{
+		oldkickstart=kickstart;
+		snprintf(romfile, 256, "%s/kickstarts/%s",launchDir,kickstarts_rom_names[kickstart]);
+		bReloadKickstart=1;
+		uae4all_init_rom(romfile);
+	}
+}
+
 int run_mainMenu()
 {
 	static int c=0;
@@ -715,11 +728,7 @@ int run_mainMenu()
 	mainMenu_case=-1;
 	init_text(0);
 	
-#if defined(__PSP2__) || defined(__SWITCH__)
 	inside_menu = 1;
-	SDL_Event event;
-	while (SDL_PollEvent(&event) > 0);
-#endif
    
 	while(mainMenu_case<0)
 	{
@@ -828,17 +837,7 @@ int run_mainMenu()
 				mainMenu_case=-1;
 			break;
 		case MAIN_MENU_CASE_RESET:
-			setCpuSpeed();
-			gp2xMouseEmuOn=0;
-			gp2xButtonRemappingOn=0;
-			mainMenu_drives=nr_drives;
-			if (kickstart!=oldkickstart) 
-			{
-				oldkickstart=kickstart;
-				snprintf(romfile, 256, "%s/kickstarts/%s",launchDir,kickstarts_rom_names[kickstart]);
-				bReloadKickstart=1;
-				uae4all_init_rom(romfile);
-			}
+			reset_mainMenu();
 			if (emulating)
 			{
 				mainMenu_case=2;	
@@ -928,12 +927,6 @@ int run_mainMenu()
 
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
-	
-	//See if new joysticks have been paired
-	close_joystick();
-	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);	
-	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-	init_joystick();
 	
 	update_display();
 

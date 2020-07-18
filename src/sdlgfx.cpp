@@ -46,10 +46,6 @@
 #include "uibottom.h"
 #include "uae3ds.h"
 
-bool mouse_state = true;
-extern bool slow_mouse;
-extern bool fast_mouse;
-
 extern int moved_x;
 extern int moved_y;
 extern int stylusClickOverride;
@@ -302,13 +298,9 @@ void handle_events (void)
 			buttonstate[(rEvent.button.button-1)%3] = 0;
 			break;
 		case SDL_MOUSEMOTION:
-			mouse_state = true;
-			int mouseScale = mainMenu_mouseMultiplier * 16;
+			int mouseScale = mainMenu_mouseMultiplier * 32;
 			mouseScale /= 100;
-
-			if (fast_mouse) mouseScale *= 3;
-			if (slow_mouse) mouseScale /= 8;
-
+	
 			lastmx += rEvent.motion.xrel * mouseScale;
 			lastmy += rEvent.motion.yrel * mouseScale;
 			// move mouse if touching mousepad edges

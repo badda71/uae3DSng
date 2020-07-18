@@ -124,7 +124,7 @@ int quit_program = 0;
 
 void uae_reset (void)
 {
-    gui_purge_events();
+    //gui_purge_events();
     black_screen_now();
     quit_program = 2;
     set_special (SPCFLAG_BRK);
@@ -175,7 +175,6 @@ void do_leave_program (void)
 #endif
 	     
     graphics_leave ();
-    close_joystick ();
     close_sound ();
     zfile_exit ();
 #ifdef USE_SDL
@@ -255,7 +254,7 @@ void real_main (int argc, char **argv)
 	}
 
 #ifdef USE_SDL
-    SDL_Init (SDL_INIT_VIDEO | SDL_INIT_JOYSTICK 
+    SDL_Init (SDL_INIT_VIDEO 
 #if !defined(NO_SOUND) && !defined(GP2X)
  			| SDL_INIT_AUDIO
 #endif
@@ -306,8 +305,6 @@ void real_main (int argc, char **argv)
 	}
 	uib_init();
 
-	init_joystick ();
-
 	int err = gui_init ();
 	if (err == -1) {
 		write_log ("Failed to initialize the GUI\n");
@@ -322,7 +319,7 @@ void real_main (int argc, char **argv)
 	/* Install resident module to get 8MB chipmem, if requested */
 	rtarea_setup ();
 
-	keybuf_init (); /* Must come after init_joystick */
+	keybuf_init ();
 
 #ifdef USE_AUTOCONFIG
     expansion_init ();

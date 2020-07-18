@@ -27,6 +27,7 @@
 #include "keyboard.h"
 #include "disk.h"
 #include "savestate.h"
+#include "gensound.h"
 #include <SDL/SDL.h>
 
 #define VIDEO_FLAGS SDL_SWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF
@@ -71,8 +72,6 @@ int stylusAdjustX=0, stylusAdjustY=0;
 int screenWidth = 640;
 
 static int customAutofireDelay[MAX_NUM_CONTROLLERS]={};
-
-extern int nr_joysticks;
 
 extern struct gui_info gui_data;
 
@@ -180,27 +179,29 @@ static void getChanges(void)
 int gui_init (void)
 {
 	SDL_ShowCursor(SDL_DISABLE);
-#if !(defined(AROS))
-	SDL_JoystickEventState(SDL_ENABLE);
-	SDL_JoystickOpen(0);
-#endif
 	if (prSDLScreen!=NULL)
 	{
 		emulating=0;
 		uae4all_init_sound();
 		init_kickstart();
 
-#if defined(__PSP2__) // NOT __SWITCH__
-		//Lock PS Button to prevent file corruption
-		sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
-#endif
+		//init_text(1);
 
+		// start menu as soon as possible
+		//run_mainMenu();
+		SDL_Event e;
+		e.type = SDL_KEYDOWN;
+		e.key.keysym.sym = (SDLKey)DS_SELECT;
+		e.key.keysym.mod = KMOD_MODE; // not mappable
+		SDL_PushEvent(&e);
+		e.type = SDL_KEYUP;
+		SDL_PushEvent(&e);
 
-		init_text(1);
-#if !defined(__SWITCH__) && !defined(__PSP2__)
-		if (!uae4all_image_file0[0])
-#endif
-			run_mainMenu();
+		extern void reset_mainMenu();
+		reset_mainMenu();
+		init_sound();
+		update_display();
+		
 		quit_text();
 		inputmode_init();
 		uae4all_pause_music();

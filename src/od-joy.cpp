@@ -25,10 +25,6 @@
 #include "gp2x.h"
 #include "xwin.h"
 
-int nr_joysticks;
-bool slow_mouse = false;
-bool fast_mouse = false;
-
 void read_joystick(int nr, unsigned int *dir, int *button)
 {
     int left = 0, right = 0, top = 0, bot = 0;
@@ -52,13 +48,4 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	if (left) top = !top;
 	if (right) bot = !bot;
 		*dir = bot | (right << 1) | (top << 8) | (left << 9);
-}
-
-void init_joystick(void)
-{
-	nr_joysticks = 0;
-}
-
-void close_joystick(void)
-{
 }

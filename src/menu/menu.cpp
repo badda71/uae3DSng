@@ -31,7 +31,6 @@ Uint32 menu_win1_color=0;			// window frame
 Uint32 menu_barra0_color=0;			// progress bar color 0
 Uint32 menu_barra1_color=0;			// progress bar color 1
 
-int kickstart_warning=0;
 int displaying_menu = 1;
 
 int menu_screen_width = 400;
@@ -138,11 +137,9 @@ void init_kickstart()
 	{
 		init_text(0);
 		text_messagebox("--- ERROR ---", "kickstart rom(s) not found!", MB_OK);
-		kickstart_warning=1;
 	}
 	else
 	{
-		kickstart_warning=0;
 		bReloadKickstart=1;
 	}
 }
