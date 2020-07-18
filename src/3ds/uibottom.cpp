@@ -892,7 +892,7 @@ int uib_handle_event(SDL_Event *e) {
 			kb_activekey=-1;
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			x = (int)(((((double)e->button.x)*320.0f)/((double)prSDLScreen->w))+0.5f);
+			x = e->button.x;
 			y = e->button.y;
 			for (i = 0; uikbd_keypos[i].key != -1 ; ++i) {
 				// keyboard button

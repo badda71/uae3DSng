@@ -248,141 +248,6 @@ void graphics_leave (void)
     dumpcustom ();
 }
 
-/* Decode KeySyms. This function knows about all keys that are common
- * between different keyboard languages. */
-static int kc_decode (SDL_keysym *prKeySym)
-{
-    switch (prKeySym->sym)
-    {
-    case SDLK_b: return AK_B;
-    case SDLK_c: return AK_C;
-    case SDLK_d: return AK_D;
-    case SDLK_e: return AK_E;
-    case SDLK_f: return AK_F;
-    case SDLK_g: return AK_G;
-    case SDLK_h: return AK_H;
-    case SDLK_i: return AK_I;
-    case SDLK_j: return AK_J;
-    case SDLK_k: return AK_K;
-    case SDLK_l: return AK_L;
-    case SDLK_n: return AK_N;
-    case SDLK_o: return AK_O;
-    case SDLK_p: return AK_P;
-    case SDLK_r: return AK_R;
-    case SDLK_s: return AK_S;
-    case SDLK_t: return AK_T;
-    case SDLK_u: return AK_U;
-    case SDLK_v: return AK_V;
-    case SDLK_x: return AK_X;
-
-    case SDLK_0: return AK_0;
-    case SDLK_1: return AK_1;
-    case SDLK_2: return AK_2;
-    case SDLK_3: return AK_3;
-    case SDLK_4: return AK_4;
-    case SDLK_5: return AK_5;
-    case SDLK_6: return AK_6;
-    case SDLK_7: return AK_7;
-    case SDLK_8: return AK_8;
-    case SDLK_9: return AK_9;
-
-    case SDLK_KP0: return AK_NP0;
-    case SDLK_KP1: return AK_NP1;
-    case SDLK_KP2: return AK_NP2;
-    case SDLK_KP3: return AK_NP3;
-    case SDLK_KP4: return AK_NP4;
-    case SDLK_KP5: return AK_NP5;
-    case SDLK_KP6: return AK_NP6;
-    case SDLK_KP7: return AK_NP7;
-    case SDLK_KP8: return AK_NP8;
-    case SDLK_KP9: return AK_NP9;
-    case SDLK_KP_DIVIDE: return AK_NPDIV;
-    case SDLK_KP_MULTIPLY: return AK_NPMUL;
-    case SDLK_KP_MINUS: return AK_NPSUB;
-    case SDLK_KP_PLUS: return AK_NPADD;
-    case SDLK_KP_PERIOD: return AK_NPDEL;
-    case SDLK_KP_ENTER: return AK_ENT;
-
-    case SDLK_F1: return AK_F1;
-    case SDLK_F2: return AK_F2;
-    case SDLK_F3: return AK_F3;
-    case SDLK_F4: return AK_F4;
-    case SDLK_F5: return AK_F5;
-    case SDLK_F6: return AK_F6;
-    case SDLK_F7: return AK_F7;
-    case SDLK_F8: return AK_F8;
-    case SDLK_F9: return AK_F9;
-    case SDLK_F10: return AK_F10;
-
-    case SDLK_BACKSPACE: return AK_BS;
-    case SDLK_DELETE: return AK_DEL;
-    case SDLK_LCTRL: return AK_CTRL;
-    case SDLK_RCTRL: return AK_RCTRL;
-    case SDLK_TAB: return AK_TAB;
-    case SDLK_LALT: return AK_LALT;
-    case SDLK_RALT: return AK_RALT;
-    case SDLK_LMETA: return AK_LAMI;
-    case SDLK_RMETA: return AK_RAMI;
-    case SDLK_RETURN: return AK_RET;
-    case SDLK_SPACE: return AK_SPC;
-    case SDLK_LSHIFT: return AK_LSH;
-    case SDLK_RSHIFT: return AK_RSH;
-    case SDLK_ESCAPE: return AK_ESC;
-
-    case SDLK_INSERT: return AK_HELP;
-    case SDLK_HOME: return AK_NPLPAREN;
-    case SDLK_END: return AK_NPRPAREN;
-    case SDLK_CAPSLOCK: return AK_CAPSLOCK;
-
-    case SDLK_UP: return AK_UP;
-    case SDLK_DOWN: return AK_DN;
-    case SDLK_LEFT: return AK_LF;
-    case SDLK_RIGHT: return AK_RT;
-
-    case SDLK_PAGEDOWN: return AK_LAMI;        /* PgDn mapped to left amiga */
-    case SDLK_PAGEUP: return AK_RAMI;          /* PgUp mapped to right amiga */
-
-    default: return -1;
-    }
-}
-
-static int decode_us (SDL_keysym *prKeySym)
-{
-    switch(prKeySym->sym)
-    {
-	/* US specific */
-    case SDLK_a: return AK_A;
-    case SDLK_m: return AK_M;
-    case SDLK_q: return AK_Q;
-    case SDLK_y: return AK_Y;
-    case SDLK_w: return AK_W;
-    case SDLK_z: return AK_Z;
-    case SDLK_LEFTBRACKET: return AK_LBRACKET;
-    case SDLK_RIGHTBRACKET: return AK_RBRACKET;
-    case SDLK_COMMA: return AK_COMMA;
-    case SDLK_PERIOD: return AK_PERIOD;
-    case SDLK_SLASH: return AK_SLASH;
-    case SDLK_SEMICOLON: return AK_SEMICOLON;
-    case SDLK_MINUS: return AK_MINUS;
-    case SDLK_EQUALS: return AK_EQUAL;
-	/* this doesn't work: */
-    case SDLK_BACKQUOTE: return AK_QUOTE;
-    case SDLK_QUOTE: return AK_BACKQUOTE;
-    case SDLK_BACKSLASH: return AK_BACKSLASH;
-    default: return -1;
-    }
-}
-
-int keycode2amiga(SDL_keysym *prKeySym)
-{
-    int iAmigaKeycode = kc_decode(prKeySym);
-    if (iAmigaKeycode == -1)
-            return decode_us(prKeySym);
-    return iAmigaKeycode;
-}
-
-static int refresh_necessary = 0;
-
 void handle_events (void)
 {
 	SDL_Event rEvent;
@@ -408,7 +273,7 @@ void handle_events (void)
 		case SDL_KEYDOWN:
 			if ((rEvent.key.keysym.sym & 0x100) == 0)
 			{
-				iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
+				iAmigaKeyCode = rEvent.key.keysym.sym;
 				if (iAmigaKeyCode >= 0)
 				{
 					if (!uae4all_keystate[iAmigaKeyCode])
@@ -422,7 +287,7 @@ void handle_events (void)
 		case SDL_KEYUP:
 			if ((rEvent.key.keysym.sym & 0x100) == 0)
 			{
-				iAmigaKeyCode = keycode2amiga(&(rEvent.key.keysym));
+				iAmigaKeyCode = rEvent.key.keysym.sym;
 				if (iAmigaKeyCode >= 0)
 				{
 					uae4all_keystate[iAmigaKeyCode] = 0;

@@ -118,20 +118,10 @@ void N3DS_PumpEvents(_THIS)
 		
 // TO DO: handle fit screen on x and y.Y and Y to be considered separately
 		
-		if(this->hidden->screens&SDL_TOPSCR && this->hidden->screens&SDL_BOTTOMSCR) {
-			if (touch.px != 0 || touch.py != 0) {
-				SDL_PrivateMouseMotion (0, 0, 
-					touch.px  + (this->hidden->w1 - 320)/2, 
-					this->hidden->y2 + touch.py + (this->hidden->h2 - 240)/2);
-				if (!SDL_GetMouseState (NULL, NULL))
-					SDL_PrivateMouseButton (SDL_PRESSED, 1, 0, 0);
-			}
-		} else {
-			if (touch.px != 0 || touch.py != 0) {
-				SDL_PrivateMouseMotion (0, 0, (touch.px * this->hidden->w1) / 320, (touch.py * this->hidden->h1) / 240);
-				if (!SDL_GetMouseState (NULL, NULL))
-					SDL_PrivateMouseButton (SDL_PRESSED, 1, 0, 0);
-			}
+		if (touch.px != 0 || touch.py != 0) {
+			SDL_PrivateMouseMotion (0, 0, touch.px, touch.py);
+			if (!SDL_GetMouseState (NULL, NULL))
+				SDL_PrivateMouseButton (SDL_PRESSED, 1, 0, 0);
 		}
 	} else {
 		if (SDL_GetMouseState (NULL, NULL))
