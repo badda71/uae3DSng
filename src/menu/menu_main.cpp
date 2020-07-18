@@ -729,7 +729,8 @@ int run_mainMenu()
 	init_text(0);
 	
 	inside_menu = 1;
-   
+	
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	while(mainMenu_case<0)
 	{
 		raise_mainMenu();
@@ -924,6 +925,7 @@ int run_mainMenu()
 			mainMenu_case=-1;
 		}
 	}
+	SDL_EnableKeyRepeat(0,0);
 
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
