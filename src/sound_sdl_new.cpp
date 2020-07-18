@@ -288,7 +288,7 @@ void close_sound (void)
 
     // testing shows that reopenning sound device is not a good idea on gp2x (causes random sound driver crashes)
     // we will close it on real exit instead
-    //gp2x_stop_sound();
+    gp2x_stop_sound();
     have_sound = 0;
 
 #ifdef DEBUG_SOUND

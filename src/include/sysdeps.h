@@ -404,7 +404,13 @@ extern void mallocemu_free (void *ptr);
 #define write_log write_log_standard
 
 extern void write_log_standard (const char *, ...);
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern void log_citra(const char *, ...);
+#ifdef __cplusplus
+}
+#endif
 extern void console_out (const char *, ...);
 extern void console_flush (void);
 extern int console_get (char *, int);

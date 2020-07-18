@@ -163,27 +163,14 @@ void do_start_program (void)
 
 void do_leave_program (void)
 {
-#ifdef USE_SDL
-#if defined(__PSP2__) || defined(__SWITCH__) //On Vita, only remove keyboard graphics from memory when quitting the emu
-#ifdef __PSP2__ // NOT __SWITCH__
-	//De-Initialize touch panels
-	psp2QuitTouch();
-#endif
-#endif
-  if(current_screenshot != NULL)
-    SDL_FreeSurface(current_screenshot);
-#endif
-	     
-    graphics_leave ();
-    close_sound ();
-    zfile_exit ();
-#ifdef USE_SDL
-    SDL_Quit ();
-#endif
-    memory_cleanup ();
-#ifdef __SWITCH__
-    socExit();
-#endif
+	if(current_screenshot != NULL)
+		SDL_FreeSurface(current_screenshot);
+	graphics_leave ();
+	close_sound ();
+	zfile_exit ();
+	SDL_Quit ();
+	memory_cleanup ();
+	socExit();
 }
 
 void start_program (void)
@@ -253,13 +240,7 @@ void real_main (int argc, char **argv)
 		exit(0);
 	}
 
-#ifdef USE_SDL
-    SDL_Init (SDL_INIT_VIDEO 
-#if !defined(NO_SOUND) && !defined(GP2X)
- 			| SDL_INIT_AUDIO
-#endif
-	);
-#endif
+    SDL_Init (SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
 	// init romfs file system
 	romfsInit();

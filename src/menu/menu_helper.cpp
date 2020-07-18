@@ -60,7 +60,7 @@ void stateFilenameToThumbFilename(char *src, char *dst) {
 }
 
 void exit_safely(int quit_via_home) {
-    saveAdfDir();	
+    saveAdfDir();
     leave_program();
     exit(0);
 }

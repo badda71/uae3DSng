@@ -16,7 +16,7 @@ static void vlog_citra(const char *format, va_list arg ) {
 	svcOutputDebugString(buf, strlen(buf));
 }
 
-void log_citra(const char *format, ...)
+extern "C" void log_citra(const char *format, ...)
 {
     va_list argptr;
     va_start(argptr, format);
