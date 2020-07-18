@@ -345,6 +345,7 @@ static void goMenu(void)
 
 void gui_handle_events (SDL_Event *e)
 {
+	extern bool switch_autofire;
 	int v,t = e->type;
 	if ((v=(t == SDL_KEYDOWN)) || t == SDL_KEYUP) {
 		switch (e->key.keysym.sym) {
@@ -405,10 +406,10 @@ void gui_handle_events (SDL_Event *e)
 				else
 					goSuperThrottle();
 			}
-			break;
+			break;*/
 		case DS_R:
-			if (v) autofire_start();
-			else autofire_stop();*/
+			switch_autofire = v;
+			break;
 		default:
 			break;
 		}

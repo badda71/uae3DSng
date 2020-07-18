@@ -25,12 +25,15 @@
 #include "gp2x.h"
 #include "xwin.h"
 
+bool switch_autofire=false;
+
 void read_joystick(int nr, unsigned int *dir, int *button)
 {
     int left = 0, right = 0, top = 0, bot = 0;
 
     *dir = 0;
     *button = 0;
+	static int af_state = 0, af_delay = 0;
 
 	if (nr + 1 == mainMenu_joyPort) return;
 
@@ -41,6 +44,31 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	top|=emulated_top;
 	bot|=emulated_bot;
 	*button |= emulated_button1;
+
+	// autofire stuff
+	if (switch_autofire) {
+		switch (af_state) {
+		case 0: // AF button was just pressed, press button for one frame
+			af_state = 1;
+			*button |= 1;
+			break;
+		case 1: // button is pressed, release after one frame
+			af_state = 2;
+			af_delay = 0;
+			break;
+		case 2: // button is not pressed, wait mainMenu_autofireRate before pressing it again
+			if (af_delay > mainMenu_autofireRate)
+			{
+				af_state = 1;
+				*button |= 1;
+			} else {
+				++af_delay;
+			}
+			break;
+		}
+	} else {
+		af_state=0;
+	}
 
 	// map b-btn to joy up
 	top|=emulated_button2;
