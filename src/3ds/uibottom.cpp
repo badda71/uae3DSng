@@ -137,19 +137,18 @@ extern void log_citra(const char *format, ...);
 #define TD_PADY 2
 #define TD_WIDTH 32
 #define TD_LED_WIDTH 24
-#define TD_PAD (TD_WIDTH - TD_LED_WIDTH)
 
-#define ON_RGB_D 0x00ff00ff
-#define OFF_RGB_D 0x0044000ff
-#define ON_RGB_P 0xff0000ff
-#define OFF_RGB_P 0x4400000ff
+#define ON_RGB_DRIVE 0x00ff00ff
+#define OFF_RGB_DRIVE 0x0044000ff
+#define ON_RGB_POWER 0xff0000ff
+#define OFF_RGB_POWER 0x4400000ff
+#define ON_RGB_HD 0x0000ffff
+#define OFF_RGB_HD 0x0000044ff
 
 #define TD_NUM_WIDTH 7
 #define TD_NUM_HEIGHT 7
 
 #define TD_TOTAL_HEIGHT (TD_PADY * 2 + TD_NUM_HEIGHT)
-#define TD_STARTX 218
-int td_text_length = 0;
 
 // data definitions
 typedef struct {
@@ -368,9 +367,9 @@ static void uib_repaint(void *param, int topupdated) {
 	// statusbar
 /*	extern int nowSuperThrottle;
 	if (nowSuperThrottle)
-		drawImage(&turbo_icon_spr, TD_STARTX - TD_PAD - turbo_icon_spr.w, 0, 0, 0, 0);
+		drawImage(&turbo_icon_spr, TD_STARTX - TD_PAD - turbo_icon_spr.w, 0, 0, 0, 0);*/
 	drawImage(&statusbar_spr, 0, 0, 0, 0, 0);
-*/
+
 	// keyboard
 	DS3_Image *kb=(sticky & 1) == 1 ? &(kbd2_spr):&(kbd1_spr);
 	drawImage(kb, 0, kb_y_pos, 0, 0, 0);
@@ -508,7 +507,6 @@ void uib_init() {
 	statusbar_spr.fw=(float)(statusbar_spr.w)/512.0f;
 	statusbar_spr.fh=(float)(statusbar_spr.h)/16.0f;
 	makeTexture(&(statusbar_spr.tex), status_gpusrc, 512, 16);
-	td_text_length = TD_STARTX - turbo_icon_spr.w - 2 * TD_PAD;
 
 	// other stuff
 	kb_y_pos = 240 - kbd1_spr.h;
@@ -524,13 +522,13 @@ void uib_init() {
 // status line funtions
 
 static const char *numbers = {
-"------ ------ ------ ------ ------ ------ ------ ------ ------ ------ "
-"-xxxxx ---xx- -xxxxx -xxxxx -x---x -xxxxx -xxxxx -xxxxx -xxxxx -xxxxx "
-"-x---x ----x- -----x -----x -x---x -x---- -x---- -----x -x---x -x---x "
-"-x---x ----x- -xxxxx -xxxxx -xxxxx -xxxxx -xxxxx ----x- -xxxxx -xxxxx "
-"-x---x ----x- -x---- -----x -----x -----x -x---x ---x-- -x---x -----x "
-"-xxxxx ----x- -xxxxx -xxxxx -----x -xxxxx -xxxxx ---x-- -xxxxx -xxxxx "
-"------ ------ ------ ------ ------ ------ ------ ------ ------ ------ "
+"------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ "
+"-xxxxx ---xx- -xxxxx -xxxxx -x---x -xxxxx -xxxxx -xxxxx -xxxxx -xxxxx -x---x -xxxx- "
+"-x---x ----x- -----x -----x -x---x -x---- -x---- -----x -x---x -x---x -x---x -x---x "
+"-x---x ----x- -xxxxx -xxxxx -xxxxx -xxxxx -xxxxx ----x- -xxxxx -xxxxx -xxxxx -x---x "
+"-x---x ----x- -x---- -----x -----x -----x -x---x ---x-- -x---x -----x -x---x -x---x "
+"-xxxxx ----x- -xxxxx -xxxxx -----x -xxxxx -xxxxx ---x-- -xxxxx -xxxxx -x---x -xxxx- "
+"------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ "
 };
 
 static void uib_paint_led(int x, u32 col, int num)
@@ -545,54 +543,77 @@ static void uib_paint_led(int x, u32 col, int num)
 
 	if (num >= 0) {
 		x += TD_PADX;
-		u8 *nump1 = (u8 *)(numbers + (num/10) * TD_NUM_WIDTH);
-		u8 *nump2 = (u8 *)(numbers + (num%10) * TD_NUM_WIDTH);
+		u8 *nump1 = (u8 *)(numbers + (num >> 4) * TD_NUM_WIDTH);
+		u8 *nump2 = (u8 *)(numbers + (num & 0x0f) * TD_NUM_WIDTH);
 		for (y = 0; y < TD_NUM_HEIGHT; ++y) {
 			for (j = 0 ; j < TD_NUM_WIDTH; ++j) {
 				*((u32*)(status_gpusrc + ((x + j + (y + TD_PADY) * 512)<<2))) = 
-					nump1[j + y * 10 * TD_NUM_WIDTH] == 'x'? 0xffffffff : 0x000000ff;
+					nump1[j + y * 12 * TD_NUM_WIDTH] == 'x'? 0xffffffff : 0x000000ff;
 				*((u32*)(status_gpusrc + ((TD_NUM_WIDTH + x + j + (y + TD_PADY) * 512)<<2))) = 
-					nump2[j + y * 10 * TD_NUM_WIDTH] == 'x'? 0xffffffff : 0x000000ff;
+					nump2[j + y * 12 * TD_NUM_WIDTH] == 'x'? 0xffffffff : 0x000000ff;
 			}
 		}
 	}
 }
 
+#define DEC2HEX(x) (((x/10)<<4)+(x%10))
+
 static void uib_statusbar_recalc()
 {
-	static uae_u8 dt0 = -1;
-	static uae_u8 dt1 = -1;
-	static uae_u8 dm0 = -1;
-	static uae_u8 dm1 = -1;
+	static uae_u8 dt[4] = {255,255,255,255};
+	static uae_u8 dm[4] = {255,255,255,255};
 	static uae_u8 pow = -1;
-	static int fps = -1;
+	static uae_u8 fps = -1;
+	static uae_u8 hdl = -1;
+	static uae_u8 idle = -1;
+	static int nrdrives = -1;
 	int upd=0;
 	static char buf[100]={0};
 
+	if (nrdrives != mainMenu_drives) {
+		*((u32*)dt)=*((u32*)dm)=UINT_MAX;
+		hdl=pow=fps=idle=-1;
+		*buf=0;
+		SDL_FillRect(statusbar_img, NULL, 0x00000000);
+	}
 
-	if (dt0 != gui_data.drive_track[0] || 
-		dm0 != gui_data.drive_motor[0])
-	{
-		dt0 = gui_data.drive_track[0];
-		dm0 = gui_data.drive_motor[0];
-		uib_paint_led(TD_STARTX + TD_WIDTH, dm0 ? ON_RGB_D : OFF_RGB_D, dt0);
+	int x=320-TD_LED_WIDTH;
+	// floppies
+	for (int i=mainMenu_drives-1; i>=0; --i) {
+		if (gui_data.drive_track[i] != dt[i] ||
+			gui_data.drive_motor[i] != dt[i])
+		{
+			dt[i] = gui_data.drive_track[i];
+			dm[i] = gui_data.drive_motor[i];
+			uib_paint_led(x, dm[i] ? ON_RGB_DRIVE : OFF_RGB_DRIVE, DEC2HEX(dt[i]));
+			upd=1;
+		}
+		x-=TD_WIDTH;
+	}
+	// HD
+	if (gui_data.hdled != hdl) {
+		hdl = gui_data.hdled;
+		uib_paint_led(x, hdl == HDLED_OFF ? 0x000044ff :
+						(hdl == HDLED_READ ? 0x0000ffff :
+						0xff0000ff), 0xab);
 		upd=1;
 	}
-	if (dt1 != gui_data.drive_track[1] || 
-		dm1 != gui_data.drive_motor[1])
-	{
-		dt1 = gui_data.drive_track[1];
-		dm1 = gui_data.drive_motor[1];
-		uib_paint_led(TD_STARTX + 2*TD_WIDTH, dm1 ? ON_RGB_D : OFF_RGB_D, dt1);
-		upd=1;
-	}
-	
+	x-=TD_WIDTH;
+	// Power
 	if (pow != gui_data.powerled ||
 		fps != gui_data.fps)	
 	{
 		pow = gui_data.powerled;
 		fps = gui_data.fps;
-		uib_paint_led(TD_STARTX, pow ? ON_RGB_P : OFF_RGB_P, gui_data.fps);
+		uib_paint_led(x, pow ? ON_RGB_POWER : OFF_RGB_POWER, DEC2HEX(fps));
+		upd=1;
+	}
+	x-=TD_WIDTH;
+	// Idletime
+	extern int idletime_percent;
+	if (idletime_percent != idle) {
+		idle = idletime_percent;
+		uib_paint_led(x, 0x666666ff, DEC2HEX(idle));
 		upd=1;
 	}
 
@@ -602,13 +623,13 @@ static void uib_statusbar_recalc()
 			if (strcmp(buf, show_message_str)) {
 				strncpy(buf, show_message_str, 99);
 				SDL_FillRect(statusbar_img,
-					&(SDL_Rect){.x=0, .y=0, .w=td_text_length, .h=TD_TOTAL_HEIGHT}, 0x70708aff);
-				write_text_full (statusbar_img, buf, 2, 2, (td_text_length-4)/8, ALIGN_LEFT, FONT_NORMAL, menu_text_color, 0);
+					&(SDL_Rect){.x=0, .y=0, .w=x-2, .h=12}, 0x70708aff);
+				write_text_full(statusbar_img, buf, 2, 2, (x-6)/8, ALIGN_LEFT, FONT_NORMAL, menu_text_color, 0);
 				upd=1;
 			}
 		} else {
 			SDL_FillRect(statusbar_img,
-				&(SDL_Rect){.x=0, .y=0, .w=td_text_length, .h=TD_TOTAL_HEIGHT}, 0x00000000);
+				&(SDL_Rect){.x=0, .y=0, .w=x-2, .h=12}, 0x00000000);
 			show_message=0;
 			*buf=0;
 			upd=1;

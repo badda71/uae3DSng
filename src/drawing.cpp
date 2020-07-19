@@ -2058,6 +2058,7 @@ static _INLINE_ void init_drawing_frame (void)
 /*
  * Some code to put status information on the screen.
  */
+/*
 #define TD_PADX 10
 #define TD_PADY 2
 #define TD_WIDTH 32
@@ -2074,7 +2075,7 @@ static int td_pos = (TD_RIGHT|TD_BOTTOM);
 
 #define TD_TOTAL_HEIGHT (TD_PADY * 2 + TD_NUM_HEIGHT)
 
-static const char *numbers = { /* ugly */
+static const char *numbers = { // ugly
 "------ ------ ------ ------ ------ ------ ------ ------ ------ ------ "
 "-xxxxx ---xx- -xxxxx -xxxxx -x---x -xxxxx -xxxxx -xxxxx -xxxxx -xxxxx "
 "-x---x ----x- -----x -----x -x---x -x---- -x---- -----x -x---x -x---x "
@@ -2084,7 +2085,7 @@ static const char *numbers = { /* ugly */
 "------ ------ ------ ------ ------ ------ ------ ------ ------ ------ "
 };
 
-static const char *letters = { /* ugly */
+static const char *letters = { // ugly
 "------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ "
 "-xxxxx -xxxxx -xxxxx -xxxx- -xxxxx -xxxxx -xxxxx -x---x --xx-- -----x -x--x- -x---- -x---x -x---x --xxx- -xxxx- -xxxx- -xxxx- -xxxxx -xxxxx -x---x -x---x -x---x -x---x -x---x -xxxxx "
 "-x---x -x---x -x---- -x---x -x---- -x---- -x---- -x---x --xx-- -----x -x-x-- -x---- -xxxxx -xx--x -x---x -x---x -x---- -x---x -x---- ---x-- -x---x -x---x --x-x- --x-x- -x---x ----x- "
@@ -2152,25 +2153,25 @@ static _INLINE_ void draw_status_line (int line)
 	for (led = -2; led < (mainMenu_drives+1); led++) {
 		int track;
 		if (led > 0) {
-			/* Floppy */
+			// Floppy
 			track = gui_data.drive_track[led-1];
 			on = gui_data.drive_motor[led-1];
 			on_rgb = 0x0f0;
 			off_rgb = 0x040;
 		} else if (led < -1) {
-			/* Idle time */
+			// Idle time
 			track = idletime_percent;
 			on = 1;
 			on_rgb = 0x666;
 			off_rgb = 0x666;
 		} else if (led < 0) {
-			/* Power */
+			// Power
 			track = gui_data.fps;
 			on = gui_data.powerled;
 			on_rgb = 0xf00;
 			off_rgb = 0x400;
 		} else {
-			/* Hard disk */
+			// Hard disk
 			track = -2;
 			
 			switch (gui_data.hdled) {
@@ -2217,7 +2218,7 @@ static _INLINE_ void draw_status_line (int line)
     }
 
 }
-
+*/
 void check_all_prefs(void)
 {
 
@@ -2275,11 +2276,12 @@ static _INLINE_ void finish_drawing_frame (void)
 	} else {
 		countdown = HDLED_TIMEOUT;
 	}
-
+/*
 	for (i = 0; i < TD_TOTAL_HEIGHT; i++) {
 		int line = mainMenu_displayedLines - TD_TOTAL_HEIGHT + i;
 		draw_status_line (line);
 	}
+*/
 	drawfinished=1;
 	do_flush_screen ();
 }
