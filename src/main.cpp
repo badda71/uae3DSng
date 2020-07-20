@@ -330,7 +330,10 @@ void real_main (int argc, char **argv)
 #ifndef NO_MAIN_IN_MAIN_C
 int main (int argc, char *argv[])
 {
-    real_main (argc, argv);
+    // set 804 MHz
+	osSetSpeedupEnable(1);
+
+	real_main (argc, argv);
     return 0;
 }
 
