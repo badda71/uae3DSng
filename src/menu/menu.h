@@ -54,6 +54,7 @@ int text_messagebox(char *title, char *text, mb_mode mode);
 int createScript(int bIcon=0);
 
 void text_flip(void);
+void text_flip_with_image(SDL_Surface *img, int x, int y);
 void loadconfig(int general=0);
 int saveconfig(int general=0);
 int create_configfilename(char *dest, char *basename, int fromDir);

@@ -573,10 +573,6 @@ static void unraise_miscMenu()
 
 int run_menuMisc()
 {
-	SDL_Event event;
-	SDL_Delay(150);
-	while(SDL_PollEvent(&event))
-		SDL_Delay(10);
 	int end=0, c=0;
 	raise_miscMenu();
 	while(!end)

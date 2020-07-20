@@ -113,7 +113,6 @@ void text_draw_background()
 
 void text_flip_with_image(SDL_Surface *img, int x, int y)
 {
-	SDL_Delay(10);
 	SDL_Rect dst;
 	dst.x = x;
 	dst.y = y;
@@ -121,14 +120,15 @@ void text_flip_with_image(SDL_Surface *img, int x, int y)
 	dst.h = img->h;
 	SDL_BlitSurface(img, NULL, prSDLScreen, &dst);
 	SDL_Flip(prSDLScreen);
+	SDL_Delay(20);
 }
 
 void text_flip(void)
 {
-	SDL_Delay(10);
 //	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);
 	uib_update();
 	SDL_Flip(prSDLScreen);
+	SDL_Delay(20);
 }
 
 void init_kickstart()

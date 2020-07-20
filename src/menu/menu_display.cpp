@@ -548,9 +548,6 @@ static void unraise_displayMenu()
 int run_menuDisplay()
 {
 	SDL_Event event;
-	SDL_Delay(150);
-	while(SDL_PollEvent(&event))
-		SDL_Delay(10);
 	int end=0, c=0;
 	raise_displayMenu();
 	while(!end)

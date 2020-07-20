@@ -62,6 +62,10 @@ char save_import_filename[300];
 
 enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_DELETE_SLOT, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL, SAVE_MENU_CASE_IMPORT_MEM, SAVE_MENU_CASE_EXPORT_MEM, SAVE_MENU_CASE_DELETE_MEM};
 
+const int menuWidth = 37;
+const int menuHeight = 27;
+const int tnSpace = 15;
+
 static inline void cp(char* source_name, char* dest_name)
 {
 	FILE *src = fopen(source_name, "rb");
@@ -89,8 +93,6 @@ static inline void draw_savestatesMenu(int c)
 {
 	static int b=0;
 	int bb=(b%6)/3;
-	int menuWidth = 37;
-	int menuHeight = 27;
 	
 	int leftMargin = ((50 - menuWidth) / 2)*8;
 	int menuLine = ((31 - menuHeight) / 2)*8;
@@ -186,7 +188,7 @@ static inline void draw_savestatesMenu(int c)
 		write_text_pos(tabstop1+3*8,menuLine+9*8,"Empty slot");
 	}
 
-	menuLine+=15*8;
+	menuLine+=tnSpace*8;
 
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,text_str_separator);
@@ -229,7 +231,10 @@ static inline void draw_savestatesMenu(int c)
 	else
 		write_text_pos(leftMargin,menuLine,text_str_deleteslot);
 
-	text_flip();
+	if (!savestate_empty && thumbnail_image != NULL)
+		text_flip_with_image(thumbnail_image, (prSDLScreen->w - thumbnail_image->w) / 2, menuLineForThumb);
+	else
+		text_flip();
 	b++;
 }
 
@@ -241,9 +246,6 @@ static inline int key_saveMenu(int *cp)
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0;
 	int hit2=0, hit3=0, hit4=0, hit5=0;
 	SDL_Event event;
-	//delay ++;
-	//if (delay<3) return end;
-	//delay=0;
 
 	while (SDL_PollEvent(&event) > 0)
 	{
@@ -550,19 +552,9 @@ void load_savestate_thumbnail() {
 				SDL_Rect dst = {0, 0, 0, 0 };
 				src.h = loadedImage->h;
 				src.w = loadedImage->w;
-#ifdef __PSP2__
-				dst.h = (src.h <= 132 * 2)? src.h : 132 * 2;
-#else
-				dst.h = 132 * 2;
-#endif
+				dst.h = (tnSpace+1) * 8;
 				dst.w = (dst.h * src.w) / src.h;
-				if (src.w >= 640) dst.w /= 2;
-#ifdef __PSP2__
-				thumbnail_image = SDL_CreateRGBSurface(loadedImage->flags, dst.w, dst.h, loadedImage->format->BitsPerPixel, loadedImage->format->Rmask, loadedImage->format->Gmask, loadedImage->format->Bmask, loadedImage->format->Amask);
-				SDL_SoftStretch(loadedImage, &src, thumbnail_image, &dst);
-#else
 				thumbnail_image = zoomSurface(loadedImage, (float) dst.w / (float) src.w, (float) dst.h / (float) src.h, SMOOTHING_ON);
-#endif
 				SDL_FreeSurface(loadedImage);
 			} else thumbnail_image = NULL;
 		} else thumbnail_image = NULL;

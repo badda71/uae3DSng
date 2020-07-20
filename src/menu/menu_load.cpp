@@ -242,9 +242,6 @@ static int menuLoadLoop(char *curr_path)
 	//sort alphabetically
 	qsort(namelist, n, sizeof(dirent*), cmpDirentString);
 	
-	if (n<10) SDL_Delay(70);
-	else SDL_Delay(40);
-
 	// try to find sel
 	if (fname != NULL) 
 	{
