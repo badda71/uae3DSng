@@ -79,7 +79,10 @@ int mainMenu_cutRight = 0;
 int mainMenu_ntsc = DEFAULT_NTSC;
 int mainMenu_frameskip = 0;
 int visibleAreaWidth = 400;
-
+int mainMenu_scaling = 0;
+int mainMenu_scalingFac = 100;
+int mainMenu_xoffset = 0;
+int mainMenu_yoffset = 0;
 
 int saveMenu_n_savestate = 0;
 
@@ -710,13 +713,15 @@ int saveconfig(int general)
 
     snprintf((char*)buffer, 255, "kickstart=%d\n",kickstart);
     fputs(buffer,f);
-#if defined(PANDORA)
-    snprintf((char*)buffer, 255, "scaling=%d\n",0);
-#else
-    snprintf((char*)buffer, 255, "scaling=%d\n",mainMenu_enableHWscaling);
-#endif
+    snprintf((char*)buffer, 255, "scaling=%d\n",mainMenu_scaling);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "mousemultiplier=%d\n",mainMenu_mouseMultiplier);
+    snprintf((char*)buffer, 255, "scalingfac=%d\n",mainMenu_scalingFac);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "xoffset=%d\n",mainMenu_xoffset);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "yoffset=%d\n",mainMenu_yoffset);
+    fputs(buffer,f);
+	snprintf((char*)buffer, 255, "mousemultiplier=%d\n",mainMenu_mouseMultiplier);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "mouseemulation=%d\n",mainMenu_mouseEmulation);
     fputs(buffer,f);
@@ -928,12 +933,11 @@ void loadconfig(int general)
         int dummy;
 #endif
         fscanf(f,"kickstart=%d\n",&kickstart);
-#if defined(PANDORA)
-        fscanf(f,"scaling=%d\n",&dummy);
-#else
-        fscanf(f,"scaling=%d\n",&mainMenu_enableHWscaling);
-#endif
-        fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier);
+        fscanf(f,"scaling=%d\n",&mainMenu_scaling);
+        fscanf(f,"scalingfac=%d\n",&mainMenu_scalingFac);
+        fscanf(f,"xoffset=%d\n",&mainMenu_xoffset);
+        fscanf(f,"yoffset=%d\n",&mainMenu_yoffset);
+		fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier);
         //remain compatible with old configuration versions
         if (mainMenu_mouseMultiplier < 10) {
             if (mainMenu_mouseMultiplier == 1 || mainMenu_mouseMultiplier == 2 || mainMenu_mouseMultiplier == 4) {

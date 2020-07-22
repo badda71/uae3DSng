@@ -217,6 +217,7 @@ static SDL_VideoDevice *N3DS_CreateDevice(int devindex)
 	device->hidden->scalex2 = 1.0f;
 	device->hidden->scaley2 = 1.0f;
 	device->hidden->yoffset = 0;
+	device->hidden->xoffset = 0;
 
 	return device;
 }
@@ -266,6 +267,10 @@ void log_citrac(const char *format, ...)
 
 void N3DS_SetYOffset(int y) {
 	this_device->hidden->yoffset = y;
+}
+
+void N3DS_SetXOffset(int x) {
+	this_device->hidden->xoffset = x;
 }
 
 void N3DS_SetScalingDirect(float x, float y, int permanent) {
@@ -541,7 +546,7 @@ void drawMainSpritesheetAt(int x, int y, int w, int h) {
 	s32 i;
 	svcWaitSynchronization(privateSem1, U64_MAX);
 	C3D_TexBind(0, &spritesheet_tex);
-	drawTexture(x, y + this_device->hidden->yoffset, w, h, this_device->hidden->l1, this_device->hidden->r1, this_device->hidden->t1, this_device->hidden->b1);
+	drawTexture(x + this_device->hidden->xoffset, y + this_device->hidden->yoffset, w, h, this_device->hidden->l1, this_device->hidden->r1, this_device->hidden->t1, this_device->hidden->b1);
 	svcReleaseSemaphore(&i, privateSem1, 1);
 }
 

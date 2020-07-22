@@ -65,6 +65,10 @@ void exit_safely(int quit_via_home) {
     exit(0);
 }
 
+extern "C" void N3DS_SetYOffset(int);
+extern "C" void N3DS_SetXOffset(int);
+extern "C" void N3DS_SetScalingDirect(float, float, int);
+
 void update_display() {
 /*
 	if (prSDLScreen != NULL) {
@@ -80,8 +84,13 @@ void update_display() {
 */
 	displaying_menu = 0;
 
-    prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE);
+    prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE | mainMenu_scaling);
 log_citra("update_display: SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
+	N3DS_SetYOffset(mainMenu_yoffset);
+	N3DS_SetXOffset(mainMenu_xoffset);
+	if (mainMenu_scaling == 0) {
+		N3DS_SetScalingDirect((float)mainMenu_scalingFac/(float)100, (float)mainMenu_scalingFac/(float)100, 1);
+	}
 
     // clear new screen
 	SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));

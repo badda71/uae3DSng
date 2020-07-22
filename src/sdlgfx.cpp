@@ -308,9 +308,9 @@ void handle_events (void)
 				lastmx -= mouseScale * 4;
 			if(rEvent.motion.y < 5)
 				lastmy -= mouseScale * 4;
-			if(rEvent.motion.x >= visibleAreaWidth-5)
+			if(rEvent.motion.x >= 315)
 				lastmx += mouseScale * 4;
-			if(rEvent.motion.y >= mainMenu_displayedLines-5)
+			if(rEvent.motion.y >= 235)
 				lastmy += mouseScale * 4;			
 			newmousecounters = 1;
 			break;

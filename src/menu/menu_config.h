@@ -46,6 +46,10 @@ extern int mainMenu_ntsc;
 extern int mainMenu_frameskip;
 extern int mainMenu_autofire;
 extern int visibleAreaWidth;
+extern int mainMenu_scaling;
+extern int mainMenu_scalingFac;
+extern int mainMenu_xoffset;
+extern int mainMenu_yoffset;
 
 extern int saveMenu_n_savestate;
 

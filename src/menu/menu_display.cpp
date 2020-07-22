@@ -47,6 +47,10 @@ enum {
 	MENUDISPLAY_PRESETHEIGHT,
 	MENUDISPLAY_DISPLINES,
 	MENUDISPLAY_VERTPOS,
+	MENUDISPLAY_SCALING,
+	MENUDISPLAY_SCALINGFAC,
+	MENUDISPLAY_XOFFSET,
+	MENUDISPLAY_YOFFSET,
 	MENUDISPLAY_REFRESHRATE,
 	MENUDISPLAY_FRAMESKIP,
 	MENUDISPLAY_SOUND,
@@ -109,16 +113,9 @@ static void draw_displayMenu(int c)
 	else
 		write_text_inv_pos(tabstop3,menuLine,presetMode);
 
-	menuLine+=8;
-	write_text_pos(leftMargin,menuLine,text_str_display_separator);
-	menuLine+=8;
-	write_text_pos(leftMargin,menuLine,"Custom Settings");
-	menuLine+=8;
-	write_text_pos(leftMargin,menuLine,"---------------");
-	menuLine+=8;
-
 	// MENUDISPLAY_DISPLINES
-	write_text_pos(leftMargin,menuLine,"Displayed Lines");
+	menuLine+=12;
+	write_text_pos(leftMargin,menuLine,"Rendered Lines");
 	sprintf(value, "%d", mainMenu_displayedLines);
 	if ((menuDisplay!=MENUDISPLAY_DISPLINES)||(bb))
 		write_text_pos(tabstop3,menuLine,value);
@@ -126,12 +123,57 @@ static void draw_displayMenu(int c)
 		write_text_inv_pos(tabstop3,menuLine,value);
 	// MENUDISPLAY_VERTPOS
 	menuLine+=12;
-	write_text_pos(leftMargin,menuLine,"Vertical Position");
+	write_text_pos(leftMargin,menuLine,"Render Start");
 	sprintf(value, "%d", moveY);
 	if ((menuDisplay!=MENUDISPLAY_VERTPOS)||(bb))
 		write_text_pos(tabstop3,menuLine,value);
 	else
 		write_text_inv_pos(tabstop3,menuLine,value);
+
+	// MENUDISPLAY_SCALING
+	menuLine+=12;
+	write_text_pos(leftMargin,menuLine,"Scaling");
+	if ((mainMenu_scaling==0)&&((menuDisplay!=MENUDISPLAY_SCALING)||(bb)))
+		write_text_inv_pos(leftMargin + 14*8,menuLine,"custom");
+	else
+		write_text_pos(leftMargin + 14*8,menuLine,"custom");
+	if ((mainMenu_scaling==SDL_FITWIDTH)&&((menuDisplay!=MENUDISPLAY_SCALING)||(bb)))
+		write_text_inv_pos(leftMargin + 21*8,menuLine,"width");
+	else
+		write_text_pos(leftMargin + 21*8,menuLine,"width");
+	if ((mainMenu_scaling==SDL_FITHEIGHT)&&((menuDisplay!=MENUDISPLAY_SCALING)||(bb)))
+		write_text_inv_pos(leftMargin + 27*8,menuLine,"height");
+	else
+		write_text_pos(leftMargin + 27*8,menuLine,"height");
+	if ((mainMenu_scaling==SDL_FULLSCREEN)&&((menuDisplay!=MENUDISPLAY_SCALING)||(bb)))
+		write_text_inv_pos(leftMargin + 34*8,menuLine,"full");
+	else
+		write_text_pos(leftMargin + 34*8,menuLine,"full");
+
+	menuLine+=12;
+	write_text_pos(leftMargin,menuLine,"Custom Scaling");
+	sprintf(value, "%d%%", mainMenu_scalingFac);
+	if ((menuDisplay!=MENUDISPLAY_SCALINGFAC)||(bb))
+		write_text_pos(tabstop3,menuLine,value);
+	else
+		write_text_inv_pos(tabstop3,menuLine,value);
+
+	menuLine+=12;
+	write_text_pos(leftMargin,menuLine,"X-Offset");
+	sprintf(value, "%d", mainMenu_xoffset);
+	if ((menuDisplay!=MENUDISPLAY_XOFFSET)||(bb))
+		write_text_pos(tabstop3,menuLine,value);
+	else
+		write_text_inv_pos(tabstop3,menuLine,value);
+
+	menuLine+=12;
+	write_text_pos(leftMargin,menuLine,"Y-Offset");
+	sprintf(value, "%d", mainMenu_yoffset);
+	if ((menuDisplay!=MENUDISPLAY_YOFFSET)||(bb))
+		write_text_pos(tabstop3,menuLine,value);
+	else
+		write_text_inv_pos(tabstop3,menuLine,value);
+
 	menuLine+=8;
 	write_text_pos(leftMargin,menuLine,text_str_display_separator);
 	menuLine+=8;
@@ -272,6 +314,20 @@ static void draw_displayMenu(int c)
 	b++;
 }
 
+static void adjustScaling()
+{
+	int smin = MIN(MIN (100, (400*100)/visibleAreaWidth), (240*100)/mainMenu_displayedLines);
+	int smax = 200;
+	if (mainMenu_scalingFac < smin) mainMenu_scalingFac = smin;
+	if (mainMenu_scalingFac > smax) mainMenu_scalingFac = smax;
+	if (mainMenu_xoffset < -(visibleAreaWidth/2)) mainMenu_xoffset = -(visibleAreaWidth/2);
+	if (mainMenu_xoffset > visibleAreaWidth/2) mainMenu_xoffset= (visibleAreaWidth/2);
+//	mainMenu_xoffset &= ~0x07;
+	if (mainMenu_yoffset < -(mainMenu_displayedLines / 2)) mainMenu_yoffset = -mainMenu_displayedLines/2;
+	if (mainMenu_yoffset > mainMenu_displayedLines / 2) mainMenu_yoffset = mainMenu_displayedLines/2;
+//	mainMenu_yoffset &= ~0x07;
+}
+
 static int key_displayMenu(int *c)
 {
 	int end=0;
@@ -361,6 +417,7 @@ static int key_displayMenu(int *c)
 					else
 						SetPresetMode(presetModeId + 10);
 				}
+				adjustScaling();
 				break;
 			case MENUDISPLAY_PRESETHEIGHT:
 				if (left)
@@ -395,6 +452,45 @@ static int key_displayMenu(int *c)
 							SetPresetMode(presetModeId + 1);
 					}
 				}
+				adjustScaling();
+				break;
+			case MENUDISPLAY_SCALING:
+				if (right)
+				{
+					if (mainMenu_scaling == 0) mainMenu_scaling = SDL_FITWIDTH;
+					else if (mainMenu_scaling == SDL_FITWIDTH) mainMenu_scaling = SDL_FITHEIGHT;
+					else if (mainMenu_scaling == SDL_FITHEIGHT) mainMenu_scaling = SDL_FULLSCREEN ;
+					else if (mainMenu_scaling == SDL_FULLSCREEN ) mainMenu_scaling = 0;
+				}
+				else if (left)
+				{
+					if (mainMenu_scaling == 0) mainMenu_scaling = SDL_FULLSCREEN;
+					else if (mainMenu_scaling == SDL_FITWIDTH) mainMenu_scaling = 0;
+					else if (mainMenu_scaling == SDL_FITHEIGHT) mainMenu_scaling = SDL_FITWIDTH ;
+					else if (mainMenu_scaling == SDL_FULLSCREEN ) mainMenu_scaling = SDL_FITHEIGHT;
+				}
+				break;
+			case MENUDISPLAY_SCALINGFAC:
+				if (right)
+				{
+					mainMenu_scalingFac = ((mainMenu_scalingFac+10)/10)*10;
+
+				}
+				else if (left)
+				{
+					mainMenu_scalingFac = ((mainMenu_scalingFac-10)/10)*10;
+				}
+				adjustScaling();
+				break;
+			case MENUDISPLAY_XOFFSET:
+				if (right) mainMenu_xoffset += 1;
+				if (left) mainMenu_xoffset -= 1;
+				adjustScaling();
+				break;
+			case MENUDISPLAY_YOFFSET:
+				if (right) mainMenu_yoffset += 1;
+				if (left) mainMenu_yoffset -= 1;
+				adjustScaling();
 				break;
 			case MENUDISPLAY_DISPLINES:
 				if (left)
@@ -408,6 +504,7 @@ static int key_displayMenu(int *c)
 						mainMenu_displayedLines++;
 				}
 				break;
+				adjustScaling();
 			case MENUDISPLAY_VERTPOS:
 				if (left)
 				{
