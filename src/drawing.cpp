@@ -208,9 +208,57 @@ void adjust_idletime(unsigned long ns_waited)
   }
 }
 
+static Uint32 next_frameskip;
+
+void reset_frameskip()
+{
+	next_frameskip=SDL_GetTicks();
+}
+
 static __inline__ void count_frame (void)
 {
-	if (!prefs_gfx_framerate)
+	if (prefs_gfx_framerate>=0)
+	{
+		// fixed framerate
+		framecnt++;
+		if (framecnt > prefs_gfx_framerate)
+			framecnt = 0;
+	}
+	else
+	{
+		static int total=0;
+		int frametime_ms = time_per_frame / 1000;
+		Uint32 now=SDL_GetTicks();
+		next_frameskip += frametime_ms;
+
+		if ((now - frametime_ms / 2 ) > next_frameskip)
+		{
+			// check if we need to skip a frame
+			total++;
+			if (total>5)
+			{
+				next_frameskip=now+2;
+				framecnt=0;
+				total=0;
+			}
+			else
+			{
+				framecnt=1;
+			}
+		}
+		else
+		{
+			// timer within limits, no frameskip. Wait if emulation is too fast
+			if ((now + frametime_ms / 2) < next_frameskip)
+			{
+				SDL_Delay(next_frameskip - now - (frametime_ms / 6) + 1);
+				next_frameskip = SDL_GetTicks();
+			}
+			framecnt=0;
+			total=0;
+		}
+	}
+/*	if (!prefs_gfx_framerate)
 	{
 		fs_framecnt = 0;
 	} else {
@@ -218,6 +266,7 @@ static __inline__ void count_frame (void)
 		if (fs_framecnt > prefs_gfx_framerate)
 			fs_framecnt = 0;
 	}
+*/
 }
 
 int coord_native_to_amiga_x (int x)

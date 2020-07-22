@@ -77,7 +77,7 @@ int presetModeId = 2;
 int mainMenu_cutLeft = 0;
 int mainMenu_cutRight = 0;
 int mainMenu_ntsc = DEFAULT_NTSC;
-int mainMenu_frameskip = 0;
+int mainMenu_frameskip = -1;
 int visibleAreaWidth = 400;
 int mainMenu_scaling = 0;
 int mainMenu_scalingFac = 100;
@@ -147,7 +147,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_cutLeft = 0;
     mainMenu_cutRight = 0;
     mainMenu_ntsc = DEFAULT_NTSC;
-    mainMenu_frameskip = 0;
+    mainMenu_frameskip = -1;
 
     // The following params can't be changed in gui
     mainMenu_autosave = DEFAULT_AUTOSAVE;

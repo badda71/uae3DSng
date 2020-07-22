@@ -79,6 +79,7 @@ static void draw_displayMenu(int c)
 	int tabstop9 = leftMargin + 30*8;
 	int tabstop10 = leftMargin + 32*8;
 	int tabstop11 = leftMargin + 34*8;
+	int tabstop12 = leftMargin + 36*8;
 
 	static int b=0;
 	int bb=(b%6)/3;
@@ -193,42 +194,46 @@ static void draw_displayMenu(int c)
 	// 	MENUDISPLAY_FRAMESKIP
 	menuLine+=12;
 	write_text_pos(leftMargin,menuLine,"Frameskip");
+	if ((mainMenu_frameskip==-1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
+		write_text_inv_pos(tabstop1,menuLine,"auto");
+	else
+		write_text_pos(tabstop1,menuLine,"auto");	
 	if ((mainMenu_frameskip==0)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop1,menuLine,"0");
+		write_text_inv_pos(tabstop4,menuLine,"0");
 	else
-		write_text_pos(tabstop1,menuLine,"0");	
+		write_text_pos(tabstop4,menuLine,"0");	
 	if ((mainMenu_frameskip==1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop2,menuLine,"1");
+		write_text_inv_pos(tabstop5,menuLine,"1");
 	else
-		write_text_pos(tabstop2,menuLine,"1");
+		write_text_pos(tabstop5,menuLine,"1");
 	if ((mainMenu_frameskip==2)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop3,menuLine,"2");
+		write_text_inv_pos(tabstop6,menuLine,"2");
 	else
-		write_text_pos(tabstop3,menuLine,"2");
+		write_text_pos(tabstop6,menuLine,"2");
 	if ((mainMenu_frameskip==3)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop4,menuLine,"3");
+		write_text_inv_pos(tabstop7,menuLine,"3");
 	else
-		write_text_pos(tabstop4,menuLine,"3");
+		write_text_pos(tabstop7,menuLine,"3");
 	if ((mainMenu_frameskip==4)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop5,menuLine,"4");
+		write_text_inv_pos(tabstop8,menuLine,"4");
 	else
-		write_text_pos(tabstop5,menuLine,"4");
+		write_text_pos(tabstop8,menuLine,"4");
 	if ((mainMenu_frameskip==5)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop6,menuLine,"5");
+		write_text_inv_pos(tabstop9,menuLine,"5");
 	else
-		write_text_pos(tabstop6,menuLine,"5");
+		write_text_pos(tabstop9,menuLine,"5");
 	if ((mainMenu_frameskip==6)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop7,menuLine,"6");
+		write_text_inv_pos(tabstop10,menuLine,"6");
 	else
-		write_text_pos(tabstop7,menuLine,"6");
+		write_text_pos(tabstop10,menuLine,"6");
 	if ((mainMenu_frameskip==7)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop8,menuLine,"7");
+		write_text_inv_pos(tabstop11,menuLine,"7");
 	else
-		write_text_pos(tabstop8,menuLine,"7");
+		write_text_pos(tabstop11,menuLine,"7");
 	if ((mainMenu_frameskip==8)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
-		write_text_inv_pos(tabstop9,menuLine,"8");
+		write_text_inv_pos(tabstop12,menuLine,"8");
 	else
-		write_text_pos(tabstop9,menuLine,"8");
+		write_text_pos(tabstop12,menuLine,"8");
 
 	// MENUDISPLAY_SOUND
 	menuLine+=12;
@@ -520,7 +525,7 @@ static int key_displayMenu(int *c)
 			case MENUDISPLAY_FRAMESKIP:
 				if (left)
 				{
-					if (mainMenu_frameskip>0)
+					if (mainMenu_frameskip>-1)
 						mainMenu_frameskip--;
 					else
 						mainMenu_frameskip=8;
@@ -530,7 +535,7 @@ static int key_displayMenu(int *c)
 					if (mainMenu_frameskip<8)
 						mainMenu_frameskip++;
 					else
-						mainMenu_frameskip=0;
+						mainMenu_frameskip=-1;
 				}
 				break;
 			case MENUDISPLAY_REFRESHRATE:

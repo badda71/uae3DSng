@@ -208,6 +208,7 @@ int gui_init (void)
 		emulating=1;
 		getChanges();
 		check_all_prefs();
+		reset_frameskip();
 		return 0;
 	}
 	return -1;

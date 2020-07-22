@@ -214,5 +214,6 @@ extern void adjust_idletime(unsigned long ns_waited);
 
 extern int diwfirstword,diwlastword;
 
+void reset_frameskip(void);
 void check_all_prefs(void);
 void init_row_map(void);

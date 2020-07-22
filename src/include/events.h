@@ -14,7 +14,6 @@
 extern void reset_frame_rate_hack (void);
 extern int rpt_available;
 extern frame_time_t syncbase;
-extern unsigned long last_synctime;
 
 extern unsigned long currcycle, nextevent;
 extern unsigned long sample_evtime;

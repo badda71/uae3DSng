@@ -85,8 +85,8 @@ static int ncolors = 0;
 /* Keyboard and mouse */
 int uae4all_keystate[256];
 
-static unsigned long previous_synctime = 0;
-static unsigned long next_synctime = 0;
+//static unsigned long next_synctime = 0;
+//static unsigned long last_synctime = 0;
 
 void flush_block ()
 {
@@ -99,10 +99,10 @@ void flush_block ()
 		{
 			CreateScreenshot(SCREENSHOT);
 		}
+/*
 		unsigned long start = read_processor_time();
 		if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
 			usleep((next_synctime - start) - 1000);
-		SDL_Flip(prSDLScreen);
 		last_synctime = read_processor_time();
 
 		if(last_synctime - next_synctime > time_per_frame - 1000)
@@ -114,6 +114,8 @@ void flush_block ()
 			next_synctime = last_synctime + time_per_frame * (1 + prefs_gfx_framerate);
 		else
 			next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
+*/
+		SDL_Flip(prSDLScreen);
 	}
 	init_row_map();
 }

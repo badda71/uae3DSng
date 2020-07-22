@@ -96,7 +96,6 @@ unsigned int joy0dir, joy1dir;
 
 /* Events */
 unsigned long int currcycle, nextevent;
-unsigned long last_synctime = 0;
 frame_time_t syncbase;
 
 struct ev eventtab[ev_max];

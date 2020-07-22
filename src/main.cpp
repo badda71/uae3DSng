@@ -158,6 +158,7 @@ void reset_all_systems (void)
 void do_start_program (void)
 {
 	quit_program = 2;
+	reset_frameskip();
 	m68k_go (1);
 }
 
