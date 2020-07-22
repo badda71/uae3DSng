@@ -194,7 +194,7 @@ static unsigned char keysPressed[256];
 extern C3D_Mtx projection2;
 extern C3D_RenderTarget* VideoSurface2;
 extern int uLoc_projection;
-extern Handle privateSem1;
+extern Handle gspMutex;
 extern "C" void SDL_RequestCall(void(*callback)(void*,int), void *param);
 
 #define CLEAR_COLOR 0x000000FF
@@ -277,8 +277,7 @@ static inline void  drawImage( DS3_Image *img, int x, int y, int w, int h, int d
 }
 
 static void makeTexture(C3D_Tex *tex, const u8 *mygpusrc, unsigned hw, unsigned hh) {
-	s32 i;
-	svcWaitSynchronization(privateSem1, U64_MAX);
+	svcWaitSynchronization(gspMutex, U64_MAX);
 	// init texture
 	C3D_TexDelete(tex);
 	C3D_TexInit(tex, hw, hh, GPU_RGBA8);
@@ -288,7 +287,7 @@ static void makeTexture(C3D_Tex *tex, const u8 *mygpusrc, unsigned hw, unsigned 
 	GSPGPU_FlushDataCache(mygpusrc, hw*hh*4);
 	C3D_SyncDisplayTransfer ((u32*)mygpusrc, GX_BUFFER_DIM(hw,hh), (u32*)(tex->data), GX_BUFFER_DIM(hw,hh), TEXTURE_TRANSFER_FLAGS);
 	GSPGPU_FlushDataCache(tex->data, hw*hh*4);
-	svcReleaseSemaphore(&i, privateSem1, 1);
+	svcReleaseMutex(gspMutex);
 }
 
 // this function is NOT thread safe - it uses static buffer gpusrc!!
@@ -345,12 +344,11 @@ static inline void requestRepaint() {
 }
 
 static void uib_repaint(void *param, int topupdated) {
-	s32 c;
 	int i;
 	
 	if (svcWaitSynchronization(repaintRequired, 0)) return;
 	svcClearEvent(repaintRequired);
-	svcWaitSynchronization(privateSem1, U64_MAX);
+	svcWaitSynchronization(gspMutex, U64_MAX);
 
 	if (set_kb_y_pos != -10000) {
 		kb_y_pos=set_kb_y_pos;
@@ -384,7 +382,7 @@ static void uib_repaint(void *param, int topupdated) {
 		drawImage(&(keymask_spr),k->x,k->y+kb_y_pos,k->w,k->h,0);
 	}
 
-	svcReleaseSemaphore(&c, privateSem1, 1);
+	svcReleaseMutex(gspMutex);
 }
 
 // shutdown bottom

@@ -107,14 +107,18 @@ void drawTexture( int x, int y, int width, int height, float left, float right, 
 
 // video thread variables and functions
 volatile bool runThread = false;
-Handle privateSem1;
-Handle repaintRequired;
+Handle gspMutex;
+static Handle repaintRequired;
+static Handle buffer_mutex;
+
 Thread privateVideoThreadHandle = NULL;
 static void videoThread(void* data);
 static void (*addDrawCallback)(void *, int)=NULL;
 static void *addDrawParam=NULL;
 extern volatile bool app_pause;
 extern volatile bool app_exiting;
+
+u8 *current_buffer=NULL;
 
 /* Initialization/Query functions */
 static int N3DS_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -241,7 +245,11 @@ int N3DS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	vformat->Gmask = 0x00ff0000;
 	vformat->Bmask = 0x0000ff00; 
 	vformat->Amask = 0x000000ff; 
-	
+
+	svcCreateMutex(&gspMutex, false);
+	svcCreateEvent(&repaintRequired,0);
+	svcCreateMutex(&buffer_mutex,false);
+
 	/* We're done! */
 	return(0);
 }
@@ -404,6 +412,10 @@ int hh= next_pow2(height);
 		linearFree( this->hidden->buffer );
 		this->hidden->buffer = NULL;
 	}
+	if ( this->hidden->buffer2 ) {
+		linearFree( this->hidden->buffer2 );
+		this->hidden->buffer2 = NULL;
+	}
 	if ( this->hidden->palettedbuffer ) {
 		free( this->hidden->palettedbuffer );
 		this->hidden->palettedbuffer = NULL;
@@ -414,14 +426,22 @@ int hh= next_pow2(height);
 		SDL_SetError("Couldn't allocate buffer for requested mode");
 		return(NULL);
 	}
+	this->hidden->buffer2 = (u8*) linearAlloc(hw * hh * this->hidden->byteperpixel);
+	if ( ! this->hidden->buffer2 ) {
+		SDL_SetError("Couldn't allocate buffer2 for requested mode");
+		return(NULL);
+	}
 
 	SDL_memset(this->hidden->buffer, 0, hw * hh * this->hidden->byteperpixel);
+	SDL_memset(this->hidden->buffer2, 0, hw * hh * this->hidden->byteperpixel);
 
 	if(bpp==8) {
 		this->hidden->palettedbuffer = malloc(width * height);
 		if ( ! this->hidden->palettedbuffer ) {
 			SDL_SetError("Couldn't allocate buffer for requested mode");
 			linearFree(this->hidden->buffer);
+			linearFree(this->hidden->buffer2);
+			this->hidden->buffer = this->hidden->buffer2 = NULL;
 			return(NULL);
 		}
 		SDL_memset(this->hidden->palettedbuffer, 0, width * height);
@@ -430,7 +450,8 @@ int hh= next_pow2(height);
 	/* Allocate the new pixel format for the screen */
 	if ( ! SDL_ReallocFormat(current, bpp, Rmask, Gmask, Bmask, Amask) ) {
 		linearFree(this->hidden->buffer);
-		this->hidden->buffer = NULL;
+		linearFree(this->hidden->buffer2);
+		this->hidden->buffer = this->hidden->buffer2 = NULL;
 		SDL_SetError("Couldn't allocate new pixel format for requested mode");
 		return(NULL);
 	}
@@ -488,6 +509,7 @@ int hh= next_pow2(height);
 	if (mode==2) mode = 3; 
 
 	// Setup the textures
+	C3D_TexDelete(&spritesheet_tex);
 	C3D_TexInit(&spritesheet_tex, hw, hh, this->hidden->mode);
 
 	N3DS_SetScaling(this);
@@ -503,8 +525,7 @@ int hh= next_pow2(height);
 	}
 	
 	runThread = true;
-	svcCreateSemaphore(&privateSem1, 1, 255);
-	svcCreateEvent(&repaintRequired,0);
+	current_buffer=NULL;
 
 // ctrulib sys threads uses 0x18, so we use a lower priority, but higher than any other SDL thread
 	privateVideoThreadHandle = threadCreate(videoThread, (void *) this, STACKSIZE, 0x19, -2, true);
@@ -543,15 +564,14 @@ void SDL_RequestCall(void(*callback)(void*, int), void *param) {
 }
 
 void drawMainSpritesheetAt(int x, int y, int w, int h) {
-	s32 i;
-	svcWaitSynchronization(privateSem1, U64_MAX);
+	svcWaitSynchronization(gspMutex, U64_MAX);
 	C3D_TexBind(0, &spritesheet_tex);
 	drawTexture(x + this_device->hidden->xoffset, y + this_device->hidden->yoffset, w, h, this_device->hidden->l1, this_device->hidden->r1, this_device->hidden->t1, this_device->hidden->b1);
-	svcReleaseSemaphore(&i, privateSem1, 1);
+	svcReleaseMutex(gspMutex);
 }
 
 static void videoThread(void* data)
-{
+{	
 	while(runThread) {
 		if(!app_pause && !app_exiting) {
 			if (svcWaitSynchronization(repaintRequired, 0)) {
@@ -563,6 +583,16 @@ static void videoThread(void* data)
 				svcClearEvent(repaintRequired);
 				if (C3D_FrameBegin(C3D_FRAME_NONBLOCK)){
 //				if (C3D_FrameBegin(C3D_FRAME_SYNCDRAW)){
+					svcWaitSynchronization(gspMutex, U64_MAX);
+					svcWaitSynchronization(buffer_mutex, U64_MAX);
+					if (current_buffer) {
+						GSPGPU_FlushDataCache(current_buffer, this_device->hidden->w*this_device->hidden->h*4);
+						C3D_SyncDisplayTransfer ((u32*)current_buffer, GX_BUFFER_DIM(this_device->hidden->w,this_device->hidden->h), (u32*)(spritesheet_tex.data), GX_BUFFER_DIM(this_device->hidden->w,this_device->hidden->h), textureTranferFlags[this_device->hidden->mode]);
+						GSPGPU_FlushDataCache(spritesheet_tex.data, this_device->hidden->w*this_device->hidden->h*4);
+					}
+					svcReleaseMutex(buffer_mutex);
+					svcReleaseMutex(gspMutex);
+
 					// Update the uniforms
 					C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, uLoc_projection, &projection2);
 					C3D_RenderTargetClear(VideoSurface1, C3D_CLEAR_ALL, RenderClearColor, 0);
@@ -579,7 +609,10 @@ static void videoThread(void* data)
 				}
 			}
 		}
+		// protecting this with mutex really sucks ...
+		svcWaitSynchronization(gspMutex, U64_MAX);
 		gspWaitForVBlank();
+		svcReleaseMutex(gspMutex);
 	}
 	threadExit(0);
 }
@@ -587,20 +620,16 @@ static void videoThread(void* data)
 static void drawBuffers(_THIS)
 {
 	if(this->hidden->buffer) {
-		s32 i;
-		if(app_pause || app_exiting) return; // Blocking video output if the application is closing 
-	
-		// next part needs to be synchronized with the videoThread
-		// because it is not possible to write a texture and draw it at the same time
-		svcWaitSynchronization(privateSem1, U64_MAX);
+		if(app_pause || app_exiting) return; // Blocking video output if the application is closing
 
-			// Convert image to 3DS tiled texture format
-			GSPGPU_FlushDataCache(this->hidden->buffer, this->hidden->w*this->hidden->h*4);
-			C3D_SyncDisplayTransfer ((u32*)this->hidden->buffer, GX_BUFFER_DIM(this->hidden->w,this->hidden->h), (u32*)(spritesheet_tex.data), GX_BUFFER_DIM(this->hidden->w,this->hidden->h), textureTranferFlags[this->hidden->mode]);
-			GSPGPU_FlushDataCache(spritesheet_tex.data, this->hidden->w*this->hidden->h*4);
-
-			svcSignalEvent(repaintRequired);
-		svcReleaseSemaphore(&i, privateSem1, 1);
+		// flip my buffers and signal to draw
+		svcWaitSynchronization(buffer_mutex, U64_MAX);
+		current_buffer=this->hidden->buffer;
+		this->hidden->currentVideoSurface->pixels = this->hidden->buffer = this->hidden->buffer2;
+		this->hidden->buffer2 = current_buffer;
+		svcReleaseMutex(buffer_mutex);
+		svcSignalEvent(repaintRequired);
+//		memcpy((u32*)this->hidden->buffer,(u32 *)current_buffer,buffer_size);
 	}
 }
 
@@ -694,10 +723,19 @@ void N3DS_VideoQuit(_THIS)
 		threadJoin(privateVideoThreadHandle, U64_MAX);
 		privateVideoThreadHandle = NULL;
 	}
+	svcCloseHandle(gspMutex);
+	svcCloseHandle(repaintRequired);
+	svcCloseHandle(buffer_mutex);
+
 	if (this->hidden->buffer)
 	{
 		linearFree(this->hidden->buffer);
 		this->hidden->buffer = NULL;
+	}
+	if (this->hidden->buffer2)
+	{
+		linearFree(this->hidden->buffer2);
+		this->hidden->buffer2 = NULL;
 	}
 	if (this->hidden->palettedbuffer)
 	{
@@ -755,13 +793,13 @@ static void sceneInit(GSPGPU_FramebufferFormats mode, bool scale) {
 	RenderClearColor = clearcolors[mode];
 
 	// Initialize the top screen render target
-	if (scale)
-		VideoSurface1 = C3D_RenderTargetCreate(240*2, 400*2, mode, GPU_RB_DEPTH24_STENCIL8);
-	else
+//	if (scale)
+//		VideoSurface1 = C3D_RenderTargetCreate(240*2, 400*2, mode, GPU_RB_DEPTH24_STENCIL8);
+//	else
 		VideoSurface1 = C3D_RenderTargetCreate(240, 400, mode, GPU_RB_DEPTH24_STENCIL8);
-	if(scale)	
-		C3D_RenderTargetSetOutput(VideoSurface1, GFX_TOP, GFX_LEFT, displayTranferFlags[mode] | GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_XY));
-	else
+//	if(scale)	
+//		C3D_RenderTargetSetOutput(VideoSurface1, GFX_TOP, GFX_LEFT, displayTranferFlags[mode] | GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_XY));
+//	else
 		C3D_RenderTargetSetOutput(VideoSurface1, GFX_TOP, GFX_LEFT, displayTranferFlags[mode] | GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
 	
 	// Initialize the bottom screen render target
