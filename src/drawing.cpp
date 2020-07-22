@@ -210,18 +210,14 @@ void adjust_idletime(unsigned long ns_waited)
 
 static __inline__ void count_frame (void)
 {
-	switch(prefs_gfx_framerate)
+	if (!prefs_gfx_framerate)
 	{
-		case 0: // draw every frame (Limiting is done by waiting for vsync...)
+		fs_framecnt = 0;
+	} else {
+		fs_framecnt++;
+		if (fs_framecnt > prefs_gfx_framerate)
 			fs_framecnt = 0;
-			break;
-			
-		case 1: // draw every second frame
-			fs_framecnt++;
-			if (fs_framecnt > 1)
-				fs_framecnt = 0;
-      break;  
-   }
+	}
 }
 
 int coord_native_to_amiga_x (int x)
