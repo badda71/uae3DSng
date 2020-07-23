@@ -361,22 +361,22 @@ void gui_handle_events (SDL_Event *e)
 		case DS_L:
 			buttonstate[2] = v; break;
 		case DS_UP2:
-//			if (mainMenu_cpad) break;
+			if (mainMenu_mouseEmulation) break;
 			// fallthrough
 		case DS_UP1:
 			emulated_top=v; break;
 		case DS_DOWN2:
-//			if (mainMenu_cpad) break;
+			if (mainMenu_mouseEmulation) break;
 			// fallthrough
 		case DS_DOWN1:
 			emulated_bot=v; break;
 		case DS_LEFT2:
-//			if (mainMenu_cpad) break;
+			if (mainMenu_mouseEmulation) break;
 			// fallthrough
 		case DS_LEFT1:
 			emulated_left=v; break;
 		case DS_RIGHT2:
-//			if (mainMenu_cpad) break;
+			if (mainMenu_mouseEmulation) break;
 			// fallthrough
 		case DS_RIGHT1:
 			emulated_right=v; break;
