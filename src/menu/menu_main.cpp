@@ -44,6 +44,7 @@ extern void update_display(void);
 extern int saveAdfDir(void);
 extern void setCpuSpeed(void);
 extern void show_error(const char *);
+extern int run_menuFileinfo(char* fileName);
 
 extern char launchDir[300];
 extern char currentDir[300];
@@ -126,55 +127,59 @@ static void draw_mainMenu(int c)
 	text_draw_window(leftMargin/8,menuLine/8,menuWidth,menuHeight,text_str_title);
 
 	// MENUMAIN_DF0
+	int i=strlen(text_str_df0)+1;
 	if ((c==MENUMAIN_DF0)&&(bb))
 		write_text_inv_pos(leftMargin,menuLine,text_str_df0);
 	else
 		write_text_pos(leftMargin,menuLine,text_str_df0);
 	if(strcmp(uae4all_image_file0, "")==0)
-		write_text_inv_pos(leftMargin+6*8,menuLine,"insert disk image");
+		write_text_inv_pos(leftMargin+i*8,menuLine,"insert disk image");
 	else
-		write_text_inv_pos(leftMargin+6*8,menuLine,filename0);
+		write_text_full (NULL, filename0, leftMargin+i*8, menuLine, menuWidth - i, ALIGN_LEFT, FONT_NORMAL, menu_text_color, 1);
 
 	// MENUMAIN_DF1
 	menuLine+=12;
 	if(nr_drives > 1)
 	{
+		int i=strlen(text_str_df1)+1;
 		if((c==MENUMAIN_DF1)&&(bb))
 			write_text_inv_pos(leftMargin,menuLine,text_str_df1);
 		else
 			write_text_pos(leftMargin,menuLine,text_str_df1);
 		if(strcmp(uae4all_image_file1, "")==0)
-			write_text_inv_pos(leftMargin+6*8,menuLine,"insert disk image");
+			write_text_inv_pos(leftMargin+i*8,menuLine,"insert disk image");
 		else
-			write_text_inv_pos(leftMargin+6*8,menuLine,filename1);
+			write_text_full (NULL, filename1, leftMargin+i*8, menuLine, menuWidth - i, ALIGN_LEFT, FONT_NORMAL, menu_text_color, 1);
 	}
 
 	// MENUMAIN_DF2
 	menuLine+=12;
 	if(nr_drives > 2)
 	{
+		int i=strlen(text_str_df2)+1;
 		if ((c==MENUMAIN_DF2)&&(bb))
 			write_text_inv_pos(leftMargin,menuLine,text_str_df2);
 		else
 			write_text_pos(leftMargin,menuLine,text_str_df2);
 		if(strcmp(uae4all_image_file2, "")==0)
-			write_text_inv_pos(leftMargin+6*8,menuLine,"insert disk image");
+			write_text_inv_pos(leftMargin+i*8,menuLine,"insert disk image");
 		else
-			write_text_inv_pos(leftMargin+6*8,menuLine,filename2);
+			write_text_full (NULL, filename2, leftMargin+i*8, menuLine, menuWidth - i, ALIGN_LEFT, FONT_NORMAL, menu_text_color, 1);
 	}
 
 	// MENUMAIN_DF3
 	menuLine+=12;
 	if(nr_drives > 3)
 	{
+		int i=strlen(text_str_df3)+1;
 		if ((c==MENUMAIN_DF3)&&(bb))
 			write_text_inv_pos(leftMargin,menuLine,text_str_df3);
 		else
 			write_text_pos(leftMargin,menuLine,text_str_df3);
 		if(strcmp(uae4all_image_file3, "")==0)
-			write_text_inv_pos(leftMargin+6*8,menuLine,"insert disk image");
+			write_text_inv_pos(leftMargin+i*8,menuLine,"insert disk image");
 		else
-			write_text_inv_pos(leftMargin+6*8,menuLine,filename3);
+			write_text_full (NULL, filename3, leftMargin+i*8, menuLine, menuWidth - i, ALIGN_LEFT, FONT_NORMAL, menu_text_color, 1);
 	}
 
 	menuLine+=8;
@@ -351,7 +356,7 @@ static int key_mainMenu(int *cp)
 	int back_c=-1;
 	int c=(*cp);
 	int end=0;
-	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0, hit3=0, hit4=0, hit5=0, hit6=0, hitH=0, hitS=0, hitQ=0, hitN1=0, hitN2=0, hitN3=0, hitN4=0;
+	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0, hit3=0, hitR=0, hit5=0, hit6=0, hitH=0, hitS=0, hitL=0, hitN1=0, hitX=0, hitN2=0, hitN3=0, hitN4=0;
 	SDL_Event event;
 	
 	force_quit=0;
@@ -359,7 +364,7 @@ static int key_mainMenu(int *cp)
 	while (SDL_PollEvent(&event) > 0)
 	{
 		if (uib_handle_event(&event)) continue;
-		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hit5=hit6=hitH=hitS=hitQ=hitN1=hitN2=hitN3=hitN4=0;
+		left=right=up=down=hit0=hit1=hit2=hit3=hitR=hit5=hit6=hitH=hitS=hitL=hitN1=hitN2=hitN3=hitN4=hitX=0;
 		if (event.type == SDL_QUIT)
 		{
 			mainMenu_case=MAIN_MENU_CASE_QUIT;
@@ -393,13 +398,15 @@ static int key_mainMenu(int *cp)
 				case AK_ESC:
 				case DS_B: hit1=1; break;
 				case DS_L:
-				case AK_L: hitQ=1; break;
+				case AK_L: hitL=1; break;
 				case DS_R:
-				case AK_R: hit4=1; break;
-//				case SDLK_RCTRL: hit4=1; break;
+				case AK_R: hitR=1; break;
+				case DS_X:
+				case AK_X: hitX=1; break;
+//				case SDLK_RCTRL: hitR=1; break;
 //				case SDLK_h: hitH=1; break;
 //				case SDLK_s: hitS=1; break;
-//				case SDLK_q: hitQ=1; break;
+//				case SDLK_q: hitL=1; break;
 //				case SDLK_1: hitN1=1; break;
 //				case SDLK_2: hitN2=1; break;
 //				case SDLK_3: hitN3=1; break;
@@ -422,7 +429,7 @@ static int key_mainMenu(int *cp)
 			mainMenu_case=MAIN_MENU_CASE_DISPLAY;
 			end=1;
 		}
-		else if (hit4)
+		else if (hitR)
 		{
 			// reset
 			back_c = c;
@@ -446,13 +453,13 @@ static int key_mainMenu(int *cp)
 			mainMenu_case=MAIN_MENU_CASE_SAVESTATES;
 			end=1;
 		}
-		else if (hitQ && right)
+		else if (hitL && right)
 		{
 			force_quit=1;
 			mainMenu_case=MAIN_MENU_CASE_QUIT;
 			end=1;
 		}
-		else if (hitQ)
+		else if (hitL)
 		{
 			mainMenu_case=MAIN_MENU_CASE_QUIT;
 			end=1;
@@ -514,6 +521,7 @@ static int key_mainMenu(int *cp)
 					mainMenu_case=MAIN_MENU_CASE_LOAD;
 					end=1;
 				}
+				else if (hitX) run_menuFileinfo(filename0);
 				break;
 			case MENUMAIN_DF1:
 				if (hit0)
@@ -522,6 +530,7 @@ static int key_mainMenu(int *cp)
 					mainMenu_case=MAIN_MENU_CASE_LOAD;
 					end=1;
 				}
+				else if (hitX) run_menuFileinfo(filename1);
 				break;
 			case MENUMAIN_DF2:
 				if (hit0)
@@ -530,6 +539,7 @@ static int key_mainMenu(int *cp)
 					mainMenu_case=MAIN_MENU_CASE_LOAD;
 					end=1;
 				}
+				else if (hitX) run_menuFileinfo(filename2);
 				break;
 			case MENUMAIN_DF3:
 				if (hit0)
@@ -538,6 +548,7 @@ static int key_mainMenu(int *cp)
 					mainMenu_case=MAIN_MENU_CASE_LOAD;
 					end=1;
 				}
+				else if (hitX) run_menuFileinfo(filename3);
 				break;
 			case MENUMAIN_EJECT:
 				if (hit0)

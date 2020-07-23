@@ -208,6 +208,7 @@ void get_font_info(font_info *f, enum font_size size) {
 
 void write_text_full (SDL_Surface *s, const char *str, int x, int y, int maxchars, enum str_alignment align, enum font_size size, Uint32 col, int inv) {
 	int xof, w;
+	if (!s) s=text_screen;
 	if (str==NULL || str[0]==0) return;
 	font_info f;
 	w=strlen(str);
@@ -229,7 +230,7 @@ void write_text_full (SDL_Surface *s, const char *str, int x, int y, int maxchar
 		SDL_Rect dest;
 		dest.x = xof - 2;
 		dest.y = y - 2;
-		dest.w = (strlen(str) * 8) + 4;
+		dest.w = (w * 8) + 4;
 		dest.h = 12;
 		SDL_FillRect(s, &dest, menu_inv_color);
 	}

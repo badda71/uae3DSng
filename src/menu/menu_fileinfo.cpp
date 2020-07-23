@@ -20,31 +20,30 @@ char* fileInfo_fileName;
 
 static void draw_fileinfoMenu(int c)
 {
-	int menuLine = 0;
-	SDL_Rect r;
-	extern SDL_Surface *text_screen;
-	r.x=80-64; r.y=60; r.w=110+64+64; r.h=120;
+	int menuWidth = 35;
+	int menuHeight = 4 + strlen(fileInfo_fileName) / menuWidth;
+	
+	int leftMargin = ((50 - menuWidth) / 2)*8;
+	int menuLine = ((31 - menuHeight) / 2)*8;
 
 	text_draw_background();
-	text_draw_window(2,2,40,40,text_str_fileinfo_title);
+	text_draw_window(leftMargin/8,menuLine/8,menuWidth,menuHeight,text_str_fileinfo_title);
 
-	menuLine = 4;
-	write_text(3, menuLine, "File info:");
-	menuLine+=2;
-	write_text(3, menuLine, "----------");
-	menuLine+=4;
+	write_text_pos(leftMargin, menuLine, "File info:");
+	menuLine+=8;
+	write_text_pos(leftMargin, menuLine, "----------");
+	menuLine+=12;
 
-	// now wrap the filename if necessary (at 32)
+	// now wrap the filename if necessary (at 35)
 	int i = 0;
-	char line [40];
-	const int LINELEN = 32;
-
-	for (i = 0; i < strlen(fileInfo_fileName); i+=LINELEN)
+	char line [menuWidth+1];
+	
+	for (i = 0; i < strlen(fileInfo_fileName); i+=menuWidth)
 	{
-		strncpy(line, fileInfo_fileName + i, LINELEN);
-		line[LINELEN] = '\0';
-		write_text(3, menuLine, line);
-		menuLine+=2;
+		strncpy(line, fileInfo_fileName + i, menuWidth);
+		line[menuWidth] = '\0';
+		write_text_pos(leftMargin, menuLine, line);
+		menuLine+=8;
 	}
 	
 	text_flip();
