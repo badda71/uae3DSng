@@ -19,7 +19,6 @@
 #include "gui.h"
 #include <SDL/SDL.h>
 #include "gp2x.h"
-#include <SDL/SDL_ttf.h>
 
 /* PocketUAE config file. Used for parsing PocketUAE-like options. */
 #include "cfgfile.h" 

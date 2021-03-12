@@ -14,7 +14,6 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_rotozoom.h>
 #include "gp2x.h"
-#include <SDL/SDL_ttf.h>
 #include "savestate.h"
 
 #include "keyboard.h"

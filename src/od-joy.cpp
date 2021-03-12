@@ -17,7 +17,7 @@
 #include "memory-uae.h"
 #include "custom.h"
 #include "joystick.h"
-#include "SDL.h"
+#include "SDL/SDL.h"
 #include "menu.h"
 #include "menu_config.h"
 #include "math.h"

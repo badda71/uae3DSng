@@ -51,7 +51,7 @@ extern "C" int main( int argc, char *argv[] );
 #include <malloc.h>
 
 #ifdef USE_SDL
-#include "SDL.h"
+#include "SDL/SDL.h"
 extern SDL_Surface *current_screenshot;
 #endif
 #ifdef GP2X

@@ -13,7 +13,6 @@
 #include "sound.h"
 #include <SDL/SDL.h>
 #include "gp2x.h"
-#include <SDL/SDL_ttf.h>
 #include "menu_config.h"
 #include "keyboard.h"
 #include "uibottom.h"

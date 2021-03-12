@@ -17,7 +17,7 @@
 #include "gp2x.h"
 #include "gp2xutil.h"
 #include <limits.h>
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include "keyboard.h"
 #include "uibottom.h"
 

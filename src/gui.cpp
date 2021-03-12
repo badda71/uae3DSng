@@ -344,6 +344,30 @@ static void goMenu(void)
 	unlockscr();
 }
 
+int nowSuperThrottle=0;
+
+static void setSuperThrottle(int i)
+{
+	if (i && !nowSuperThrottle)
+	{
+		nowSuperThrottle=1;
+		//m68k_speed=1; //6;
+		changed_produce_sound=0;
+		changed_gfx_framerate=20;
+//		check_prefs_changed_cpu();
+		check_prefs_changed_audio();	// sound
+		check_prefs_changed_custom();	// framerate
+		gui_set_message("SuperThrottle On",1000);
+	} else if (!i && nowSuperThrottle) {
+		nowSuperThrottle=0;
+		getChanges();
+//		check_prefs_changed_cpu();
+		check_prefs_changed_audio();
+		check_prefs_changed_custom();
+		gui_set_message("SuperThrottle Off",1000);
+	}
+}
+
 void gui_handle_events (SDL_Event *e)
 {
 	extern bool switch_autofire;
@@ -400,14 +424,9 @@ void gui_handle_events (SDL_Event *e)
 		case DS_SELECT:
 			if (v) goMenu();
 			break;
-/*		case DS_START:
-			if (v) {
-				if (nowSuperThrottle)
-					leftSuperThrottle();
-				else
-					goSuperThrottle();
-			}
-			break;*/
+		case DS_START:
+			if (v) setSuperThrottle(!nowSuperThrottle);
+			break;
 		case DS_R:
 			switch_autofire = v;
 			break;

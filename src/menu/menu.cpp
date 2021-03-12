@@ -6,8 +6,8 @@
 #include "config.h"
 #include "menu.h"
 
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include "uae.h"
 #include "options.h"
 #include "zfile.h"

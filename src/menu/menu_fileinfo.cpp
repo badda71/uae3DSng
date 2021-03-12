@@ -5,7 +5,7 @@
 #include "sysdeps.h"
 #include "config.h"
 #include "menu.h"
-#include<SDL.h>
+#include<SDL/SDL.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include<dirent.h>

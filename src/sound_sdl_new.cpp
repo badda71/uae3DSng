@@ -25,7 +25,7 @@
 #include "menu_config.h"
 
 #include "thread.h"
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 extern unsigned long next_sample_evtime;
 
