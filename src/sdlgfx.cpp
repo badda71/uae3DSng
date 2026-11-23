@@ -183,6 +183,22 @@ void flush_block ()
 #endif
 		SDL_Flip(prSDLScreen);
 		last_synctime = read_processor_time();
+#ifdef __3DS__
+		{	/* speed report every ~5 s: real fps vs target and how much of the time the emulator had to spare */
+			static unsigned long t0 = 0, spare = 0; static unsigned frames = 0;
+			if (t0 == 0) t0 = last_synctime;
+			frames++;
+			if (start < next_synctime) spare += next_synctime - start;   /* time slept in the limiter (capped as above) */
+			unsigned long el = last_synctime - t0;
+			if (el >= 5000000UL) {
+				unsigned fps10 = (unsigned)(frames * 10000000ULL / el);
+				unsigned tgt10 = (unsigned)(10000000UL / time_per_frame);
+				write_log("speed: %u.%u fps (target %u.%u), spare %lu%% of frame time\n",
+					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10, spare * 100 / el);
+				t0 = last_synctime; spare = 0; frames = 0;
+			}
+		}
+#endif
 
 		if(last_synctime - next_synctime > time_per_frame - 1000)
 			adjust_idletime(0);

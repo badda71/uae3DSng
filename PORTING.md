@@ -88,12 +88,14 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 
 ## Audio, timing, shutdown (found on hardware)
 
-* **Audio hand-off** (`sound_sdl_new.cpp`): upstream paces the emulator by blocking it on a semaphore until the
-  audio callback has consumed a buffer. On 3DS that deadlocked (black screen after Reset: the callback never
-  fired) and, via `SDL_Quit()` -> `SDL_CloseAudio()` joining a stuck audio thread, also froze Quit. The 3DS
-  build now uses an 8-slot ring buffer: the emulator never waits for audio and the callback never waits for the
-  emulator (underrun = silence, overrun = drop oldest). The log (`audio stats ...`) records callback and DSP
-  counters (`n3dsaud_dbg_*` in the SDL fork's audio driver) so a stalled DSP is visible.
+* **Audio** (`src/3ds/sound3ds.cpp`, replaces `sound_sdl_new.cpp` on 3DS): upstream paces the emulator by
+  blocking it on a semaphore until the SDL audio callback consumed a buffer. On 3DS the SDL audio thread never
+  reached the callback (log: `callbacks=0` while the DSP's frame callback kept running), so the emulator
+  froze after Reset and Quit hung joining that thread. The 3DS build now drives the DSP (ndsp) directly:
+  samples are written into linear-memory slots and finished slots are queued on DSP channel 0 from
+  `finish_sound_buffer()`; nothing ever waits (too far behind = drop a buffer, underrun = brief silence).
+  The log has `audio[...]` lines with the slot states (0 free, 1 queued, 2 playing, 3 done) and ndsp state.
+  Root cause of the SDL path not working is not known (uae3DS uses the same driver successfully).
 * **Speed**: with audio no longer pacing the emulator, `sdlgfx.cpp` uses a real frame limiter on 3DS (sleep until
   `next_synctime`, clamped to 2 frames). Upstream only slept when more than a whole frame ahead, which assumes
   audio pacing and made the game run too fast once audio was off.

@@ -180,7 +180,7 @@ CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
 # files in the source dirs that must not be compiled/assembled for 3DS
-EXCLUDE_FILES	:=	compiler.cpp filesys_bootrom.cpp fsusage_win32.cpp sound.cpp sound_gp2x.cpp \
+EXCLUDE_FILES	:=	compiler.cpp filesys_bootrom.cpp fsusage_win32.cpp sound.cpp sound_gp2x.cpp sound_sdl_new.cpp \
 			homedir.cpp neon_helper.s memcpy.s memset.s \
 			http.cpp update.cpp qr-scanner.cpp 3ds_cia.cpp \
 			uae3ds.cpp uibottom.cpp autofire.cpp
