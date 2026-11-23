@@ -30,7 +30,7 @@ jobs:
           set -o pipefail
           make release -k -j"$(nproc)" 2>&1 | tee build.log || true
           echo "---- result ----" | tee -a build.log
-          if [ -f uae3DSng.elf ]; then ls -l uae3DSng.elf | tee -a build.log; else echo "NO ELF PRODUCED" | tee -a build.log; fi
+          if [ -f uae3DSng.elf ]; then ls -l uae3DSng.elf uae3DSng.3dsx | tee -a build.log; else echo "NO ELF PRODUCED" | tee -a build.log; fi
           echo "errors: $(grep -cE ' error( |:)|undefined reference|\*\*\* \[' build.log || true)" | tee -a build.log
 
       - name: Upload log and artifacts
@@ -43,6 +43,7 @@ jobs:
             uae3DSng.elf
             uae3DSng.3dsx
           if-no-files-found: ignore
+          retention-days: 30
 
       - name: Fail if no ELF
         run: test -f uae3DSng.elf

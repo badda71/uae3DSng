@@ -3,9 +3,9 @@
 Port of the Switch/Vita flavour of **UAE4All2** (`rsn8887/uae4all2`) to the Nintendo 3DS, reusing the
 platform layer of **uae3DS** (`badda71/uae3DS`: SDL 1.2 fork for 3DS, bottom-screen UI).
 
-> **Status: groundwork only. Never compiled with devkitARM, never linked, never run on a 3DS.**
-> What *was* checked is listed under [Verification](#verification). Expect a first round of real
-> compiler/linker errors; send them back and they get fixed in order.
+> **Status: builds and links with devkitARM (CI), `uae3DSng.3dsx` is produced. Never run on a 3DS.**
+> What *was* checked is listed under [Verification](#verification). Everything about runtime behaviour
+> (boot, video, audio, input, speed, memory) is untested.
 
 ## Provenance (git history is the changelog)
 
@@ -66,7 +66,15 @@ devkitARM + libctru, and `pacman -S 3ds-sdl_image 3ds-sdl_gfx 3ds-libpng 3ds-zli
 
 ## Verification
 
-Done here (no devkitARM, no hardware available):
+**CI build (GitHub Actions, `.github/workflows/build.yml`)**: `devkitpro/devkitarm` container
+(devkitARM r68 / GCC 16.1, libctru 2.7.1), `make release`. All 54 sources compile, `UAE3DS_SDL` builds,
+`uae3DSng.elf` links and `uae3DSng.3dsx` is produced (with romfs). The `.cia`/`.3ds` steps fail in CI only
+because `bannertool` and `makerom` are not in the image. Build outputs are uploaded as the
+`uae3DSng-build` artifact of each run. First real-toolchain findings were fixed in-tree:
+`<sys/mman.h>` does not exist in newlib (`menu_load.cpp`), and an unused `-DGCCCONSTFUNC="..."` define broke
+devkitPro's C rule through shell quoting (removed).
+
+Before CI existed (kept for reference; the host check is still useful for quick local syntax passes):
 
 1. `make -n` against a stub devkitARM: the Makefile selects 52 C++ + 2 C files, excludes the intended
    ones, and passes the ARM11 flags and all defines. Real flags/rules of `3ds_rules` were not exercised.
@@ -75,8 +83,8 @@ Done here (no devkitARM, no hardware available):
    All 52 C++ and 2 C files pass. Limits: glibc instead of newlib headers (stubbed where they differ),
    no `SDL_image/SDL_rotozoom` real headers (small stubs), no code generation, no linking.
 
-**Not verified:** compilation with devkitARM, linking (e.g. unresolved symbols between the sublibrary and
-the app), running, performance, memory use, any behaviour.
+**Not verified:** running (boot, video, audio, input, UI), performance, memory use, any behaviour.
+Runtime risks I already know of are listed below; expect more once it runs on hardware.
 
 ## Known gaps / risks
 
