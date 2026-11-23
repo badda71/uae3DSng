@@ -16,12 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install libraries
+      - name: Check libraries (install only what is missing)
         run: |
-          dkp-pacman -Syu --noconfirm
-          dkp-pacman -S --noconfirm --needed 3ds-dev
-          for p in 3ds-sdl_image 3ds-sdl_gfx 3ds-libpng 3ds-zlib 3ds-libjpeg-turbo; do
-            dkp-pacman -S --noconfirm --needed "$p" || echo "::warning::package $p could not be installed"
+          # The image normally ships everything; pkg.devkitpro.org sometimes answers 403 to CI runners, so do not hard-depend on it.
+          for p in 3ds-dev 3ds-sdl_image 3ds-sdl_gfx 3ds-libpng 3ds-zlib 3ds-libjpeg-turbo; do
+            if dkp-pacman -Q "$p" >/dev/null 2>&1; then echo "have $p"; continue; fi
+            for t in 1 2 3; do dkp-pacman -Sy --noconfirm --needed "$p" && break || sleep 20; done
           done
           dkp-pacman -Q | grep -E '^(3ds-|libctru|citro|devkitARM|tex3ds)' || true
 
