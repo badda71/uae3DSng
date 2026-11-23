@@ -3268,6 +3268,10 @@ static uae_u32 filesys_dev_bootfilesys (void) //TrapContext *context)
     if (type == FILESYS_VIRTUAL)
 	return 0;
     dostype = get_long (parmpacket + 80);
+    write_log ("hardfile unit %d: DosType %08x, FileSystem.resource at %08x%s\n", unit_no, dostype, fsres,
+	fsres == 0 ? " (none: this Kickstart has no built-in filesystem table)" : "");
+    if (fsres == 0)
+	return 0;
     fsnode = get_long (fsres + 18);
     while (get_long (fsnode)) {
 	dostype2 = get_long (fsnode + 14);
@@ -3276,10 +3280,12 @@ static uae_u32 filesys_dev_bootfilesys (void) //TrapContext *context)
 		put_long (devicenode + 32, get_long (fsnode + 54)); /* dn_SegList */
 		put_long (devicenode + 36, -1); /* dn_GlobalVec */
 	    }
+	    write_log ("hardfile unit %d: filesystem handler for DosType %08x found\n", unit_no, dostype);
 	    return 1;
 	}
 	fsnode = get_long (fsnode);
     }
+    write_log ("hardfile unit %d: no filesystem handler for DosType %08x in FileSystem.resource\n", unit_no, dostype);
     return 0;
 }
 

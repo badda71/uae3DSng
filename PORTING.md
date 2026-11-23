@@ -109,6 +109,11 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   Hardware log of that build: while loading, ~1000 ADF reads per 5 s took ~2.5 ms each (an fseek+fread of one 512-byte
   sector on the SD card) = half of all wall time, with frames up to 180 ms. `zfile.cpp` therefore keeps the whole
   floppy image (<= 2 MB) in RAM on 3DS; writes still go through to the file.
+* **Hard disks**: hardfiles mount through the WinUAE boot ROM (`filesys_bootrom.cpp`, `#include`d by `filesys.cpp`). The
+  boot code looks the volume's DosType up in `FileSystem.resource`, which only exists from Kickstart 2.0 on, so an
+  FFS-formatted HDF is not mounted under Kickstart 1.3 (hardware log: the filesys traps all run, no drive appears).
+  `filesys_dev_bootfilesys` now logs `hardfile unit N: DosType ...` and whether a handler was found.
+  `TRAP: exter_int_helper` (~100/s with a HD mounted) is no longer logged: each log line is a synced SD write and it cost 10-20 fps.
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
   no button reaches it. `menu_memory_disk.cpp` and `menu_fileinfo.cpp` were missing it (Memory/Disk menu froze).
 * **Quit**: `app_exiting` is set before `SDL_Quit()` so the audio thread's `WaitAudio()` returns.

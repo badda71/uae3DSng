@@ -277,7 +277,12 @@ void REGPARAM2 call_calltrap(int func)
     int has_retval = (trapmode[func] & TRAPFLAG_NO_RETVAL) == 0;
     int implicit_rts = (trapmode[func] & TRAPFLAG_DORET) != 0;
 
-    if (*trapstr[func] != 0 && trace_traps)
+    if (*trapstr[func] != 0 && trace_traps
+#ifdef __3DS__
+	/* called ~100 times per second while a hard disk is mounted; every log line is a synced SD write */
+	&& strcmp (trapstr[func], "exter_int_helper") != 0
+#endif
+	)
 	write_log ("TRAP: %s\n", trapstr[func]);
 
     /* For monitoring only? */
