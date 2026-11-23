@@ -3,9 +3,11 @@
 Port of the Switch/Vita flavour of **UAE4All2** (`rsn8887/uae4all2`) to the Nintendo 3DS, reusing the
 platform layer of **uae3DS** (`badda71/uae3DS`: SDL 1.2 fork for 3DS, bottom-screen UI).
 
-> **Status: builds and links with devkitARM (CI), `uae3DSng.3dsx` is produced. Never run on a 3DS.**
-> What *was* checked is listed under [Verification](#verification). Everything about runtime behaviour
-> (boot, video, audio, input, speed, memory) is untested.
+> **Status: runs on a New 3DS (tested on hardware).** Boots to Kickstart, runs games from ADF at a steady
+> 50 fps (including while loading), sound works (direct DSP output), menus and quit work. Not done yet:
+> bottom-screen UI/keyboard (`uae3ds.cpp`, `uibottom.cpp`, `autofire.cpp` are excluded from the build), Old 3DS
+> testing, real 3DS-specific menus, CIA/icon. Details of what was found on hardware are in the sections below
+> and under [Verification](#verification).
 
 ## Provenance (git history is the changelog)
 
