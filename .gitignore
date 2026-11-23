@@ -1,0 +1,11 @@
+build/
+obj/
+lib/
+*.3dsx
+*.cia
+*.3ds
+*.elf
+*.smdh
+*.bnr
+*.icn
+*.map
