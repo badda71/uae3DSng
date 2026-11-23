@@ -28,7 +28,7 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          make -k -j"$(nproc)" 2>&1 | tee build.log || true
+          make release -k -j"$(nproc)" 2>&1 | tee build.log || true
           echo "---- result ----" | tee -a build.log
           if [ -f uae3DSng.elf ]; then ls -l uae3DSng.elf | tee -a build.log; else echo "NO ELF PRODUCED" | tee -a build.log; fi
           echo "errors: $(grep -cE ' error( |:)|undefined reference|\*\*\* \[' build.log || true)" | tee -a build.log

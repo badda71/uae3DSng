@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include "psp2-dirent.h"
 #else
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(__3DS__)
 #include <sys/mman.h>
 #endif
 #include <sys/types.h>
