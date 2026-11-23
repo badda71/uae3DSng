@@ -17,11 +17,15 @@
 #include "sound.h"
 #include <SDL.h>
 #include "gp2x.h"
-#include <SDL_ttf.h>
+#ifndef __3DS__
+#include <SDL_ttf.h>   /* vestigial: nothing here calls TTF_*; no SDL_ttf for 3DS */
+#endif
 #include "menu_config.h"
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
 #endif
 
 const char *text_str_display_separator="--------------------------------------";
@@ -52,17 +56,17 @@ enum {
 	MENUDISPLAY_PRESETWIDTH,
 	MENUDISPLAY_PRESETHEIGHT,
 	MENUDISPLAY_DISPLINES,
-#if !defined(__PSP2__) && !defined(__SWITCH__) //screenwidth has no meaning on Vita and is never used
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) //screenwidth has no meaning on Vita and is never used
 	MENUDISPLAY_SCREENWIDTH,
 #endif
 	MENUDISPLAY_VERTPOS,
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	MENUDISPLAY_CUTLEFT,
 	MENUDISPLAY_CUTRIGHT,
 #endif
 	MENUDISPLAY_REFRESHRATE,
 	MENUDISPLAY_FRAMESKIP,
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	MENUDISPLAY_SHADER,
 #endif
 	MENUDISPLAY_STATUSLINE,
@@ -91,7 +95,7 @@ enum {
 };
 #endif
 
-#if defined(__SWITCH__)
+#if defined(__SWITCH__) || defined(__3DS__)
 enum {
 	SHADER_NONE = 0,
 	SHADER_SHARP_BILINEAR_SIMPLE,
@@ -168,7 +172,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	// MENUDISPLAY_SCREENWIDTH
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Screen Width");
@@ -186,7 +190,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	// MENUDISPLAY_CUTLEFT
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Cut Left");
@@ -205,7 +209,7 @@ static void draw_displayMenu(int c)
 	else
 		write_text_inv(tabstop3,menuLine,value);
 
-#else // !defined(__PSP2__) && !defined(__SWITCH__)
+#else // !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
 	menuLine++;
@@ -272,7 +276,7 @@ static void draw_displayMenu(int c)
 	menuLine+=2;
 #endif
 
-#if defined(__PSP2__) || defined(__SWITCH__)	
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)	
 	//Shader settings on Vita
 	//MENUDISPLAY_SHADER
 	menuLine+=2;
@@ -280,7 +284,7 @@ static void draw_displayMenu(int c)
   
   	switch (mainMenu_shader)
   	{
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		case SHADER_NONE:
 			snprintf((char*)value, 25, "NONE (auto 2x/3x/4x)");
 			break;
@@ -546,7 +550,7 @@ static int key_displayMenu(int *c)
 			case SDLK_UP: up=1; break;
 			case SDLK_DOWN: down=1; break;
 			case SDLK_PAGEDOWN: hit0=1; break;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			case SDLK_END: hit1=1; break;
 #else
 			case SDLK_HOME: hit0=1; break;
@@ -609,7 +613,7 @@ static int key_displayMenu(int *c)
 				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
 			}
 		}	
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 		else if (hit0)
 		{
 			end = -1;
@@ -697,7 +701,7 @@ static int key_displayMenu(int *c)
 						mainMenu_displayedLines++;
 				}
 				break;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 			case MENUDISPLAY_SCREENWIDTH:
 				if (left)
 				{
@@ -725,7 +729,7 @@ static int key_displayMenu(int *c)
 						moveY++;
 				}
 				break;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 			case MENUDISPLAY_CUTLEFT:
 				if (left)
 				{
@@ -776,7 +780,7 @@ static int key_displayMenu(int *c)
 				if ((left)||(right))
 						mainMenu_ntsc = !mainMenu_ntsc;
 				break;
-#if defined(__PSP2__) || defined(__SWITCH__) //shader choice on VITA
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) //shader choice on VITA
 			case MENUDISPLAY_SHADER:
 				if (left)
 				{
@@ -934,7 +938,7 @@ static void raise_displayMenu()
 
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -947,7 +951,7 @@ static void raise_displayMenu()
 static void unraise_displayMenu()
 {
 	int i;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

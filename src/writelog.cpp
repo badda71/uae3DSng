@@ -11,7 +11,7 @@
 
 #if defined(DEBUG_UAE4ALL) && defined(UAE_CONSOLE)
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 
 void write_log_standard (const char *fmt, ...)
 {

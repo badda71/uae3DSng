@@ -22,7 +22,7 @@ extern int gp2xMouseEmuOn, gp2xButtonRemappingOn, show_inputmode;
 
 void inputmode_init(void)
 {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	int i;
 	char tmpchar[256];
 	SDL_Surface* tmp;

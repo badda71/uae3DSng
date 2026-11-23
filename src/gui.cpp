@@ -111,7 +111,7 @@ extern SDL_Surface *prSDLScreen;
 
 extern SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3, *uae4all_joy4, *uae4all_joy5, *uae4all_joy6, *uae4all_joy7;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 //Predefined quick switch resolutions to select via TRIGGER R+START+DPAD LEFT/RIGHT
 static int can_change_quickSwitchModeID = 1;
 static int can_change_custom_controlSet = 1;
@@ -259,7 +259,7 @@ void update_joycon_mode() {
 }
 #endif
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 void remap_custom_controls() // assign custom 1-3 to currently used custom set
 {
 	for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
@@ -307,7 +307,9 @@ static void getChanges(void)
 int gui_init (void)
 {
 	SDL_ShowCursor(SDL_DISABLE);
-#if !(defined(ANDROIDSDL) || defined(AROS))
+#if defined(__3DS__)
+	input3ds_init();
+#elif !(defined(ANDROIDSDL) || defined(AROS))
 	SDL_JoystickEventState(SDL_ENABLE);
 	SDL_JoystickOpen(0);
 #endif
@@ -331,7 +333,7 @@ int gui_init (void)
 			run_mainMenuGuichan();
 #else
 		init_text(1);
-#if !defined(__SWITCH__) && !defined(__PSP2__)
+#if !defined(__SWITCH__) && !defined(__PSP2__) && !defined(__3DS__)
 		if (!uae4all_image_file0[0])
 #endif
 			run_mainMenu();
@@ -370,7 +372,7 @@ static void goMenu(void)
 	if (quit_program != 0)
 		return;
 	emulating=1;
-#if !defined(__PSP2__) && !defined(__SWITCH__) //no need to erase all the vkbd graphics from memory on Vita
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) //no need to erase all the vkbd graphics from memory on Vita
 #ifdef USE_UAE4ALL_VKBD
 	vkbd_quit();
 #endif	
@@ -396,7 +398,7 @@ static void goMenu(void)
 	quit_text();
 #endif
 #ifdef USE_UAE4ALL_VKBD
-#if !defined(__PSP2__) && !defined(__SWITCH__) //no need to reload all the vkbd graphics everytime on Vita
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) //no need to reload all the vkbd graphics everytime on Vita
 	vkbd_init();
 #endif
 #endif
@@ -602,6 +604,17 @@ void getMapping(int customId)
 	}
 }
 
+#if defined(__3DS__)
+/* built-in pad: read libctru hid state instead of SDL joysticks (see 3ds/input3ds.cpp) */
+#define JOY_UPDATE()      input3ds_update()
+#define JOY_BTN(j, b)     input3ds_button(i, (b))
+#define JOY_AXIS(j, a)    input3ds_axis(i, (a))
+#else
+#define JOY_UPDATE()      SDL_JoystickUpdate()
+#define JOY_BTN(j, b)     SDL_JoystickGetButton((j), (b))
+#define JOY_AXIS(j, a)    SDL_JoystickGetAxis((j), (a))
+#endif
+
 void gui_handle_events (void)
 {
 #ifdef USE_SDL2
@@ -610,8 +623,8 @@ void gui_handle_events (void)
 #else
 	Uint8 *keystate = SDL_GetKeyState(NULL);
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
-	SDL_JoystickUpdate();
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
+	JOY_UPDATE();
 	SDL_Joystick *currentJoy = uae4all_joy0;
 	int lX, lY, rX, rY;
 	float joyX = 0;
@@ -650,10 +663,10 @@ void gui_handle_events (void)
 		}
 		//Only Joystick 0 analog axis are important for mouse control, the others
 		//are used to have the dpad on the left stick but that is all
-		lX = SDL_JoystickGetAxis(currentJoy, 0);
-		lY = SDL_JoystickGetAxis(currentJoy, 1);
-		rX = SDL_JoystickGetAxis(currentJoy, 2);
-		rY = SDL_JoystickGetAxis(currentJoy, 3);
+		lX = JOY_AXIS(currentJoy, 0);
+		lY = JOY_AXIS(currentJoy, 1);
+		rX = JOY_AXIS(currentJoy, 2);
+		rY = JOY_AXIS(currentJoy, 3);
 		
 		//Is this the first time this routine is called when the program has just been launched? 
 		//If yes, center the joysticks now
@@ -683,30 +696,30 @@ void gui_handle_events (void)
 		// Main Controller is special (it does mouse controls vkeyboard etc.)
 		// On Main Controller, always use either the left of right analog for mouse pointer movement
 		// the other stick replicates the dpad inputs
-		dpadRight[i]  = SDL_JoystickGetButton(currentJoy, PAD_RIGHT);
-		dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, PAD_LEFT);
-		dpadUp[i]  = SDL_JoystickGetButton(currentJoy, PAD_UP);
-		dpadDown[i]  = SDL_JoystickGetButton(currentJoy, PAD_DOWN);
+		dpadRight[i]  = JOY_BTN(currentJoy, PAD_RIGHT);
+		dpadLeft[i]  = JOY_BTN(currentJoy, PAD_LEFT);
+		dpadUp[i]  = JOY_BTN(currentJoy, PAD_UP);
+		dpadDown[i]  = JOY_BTN(currentJoy, PAD_DOWN);
 
 		stickUp[i] = 0;
 		stickDown[i] = 0;
 		stickLeft[i] = 0;
 		stickRight[i] = 0;
 
-		buttonA[i] = SDL_JoystickGetButton(currentJoy, PAD_SQUARE);
-		buttonB[i] = SDL_JoystickGetButton(currentJoy, PAD_CIRCLE);
-		buttonX[i] = SDL_JoystickGetButton(currentJoy, PAD_CROSS);
-		buttonY[i] = SDL_JoystickGetButton(currentJoy, PAD_TRIANGLE);
-		triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_L);
-		triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_R);
+		buttonA[i] = JOY_BTN(currentJoy, PAD_SQUARE);
+		buttonB[i] = JOY_BTN(currentJoy, PAD_CIRCLE);
+		buttonX[i] = JOY_BTN(currentJoy, PAD_CROSS);
+		buttonY[i] = JOY_BTN(currentJoy, PAD_TRIANGLE);
+		triggerL[i] = JOY_BTN(currentJoy, PAD_L);
+		triggerR[i] = JOY_BTN(currentJoy, PAD_R);
 
-		buttonSelect[i] = SDL_JoystickGetButton(currentJoy, PAD_SELECT);
-		buttonStart[i] = SDL_JoystickGetButton(currentJoy, PAD_START);
+		buttonSelect[i] = JOY_BTN(currentJoy, PAD_SELECT);
+		buttonStart[i] = JOY_BTN(currentJoy, PAD_START);
 #ifdef __SWITCH__
-		triggerL2[i] = SDL_JoystickGetButton(currentJoy, PAD_L2);
-		triggerR2[i] = SDL_JoystickGetButton(currentJoy, PAD_R2);
-		triggerL3[i] = SDL_JoystickGetButton(currentJoy, PAD_L3);
-		triggerR3[i] = SDL_JoystickGetButton(currentJoy, PAD_R3);
+		triggerL2[i] = JOY_BTN(currentJoy, PAD_L2);
+		triggerR2[i] = JOY_BTN(currentJoy, PAD_R2);
+		triggerL3[i] = JOY_BTN(currentJoy, PAD_L3);
+		triggerR3[i] = JOY_BTN(currentJoy, PAD_R3);
 
 		if (singleJoycons) {
 			joyX=lX;
@@ -912,10 +925,10 @@ void gui_handle_events (void)
 					currentJoy = uae4all_joy7;
 					break;
 			}
-			lAnalogXCenter[i]=SDL_JoystickGetAxis(currentJoy, 0);
-			lAnalogYCenter[i]=SDL_JoystickGetAxis(currentJoy, 1);
-			rAnalogXCenter[i]=SDL_JoystickGetAxis(currentJoy, 2);
-			rAnalogYCenter[i]=SDL_JoystickGetAxis(currentJoy, 3);
+			lAnalogXCenter[i]=JOY_AXIS(currentJoy, 0);
+			lAnalogYCenter[i]=JOY_AXIS(currentJoy, 1);
+			rAnalogXCenter[i]=JOY_AXIS(currentJoy, 2);
+			rAnalogYCenter[i]=JOY_AXIS(currentJoy, 3);
 		}
 		goMenu();
 	}
@@ -1039,7 +1052,7 @@ void gui_handle_events (void)
 if(!vkbd_mode)
 #endif
 {
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	if(buttonStart[0] && triggerL[0]) //toggle custom control config 1-3
 	{
 		if (can_change_custom_controlSet)
@@ -1088,7 +1101,7 @@ if(!vkbd_mode)
 		//left
 		else if(dpadLeft[0])
 		{
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 // Change zoom:
 // quickSwitch resolution presets
 			if (can_change_quickSwitchModeID)
@@ -1120,7 +1133,7 @@ if(!vkbd_mode)
 		//right
 		else if(dpadRight[0])
 		{
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			if (can_change_quickSwitchModeID)
 			{
 				if (quickSwitchModeID==0)
@@ -1151,7 +1164,7 @@ if(!vkbd_mode)
 		{
 			can_change_quickSwitchModeID = 1;
 		}
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 		//1
 		else if(keystate[SDLK_1])
 		{
@@ -1346,7 +1359,7 @@ if(!vkbd_mode)
 			mainMenu_cutRight++;
 			update_display();
 		}
-#endif //!defined(__PSP2__) && !defined(__SWITCH__)
+#endif //!defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	}
 	if (mainMenu_customControls && !gp2xMouseEmuOn && !gp2xButtonRemappingOn)
 	{
@@ -1897,7 +1910,7 @@ if(!vkbd_mode)
 		}
 	}
 	
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	//VITA Controls: If not using custom controls, use L=right mouse, R=left mouse 
 	//because analog stick = mouse movement is always on for Vita
 	if(!mainMenu_customControls)
@@ -1940,7 +1953,7 @@ if(!vkbd_mode)
 } // if(!vkbd_mode)
 
 #ifdef USE_UAE4ALL_VKBD
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	//on Vita, Start brings up the  virtual keyboard, but Trigger R + Start is used for
 	//quickswitch resolution etc. and Trigger L + Start is used for switching between
 	//custom control configs
@@ -1960,7 +1973,7 @@ if(!vkbd_mode)
 		justLK=0;
 #endif
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	if(triggerL[0] && keystate[SDLK_s])
 	{
 		keystate[SDLK_s]=0;

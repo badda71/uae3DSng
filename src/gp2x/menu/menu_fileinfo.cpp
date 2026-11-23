@@ -77,7 +77,7 @@ static void raise_fileinfoMenu()
 
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -91,7 +91,7 @@ static void unraise_fileinfoMenu()
 {
 	int i;
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

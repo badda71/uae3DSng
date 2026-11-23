@@ -2578,7 +2578,7 @@ action_set_file_size (Unit *unit, dpacket packet)
        The write is supposed to guarantee that the file can't be smaller than
        the requested size, the truncate guarantees that it can't be larger.
        If we were to write one byte earlier we'd clobber file data.  */
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
     if (truncate (k->aino->nname, offset) == -1) {
 	PUT_PCK_RES1 (packet, DOS_FALSE);
 	PUT_PCK_RES2 (packet, dos_errno ());
@@ -2666,7 +2666,7 @@ action_set_date (Unit *unit, dpacket packet)
     ut.actime = ut.modtime = put_time(get_long (date), get_long (date + 4),
 				      get_long (date + 8));
     a = find_aino (unit, lock, bstr (unit, name), &err);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
     if (err == 0 && utime (a->nname, &ut) == -1)
 #endif
 	err = dos_errno ();

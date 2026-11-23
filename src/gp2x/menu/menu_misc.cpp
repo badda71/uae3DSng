@@ -20,12 +20,16 @@
 #include "sound.h"
 #include <SDL.h>
 #include "gp2x.h"
-#include <SDL_ttf.h>
+#ifndef __3DS__
+#include <SDL_ttf.h>   /* vestigial: nothing here calls TTF_*; no SDL_ttf for 3DS */
+#endif
 #include "custom.h"
 #include "menu_config.h"
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
 #endif
 
 #ifdef __SWITCH__
@@ -60,7 +64,7 @@ enum {
 	MENUMISC_CPUSPEED,
 	MENUMISC_BLITTER,
 	MENUMISC_SPRITECOLLISIONS,
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 #ifdef PANDORA
 	MENUMISC_PANDORASPEED,
 #endif
@@ -71,10 +75,10 @@ enum {
 	MENUMISC_CONTROLCFG,
 	MENUMISC_JOYSTICK,
 	MENUMISC_AUTOFIRERATE,
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	MENUMISC_CUSTOMAUTOFIREBUTTON,
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	MENUMISC_MOUSEEMULATION,
 #ifdef __SWITCH__
 	MENUMISC_SINGLEJOYCONS,
@@ -82,13 +86,13 @@ enum {
 	MENUMISC_LEFTSTICKMOUSE,
 #endif
 	MENUMISC_MOUSEMULTIPLIER,
-#if !defined(__PSP2__) && !defined(__SWITCH__) // No stylus on Vita
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) // No stylus on Vita
 	MENUMISC_STYLUSOFFSET,
 #endif
 #ifdef __SWITCH__
 	MENUMISC_SWAPAB,
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	MENUMISC_DEADZONE,
 	MENUMISC_TOUCHCONTROLS,
 #else
@@ -247,7 +251,7 @@ static void draw_miscMenu(int c)
 	else
 	  write_text(tabstop6,menuLine,"On");
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 #ifdef PANDORA
   // MENUMISC_PANDORASPEED
 	menuLine+=2;
@@ -353,7 +357,7 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop9-1,menuLine,"Heavy");
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	// MENUMISC_CUSTOMAUTOFIREBUTTON
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Custom Autofire Button");
@@ -416,7 +420,7 @@ static void draw_miscMenu(int c)
 	write_text(leftMargin,menuLine,text_str_misc_separator);
 	menuLine++;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	// MENUMISC_MOUSEEMULATION
 	write_text(leftMargin,menuLine,"Mouse");	
 	if ((mainMenu_mouseEmulation==0) && ((menuMisc!=MENUMISC_MOUSEEMULATION)||(bb)))
@@ -495,7 +499,7 @@ static void draw_miscMenu(int c)
 	}
 #endif
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	// MENUMISC_STYLUSOFFSET
 	menuLine+=2;
 	write_text(leftMargin,menuLine,text_str_stylus_offset);
@@ -525,7 +529,7 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop9,menuLine,text_str_8px);
 #endif //__PSP2__
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 
 	//Analog Stick Deadzone settings on Vita
 	//MENUMISC_DEADZONE
@@ -643,7 +647,7 @@ static int key_miscMenu(int *c)
 			case SDLK_PAGEDOWN: hit0=1; break;
 			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 			//note SDLK_CTRL corresponds to ButtonSelect on Vita
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			case SDLK_END: hit1=1; break;
 #else
 			case SDLK_HOME: hit0=1; break;
@@ -712,7 +716,7 @@ static int key_miscMenu(int *c)
 				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
 			}
 		}	
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 		else if (hit0)
 		{
 			end = -1;
@@ -873,7 +877,7 @@ static int key_miscMenu(int *c)
 				}
 				break;
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 #ifdef PANDORA
 			case MENUMISC_PANDORASPEED:
 				if(left)
@@ -883,7 +887,7 @@ static int key_miscMenu(int *c)
 				break;
 #endif
 #endif //__PSP2__
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			case MENUMISC_LEFTSTICKMOUSE:
 				if (left || right) 
 					mainMenu_leftStickMouse = !mainMenu_leftStickMouse;
@@ -985,7 +989,7 @@ static int key_miscMenu(int *c)
 						mainMenu_autofireRate=2;
 				}
  				break;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			case MENUMISC_CUSTOMAUTOFIREBUTTON:
 				if (left)
 				{
@@ -1026,7 +1030,7 @@ static int key_miscMenu(int *c)
 						mainMenu_mouseMultiplier += 25;
 				}
 				break;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 			case MENUMISC_STYLUSOFFSET:
 				if (left)
 				{
@@ -1057,7 +1061,7 @@ static int key_miscMenu(int *c)
 				break;
 #endif //__PSP2__
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			case MENUMISC_DEADZONE:
 				if (left)
 				{
@@ -1133,7 +1137,7 @@ static void raise_miscMenu()
 
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -1146,7 +1150,7 @@ static void raise_miscMenu()
 static void unraise_miscMenu()
 {
 	int i;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

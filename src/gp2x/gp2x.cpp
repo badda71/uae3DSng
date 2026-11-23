@@ -7,14 +7,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if !( defined(WIN32) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
+#if !( defined(WIN32) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__))
 #include <sys/mman.h>
 #endif
 
 #include <unistd.h>
 #include <fcntl.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
+#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__))
 #include <sys/soundcard.h>
 #endif
 
@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
+#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__))
 #include <linux/soundcard.h>
 #endif
 
@@ -54,7 +54,7 @@ int flashLED;
 
 int gp2xMouseEmuOn=0;
 int gp2xButtonRemappingOn=0;
-#if !defined(PANDORA) && !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(PANDORA) && !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 int hasGp2xButtonRemapping=1;
 #endif
 int GFXVIDINFO_HEIGHT=240;
@@ -107,7 +107,7 @@ unsigned long gp2x_joystick_read(int allow_usb_joy)
 void gp2x_init(int argc, char **argv)
 {
 	unsigned long memdev;
-#ifndef AROS
+#if !defined(AROS) && !defined(__3DS__)
 	mixerdev = open("/dev/mixer", O_RDWR);
 #endif
 	
@@ -115,6 +115,9 @@ void gp2x_init(int argc, char **argv)
 #if defined(__PSP2__) // NOT __SWITCH__
 	strcpy(launchDir, "ux0:/data/uae4all");
 	strcpy(currentDir, "ux0:/data/uae4all");
+#elif defined(__3DS__)
+	strcpy(launchDir, "sdmc:/3ds/uae3DSng");
+	strcpy(currentDir, "sdmc:/3ds/uae3DSng");
 #elif defined(__SWITCH__)
 	strcpy(launchDir, ".");
 	strcpy(currentDir, ".");

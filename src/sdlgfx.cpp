@@ -49,6 +49,8 @@
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
 #endif
 
 #ifdef __PSP2__ // NOT __SWITCH__
@@ -60,7 +62,7 @@
 #endif
 
 bool mouse_state = true;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 extern bool slow_mouse;
 extern bool fast_mouse;
 #else
@@ -181,7 +183,7 @@ void flush_block ()
 #if defined(__SWITCH__)
 	SDL_LockSurface (prSDLScreen);
 #endif
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	SDL_LockSurface (prSDLScreen);
 	if(stylusClickOverride)
 	{
@@ -547,7 +549,7 @@ void handle_events (void)
 	/* Handle GUI events */
 	gui_handle_events ();
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 /* SDL events on PSP2 with all keyboard/mouse inputs for BT keyboard and mouse, and touch */
 #ifdef __PSP2__	 // NOT __SWITCH__	
 	if (mainMenu_touchControls) {
@@ -591,6 +593,15 @@ void handle_events (void)
 				}
 			}
 			break;
+#ifdef __3DS__
+		/* The SDL 3DS driver turns bottom-screen touches into *absolute* mouse events, which this
+		 * loop would apply as relative motion. Ignored until the bottom-screen module (3ds/uibottom)
+		 * is ported and turns touches into keyboard presses / touchpad movement. */
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP:
+		case SDL_MOUSEMOTION:
+			break;
+#else
 		case SDL_MOUSEBUTTONDOWN:
 			buttonstate[(rEvent.button.button-1)%3] = 1;
 			break;
@@ -617,6 +628,7 @@ void handle_events (void)
 				lastmy += mouseScale * 4;
 			newmousecounters = 1;
 			break;
+#endif
 		}
 	}
 #else

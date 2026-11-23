@@ -44,6 +44,9 @@ extern void update_joycon_mode();
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 int inside_menu = 0;
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
+int inside_menu = 0;
 #endif
 
 extern int kickstart;
@@ -97,7 +100,7 @@ static const char *text_str_df0=		"DF0:";
 static const char *text_str_df1=		"DF1:";
 static const char *text_str_df2=		"DF2:";
 static const char *text_str_df3=		"DF3:";
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 static const char* text_str_hdnmem="Harddisk and Memory Options";
 static const char *text_str_display="Display and Sound";
 static const char *text_str_savestates="Savestates";
@@ -113,17 +116,17 @@ static const char *text_str_reset="Reset (R-trigger)";
 #else
 static const char *text_str_reset="Reset (Start Emulator)";
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 static const char *text_str_exit= "Quit (L-trigger)";
 #else
 static const char *text_str_exit= "Quit (Q)";
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 static const char *text_str_custom= "Custom Control Config";
 #else
 static const char *text_str_custom= "Custom Control Config (Y)";
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 static const char *text_str_more= "More Options";
 #else
 static const char *text_str_more= "More Options (B)";
@@ -144,7 +147,7 @@ int force_quit=0;
 int lastCpuSpeed=600;
 int ntsc=0;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 int ps_button_locked = 0;
 #endif
 
@@ -573,7 +576,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				case SDLK_PAGEDOWN: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_LCTRL: hit2=1; break;
-#if defined(__PSP2__) || defined(__SWITCH__) //RSHIFT is PAD_L on Vita
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) //RSHIFT is PAD_L on Vita
 				case SDLK_RSHIFT: hitQ=1; break;
 #else
 				case SDLK_RSHIFT: hit3=1; break;
@@ -973,7 +976,7 @@ static void raise_mainMenu()
 {	
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	int i;
 	for(i=0;i<10;i++)
 	{
@@ -986,7 +989,7 @@ static void raise_mainMenu()
 
 static void unraise_mainMenu()
 {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	int i;
 	for(i=9;i>=0;i--)
 	{
@@ -1010,7 +1013,7 @@ int run_mainMenu()
 	mainMenu_case=-1;
 	init_text(0);
 	
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	inside_menu = 1;
 	SDL_Event event;
 	while (SDL_PollEvent(&event) > 0);
@@ -1274,7 +1277,7 @@ int run_mainMenu()
 	
 	update_display();
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	inside_menu = 0;
 #endif
 	return mainMenu_case;

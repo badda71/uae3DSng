@@ -5,7 +5,7 @@ extern void UpdateChipsetSettings();
 extern void SetPresetMode(int mode);
 extern void reset_hdConf(void);
 extern void kill_hd_configs();
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 extern void remap_custom_controls();
 #endif
 
@@ -123,7 +123,7 @@ extern int mainMenu_vsync;
 #endif
 extern char custom_kickrom[256];
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 extern int mainMenu_leftStickMouse;
 extern int mainMenu_touchControls;
 extern int mainMenu_shader;

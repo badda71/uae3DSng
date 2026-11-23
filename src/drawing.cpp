@@ -59,7 +59,7 @@
 
 #define GFXVIDINFO_PIXBYTES 2
 //#define GFXVIDINFO_WIDTH 320
-//#if defined(__PSP2__) || defined(__SWITCH__)
+//#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 //#define GFXVIDINFO_HEIGHT 240
 //#else
 #define GFXVIDINFO_HEIGHT 286

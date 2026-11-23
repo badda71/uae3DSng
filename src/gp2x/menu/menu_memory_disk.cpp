@@ -23,7 +23,9 @@
 #include "gui.h"
 #include <SDL.h>
 #include "gp2x.h"
-#include <SDL_ttf.h>
+#ifndef __3DS__
+#include <SDL_ttf.h>   /* vestigial: nothing here calls TTF_*; no SDL_ttf for 3DS */
+#endif
 
 /* PocketUAE config file. Used for parsing PocketUAE-like options. */
 #include "cfgfile.h" 
@@ -388,7 +390,7 @@ static int key_memDiskMenu(int *c)
 				case SDLK_ESCAPE: case SDLK_PAGEUP: del=1; break;
 				case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 				//note SDLK_LCTRL corresponds to ButtonSelect on Vita
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 				case SDLK_HOME: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_RSHIFT: hit0=1; break;
@@ -622,7 +624,7 @@ static void raise_memDiskMenu()
 
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -635,7 +637,7 @@ static void raise_memDiskMenu()
 static void unraise_memDiskMenu()
 {
 	int i;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

@@ -33,6 +33,8 @@
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
 #endif
 
 char romFileName[PATH_MAX];
@@ -62,7 +64,7 @@ static int min_in_dir=0, max_in_dir=SHOW_MAX_FILES;
 extern int current_drive;
 extern int current_hdf;
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 #ifdef PANDORA
 static int scandir_cmp(const void *p1, const void *p2)
 {
@@ -267,7 +269,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	b++;
 }
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 static int cmpDirentString(const void *first, const void *second)
 {
 	dirent *direntA = *(dirent * const *) first;
@@ -311,7 +313,7 @@ static int menuLoadLoop(char *curr_path)
 	min_in_dir=0;
 	max_in_dir=SHOW_MAX_FILES;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #if !defined(__SWITCH__)
 	if(strcmp(curr_path, "/") == 0 || curr_path[0] == 0) 
 	{
@@ -470,7 +472,7 @@ static int menuLoadLoop(char *curr_path)
 					case SDLK_DOWN: down=1; break;
 					case SDLK_PAGEDOWN: hit0=1; break;
 					case SDLK_LALT: hit1=1; break;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 					case SDLK_LCTRL: hit2=1; break;
 					case SDLK_HOME: hit0=1; break;
 					case SDLK_END: hit0=1; break;
@@ -478,7 +480,7 @@ static int menuLoadLoop(char *curr_path)
 #endif
 					case SDLK_RSHIFT: hit3=1; break;
 					case SDLK_RCTRL: hit4=1; break;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					// SELECT to select HD dir
 					case SDLK_LCTRL: hitL=1; break;
 					// TRIANGLE for fileinfo
@@ -670,7 +672,7 @@ static void raise_loadMenu()
 
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -683,7 +685,7 @@ static void raise_loadMenu()
 static void unraise_loadMenu()
 {
 	int i;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

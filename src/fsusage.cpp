@@ -126,7 +126,7 @@ safe_read
   return n_chars;
 }
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #ifdef __PSP2__ // NOT __SWITCH__
 #include <psp2/io/devctl.h>
 #endif

@@ -20,11 +20,15 @@
 #include "sound.h"
 #include <SDL.h>
 #include "gp2x.h"
-#include <SDL_ttf.h>
+#ifndef __3DS__
+#include <SDL_ttf.h>   /* vestigial: nothing here calls TTF_*; no SDL_ttf for 3DS */
+#endif
 #include "menu_config.h"
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
 #endif
 
 #define MAX_CUSTOM_ID 96
@@ -48,7 +52,7 @@ enum {
   MENUCONTROLS_ONSCREEN,
 #endif
   MENUCONTROLS_CUSTOM_ON_OFF,
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
   MENUCONTROLS_CUSTOM_CONTROLLER_NR,
   MENUCONTROLS_CUSTOMSET,
 #else
@@ -319,7 +323,7 @@ static void getMapping(int customId)
 		96 AK_F10 0x59*/
 }
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 void mapback_custom_controls() // assign currently used custom set to custom control set
 //This is called after whenever the user changes the currently displayed controls
 //or the currently displayed controller Nr
@@ -351,7 +355,7 @@ void mapback_custom_controls() // assign currently used custom set to custom con
 
 static void draw_controlsMenu(int c)
 {
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_custom_dpad=0; //on Vita, always use full custom configs that remap the dpad
 #endif
 	int ctrlNr = mainMenu_custom_currentlyEditingControllerNr;
@@ -415,7 +419,7 @@ static void draw_controlsMenu(int c)
 	else
 		write_text(tabstop6,menuLine,"Off");
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	menuLine+=2;
 
 	// MENUCONTROLS_CUSTOM_CONTROLLER_NR
@@ -708,7 +712,7 @@ static int key_controlsMenu(int *c)
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0, hit3=0, del=0;
 	int ctrlNr = mainMenu_custom_currentlyEditingControllerNr;
 	SDL_Event event;
-#if !defined(__PSP2__) && !defined(__SWITCH__)	// this can be snappy on Vita no need to worry about touch
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)	// this can be snappy on Vita no need to worry about touch
 	delay ++;
 	if (delay<5) return end;
 	delay=0;
@@ -753,7 +757,7 @@ static int key_controlsMenu(int *c)
 				case SDLK_PAGEUP: del=1; break; //Note: PAGEUP is Triangle on Vita
 				case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 				//note SDLK_CTRL corresponds to ButtonSelect on Vita
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 				case SDLK_RSHIFT: hit3=1; break; //SDLK_RSHIFT is triggerL on Vita
 				case SDLK_PAGEDOWN: hit0=1; break; //SDLK_PAGEDOWN is the ok button on Vita
 				case SDLK_END: hit1=1; break; // SDLK_END is the cancel button on Vita
@@ -816,7 +820,7 @@ static int key_controlsMenu(int *c)
 				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
 			}
 		}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 		else if (hit3) // L pressed on Vita?
 		{
 			//See if new joysticks have been paired
@@ -826,7 +830,7 @@ static int key_controlsMenu(int *c)
 			init_joystick();	
 		}
 #endif
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 		else if (hit0)
 		{
 			end = -1;
@@ -838,7 +842,7 @@ static int key_controlsMenu(int *c)
 		}
 		else if (up)
 		{
-#if !defined(__PSP2__) && !defined(__SWITCH__)			
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)			
 			if (menuControls==MENUCONTROLS_A && mainMenu_custom_dpad>0) menuControls=MENUCONTROLS_DPAD;
 			else 
 #endif
@@ -851,7 +855,7 @@ static int key_controlsMenu(int *c)
 		}
 		else if (down)
 		{
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 			if (menuControls==MENUCONTROLS_DPAD && mainMenu_custom_dpad>0) menuControls=MENUCONTROLS_A;
 			else 
 #endif
@@ -882,7 +886,7 @@ static int key_controlsMenu(int *c)
 						remap_custom_controls();
 				}
 				break;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			case MENUCONTROLS_CUSTOM_CONTROLLER_NR:
 				if (left)
 				{
@@ -957,7 +961,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_up[ctrlNr]=MAX_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -974,7 +978,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_up[ctrlNr]=MIN_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -985,7 +989,7 @@ static int key_controlsMenu(int *c)
 					} else {
 						mainMenu_custom_up[ctrlNr]=0;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1004,7 +1008,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_down[ctrlNr]=MAX_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1021,7 +1025,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_down[ctrlNr]=MIN_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1032,7 +1036,7 @@ static int key_controlsMenu(int *c)
 					} else {
 						mainMenu_custom_down[ctrlNr]=0;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1051,7 +1055,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_left[ctrlNr]=MAX_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1068,7 +1072,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_left[ctrlNr]=MIN_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1079,7 +1083,7 @@ static int key_controlsMenu(int *c)
 					} else {
 						mainMenu_custom_left[ctrlNr]=0;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1098,7 +1102,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_right[ctrlNr]=MAX_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1115,7 +1119,7 @@ static int key_controlsMenu(int *c)
 						else
 							mainMenu_custom_right[ctrlNr]=MIN_CUSTOM_ID;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1126,7 +1130,7 @@ static int key_controlsMenu(int *c)
 					} else {
 						mainMenu_custom_right[ctrlNr]=0;
 					}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1138,7 +1142,7 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_A[ctrlNr]--;
 					else
 						mainMenu_custom_A[ctrlNr]=MAX_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1148,14 +1152,14 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_A[ctrlNr]++;
 					else
 						mainMenu_custom_A[ctrlNr]=MIN_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
 				else if (del)
 				{
 					mainMenu_custom_A[ctrlNr]=0;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1167,7 +1171,7 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_B[ctrlNr]--;
 					else
 						mainMenu_custom_B[ctrlNr]=MAX_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1177,14 +1181,14 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_B[ctrlNr]++;
 					else
 						mainMenu_custom_B[ctrlNr]=MIN_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
 				else if (del)
 				{
 					mainMenu_custom_B[ctrlNr]=0;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1196,7 +1200,7 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_X[ctrlNr]--;
 					else
 						mainMenu_custom_X[ctrlNr]=MAX_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1206,14 +1210,14 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_X[ctrlNr]++;
 					else
 						mainMenu_custom_X[ctrlNr]=MIN_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
 				else if (del)
 				{
 					mainMenu_custom_X[ctrlNr]=0;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1225,7 +1229,7 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_Y[ctrlNr]--;
 					else
 						mainMenu_custom_Y[ctrlNr]=MAX_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1235,14 +1239,14 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_Y[ctrlNr]++;
 					else
 						mainMenu_custom_Y[ctrlNr]=MIN_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
 				else if (del)
 				{
 					mainMenu_custom_Y[ctrlNr]=0;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1254,7 +1258,7 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_L[ctrlNr]--;
 					else
 						mainMenu_custom_L[ctrlNr]=MAX_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1264,14 +1268,14 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_L[ctrlNr]++;
 					else
 						mainMenu_custom_L[ctrlNr]=MIN_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
 				else if (del)
 				{
 					mainMenu_custom_L[ctrlNr]=0;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1283,7 +1287,7 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_R[ctrlNr]--;
 					else
 						mainMenu_custom_R[ctrlNr]=MAX_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
@@ -1293,14 +1297,14 @@ static int key_controlsMenu(int *c)
 						mainMenu_custom_R[ctrlNr]++;
 					else
 						mainMenu_custom_R[ctrlNr]=MIN_CUSTOM_ID;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}
 				else if (del)
 				{
 					mainMenu_custom_R[ctrlNr]=0;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					mapback_custom_controls(); //record this change in custom control set
 #endif
 				}	
@@ -1364,7 +1368,7 @@ static void raise_controlsMenu()
 
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -1377,7 +1381,7 @@ static void raise_controlsMenu()
 static void unraise_controlsMenu()
 {
 	int i;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

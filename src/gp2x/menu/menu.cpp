@@ -16,7 +16,7 @@
 #include "fade.h"
 #include "xwin.h"
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 #include <SDL_gp2x.h>
 #endif
 
@@ -225,7 +225,7 @@ int save_thumb(int code,char *path)
 
 void menu_raise(void)
 {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	int i;
 	for(i=80;i>=0;i-=16)
 	{
@@ -242,7 +242,7 @@ void menu_raise(void)
 
 void menu_unraise(void)
 {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	int i;
 	for(i=0;i<=80;i+=16)
 	{
@@ -348,7 +348,7 @@ else
 
 void text_flip_with_image(SDL_Surface *img, int x, int y)
 {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	SDL_Delay(10);
 #endif
 	SDL_Rect dst;
@@ -367,7 +367,7 @@ void text_flip_with_image(SDL_Surface *img, int x, int y)
 
 void text_flip(void)
 {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	SDL_Delay(10);
 #endif
 	SDL_Rect dst;
@@ -425,7 +425,7 @@ void init_kickstart()
 
 void init_text(int splash)
 {
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	//Display menu always in 320*240 on Vita
 	if(prSDLScreen != NULL) {
 		for (int i=0; i<10; i++)
@@ -575,7 +575,7 @@ void init_text(int splash)
 		int i,j;
 
 		obten_colores();
-#if !defined(__SWITCH__) && !defined(__PSP2__)
+#if !defined(__SWITCH__) && !defined(__PSP2__) && !defined(__3DS__)
 		if (skipintro)
 #endif
 			goto skipintro;
@@ -617,7 +617,7 @@ void init_text(int splash)
 	}
 	else
 	{
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 		SDL_FillRect(text_screen,NULL,0xFFFFFFFF);
 #endif
 		text_flip();

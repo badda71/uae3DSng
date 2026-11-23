@@ -61,7 +61,7 @@ extern int buttonSelect[MAX_NUM_CONTROLLERS];
 extern int buttonStart[MAX_NUM_CONTROLLERS];
 extern int singleJoycons;
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 extern int rAnalogX;
 extern int rAnalogY;
 extern int lAnalogX;
@@ -131,7 +131,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 #endif
 	//PSP2 updates joysticks in handle_events function which is always called 
 	//just before read_joystick is called. No need to update them again here
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	SDL_JoystickUpdate();
 #endif
 /* Temporary disabled
@@ -155,15 +155,15 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	mouseScale /= 100;
 
 //Digital mouseemu hotkeys: Triangle changes mouse speed etc.
-#if !defined(__PSP2__) && !defined(__SWITCH__) && defined(USE_UAE4ALL_VKBD)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) && defined(USE_UAE4ALL_VKBD)
 	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL[0] && !triggerR[0] && !gp2xButtonRemappingOn)))
 #else
-#if ( defined(__PSP2__) || defined(__SWITCH__) ) && defined(USE_UAE4ALL_VKBD)
+#if ( defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) ) && defined(USE_UAE4ALL_VKBD)
 	//on Vita, the L trigger is by default mapped to a mousebutton
 	//so remove the hard coded LTrigger here that was enabling the digital mouse
 	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn))
 #else
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	if ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn)
 #else
 	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL[0] && !triggerR[0] && !gp2xButtonRemappingOn)))
@@ -217,7 +217,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	else if (!triggerR[0] /*R+dpad = arrow keys*/ && !(mainMenu_customControls && mainMenu_custom_dpad==0) && usingRegularControls)
 	{
 //regular direction controls for main Joystick (or both if "both" is set.)
-#if !defined(AROS) && !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(AROS) && !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 		if (dpadRight || SDL_JoystickGetAxis(joy, 0) > 0) right=1;
 		if (dpadLeft || SDL_JoystickGetAxis(joy, 0) < 0) left=1;
 		if (dpadUp || SDL_JoystickGetAxis(joy, 1) < 0) top=1;
@@ -265,7 +265,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		}
 		else
 		{
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			*button = ((mainMenu_button1==GP2X_BUTTON_B && buttonA[0]) || (mainMenu_button1==GP2X_BUTTON_X && buttonX[0]) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY[0])) & 1;
 #else
 #if !(defined(ANDROIDSDL) || defined(AROS))
@@ -275,7 +275,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 #endif
 #endif //__PSP2__
 			delay++;
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			*button |= ((buttonB[0]) & 1) << 1;
 #else
 #if defined(PANDORA) && !defined(AROS)
@@ -288,7 +288,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	}
 
 //Analog Mouse on PSP2, only update once per frame (when nr==1)
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #ifdef USE_UAE4ALL_VKBD
 	if ((nr == 1) && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
 #else
@@ -657,7 +657,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
 		// if Start+Dpad is used (or right analog stick on Vita)
 		// move the keyboard itself and/or change transparency
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 		if (rAnalogY < -1024*10)
 #else
 		if (buttonStart[0] && (dpadUp[0] || top))
@@ -665,7 +665,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		{
 			vkbd_displace_up();
 		}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 		else if (rAnalogY > 1024*10)
 #else
 		else if (buttonStart[0] && (dpadDown[0] || bot))
@@ -673,7 +673,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		{
 			vkbd_displace_down();
 		}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 		else if (rAnalogX < -1024*10)
 #else
 		else if (buttonStart[0] && (dpadLeft[0] || left))
@@ -685,7 +685,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				can_change_vkbd_transparency=0;
 			}
 		}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 		else if (rAnalogX > 1024*10)
 #else
 		else if (buttonStart[0] && (dpadRight[0] || right))
@@ -720,7 +720,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				else
 					vkbd_move &= ~VKBD_DOWN;
 			}
-#if defined(__PSP2__) || defined(__SWITCH__) //we know the Vita has many buttons available so use those
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) //we know the Vita has many buttons available so use those
 #ifdef __SWITCH__
 			if ((!mainMenu_swapAB && buttonX[0]) || (mainMenu_swapAB && buttonB[0]))
 #else
@@ -776,7 +776,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	else
 #endif
 	{
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 		// On Vita, map the second player to always using the GP2X mapping, in addition to everything else
 		// Unless there is a custom mapping
 		if (!mainMenu_customControls && ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1) || nr == 2 || nr == 3))
@@ -834,7 +834,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		*dir = bot | (right << 1) | (top << 8) | (left << 9);
 	}
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 //If not on Vita, zero the "other" joystick
 	if (!mainMenu_customControls)
 	{
@@ -854,6 +854,13 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 void init_joystick(void)
 {
 	int i;
+#if defined(__3DS__)
+	/* the built-in pad is read through hid, see input3ds.cpp; no SDL joystick handles */
+	nr_joysticks = 1;
+	uae4all_joy0 = uae4all_joy1 = uae4all_joy2 = uae4all_joy3 = NULL;
+	uae4all_joy4 = uae4all_joy5 = uae4all_joy6 = uae4all_joy7 = NULL;
+	return;
+#endif
 	nr_joysticks = SDL_NumJoysticks();
 	if (nr_joysticks > 0)
 		uae4all_joy0 = SDL_JoystickOpen(0);
@@ -891,6 +898,9 @@ void init_joystick(void)
 
 void close_joystick(void)
 {
+#if defined(__3DS__)
+	return;
+#endif
 	if (nr_joysticks > 0)
 		SDL_JoystickClose (uae4all_joy0);
 	if (nr_joysticks > 1)

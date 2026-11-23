@@ -36,7 +36,7 @@ extern int timeslice_mode;
 extern char launchDir[300];
 extern char currentDir[300];
 extern int nr_drives;
-#if defined(__PSP2__) || defined(__SWITCH__) 
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) 
 static char config_filename[255] = "uae4all.cfg";
 #else
 extern char *config_filename;
@@ -105,7 +105,7 @@ int mainMenu_custom_R2[MAX_NUM_CONTROLLERS] = { };
 int mainMenu_custom_L3[MAX_NUM_CONTROLLERS] = { };
 int mainMenu_custom_R3[MAX_NUM_CONTROLLERS] = { };
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 int mainMenu_custom_controlSet = 0; //This controls which custom config is used
 int mainMenu_customPreset_up[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
 int mainMenu_customPreset_down[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
@@ -145,8 +145,8 @@ int visibleAreaWidth = 320;
 
 int saveMenu_n_savestate = 0;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
-#if defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
+#if defined(__SWITCH__) || defined(__3DS__)
 int mainMenu_shader = 1;
 #else
 int mainMenu_shader = 5;
@@ -284,7 +284,7 @@ void SetDefaultMenuSettings(int general)
 		 mainMenu_custom_R3[i] = 0;
 #endif
 	}
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	 mainMenu_custom_controlSet = 0;
 	 for (int i=0; i<MAX_NUM_CONTROLLERS; i++) 
 	 {
@@ -504,8 +504,8 @@ void SetDefaultMenuSettings(int general)
     mainMenu_vkbdStyle = 0; //Default is original style
     mainMenu_autofire = DEFAULT_AUTOFIRE;
 
-#if defined(__PSP2__) || defined(__SWITCH__)
-#ifdef __SWITCH__
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
+#if defined(__SWITCH__) || defined(__3DS__)
     mainMenu_shader = 1;
 #else
     mainMenu_shader = 5;
@@ -1135,7 +1135,7 @@ int saveconfig(int general)
     snprintf((char*)buffer, 255, "scaling=%d\n",mainMenu_enableHWscaling);
 #endif
     fputs(buffer,f);
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
     snprintf((char*)buffer, 255, "shader=%d\n",mainMenu_shader);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "leftstickmouse=%d\n",mainMenu_leftStickMouse);
@@ -1229,7 +1229,7 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "customControls=%d\n",mainMenu_customControls);
     fputs(buffer,f);
-#if !defined(__PSP2__) && !defined(__SWITCH__)    
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)    
     snprintf((char*)buffer, 255, "custom_dpad=%d\n",mainMenu_custom_dpad[0]);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "custom_up=%d\n",mainMenu_custom_up[0]);
@@ -1475,7 +1475,7 @@ void loadconfig(int general)
 // general == 3: loading config from guichan (unused)
 // general == 4: loading hd-dir-specific config after selecting hd dir
 // general == 5: loading general config via the load config... filerequester option on main menu 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	if (general == 1)
 	{
     //first time opening the screen on Vita
@@ -1560,9 +1560,9 @@ void loadconfig(int general)
 #else
         fscanf(f,"scaling=%d\n",&mainMenu_enableHWscaling);
 #endif
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
         fscanf(f,"shader=%d\n",&mainMenu_shader);
-#if defined(__SWITCH__)
+#if defined(__SWITCH__) || defined(__3DS__)
         if (mainMenu_shader > 3) mainMenu_shader = 1;
 #endif
         fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);
@@ -1640,7 +1640,7 @@ void loadconfig(int general)
         fscanf(f,"cutLeft=%d\n",&mainMenu_cutLeft);
         fscanf(f,"cutRight=%d\n",&mainMenu_cutRight);
         fscanf(f,"customControls=%d\n",&mainMenu_customControls);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
         fscanf(f,"custom_dpad=%d\n",&mainMenu_custom_dpad);
         fscanf(f,"custom_up=%d\n",&mainMenu_custom_up[0]);
         fscanf(f,"custom_down=%d\n",&mainMenu_custom_down[0]);
@@ -1920,7 +1920,7 @@ void loadconfig(int general)
     if (running==false)
 #endif
     {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
         update_display();
 #endif
     }

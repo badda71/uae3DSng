@@ -20,7 +20,9 @@
 #endif
 #endif
 #include "gp2x.h"
-#include <SDL_ttf.h>
+#ifndef __3DS__
+#include <SDL_ttf.h>   /* vestigial: nothing here calls TTF_*; no SDL_ttf for 3DS */
+#endif
 #include "savestate.h"
 
 #ifdef __SWITCH__
@@ -37,6 +39,8 @@
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
 #endif
 
 SDL_Surface *thumbnail_image = NULL;
@@ -308,7 +312,7 @@ static inline int key_saveMenu(int *cp)
 			case SDLK_DOWN: down=1; break;
 			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 			//note SDLK_CTRL corresponds to ButtonSelect on Vita
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 			case SDLK_PAGEDOWN: hit0=1; break;
 			case SDLK_END: hit1=1; break;
 #else
@@ -470,7 +474,7 @@ static inline void raise_saveMenu()
 
 	text_draw_background();
 	text_flip();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=0;i<8;i++)
 	{
 		text_draw_background();
@@ -484,7 +488,7 @@ static inline void raise_saveMenu()
 static inline void unraise_saveMenu()
 {
 	int i;
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	for(i=7;i>=0;i--)
 	{
 		text_draw_background();

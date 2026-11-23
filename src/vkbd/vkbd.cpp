@@ -573,7 +573,7 @@ int vkbd_init(void)
 	snprintf(vkbdShiftFileName, 256, "vkbd%s%sLargeShift.bmp", vkdbStyleString, vkbdLanguageString);
 	snprintf(vkbdShiftHiresFileName, 256, "vkbd%s%sLargeShiftHires.bmp", vkdbStyleString, vkbdLanguageString);
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdFileName);
 	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdHiresFileName);
 #else
@@ -616,7 +616,7 @@ int vkbd_init(void)
 	canvasHires=SDL_DisplayFormat(ksurHires);
 
 	//for large keyboard, load another image for shifted keys, and set transparency
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdShiftFileName);
 	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdShiftHiresFileName);
 #else
@@ -659,7 +659,7 @@ int vkbd_init(void)
 	SDL_SetAlpha(canvasHires, SDL_SRCALPHA | SDL_RLEACCEL, vkbd_transparency);
 
 	vkbd_actual=0;
-#if !defined(__PSP2__) && !defined(__SWITCH__) //no need to show keyboard on first startup
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) //no need to show keyboard on first startup
 	vkbd_redraw();
 #endif
 	for (int i=0; i<NUM_STICKY; i++)

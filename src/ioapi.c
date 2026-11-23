@@ -10,7 +10,7 @@
 
 */
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #define IOAPI_NO_64
 #endif
 

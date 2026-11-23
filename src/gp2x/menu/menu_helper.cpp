@@ -107,7 +107,7 @@ void exit_safely(int quit_via_home) {
     
     leave_program();
 
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
     sync();
 #endif
 #ifdef __SWITCH__
@@ -187,7 +187,7 @@ void update_display() {
     snprintf(layersize, 20, "%dx480", screenWidth);
 
 #ifndef WIN32
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
     setenv("SDL_OMAP_LAYER_SIZE",layersize,1);
 #endif
 #endif
@@ -196,7 +196,7 @@ void update_display() {
     snprintf(bordercut, 20, "%d,%d,0,0", mainMenu_cutLeft, mainMenu_cutRight);
 
 #ifndef WIN32
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
     setenv("SDL_OMAP_BORDER_CUT",bordercut,1);
 #endif
 #endif
@@ -205,7 +205,7 @@ void update_display() {
     update_onscreen();
 #endif
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
     if (prSDLScreen != NULL) {
         // clear old screen
         for (int i=0; i<4; i++)
@@ -309,7 +309,7 @@ void update_display() {
 static bool cpuSpeedChanged = false;
 
 void setCpuSpeed() {
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
     char speedCmd[128];
 
     if(mainMenu_cpuSpeed != lastCpuSpeed)

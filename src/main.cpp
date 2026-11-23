@@ -211,7 +211,7 @@ void do_start_program (void)
 void do_leave_program (void)
 {
 #ifdef USE_SDL
-#if defined(__PSP2__) || defined(__SWITCH__) //On Vita, only remove keyboard graphics from memory when quitting the emu
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) //On Vita, only remove keyboard graphics from memory when quitting the emu
 #ifdef USE_UAE4ALL_VKBD
 	vkbd_quit();
 #endif
@@ -268,6 +268,11 @@ void real_main (int argc, char **argv)
     socketInitializeDefault();
 #endif
 
+#if defined(__3DS__)
+    romfsInit();                  /* romfs:/data = menu graphics, romfs:/*.png = bottom screen UI */
+    osSetSpeedupEnable(true);     /* New 3DS: 804 MHz + L2 cache; harmless on Old 3DS */
+#endif
+
 #ifdef USE_SDL
     SDL_Init (SDL_INIT_VIDEO | SDL_INIT_JOYSTICK 
 #if !defined(NO_SOUND) && !defined(GP2X)
@@ -288,6 +293,16 @@ void real_main (int argc, char **argv)
     mkdir("ux0:/data/uae4all/thumbs", 0777);
     mkdir("ux0:/data/uae4all/tmp", 0777);
 	strcpy(launchDir, "ux0:/data/uae4all");
+#elif defined(__3DS__)
+	mkdir("sdmc:/3ds", 0777);
+	mkdir("sdmc:/3ds/uae3DSng", 0777);
+	mkdir("sdmc:/3ds/uae3DSng/roms", 0777);
+	mkdir("sdmc:/3ds/uae3DSng/saves", 0777);
+	mkdir("sdmc:/3ds/uae3DSng/conf", 0777);
+	mkdir("sdmc:/3ds/uae3DSng/kickstarts", 0777);
+	mkdir("sdmc:/3ds/uae3DSng/thumbs", 0777);
+	mkdir("sdmc:/3ds/uae3DSng/tmp", 0777);
+	strcpy(launchDir, "sdmc:/3ds/uae3DSng");
 #elif defined(__SWITCH__)
 	mkdir("./roms", 0777);
 	mkdir("./saves", 0777);

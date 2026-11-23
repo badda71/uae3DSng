@@ -45,7 +45,7 @@
 #include <stdlib.h>
 #include "zlib.h"
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #define USE_FILE32API
 #endif
 

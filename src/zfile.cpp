@@ -24,7 +24,7 @@
 #include <android/log.h>
 #endif
 
-#if defined(__vita__) || defined(__SWITCH__)
+#if defined(__vita__) || defined(__SWITCH__) || defined(__3DS__)
 #include <unzip.h>
 #endif
 
@@ -164,7 +164,7 @@ size_t zfile_fwrite (void *b, size_t l1, size_t l2, struct zfile *z)
  */
 static int gunzip (const char *decompress, const char *src, const char *dst)
 {
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
     if (!dst)
         return 1;
     int success = 0;
@@ -228,7 +228,7 @@ static int lha (const char *src, const char *dst)
  */
 static int unzip (const char *src, const char *dst)
 {
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
     if (!dst)
         return 1;
     int success = 0;
@@ -506,7 +506,7 @@ static void uae4all_disk_real_write(int num)
 			uae4all_disk_actual_crc[num]=new_crc;
 // FIXME - error: 'sync' was not declared in this scope
 #ifndef WIN32
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 			sync();
 #endif
 #endif

@@ -379,17 +379,22 @@
 #	define uae_malloc(len) malloc((len + 1) & ~1);
 #endif
 
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #undef HAVE_SYS_MOUNT_H
 #undef HAVE_SYS_VFS_H
 #undef HAVE_SYS_STATFS_H
 #ifdef __PSP2__ // NOT __SWITCH__
 #include <psp2/power.h>
 #endif
+#ifdef __3DS__
+#include "input3ds.h"
+#include "video3ds.h"
+#else
 #include "psp2_input.h"
-#ifdef DEBUG_UAE4ALL
+#if defined(DEBUG_UAE4ALL)
 #include <psp2shell.h>
 #define printf psp2shell_print
+#endif
 #endif
 #endif
 

@@ -102,7 +102,7 @@ void fsdb_clean_dir (a_inode *dir)
 	pos1 += sizeof buf;
     }
     fclose (f);
-#if !defined(__PSP2__) && !defined(__SWITCH__)
+#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
     truncate (n, pos1);
 #endif
     free (n);
