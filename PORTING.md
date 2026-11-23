@@ -103,6 +103,11 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   heavy scene) permanently loses time. Hardware log showed windows at 32-44 fps although the average emulation
   cost was well under 20 ms/frame; the 3DS limiter now catches up through up to 4 frames of lateness.
   The `speed:` log line reports fps, limiter slack, worst frame, frames >35 ms and time spent reading the ADF.
+  Hardware log of that build: while loading, ~1000 ADF reads per 5 s took ~2.5 ms each (an fseek+fread of one 512-byte
+  sector on the SD card) = half of all wall time, with frames up to 180 ms. `zfile.cpp` therefore keeps the whole
+  floppy image (<= 2 MB) in RAM on 3DS; writes still go through to the file.
+* **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
+  no button reaches it. `menu_memory_disk.cpp` and `menu_fileinfo.cpp` were missing it (Memory/Disk menu froze).
 * **Quit**: `app_exiting` is set before `SDL_Quit()` so the audio thread's `WaitAudio()` returns.
 * `Illegal instruction: 4e7b at 00fc0564` in the log is Kickstart 1.3 probing for a 68010 (MOVEC) - expected.
 * Debug log: `sdmc:/3ds/uae3DSng/uae3DSng.log` (+ `stdout.log`), flushed per line; `write_log()` maps to it.

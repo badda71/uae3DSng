@@ -18,6 +18,12 @@
 #include "sound.h"
 #include "gp2x.h"
 
+#if defined(__PSP2__) || defined(__SWITCH__)
+#define SDL_PollEvent PSP2_PollEvent
+#elif defined(__3DS__)
+#define SDL_PollEvent N3DS_PollEvent
+#endif
+
 static const char *text_str_fileinfo_title=    "File info";
 char* fileInfo_fileName;
 

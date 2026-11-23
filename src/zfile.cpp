@@ -67,6 +67,13 @@ struct zfile
     struct zfile **pprev;
     FILE *f;
     char name[L_tmpnam];
+#ifdef __3DS__
+    /* The whole (small) image is held in RAM: every sector read of an ADF used to be an fseek+fread on the SD
+     * card (~2.5 ms each, measured on hardware), which made loading far slower than the emulation itself.
+     * Writes still go through to the file. */
+    unsigned char *mem;
+    long msize, mpos;
+#endif
 };
 
 static struct zfile *zlist = 0;
@@ -115,6 +122,9 @@ void zfile_exit (void)
 	zlist = l->next;
 	fclose (l->f);
 	unlink (l->name); /* sam: in case unlink () after fopen () fails */
+#ifdef __3DS__
+	free (l->mem);
+#endif
 	free (l);
     }
 }
@@ -133,6 +143,9 @@ int zfile_fclose (struct zfile *f)
     ret = fclose (f->f);
     unlink (f->name);
 
+#ifdef __3DS__
+    free (f->mem);
+#endif
     free (f);
 
     return ret;
@@ -140,21 +153,65 @@ int zfile_fclose (struct zfile *f)
 
 int zfile_fseek (struct zfile *z, long offset, int mode)
 {
+#ifdef __3DS__
+    if (z->mem) {
+	long np = offset;
+	if (mode == SEEK_CUR) np = z->mpos + offset;
+	else if (mode == SEEK_END) np = z->msize + offset;
+	if (np < 0) return -1;
+	z->mpos = np;
+	return 0;
+    }
+#endif
     return fseek (z->f, offset, mode);
 }
 
 long zfile_ftell (struct zfile *z)
 {
+#ifdef __3DS__
+    if (z->mem) return z->mpos;
+#endif
     return ftell (z->f);
 }
 
 size_t zfile_fread (void *b, size_t l1, size_t l2, struct zfile *z)
 {
+#ifdef __3DS__
+    if (z->mem) {
+	if (l1 == 0 || l2 == 0) return 0;
+	long avail = z->mpos < z->msize ? z->msize - z->mpos : 0;
+	size_t n = (size_t) avail / l1;           /* whole items available */
+	if (n > l2) n = l2;
+	memcpy (b, z->mem + z->mpos, n * l1);
+	z->mpos += (long) (n * l1);
+	return n;
+    }
+#endif
     return fread (b, l1, l2, z->f);
 }
 
 size_t zfile_fwrite (void *b, size_t l1, size_t l2, struct zfile *z)
 {
+#ifdef __3DS__
+    if (z->mem) {
+	/* write through to the file first (authoritative copy), then mirror into RAM */
+	if (fseek (z->f, z->mpos, SEEK_SET) != 0) return 0;
+	size_t n = fwrite (b, l1, l2, z->f);
+	long end = z->mpos + (long) (n * l1);
+	if (n && z->mpos < z->msize) {
+	    long c = (end < z->msize ? end : z->msize) - z->mpos;
+	    memcpy (z->mem + z->mpos, b, c);
+	}
+	if (end > z->msize) {                     /* image grew: drop the RAM copy, use the file from now on */
+	    free (z->mem);
+	    z->mem = NULL;
+	    fseek (z->f, end, SEEK_SET);
+	    return n;
+	}
+	z->mpos = end;
+	return n;
+    }
+#endif
     return fwrite (b, l1, l2, z->f);
 }
 
@@ -388,6 +445,25 @@ struct zfile *zfile_open (const char *name, const char *mode)
 	free (l);
 	return NULL;
     }
+
+#ifdef __3DS__
+    l->mem = NULL;
+    l->msize = l->mpos = 0;
+    if (mode[0] == 'r' && fseek (l->f, 0, SEEK_END) == 0) {
+	long sz = ftell (l->f);
+	fseek (l->f, 0, SEEK_SET);
+	if (sz > 0 && sz <= 2 * 1024 * 1024) {         /* floppy images (DD 880 KB, HD 1.7 MB) */
+	    unsigned char *m = (unsigned char *) malloc (sz);
+	    if (m && fread (m, 1, sz, l->f) == (size_t) sz) {
+		l->mem = m;
+		l->msize = sz;
+	    } else {
+		free (m);                              /* no memory / short read: keep using the file */
+		fseek (l->f, 0, SEEK_SET);
+	    }
+	}
+    }
+#endif
 
     l->pprev = &zlist;
     l->next = zlist;
