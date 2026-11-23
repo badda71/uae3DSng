@@ -187,7 +187,13 @@ static int gp2x_start_sound(int rate, int bits, int stereo)
 	  as.samples = SNDBUFFER_LEN / as.channels / 2;
 #endif
 	as.callback = sound_thread_mixer;
-	SDL_OpenAudio(&as, NULL);
+	if (SDL_OpenAudio(&as, NULL) < 0) {
+		/* e.g. 3DS without sdmc:/3ds/dspfirm.cdc: no audio callback will ever run, so the emulator
+		 * must not wait for one (finish_sound_buffer) - report failure so sound gets disabled. */
+		write_log("SDL_OpenAudio failed (%s) - sound disabled\n", SDL_GetError());
+		return -1;
+	}
+	write_log("SDL_OpenAudio ok: %d Hz, %d ch, %d samples/buffer\n", as.freq, as.channels, as.samples);
 	audioOpened = 1;
 
 	s_oldrate = rate; 
@@ -232,8 +238,24 @@ void finish_sound_buffer (void)
 #else
 
 #ifdef SOUND_USE_SEMAPHORES
-	uae_sem_post(&sound_sem);
-	uae_sem_wait(&callback_sem);
+	static int sound_dead = 0, stalls = 0, calls = 0;
+	if (calls < 3) { write_log("finish_sound_buffer #%d (sound_dead=%d)\n", calls, sound_dead); calls++; }
+	if (!sound_dead) {
+		uae_sem_post(&sound_sem);
+#ifdef __3DS__
+		/* Never block forever on the audio callback: if the DSP/audio thread stalls (or never started),
+		 * give up on audio instead of freezing the whole emulator. */
+		if (SDL_SemWaitTimeout(callback_sem, 250) != 0) {
+			stalls++;
+			write_log("audio callback timeout #%d\n", stalls);
+			if (stalls >= 2) { sound_dead = 1; write_log("audio stalled - sound disabled for this session\n"); }
+		} else {
+			stalls = 0;
+		}
+#else
+		uae_sem_wait(&callback_sem);
+#endif
+	}
 #endif
 	wrcnt++;
 	sndbufpt = render_sndbuff = sndbuffer[wrcnt%SOUND_BUFFERS_COUNT];

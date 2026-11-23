@@ -157,8 +157,10 @@ void m68k_go (int may_quit)
 				restore_state (savestate_filename);
 				mispcflags = 0;
 	    	}
+			write_log("m68k_go: reset_all_systems\n");
 			reset_all_systems ();
 			customreset ();
+			write_log("m68k_go: customreset done\n");
 			sound_default_evtime ();
          /* We may have been restoring state, but we're done now.  */
          handle_active_events ();
@@ -169,7 +171,9 @@ void m68k_go (int may_quit)
 		if(!savestate_state)
 	   	uae4all_reset();
 		savestate_restore_finish();
+      write_log("m68k_go: m68k_run\n");
       m68k_run();
+		write_log("m68k_go: m68k_run returned, quit_program=%d\n", quit_program);
 	}
 	in_m68k_go--;
 }

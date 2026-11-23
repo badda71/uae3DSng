@@ -432,6 +432,12 @@ extern int console_get (char *, int);
 #define console_get(FORMATO, RESTO...)
 #endif
 
+#ifdef __3DS__
+#include "log3ds.h"
+#undef write_log
+#define write_log log3ds
+#endif
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif

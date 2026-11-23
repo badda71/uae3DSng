@@ -269,6 +269,8 @@ void real_main (int argc, char **argv)
 #endif
 
 #if defined(__3DS__)
+    write_log("uae3DSng built %s %s, new3ds=%d\n", __DATE__, __TIME__, (int)0);
+    log3ds_mem("start");
     romfsInit();                  /* romfs:/data = menu graphics, romfs:/*.png = bottom screen UI */
     osSetSpeedupEnable(true);     /* New 3DS: 804 MHz + L2 cache; harmless on Old 3DS */
 #endif
@@ -337,10 +339,14 @@ void real_main (int argc, char **argv)
         resetOnStartingApp = true;
     }
 #endif
+    write_log("step: loadconfig\n");
     loadconfig (1);
+    write_log("step: graphics_setup\n");
     if (! graphics_setup ()) {
+	    write_log("graphics_setup FAILED: %s\n", SDL_GetError());
 	    exit (1);
     }
+    write_log("step: rtarea_init, hardfile_install, setup_sound\n");
     rtarea_init ();
 
     hardfile_install();
@@ -351,7 +357,9 @@ void real_main (int argc, char **argv)
     }
     init_joystick ();
 
+	write_log("step: gui_init (main menu)\n");
 	int err = gui_init ();
+	write_log("step: gui_init returned %d\n", err);
 	if (err == -1) {
 	    write_log ("Failed to initialize the GUI\n");
 	} else if (err == -2) {
@@ -362,6 +370,7 @@ void real_main (int argc, char **argv)
 		produce_sound = 0;
     }
 
+    write_log("step: rtarea_setup, keybuf_init, expansion_init\n");
     /* Install resident module to get 8MB chipmem, if requested */
     rtarea_setup ();
 
@@ -371,24 +380,32 @@ void real_main (int argc, char **argv)
     expansion_init ();
 #endif
 
+    write_log("step: memory_init (loads Kickstart)\n");
+    log3ds_mem("before memory_init");
     memory_init ();
+    log3ds_mem("after memory_init");
 
+    write_log("step: filesys_install, native2amiga_install, custom_init, DISK_init\n");
     filesys_install (); 
     native2amiga_install ();
 
     custom_init (); /* Must come after memory_init */
     DISK_init ();
 
+    write_log("step: m68k_init, gui_update\n");
     m68k_init(0);
 
     gui_update ();
+    write_log("step: gui_update done\n");
 
 #ifdef GP2X
     switch_to_hw_sdl(1);
 #endif
 	{
+		write_log("step: start_program -> m68k_go\n");
 		start_program ();
 	}
+    write_log("step: leave_program\n");
     leave_program ();
 }
 

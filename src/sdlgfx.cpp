@@ -161,9 +161,18 @@ void flush_block ()
 #endif
 		}
 		unsigned long start = read_processor_time();
+#ifdef __3DS__
+		{ static int n = 0; if (n < 5) { write_log("frame %d: now=%lu next_sync=%lu time_per_frame=%lu\n", n, start, next_synctime, time_per_frame); n++; } }
+#endif
 		if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
 #if defined(__PSP2__)
 			SDL_Delay(((next_synctime - start) - 1000) / 1000);
+#elif defined(__3DS__)
+		{	/* clamp: a wrong clock must never turn into a multi-second sleep */
+			unsigned long d = (next_synctime - start) - 1000;
+			if (d > 2 * time_per_frame) d = 2 * time_per_frame;
+			usleep(d);
+		}
 #else
 			usleep((next_synctime - start) - 1000);
 #endif
