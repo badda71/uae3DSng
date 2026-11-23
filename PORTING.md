@@ -1,0 +1,120 @@
+# uae3DSng – porting notes
+
+Port of the Switch/Vita flavour of **UAE4All2** (`rsn8887/uae4all2`) to the Nintendo 3DS, reusing the
+platform layer of **uae3DS** (`badda71/uae3DS`: SDL 1.2 fork for 3DS, bottom-screen UI).
+
+> **Status: groundwork only. Never compiled with devkitARM, never linked, never run on a 3DS.**
+> What *was* checked is listed under [Verification](#verification). Expect a first round of real
+> compiler/linker errors; send them back and they get fixed in order.
+
+## Provenance (git history is the changelog)
+
+| commit | content |
+|---|---|
+| `75f98b6` | pristine `rsn8887/uae4all2 @ 44955a2`, `src/psp2` and `src/switch` removed |
+| `d0a4c79` | pristine `badda71/uae3DS @ 8f1ddcf`: `UAE3DS_SDL`, `src/3ds`, `quirc`, `romfs`, `meta` |
+| later | all uae3DSng changes |
+
+`git diff 75f98b6 HEAD -- src ':!src/3ds' ':!src/quirc'` = every change made to the uae4all2 sources.
+
+## Why this base, and why this layering
+
+* The Switch build is `rsn8887/uae4all2`, not `lubomyr/uae4all2` (which has no Switch code and uses a
+  Guichan GUI for which no 3DS library exists). rsn8887's build uses the plain-SDL "gp2x" text menu.
+* uae4all2 is SDL **1.2**-style code (Switch only adds a thin SDL2 shim), which matches the
+  `UAE3DS_SDL` fork one-to-one. `UAE3DS_SDL` is reused unchanged, as a sublibrary like in uae3DS.
+* The core (FAME 68k core in C, custom chips, AGA/OCS/ECS, 68020, HDF, WHDLoad) is untouched. NEON
+  (`USE_ARMNEON`, `USE_ARMV7`) stays undefined; the ARM11 has no NEON. `neon_helper.s` and the
+  NetBSD `memcpy.s`/`memset.s` are not built (newlib's versions are used).
+
+## Layers added for 3DS (`src/3ds`)
+
+| file | role |
+|---|---|
+| `input3ds.h/.cpp` | `PAD_*` = libctru HID masks (replaces `psp2_input.h`); `input3ds_button/axis` = look-alikes of `SDL_JoystickGetButton/Axis` reading hid; `N3DS_PollEvent` = 3DS version of Vita's `PSP2_PollEvent` (synthesizes the key events the gp2x menus expect while `inside_menu`); `input3ds_init` unbinds the SDL driver's default hid→key mapping so buttons are not typed into the Amiga |
+| `video3ds.h/.cpp` | `SDL_SetVideoModeScaling/Bilinear/Sync` (called by the Vita/Switch display code) on top of the fork's `N3DS_SetScalingDirect/N3DS_SetYOffset`. Converts the 960×544 destination rect to scale factors for the 400×240 top screen – **first approximation**, tune on hardware |
+
+Face buttons follow the physical position (as the Switch port does): A=circle(right), B=cross(bottom),
+X=triangle(top), Y=square(left). In menus A=confirm, B=back (Nintendo layout; Vita default is reversed).
+
+## Change inventory in the uae4all2 sources
+
+* **Mechanical pass**: every `defined(__PSP2__) || defined(__SWITCH__)` (and negated forms) got
+  `|| defined(__3DS__)` — 215 sites (no `sync/chmod/mmap/soundcard`, in-process zlib/minizip
+  decompression instead of `system()`, `snprintf` temp names, 16-byte alignment, …).
+  Reviewed in the core/system files; **not individually reviewed in the menu files**.
+* **Reverted for 3DS** (Vita-only plumbing): `psp2shell` debug output, `SDL_PollEvent → PSP2_PollEvent`
+  (now `N3DS_PollEvent`).
+* `sysconfig.h`: includes `input3ds.h`+`video3ds.h` instead of `psp2_input.h`.
+* `gui.cpp`: `gui_handle_events()` reads the pad through `JOY_BTN/JOY_AXIS/JOY_UPDATE` macros (hid on
+  3DS, SDL joysticks elsewhere); `gui_init()` calls `input3ds_init()`.
+* `od-joy.cpp`: `init/close_joystick()` – one built-in "joystick", no SDL handles.
+* `sdlgfx.cpp`: SDL mouse events ignored on 3DS (the fork reports touches as *absolute* mouse events).
+* `main.cpp`, `gp2x/gp2x.cpp`: `romfsInit()`, `osSetSpeedupEnable(true)`, `launchDir = sdmc:/3ds/uae3DSng`
+  with `roms saves conf kickstarts thumbs tmp` created at start-up.
+* `zfile.cpp`: minizip include for 3DS. `menu_display.cpp`/`menu_config.cpp`: Switch shader set
+  (none / sharp-bilinear / bilinear / point) used for 3DS. `SDL_ttf.h` includes removed (nothing calls `TTF_*`).
+* `Makefile`: explicit source list (dirs `src src/3ds src/gp2x src/gp2x/menu src/menu src/vkbd src/m68k
+  src/m68k/fame`) with `EXCLUDE_FILES`; defines mirror rsn8887's Switch CMake minus SDL2/64-bit.
+* `romfs/data/`: uae4all2 menu graphics and the virtual-keyboard bitmaps (`upstream-data/` is the pristine copy).
+
+## Build
+
+devkitARM + libctru, and `pacman -S 3ds-sdl_image 3ds-sdl_gfx 3ds-libpng 3ds-zlib` (+ libjpeg that
+`3ds-sdl_image` pulls in). Then `make release` (builds `UAE3DS_SDL` first). Kickstarts go to
+`sdmc:/3ds/uae3DSng/kickstarts/` as `kick12.rom kick13.rom kick20.rom kick31.rom kickcustom.rom`.
+
+## Verification
+
+Done here (no devkitARM, no hardware available):
+
+1. `make -n` against a stub devkitARM: the Makefile selects 52 C++ + 2 C files, excludes the intended
+   ones, and passes the ARM11 flags and all defines. Real flags/rules of `3ds_rules` were not exercised.
+2. `tools/hostcheck/check.sh`: clang **syntax-only** pass, 32-bit target, against the **real libctru
+   headers** (clone of `devkitPro/libctru`, HEAD 2026-11-14) and `UAE3DS_SDL` SDL 1.2 headers.
+   All 52 C++ and 2 C files pass. Limits: glibc instead of newlib headers (stubbed where they differ),
+   no `SDL_image/SDL_rotozoom` real headers (small stubs), no code generation, no linking.
+
+**Not verified:** compilation with devkitARM, linking (e.g. unresolved symbols between the sublibrary and
+the app), running, performance, memory use, any behaviour.
+
+## Known gaps / risks
+
+1. **245 platform-conditional lines are unaudited** (`grep -rnE "__PSP2__|__SWITCH__|USE_SDL2"`,
+   mostly `gp2x/menu/*`, `od-joy.cpp`, `gui.cpp`, `sdlgfx.cpp`, `sound_sdl_new.cpp`). Their 3DS branch is
+   the generic/Linux `#else`, which compiles but may be wrong (e.g. file-browser start paths, Switch-only
+   sound buffer macro in `audio.cpp`/`sound_sdl_new.cpp`, `mainMenu_swapAB`).
+2. **Memory**: uae4all2 allocates chip/slow/fast RAM and several tables with `malloc`. Check that the
+   defaults fit libctru's malloc heap on Old 3DS (the 64 MB application region is shared with the
+   linear heap that the SDL driver uses for textures). uae3DS builds with `SYSTEM_MODE_EXT 124MB` for
+   New 3DS; the same is configured in this Makefile. I have not measured anything.
+3. **Speed**: the FAME core is C; AGA and 68020 will not be playable on Old 3DS (268 MHz), and likely
+   marginal on New 3DS. Consider hiding/blocking those options on Old 3DS (`osIsNew3DS()`).
+4. **Bottom screen is not ported yet.** `uae3ds.cpp`, `uibottom.cpp`, `autofire.cpp` are in the tree but
+   in `EXCLUDE_FILES`. The virtual keyboard (`vkbd`, drawn on the *top* screen) is compiled in as the
+   interim keyboard. Dependencies of the uae3DS code that must be provided/adapted:
+   * from uae3DS's own menu: `text_messagebox`/`MB_*`, `sdl_3dsbuttons buttons3ds[]`, `show_message(_str)`,
+     `write_text_full`/`FONT_*`/`ALIGN_*`/`menu_text_color`, `storeConfig`, `nowSuperThrottle`,
+     `mainMenu_{max_tap_time,click_time,single_tap_timeout,max_double_tap_time,locked_drag_timeout,
+     tap_and_drag_gesture,locked_drags}` (touchpad gestures), `gui_data` drive LEDs (check uae4all2 has it);
+   * from the SDL fork (exported symbols, so `UAE3DS_SDL` must stay as is): `VideoSurface2`, `projection2`,
+     `privateSem1`, `uLoc_projection`, `SDL_RequestCall`;
+   * **key convention mismatch**: uibottom pushes *Amiga* key codes (`AK_*`, < 0x100) as SDL keysyms and
+     uae3DS's loop does `record_key(sym << 1)`; uae4all2's loop calls `keycode2amiga(&keysym)`. Needs a
+     3DS branch in `handle_events()` (sym < 0x100 ⇒ already an Amiga code).
+   * mouse: uibottom emits synthetic mouse events with `button.which == 1`; real touches have `which == 0`.
+     The temporary "ignore all mouse events" guard in `sdlgfx.cpp` has to be replaced by
+     `uib_handle_event()` + handling of `which == 1` events.
+5. Not ported from uae3DS: key-mapping layer, super-throttle, status line, CIA self-update, curl/QR
+   download, df-selection menu. (`3ds_cia`, `http`, `update`, `qr-scanner`, `quirc` are imported, unused.)
+6. Display scaling (`video3ds.cpp`) and the filter options are approximations; the menu screen
+   (`init_text`) shares the same shim.
+
+## Suggested order
+
+* **M1 – boots**: build, fix compiler/linker errors, get Kickstart 1.3 to the insert-disk screen on the
+  top screen, hear audio, control with pad, open menu with SELECT, load an ADF.
+* **M2 – bottom screen**: bring in `uibottom` (keyboard, touchpad, status line) per gap 4, drop `vkbd`.
+* **M3 – 3DS-native menu/options**: touch-friendly file selection, per-model gating (Old/New 3DS),
+  tune scaling and the control presets, memory sizing.
+* **M4 – extras**: CIA self-update, QR/URL download, key remapping UI.
