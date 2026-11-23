@@ -1,25 +1,30 @@
 /*
-  * UAE3DS - Amiga 500 emulator for Nintendo 3DS
-  *
-  * uibottom.c - functions for handling 3DS bottom screen
-  *
-  * Copyright 2020 Sebastian Weber
-  */
- 
+ * uae3DSng - bottom screen UI: touch keyboard, touchpad mouse, status LEDs and messages
+ *
+ * Derived from uae3DS (uibottom.cpp, Copyright 2020 Sebastian Weber). Differences to uae3DS:
+ *  - the touchscreen is read directly (hidTouchRead) instead of via SDL mouse events, so the result does
+ *    not depend on the size of the emulator's SDL surface;
+ *  - keys go straight into the Amiga keyboard buffer (Amiga key codes), mouse movement and the left button
+ *    go straight into the mouse state of the custom chips;
+ *  - the keyboard slide animation is time based (no worker thread).
+ *
+ * Drawing runs in the SDL 3DS driver's video thread (SDL_RequestCall), everything else in the emulator thread.
+ */
 #include <stdlib.h>
-#include <SDL/SDL_image.h>
+#include <string.h>
+#include <math.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <3ds.h>
 #include <citro3d.h>
-#include <math.h>
 #include "sysconfig.h"
 #include "sysdeps.h"
 #include "config.h"
 #include "keyboard.h"
-#include "uibottom.h"
-#include "uae3ds.h"
 #include "gui.h"
-#include "menu.h"
-#include "uae.h"
+#include "menu_config.h"
+#include "uibottom.h"
+#include "log3ds.h"
 
 uikbd_key uikbd_keypos[] = {
 	//  x,  y,   w,   h,         key,stky, flgs, name
@@ -128,7 +133,6 @@ uikbd_key uikbd_keypos[] = {
 	{   0,  0,   0,   0,          -1,   0,  0,  ""}
 };
 
-extern void log_citra(const char *format, ...);
 
 // status line stuff
 
@@ -148,6 +152,7 @@ extern void log_citra(const char *format, ...);
 
 #define TD_TOTAL_HEIGHT (TD_PADY * 2 + TD_NUM_HEIGHT)
 #define TD_STARTX 218
+
 int td_text_length = 0;
 
 // data definitions
@@ -159,7 +164,24 @@ typedef struct {
 } DS3_Image;
 
 // exposed variables
-volatile enum uib_action uib_must_redraw = UIB_NO;
+volatile int uib_must_redraw = UIB_NO;
+
+// emulator state used here
+extern int uae4all_keystate[256];
+extern int buttonstate[3];
+extern int lastmx, lastmy, newmousecounters;
+extern void record_key(int kc);
+int nowSuperThrottle = 0;               // "turbo" icon is shown while this is set
+
+// touchpad tuning (uae3DS defaults)
+static int uib_max_tap_time = 250;
+static int uib_click_time = 100;
+static int uib_single_tap_timeout = 250;
+static int uib_max_double_tap_time = 250;
+static int uib_locked_drag_timeout = 5000;
+static int uib_tap_and_drag_gesture = 1;
+static int uib_locked_drags = 0;
+static int uib_mouse_speed = 2;          // touchpad pixels -> Amiga pixels (uae3DS: msens)
 
 // static sprites
 static DS3_Image background_spr;
@@ -174,21 +196,22 @@ static DS3_Image turbo_icon_spr;
 static DS3_Image statusbar_spr;
 
 // SDL Surfaces
-SDL_Surface *statusbar_img=NULL;
+static SDL_Surface *statusbar_img = NULL;
+static SDL_Surface *font_img = NULL;
 
 // static variables
 static Handle repaintRequired;
-static int uib_isinit=0;
-static u8 *gpusrc=NULL;
-static u8 *status_gpusrc=NULL;
-static int kb_y_pos = 0;
-static volatile int set_kb_y_pos = -10000;
-static int kb_activekey=-1;
-static int sticky=0;
+static int uib_isinit = 0;
+static u8 *gpusrc = NULL;
+static u8 *status_gpusrc = NULL;
+static volatile int kb_y_pos = 240;       // current top edge of the keyboard (240 = hidden)
+static int kb_shown = 1;
+static int kb_anim_active = 0, kb_anim_from = 0, kb_anim_to = 0;
+static Uint32 kb_anim_start = 0;
+#define KB_ANIM_MS 250
+static int kb_activekey = -1;
+static int sticky = 0;
 static unsigned char keysPressed[256];
-
-// static functions
-// ================
 
 // sprite handling funtions
 extern C3D_Mtx projection2;
@@ -338,6 +361,7 @@ static int loadImage(DS3_Image *img, const char *fname) {
 	return 0;
 }
 
+
 // bottom handling functions
 // =========================
 static inline void requestRepaint() {
@@ -352,10 +376,7 @@ static void uib_repaint(void *param, int topupdated) {
 	svcClearEvent(repaintRequired);
 	svcWaitSynchronization(privateSem1, U64_MAX);
 
-	if (set_kb_y_pos != -10000) {
-		kb_y_pos=set_kb_y_pos;
-		set_kb_y_pos=-10000;
-	}
+	int ky = kb_y_pos;
 
 	// Render the scene
 	C3D_RenderTargetClear(VideoSurface2, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
@@ -365,23 +386,22 @@ static void uib_repaint(void *param, int topupdated) {
 	drawImage(&background_spr, 0, 0, 0, 0, 0);
 
 	// statusbar
-	extern int nowSuperThrottle;
 	if (nowSuperThrottle)
 		drawImage(&turbo_icon_spr, TD_STARTX - TD_PAD - turbo_icon_spr.w, 0, 0, 0, 0);
 	drawImage(&statusbar_spr, 0, 0, 0, 0, 0);
 
 	// keyboard
 	DS3_Image *kb=(sticky & 1) == 1 ? &(kbd2_spr):&(kbd1_spr);
-	drawImage(kb, 0, kb_y_pos, 0, 0, 0);
+	drawImage(kb, 0, ky, 0, 0, 0);
 	// keyboard twisty
-	DS3_Image *tw = kb_y_pos > (240 - kb->h) ? &(twistyup_spr):&(twistydn_spr);
-	drawImage(tw, 0, kb_y_pos - tw->h, 0, 0, 0);
+	DS3_Image *tw = ky > (240 - (int)kb->h) ? &(twistyup_spr):&(twistydn_spr);
+	drawImage(tw, 0, ky - tw->h, 0, 0, 0);
 	// keys pressed
 	uikbd_key *k;
 	for (i=0;uikbd_keypos[i].key!=-1; ++i) {
 		k=&(uikbd_keypos[i]);
 		if (k->flags==1 || keysPressed[i]==0) continue;
-		drawImage(&(keymask_spr),k->x,k->y+kb_y_pos,k->w,k->h,0);
+		drawImage(&(keymask_spr),k->x,k->y+ky,k->w,k->h,0);
 	}
 
 	svcReleaseSemaphore(&c, privateSem1, 1);
@@ -399,6 +419,9 @@ static void uib_shutdown() {
 	gpusrc = NULL;
 	
 	SDL_FreeSurface(statusbar_img);
+	statusbar_img = NULL;
+	if (font_img) SDL_FreeSurface(font_img);
+	font_img = NULL;
 	if (status_gpusrc) linearFree(status_gpusrc);
 	status_gpusrc = NULL;
 
@@ -420,82 +443,61 @@ static void keypress_recalc() {
 	}
 }
 
-static void *alloc_copy(void *p, size_t s) {
-	void *d=malloc(s);
-	memcpy(d,p,s);
-	return d;
-}
-
-typedef struct animation {
-	int *var;
-	int from;
-	int to;
-} animation;
-
-typedef struct animation_set {
-	int steps;
-	int delay;
-	int nr;
-	void (*callback)(void *);
-	void *callback_data;
-	void (*callback2)(void *);
-	void *callback2_data;
-	animation anim[];
-} animation_set;
-
-static int animate(void *data){
-	animation_set *a=(animation_set*)data;
-	int steps = a->steps != 0 ? a->steps : 15 ;
-	int delay = a->delay != 0 ? a->delay : 16 ; // 1/60 sec, one 3ds frame
-	for (int s=0; s <= steps; s++) {
-		for (int i=0; i < a->nr; i++) {
-			*(a->anim[i].var)=
-				a->anim[i].from +
-				(((a->anim[i].to - a->anim[i].from) * s ) / steps);
-		}
-		if (a->callback) (a->callback)(a->callback_data);
-		if (s != steps) SDL_Delay(delay);
-	}
-	if (a->callback2) (a->callback2)(a->callback2_data);
-	free(data);
-	return 0;
-}
-
-static void anim_callback(void *param) {
-	requestRepaint();
-}
-
+// keyboard show/hide: slides over KB_ANIM_MS, advanced from uib_update()
 static void toggle_keyboard() {
-	int y1=240-kbd1_spr.h;
+	int y1 = 240 - (int)kbd1_spr.h;
+	kb_shown = !kb_shown;
+	kb_anim_from = kb_y_pos;
+	kb_anim_to = kb_shown ? y1 : 240;
+	kb_anim_start = SDL_GetTicks();
+	kb_anim_active = 1;
+}
 
-	start_worker(animate, alloc_copy(&((int[]){
-		0, 0, 1, // steps, delay, nr
-		(int)anim_callback, 0, // callback, callback_data
-		0,0, // callback2, callback2_data
-		(int)(&set_kb_y_pos), kb_y_pos < 240 ? y1 : 240, kb_y_pos < 240 ? 240 : y1
-	}), 10*sizeof(int)));
+static void keyboard_animate() {
+	if (!kb_anim_active) return;
+	Uint32 el = SDL_GetTicks() - kb_anim_start;
+	if (el >= KB_ANIM_MS) {
+		kb_y_pos = kb_anim_to;
+		kb_anim_active = 0;
+	} else {
+		kb_y_pos = kb_anim_from + (int)(((long long)(kb_anim_to - kb_anim_from) * (long long)el) / KB_ANIM_MS);
+	}
+	uib_must_redraw |= UIB_REPAINT;
 }
 
 // exposed functions
 void uib_init() {
 	if (uib_isinit) return;
-	uib_isinit=1;
+	log3ds("uib: init\n");
 
 	// init gpusrc
 	gpusrc = (u8*)linearAlloc(512*256*4);
+	status_gpusrc = (u8*)linearAlloc(512*16*4);
+	if (!gpusrc || !status_gpusrc) {
+		log3ds("uib: linearAlloc failed, bottom screen UI disabled\n");
+		if (gpusrc) linearFree(gpusrc);
+		if (status_gpusrc) linearFree(status_gpusrc);
+		gpusrc = status_gpusrc = NULL;
+		return;
+	}
 
 	// pre-load sprites
-	loadImage(&background_spr,	"romfs:/bg_bot.png");
-	loadImage(&kbd1_spr,		"romfs:/kbd1.png");
-	loadImage(&kbd2_spr,		"romfs:/kbd2.png");
-	loadImage(&twistyup_spr,	"romfs:/twistyup.png");
-	loadImage(&twistydn_spr,	"romfs:/twistydn.png");
-	loadImage(&turbo_icon_spr,	"romfs:/turbo.png");
-	makeImage(&keymask_spr, (const u8[]){0x00, 0x00, 0x00, 0x80},1,1,0);
+	int bad = 0;
+	bad |= loadImage(&background_spr,	"romfs:/bg_bot.png");
+	bad |= loadImage(&kbd1_spr,		"romfs:/kbd1.png");
+	bad |= loadImage(&kbd2_spr,		"romfs:/kbd2.png");
+	bad |= loadImage(&twistyup_spr,	"romfs:/twistyup.png");
+	bad |= loadImage(&twistydn_spr,	"romfs:/twistydn.png");
+	bad |= loadImage(&turbo_icon_spr,	"romfs:/turbo.png");
+	static const u8 mask_px[4] = {0x00, 0x00, 0x00, 0x80};
+	makeImage(&keymask_spr, mask_px, 1, 1, 0);
+	if (bad) log3ds("uib: %d image(s) from romfs failed to load (%s)\n", bad, SDL_GetError());
 
-	
+	font_img = SDL_LoadBMP("romfs:/8x8font.bmp");
+	if (font_img) SDL_SetColorKey(font_img, SDL_SRCCOLORKEY, 0);
+	else log3ds("uib: font not found, status messages disabled\n");
+
 	// set up status sprite / framebuf
-	status_gpusrc = (u8*)linearAlloc(512*16*4);
 	memset(status_gpusrc, 0, 512*16*4);
 	statusbar_img = SDL_CreateRGBSurfaceFrom((void *)status_gpusrc,
                         512, 16, 32, 512*4,
@@ -510,14 +512,17 @@ void uib_init() {
 	td_text_length = TD_STARTX - turbo_icon_spr.w - 2 * TD_PAD;
 
 	// other stuff
+	kb_shown = 1;
 	kb_y_pos = 240 - kbd1_spr.h;
 
 	svcCreateEvent(&repaintRequired, RESET_ONESHOT);
+	uib_isinit = 1;
 	SDL_RequestCall(uib_repaint, NULL);
 
-	uib_must_redraw |= UIB_REPAINT;
+	uib_must_redraw |= UIB_REPAINT | UIB_RECALC_KEYPRESS;
 	uib_update();
 	atexit(uib_shutdown);
+	log3ds("uib: ready (keyboard %ux%u)\n", kbd1_spr.w, kbd1_spr.h);
 }
 
 // status line funtions
@@ -557,6 +562,23 @@ static void uib_paint_led(int x, u32 col, int num)
 	}
 }
 
+
+// draw text with the 8x8 menu font (16 characters per row, from ' ' on) into the status bar
+static void uib_text(const char *s, int x, int y, int maxchars)
+{
+	if (!font_img) return;
+	SDL_Color white = {0xff, 0xff, 0xff, 0};
+	SDL_SetPalette(font_img, SDL_LOGPAL, &white, 1, 1);
+	for (int i = 0; s[i] && i < maxchars; i++) {
+		int c = (s[i] & 0x7f) - 32;
+		if (c < 0) c = 0;
+		SDL_Rect from, to;
+		from.x = (c & 0x0f) * 8; from.y = (c >> 4) * 8; from.w = 8; from.h = 8;
+		to.x = x + i * 8; to.y = y; to.w = 8; to.h = 8;
+		SDL_BlitSurface(font_img, &from, statusbar_img, &to);
+	}
+}
+
 static void uib_statusbar_recalc()
 {
 	static uae_u8 dt0 = -1;
@@ -566,9 +588,8 @@ static void uib_statusbar_recalc()
 	static uae_u8 pow = -1;
 	static int fps = -1;
 	int upd=0;
-	extern int fps_counter;
 	static char buf[100]={0};
-
+	extern struct gui_info gui_data;
 
 	if (dt0 != gui_data.drive_track[0] || 
 		dm0 != gui_data.drive_motor[0])
@@ -587,63 +608,44 @@ static void uib_statusbar_recalc()
 		upd=1;
 	}
 	
-	if (pow != gui_data.powerled ||
-		fps != fps_counter)	
+	int cur_fps = gui_data.fps > 99 ? 99 : gui_data.fps;
+	if (pow != gui_data.powerled || fps != cur_fps)	
 	{
 		pow = gui_data.powerled;
-		fps = fps_counter;
-		uib_paint_led(TD_STARTX, pow ? ON_RGB_P : OFF_RGB_P, fps_counter);
+		fps = cur_fps;
+		uib_paint_led(TD_STARTX, pow ? ON_RGB_P : OFF_RGB_P, fps);
 		upd=1;
 	}
 
+	// message line: show_message is an end time in SDL ticks (see gui_set_message)
 	if (show_message)
 	{
-		if (SDL_GetTicks() < show_message) {
+		if (SDL_GetTicks() < (Uint32)show_message) {
 			if (strcmp(buf, show_message_str)) {
 				strncpy(buf, show_message_str, 99);
-				SDL_FillRect(statusbar_img,
-					&(SDL_Rect){.x=0, .y=0, .w=td_text_length, .h=TD_TOTAL_HEIGHT}, 0x70708aff);
-				write_text_full (statusbar_img, buf, 2, 2, (td_text_length-4)/8, ALIGN_LEFT, FONT_NORMAL, menu_text_color, 0);
+				SDL_Rect r;
+				r.x = 0; r.y = 0; r.w = td_text_length; r.h = TD_TOTAL_HEIGHT;
+				SDL_FillRect(statusbar_img, &r, 0x70708aff);
+				uib_text(buf, 2, 2, (td_text_length-4)/8);
 				upd=1;
 			}
 		} else {
-			SDL_FillRect(statusbar_img,
-				&(SDL_Rect){.x=0, .y=0, .w=td_text_length, .h=TD_TOTAL_HEIGHT}, 0x00000000);
+			SDL_Rect r;
+			r.x = 0; r.y = 0; r.w = td_text_length; r.h = TD_TOTAL_HEIGHT;
+			SDL_FillRect(statusbar_img, &r, 0x00000000);
 			show_message=0;
 			*buf=0;
 			upd=1;
 		}
 	}
 	if (upd) {
-		makeTexture(&(statusbar_spr.tex), statusbar_img->pixels, 512, 16);
+		makeTexture(&(statusbar_spr.tex), (const u8 *)statusbar_img->pixels, 512, 16);
 		uib_must_redraw |= UIB_REPAINT;
 	}
 }
 
-void uib_update(void)
-{
-	enum uib_action uib_must_redraw_local;
-
-	// init if needed
-	if (!uib_isinit) uib_init();
-
-	uib_statusbar_recalc();
-
-	if (uib_must_redraw) {
-		// needed for mutithreading
-		uib_must_redraw_local = uib_must_redraw;
-		uib_must_redraw = UIB_NO;
-		
-		if (uib_must_redraw_local & UIB_RECALC_KEYPRESS) {
-			keypress_recalc();
-		}
-		requestRepaint();
-	}
-//	requestRepaint();
-}
-
 // *****************************
-// lots of stuff below inspired from synaptics touchpad driver
+// touchpad: lots of stuff below inspired from synaptics touchpad driver
 // https://github.com/freedesktop/xorg-xf86-input-synaptics
 // ******************************
 
@@ -663,28 +665,32 @@ enum TapState {
 	TS_MOUSEUP,
 };
 
+enum TapEvent { TE_NONE = 0, TE_DOWN, TE_UP };
+
 static int get_timeout(TapState s)
 {
 	switch (s) {
     case TS_1:
     case TS_3:
     case TS_5:
-        return mainMenu_max_tap_time;
+        return uib_max_tap_time;
     case TS_SINGLETAP:
-        return mainMenu_click_time;
+        return uib_click_time;
     case TS_2A:
-        return mainMenu_single_tap_timeout;
+        return uib_single_tap_timeout;
     case TS_2B:
-        return mainMenu_max_double_tap_time;
+        return uib_max_double_tap_time;
     case TS_4:
-        return mainMenu_locked_drag_timeout;
-    }
+        return uib_locked_drag_timeout;
+    default:
+        break;
+	}
 	return 0;
 }
 
 static int mouse_state = 0;
 
-static void set_tap_state(TapState s, SDL_Event *e)
+static void set_tap_state(TapState s)
 {
     int x=-1;
 	switch (s) {
@@ -704,21 +710,7 @@ static void set_tap_state(TapState s, SDL_Event *e)
         break;
     }
     if (x != -1 && x != mouse_state) {
-		SDL_Event ev = {0};
-		if (x == 0) {
-			ev.type = SDL_MOUSEBUTTONUP;
-			ev.button.state = SDL_RELEASED;
-		} else {
-			ev.type = SDL_MOUSEBUTTONDOWN;
-			ev.button.state = SDL_PRESSED;
-		}
-		ev.button.which = 1;
-		ev.button.button = SDL_BUTTON_LEFT;
-		if (e) {
-			ev.button.x = e->button.x;
-			ev.button.y = e->button.y;
-		}
-		SDL_PushEvent(&ev);
+		buttonstate[0] = x;                  /* left mouse button */
 		mouse_state = x;
 	}
 }
@@ -727,23 +719,24 @@ static void set_tap_state(TapState s, SDL_Event *e)
     {status = x;								\
 	timeout = get_timeout(x);					\
 	if (timeout) timeout += SDL_GetTicks();		\
-	set_tap_state(x,e);							\
+	set_tap_state(x);							\
 	is_timeout=0;}
 
-int uib_handle_tap_processing(SDL_Event *e) {
+// ev == TE_NONE is the once-per-frame tick that expires timeouts
+static int tap_processing(TapEvent ev) {
 	static Uint32 timeout = 0;
 	static TapState status = TS_START;
 	static int status2 = 0;
 	int is_timeout = 0;
 
-	if (!e) {
+	if (ev == TE_NONE) {
 		switch (status2) {
 		case 2:
-			set_tap_state(TS_MOUSEDOWN, NULL);
+			set_tap_state(TS_MOUSEDOWN);
 			--status2;
 			break;
 		case 1:
-			set_tap_state(TS_MOUSEUP, NULL);
+			set_tap_state(TS_MOUSEUP);
 			--status2;
 			break;
 		}
@@ -753,12 +746,12 @@ int uib_handle_tap_processing(SDL_Event *e) {
 		is_timeout = 1;
 		timeout = 0;
 	}
-	if (!e && !is_timeout) return 1;
+	if (ev == TE_NONE && !is_timeout) return 1;
 
  restart:
     switch (status) {
     case TS_START: /* No tap/drag in progress */
-        if (e && e->type==SDL_MOUSEBUTTONDOWN)
+        if (ev == TE_DOWN)
             SETSTATE(TS_1)
         break;
     case TS_1: /* After first touch */
@@ -766,23 +759,23 @@ int uib_handle_tap_processing(SDL_Event *e) {
             SETSTATE(TS_MOVE)
             goto restart;
         }
-        else if (e && e->type==SDL_MOUSEBUTTONUP) {
+        else if (ev == TE_UP) {
             SETSTATE(TS_2A)
         }
         break;
     case TS_MOVE: /* Pointer movement enabled */
-        if (e && e->type==SDL_MOUSEBUTTONUP) {
+        if (ev == TE_UP) {
             SETSTATE(TS_START)
         }
         break;
     case TS_2A: /* After first release */
-        if (e && e->type==SDL_MOUSEBUTTONDOWN)
+        if (ev == TE_DOWN)
             SETSTATE(TS_3)
         else if (is_timeout)
             SETSTATE(TS_SINGLETAP)
         break;
     case TS_2B: /* After second/third/... release */
-        if (e && e->type==SDL_MOUSEBUTTONDOWN) {
+        if (ev == TE_DOWN) {
             SETSTATE(TS_3)
         }
         else if (is_timeout) {
@@ -791,14 +784,14 @@ int uib_handle_tap_processing(SDL_Event *e) {
         }
         break;
     case TS_SINGLETAP: /* After timeout after first release */
-        if (e && e->type==SDL_MOUSEBUTTONDOWN)
+        if (ev == TE_DOWN)
             SETSTATE(TS_1)
         else if (is_timeout)
             SETSTATE(TS_START)
         break;
     case TS_3: /* After second touch */
         if (is_timeout) {
-            if (mainMenu_tap_and_drag_gesture) {
+            if (uib_tap_and_drag_gesture) {
                 SETSTATE(TS_DRAG)
             }
             else {
@@ -806,13 +799,13 @@ int uib_handle_tap_processing(SDL_Event *e) {
             }
             goto restart;
         }
-        else if (e && e->type==SDL_MOUSEBUTTONUP) {
+        else if (ev == TE_UP) {
             SETSTATE(TS_2B)
         }
         break;
     case TS_DRAG:
-        if (e && e->type==SDL_MOUSEBUTTONUP) {
-            if (mainMenu_locked_drags) {
+        if (ev == TE_UP) {
+            if (uib_locked_drags) {
                 SETSTATE(TS_4)
             }
             else {
@@ -825,7 +818,7 @@ int uib_handle_tap_processing(SDL_Event *e) {
             SETSTATE(TS_START)
             goto restart;
         }
-        if (e && e->type==SDL_MOUSEBUTTONDOWN)
+        if (ev == TE_DOWN)
             SETSTATE(TS_5)
         break;
     case TS_5:
@@ -833,111 +826,147 @@ int uib_handle_tap_processing(SDL_Event *e) {
             SETSTATE(TS_DRAG)
             goto restart;
         }
-        else if (e && e->type==SDL_MOUSEBUTTONUP) {
+        else if (ev == TE_UP) {
             SETSTATE(TS_START)
         }
+        break;
+    default:
         break;
     }
 	return 1;
 }
 
 // *************************
-// Bottom screen event handling routine
+// Touchscreen handling: virtual keyboard or touchpad
 // *************************
+
+// send an Amiga key code to the emulated keyboard
+static void send_key(int ak, int down)
+{
+	if (ak < 0 || ak > 0xff) return;
+	if (down) {
+		if (!uae4all_keystate[ak]) {
+			uae4all_keystate[ak] = 1;
+			record_key(ak << 1);
+		}
+	} else {
+		uae4all_keystate[ak] = 0;
+		record_key((ak << 1) | 1);
+	}
+}
 
 #define log2 __builtin_ctz
 
-int uib_handle_event(SDL_Event *e) {
-	static int sticky2keysym[4]={-1,-1,-1,-1};
+static int process_touchpad = 0;
 
-	extern SDL_Surface *prSDLScreen;
-	static SDL_Event sdl_e;
-	int i,x,y;
-	static int process_touchpad = 0;
-
-
-	if (e->type == SDL_QUIT) {
-		storeConfig();
-		do_leave_program();
-		exit(0);
+static void touch_down(int x, int y)
+{
+	int i;
+	for (i = 0; uikbd_keypos[i].key != -1 ; ++i) {
+		if (x >= uikbd_keypos[i].x &&
+			x <  uikbd_keypos[i].x + uikbd_keypos[i].w &&
+			y >= uikbd_keypos[i].y + kb_y_pos &&
+			y <  uikbd_keypos[i].y + uikbd_keypos[i].h + kb_y_pos) break;
 	}
-
-	if (e->type == SDL_KEYDOWN) {
-		if (e->key.keysym.sym == 255) {
-			toggle_keyboard();
-			return 1;
+	if (uikbd_keypos[i].key == -1) {
+		// touch outside of keyboard - process touchpad
+		if (y < kb_y_pos) {
+			process_touchpad = 1;
+			tap_processing(TE_DOWN);
 		}
-		if (e->key.keysym.sym == DS_TOUCH) return 1;
+		return;
 	}
-	if (e->type != SDL_MOUSEMOTION &&
-		e->type != SDL_MOUSEBUTTONUP &&
-		e->type != SDL_MOUSEBUTTONDOWN) return 0;
+	if (i == kb_activekey) return;           // ignore button down on an already pressed key
+	kb_activekey = i;
 
-	if (e->type == SDL_MOUSEMOTION) {
-		return e->motion.state ? 0 : 1;
-	} else {
-		if (e->button.which == 1) return 0;
-	}
-
-	// check if we should do touchpad or virtual keyboard processing
-	if (process_touchpad) {
-		if (e->type == SDL_MOUSEBUTTONUP) process_touchpad=0;
-		return uib_handle_tap_processing(e);
+	if (uikbd_keypos[i].key == 255) {        // keyboard toggle button
+		toggle_keyboard();
+		kb_activekey = -1;
+		return;
 	}
 
-	switch (e->type) {
-		case SDL_MOUSEBUTTONUP:
-			if (kb_activekey==-1) return 1; // did not get the button down, so ignore button up
-			i=kb_activekey;
-			kb_activekey=-1;
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			x = (int)(((((double)e->button.x)*320.0f)/((double)prSDLScreen->w))+0.5f);
-			y = e->button.y;
-			for (i = 0; uikbd_keypos[i].key != -1 ; ++i) {
-				// keyboard button
-				if (x >= uikbd_keypos[i].x &&
-					x <  uikbd_keypos[i].x + uikbd_keypos[i].w &&
-					y >= uikbd_keypos[i].y + kb_y_pos &&
-					y <  uikbd_keypos[i].y + uikbd_keypos[i].h + kb_y_pos) break;
-			}
-			if (uikbd_keypos[i].key == -1) {
-				// touch outside of keyboard - process touchpad
-				if  (y < kb_y_pos) {
-					process_touchpad = 1;
-					return uib_handle_tap_processing(e);
-				}
-				return 1;
-			}
-			if (i==kb_activekey) return 1; // ignore button down on an already pressed key
-			kb_activekey=i;
-			break;
-		default:
-			return 1;
-	}
-
-	// sticky key press
-	if (uikbd_keypos[i].sticky>0) {
-		if (e->button.type == SDL_MOUSEBUTTONDOWN) {
-			int pos=log2(uikbd_keypos[i].sticky & 0x0F);
-			sticky = sticky ^ uikbd_keypos[i].sticky;
-			if (sticky & uikbd_keypos[i].sticky) {
-				sdl_e.type = SDL_KEYDOWN;
-				sticky2keysym[pos] = sdl_e.key.keysym.sym = uikbd_keypos[i].key;
-				SDL_PushEvent(&sdl_e);
-			} else {
-				sdl_e.type = SDL_KEYUP;
-				sdl_e.key.keysym.sym = sticky2keysym[pos] == -1 ? uikbd_keypos[i].key : sticky2keysym[pos];
-				sticky2keysym[pos] = -1;
-				SDL_PushEvent(&sdl_e);
-			}
+	static int sticky2key[4] = {-1,-1,-1,-1};
+	if (uikbd_keypos[i].sticky > 0) {
+		// sticky key (shift, ctrl, alt, amiga): toggles on every touch
+		int pos = log2(uikbd_keypos[i].sticky & 0x0F);
+		sticky = sticky ^ uikbd_keypos[i].sticky;
+		if (sticky & uikbd_keypos[i].sticky) {
+			sticky2key[pos] = uikbd_keypos[i].key;
+			send_key(uikbd_keypos[i].key, 1);
+		} else {
+			int k = sticky2key[pos] == -1 ? uikbd_keypos[i].key : sticky2key[pos];
+			sticky2key[pos] = -1;
+			send_key(k, 0);
 		}
 	} else {
-		// normal key press
-		sdl_e.type = e->button.type == SDL_MOUSEBUTTONDOWN ? SDL_KEYDOWN : SDL_KEYUP;
-		sdl_e.key.keysym.sym = uikbd_keypos[i].key;
-		SDL_PushEvent(&sdl_e);
+		send_key(uikbd_keypos[i].key, 1);
 	}
 	uib_must_redraw |= UIB_RECALC_KEYPRESS;
-	return 1;
+}
+
+static void touch_up()
+{
+	if (process_touchpad) {
+		process_touchpad = 0;
+		tap_processing(TE_UP);
+		return;
+	}
+	if (kb_activekey == -1) return;
+	int i = kb_activekey;
+	kb_activekey = -1;
+	if (uikbd_keypos[i].sticky <= 0)
+		send_key(uikbd_keypos[i].key, 0);
+	uib_must_redraw |= UIB_RECALC_KEYPRESS;
+}
+
+static void touch_move(int dx, int dy)
+{
+	if (!process_touchpad) return;
+	int scale = ((mainMenu_mouseMultiplier * 16) / 100) * uib_mouse_speed;
+	lastmx += dx * scale;
+	lastmy += dy * scale;
+	newmousecounters = 1;
+}
+
+// once per emulated frame: read the touchscreen
+static void uib_poll_touch()
+{
+	static int was_down = 0, lx = 0, ly = 0;
+	touchPosition t;
+	int down = (hidKeysHeld() & KEY_TOUCH) != 0;
+
+	if (down) {
+		hidTouchRead(&t);
+		if (t.px == 0 && t.py == 0) down = was_down;      // glitch frame, keep previous state
+		else if (!was_down) { touch_down(t.px, t.py); lx = t.px; ly = t.py; }
+		else if (t.px != lx || t.py != ly) { touch_move(t.px - lx, t.py - ly); lx = t.px; ly = t.py; }
+	}
+	if (!down && was_down) touch_up();
+	was_down = down;
+}
+
+// exposed: call once per emulated frame (from handle_events)
+void uib_update(void)
+{
+	int uib_must_redraw_local;
+
+	// init if needed
+	if (!uib_isinit) uib_init();
+	if (!uib_isinit) return;
+
+	tap_processing(TE_NONE);       // expire tap timeouts / pending clicks
+	uib_poll_touch();
+	keyboard_animate();
+	uib_statusbar_recalc();
+
+	if (uib_must_redraw) {
+		// needed for mutithreading
+		uib_must_redraw_local = uib_must_redraw;
+		uib_must_redraw = UIB_NO;
+		
+		if (uib_must_redraw_local & UIB_RECALC_KEYPRESS) {
+			keypress_recalc();
+		}
+		requestRepaint();
+	}
 }

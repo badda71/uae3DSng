@@ -15,5 +15,5 @@ exec clang++ --target=i386-unknown-linux-gnu -fsyntax-only $LANGOPT -w -ferror-l
   '-DROM_PATH_PREFIX="x/"' '-DDATA_PREFIX="x/"' '-DSAVE_PREFIX="x/"' '-DTHUMB_PREFIX="x/"' '-DTMP_PREFIX="x/"' \
   '-DVERSION_MAJOR="0"' '-DVERSION_MINOR="1"' '-DVERSION3DS="0.1"' \
   -I"$P/tools/hostcheck/stubs" -isystem /usr/include/x86_64-linux-gnu -isystem /usr/include/c++/13 -isystem /usr/include/x86_64-linux-gnu/c++/13 \
-  -isystem "$LIBCTRU_INC" -I"$P/UAE3DS_SDL/include" -I"$P/UAE3DS_SDL/include/SDL" \
+  -isystem "$LIBCTRU_INC" ${CITRO3D_INC:+-isystem "$CITRO3D_INC"} -I"$P/UAE3DS_SDL/include" -I"$P/UAE3DS_SDL/include/SDL" \
   -I"$P/src" -I"$P/src/3ds" -I"$P/src/gp2x" -I"$P/src/gp2x/menu" -I"$P/src/menu" -I"$P/src/vkbd" -I"$P/src/m68k" -I"$P/src/m68k/fame" -I"$P/src/include" "$@"

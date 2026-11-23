@@ -42,6 +42,9 @@
 #include "gp2xutil.h"
 #include "inputmode.h"
 #include "menu_config.h"
+#ifdef __3DS__
+#include "uibottom.h"
+#endif
 #include "menu.h"
 #include "savestate.h"
 #include "rpt.h"
@@ -167,7 +170,7 @@ void flush_block ()
 #if defined(__3DS__)
 		/* Audio no longer paces the emulator on 3DS (see sound_sdl_new.cpp), so this is a real frame
 		 * limiter: sleep until the next frame is due. Clamped so a wrong clock can never mean a long sleep. */
-		if(start < next_synctime)
+		if(start < next_synctime && !nowSuperThrottle)
 		{
 			unsigned long d = next_synctime - start;
 			if (d > 2 * time_per_frame) d = 2 * time_per_frame;
@@ -680,6 +683,10 @@ void handle_events (void)
 #endif
 		}
 	}
+#ifdef __3DS__
+	/* bottom screen: touch keyboard + touchpad mouse + status bar (once per emulated frame) */
+	uib_update();
+#endif
 #else
 /* Event handling on non-PSP2 systems involves special hooks for certain keys */    
     while (SDL_PollEvent(&rEvent))

@@ -61,6 +61,10 @@ extern SDL_Surface *current_screenshot;
 #include "vkbd.h"
 #endif
 
+#ifdef __3DS__
+#include "uibottom.h"
+#endif
+
 #if defined(__PSP2__) // NOT __SWITCH__
 //Allow locking PS Button
 #include <psp2/shellutil.h>
@@ -361,6 +365,10 @@ void real_main (int argc, char **argv)
 	    write_log("graphics_setup FAILED: %s\n", SDL_GetError());
 	    exit (1);
     }
+#ifdef __3DS__
+    write_log("step: bottom screen UI\n");
+    uib_init();
+#endif
     write_log("step: rtarea_init, hardfile_install, setup_sound\n");
     rtarea_init ();
 

@@ -2054,6 +2054,13 @@ if(!vkbd_mode)
 
 void gui_set_message(const char *msg, int t)
 {
+#ifdef __3DS__
+	/* shown on the bottom screen status bar; show_message is the end time in SDL ticks, t is in frames (50/s) */
+	strncpy(show_message_str, msg, 36);
+	show_message_str[36] = 0;
+	show_message = SDL_GetTicks() + t * 20 + 1;
+	return;
+#endif
 	return;
 
 	show_message=t;

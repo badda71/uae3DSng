@@ -183,7 +183,7 @@ PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
 EXCLUDE_FILES	:=	compiler.cpp filesys_bootrom.cpp fsusage_win32.cpp sound.cpp sound_gp2x.cpp sound_sdl_new.cpp \
 			homedir.cpp neon_helper.s memcpy.s memset.s \
 			http.cpp update.cpp qr-scanner.cpp 3ds_cia.cpp \
-			uae3ds.cpp uibottom.cpp autofire.cpp
+			uae3ds.cpp autofire.cpp
 CFILES		:=	$(filter-out $(EXCLUDE_FILES),$(CFILES))
 CPPFILES	:=	$(filter-out $(EXCLUDE_FILES),$(CPPFILES))
 SFILES		:=	$(filter-out $(EXCLUDE_FILES),$(SFILES))
