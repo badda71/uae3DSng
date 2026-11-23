@@ -187,15 +187,24 @@ void flush_block ()
 		{	/* speed report every ~5 s: real fps vs target and how much of the time the emulator had to spare */
 			static unsigned long t0 = 0, spare = 0; static unsigned frames = 0;
 			if (t0 == 0) t0 = last_synctime;
+			static unsigned long prev_end = 0, worst = 0; static unsigned slow = 0;
 			frames++;
 			if (start < next_synctime) spare += next_synctime - start;   /* time slept in the limiter (capped as above) */
+			if (prev_end) {   /* work time of this frame = emulation + flip, without the limiter sleep */
+				unsigned long work = (start - prev_end);
+				if (work > worst) worst = work;
+				if (work > 35000) slow++;
+			}
+			prev_end = last_synctime;
 			unsigned long el = last_synctime - t0;
 			if (el >= 5000000UL) {
 				unsigned fps10 = (unsigned)(frames * 10000000ULL / el);
 				unsigned tgt10 = (unsigned)(10000000UL / time_per_frame);
-				write_log("speed: %u.%u fps (target %u.%u), spare %lu%% of frame time\n",
-					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10, spare * 100 / el);
-				t0 = last_synctime; spare = 0; frames = 0;
+				extern unsigned long disk_io_us; extern unsigned disk_io_calls;
+				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, disk reads %u (%lu ms)\n",
+					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10, spare * 100 / el, worst / 1000, slow,
+					disk_io_calls, disk_io_us / 1000);
+				t0 = last_synctime; spare = 0; frames = 0; worst = 0; slow = 0; disk_io_us = 0; disk_io_calls = 0;
 			}
 		}
 #endif
@@ -205,10 +214,20 @@ void flush_block ()
 		else
 			adjust_idletime(next_synctime - start);
 
+#ifdef __3DS__
+		/* Upstream forgives any frame that finishes more than ~15 ms late (schedule restarts from "now"), so every
+		 * slow frame (SD card track read, heavy scene) permanently loses time even if the frames around it are
+		 * fast. Allow catching up through up to 4 frames of lateness; only a longer stall restarts the schedule. */
+		if(last_synctime - next_synctime > 4 * time_per_frame)
+			next_synctime = last_synctime + time_per_frame * (1 + prefs_gfx_framerate);
+		else
+			next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
+#else
 		if(last_synctime - next_synctime > time_per_frame - 5000)
 			next_synctime = last_synctime + time_per_frame * (1 + prefs_gfx_framerate);
 		else
 			next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
+#endif
 	}
 #if defined(__SWITCH__)
 	SDL_LockSurface (prSDLScreen);

@@ -460,10 +460,20 @@ static void drive_motor (drive * drv, int off)
     }
 }
 
+unsigned long disk_io_us = 0;      /* time spent reading disk images (reported in the 3DS speed log) */
+unsigned disk_io_calls = 0;
+
 static void read_floppy_data (struct zfile *diskfile, trackid *ti, int offset, unsigned char *dst, int len)
 {
+#ifdef __3DS__
+    unsigned long t0 = read_processor_time ();
+#endif
     zfile_fseek (diskfile, ti->offs + offset, SEEK_SET);
     zfile_fread (dst, 1, len, diskfile);
+#ifdef __3DS__
+    disk_io_us += read_processor_time () - t0;
+    disk_io_calls++;
+#endif
 }
 
 static void reset_drive (int i)

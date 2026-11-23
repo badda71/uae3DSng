@@ -99,6 +99,10 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 * **Speed**: with audio no longer pacing the emulator, `sdlgfx.cpp` uses a real frame limiter on 3DS (sleep until
   `next_synctime`, clamped to 2 frames). Upstream only slept when more than a whole frame ahead, which assumes
   audio pacing and made the game run too fast once audio was off.
+  Upstream also restarts the schedule from "now" whenever a frame ends >15 ms late, so every slow frame (SD read,
+  heavy scene) permanently loses time. Hardware log showed windows at 32-44 fps although the average emulation
+  cost was well under 20 ms/frame; the 3DS limiter now catches up through up to 4 frames of lateness.
+  The `speed:` log line reports fps, limiter slack, worst frame, frames >35 ms and time spent reading the ADF.
 * **Quit**: `app_exiting` is set before `SDL_Quit()` so the audio thread's `WaitAudio()` returns.
 * `Illegal instruction: 4e7b at 00fc0564` in the log is Kickstart 1.3 probing for a 68010 (MOVEC) - expected.
 * Debug log: `sdmc:/3ds/uae3DSng/uae3DSng.log` (+ `stdout.log`), flushed per line; `write_log()` maps to it.

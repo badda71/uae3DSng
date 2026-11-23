@@ -284,7 +284,7 @@ void real_main (int argc, char **argv)
 #endif
 
 #if defined(__3DS__)
-    write_log("uae3DSng built %s %s, new3ds=%d\n", __DATE__, __TIME__, (int)0);
+    { bool n3 = false; APT_CheckNew3DS(&n3); write_log("uae3DSng built %s %s, new3ds=%d\n", __DATE__, __TIME__, (int)n3); }
     log3ds_mem("start");
     romfsInit();                  /* romfs:/data = menu graphics, romfs:/*.png = bottom screen UI */
     osSetSpeedupEnable(true);     /* New 3DS: 804 MHz + L2 cache; harmless on Old 3DS */
