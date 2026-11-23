@@ -40,8 +40,23 @@ int changed_produce_sound=0;
 
 unsigned int sound_rate=DEFAULT_SOUND_FREQ;
 
+#ifdef __3DS__
+/* 3DS: producer (emulator) and consumer (SDL audio thread / DSP) are decoupled by a ring buffer.
+ * The emulator never waits for the audio callback and the callback never waits for the emulator, so
+ * neither a stalled DSP nor quitting can deadlock; the emulation speed is paced by the frame limiter
+ * (sdlgfx.cpp). Underrun = silence, overrun = oldest audio dropped. */
+#define SOUND_BUFFERS_COUNT 8
+#include <3ds.h>
+extern "C" {
+extern volatile unsigned n3dsaud_dbg_framecb, n3dsaud_dbg_wait_timeouts, n3dsaud_dbg_played;
+}
+static volatile unsigned snd_wr = 0, snd_rd = 0;                 /* completed / consumed buffer counters */
+static volatile unsigned snd_callbacks = 0, snd_underruns = 0, snd_overruns = 0;
+static void sound_log_stats(const char *tag);
+#else
 #define SOUND_USE_SEMAPHORES
 #define SOUND_BUFFERS_COUNT 4
+#endif
 static uae_u16 sndbuffer[SOUND_BUFFERS_COUNT][SNDBUFFER_LEN*DEFAULT_SOUND_CHANNELS+32] UAE4ALL_ALIGN;
 unsigned n_callback_sndbuff, n_render_sndbuff;
 uae_u16 *sndbufpt = sndbuffer[0];
@@ -101,6 +116,20 @@ static void sound_thread_mixer(void *ud, Uint8 *stream, int len)
 	if (sound_thread_exit) return;
 	int sem_val;
 	sound_thread_active = 1;
+#ifdef __3DS__
+	{
+		unsigned n = ++snd_callbacks;
+		if (n == 1) write_log("audio callback is running (len=%d)\n", len);
+		unsigned w = snd_wr, r = snd_rd;
+		__sync_synchronize();
+		if (w == r) { snd_underruns++; return; }               /* nothing ready: keep the silence SDL prepared */
+		if (w - r > SOUND_BUFFERS_COUNT - 2) { snd_overruns++; r = w - 2; }   /* producer far ahead: drop old audio */
+		int bytes = mainMenu_soundStereo ? SNDBUFFER_LEN*2 : SNDBUFFER_LEN;
+		memcpy(stream, sndbuffer[r % SOUND_BUFFERS_COUNT], MIN(bytes, len));
+		snd_rd = r + 1;
+		return;
+	}
+#endif
 	/*
 	// Sound is choppy, arrgh
 	sem_getvalue(&sound_sem, &sem_val);
@@ -202,8 +231,23 @@ static int gp2x_start_sound(int rate, int bits, int stereo)
 
 	SDL_PauseAudio (0);
 
+#ifdef __3DS__
+	SDL_Delay(300);   /* give the audio thread a moment, then record whether anything is running */
+	sound_log_stats("300 ms after opening audio");
+#endif
+
 	return 0;
 }
+
+#ifdef __3DS__
+static void sound_log_stats(const char *tag)
+{
+	write_log("audio stats (%s): callbacks=%u underruns=%u overruns=%u wr=%u rd=%u | dsp framecb=%u played=%u wait_timeouts=%u | ndsp playing=%d samplepos=%u\n",
+		tag, snd_callbacks, snd_underruns, snd_overruns, snd_wr, snd_rd,
+		n3dsaud_dbg_framecb, n3dsaud_dbg_played, n3dsaud_dbg_wait_timeouts,
+		(int)ndspChnIsPlaying(0), (unsigned)ndspChnGetSamplePos(0));
+}
+#endif
 
 
 // this is meant to be called only once on exit
@@ -228,6 +272,21 @@ void finish_sound_buffer (void)
 	dbg("sound.c : finish_sound_buffer");
 #endif
 
+#ifdef __3DS__
+	{
+		static unsigned calls = 0;
+		__sync_synchronize();
+		snd_wr = snd_wr + 1;                                 /* publish the finished buffer */
+		sndbufpt = render_sndbuff = sndbuffer[snd_wr % SOUND_BUFFERS_COUNT];
+		calls++;
+		if (calls == 1 || calls == 50 || calls == 250 || calls % 2000 == 0) {
+			char tag[32]; snprintf(tag, sizeof(tag), "after %u buffers", calls);
+			sound_log_stats(tag);
+		}
+		return;
+	}
+#endif
+
 	//printf("finish %i\n", wrcnt);
 #if 0
 	if(mainMenu_soundStereo)
@@ -238,24 +297,8 @@ void finish_sound_buffer (void)
 #else
 
 #ifdef SOUND_USE_SEMAPHORES
-	static int sound_dead = 0, stalls = 0, calls = 0;
-	if (calls < 3) { write_log("finish_sound_buffer #%d (sound_dead=%d)\n", calls, sound_dead); calls++; }
-	if (!sound_dead) {
-		uae_sem_post(&sound_sem);
-#ifdef __3DS__
-		/* Never block forever on the audio callback: if the DSP/audio thread stalls (or never started),
-		 * give up on audio instead of freezing the whole emulator. */
-		if (SDL_SemWaitTimeout(callback_sem, 250) != 0) {
-			stalls++;
-			write_log("audio callback timeout #%d\n", stalls);
-			if (stalls >= 2) { sound_dead = 1; write_log("audio stalled - sound disabled for this session\n"); }
-		} else {
-			stalls = 0;
-		}
-#else
-		uae_sem_wait(&callback_sem);
-#endif
-	}
+	uae_sem_post(&sound_sem);
+	uae_sem_wait(&callback_sem);
 #endif
 	wrcnt++;
 	sndbufpt = render_sndbuff = sndbuffer[wrcnt%SOUND_BUFFERS_COUNT];

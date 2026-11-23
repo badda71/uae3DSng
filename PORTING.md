@@ -86,6 +86,21 @@ Before CI existed (kept for reference; the host check is still useful for quick 
 **Not verified:** running (boot, video, audio, input, UI), performance, memory use, any behaviour.
 Runtime risks I already know of are listed below; expect more once it runs on hardware.
 
+## Audio, timing, shutdown (found on hardware)
+
+* **Audio hand-off** (`sound_sdl_new.cpp`): upstream paces the emulator by blocking it on a semaphore until the
+  audio callback has consumed a buffer. On 3DS that deadlocked (black screen after Reset: the callback never
+  fired) and, via `SDL_Quit()` -> `SDL_CloseAudio()` joining a stuck audio thread, also froze Quit. The 3DS
+  build now uses an 8-slot ring buffer: the emulator never waits for audio and the callback never waits for the
+  emulator (underrun = silence, overrun = drop oldest). The log (`audio stats ...`) records callback and DSP
+  counters (`n3dsaud_dbg_*` in the SDL fork's audio driver) so a stalled DSP is visible.
+* **Speed**: with audio no longer pacing the emulator, `sdlgfx.cpp` uses a real frame limiter on 3DS (sleep until
+  `next_synctime`, clamped to 2 frames). Upstream only slept when more than a whole frame ahead, which assumes
+  audio pacing and made the game run too fast once audio was off.
+* **Quit**: `app_exiting` is set before `SDL_Quit()` so the audio thread's `WaitAudio()` returns.
+* `Illegal instruction: 4e7b at 00fc0564` in the log is Kickstart 1.3 probing for a 68010 (MOVEC) - expected.
+* Debug log: `sdmc:/3ds/uae3DSng/uae3DSng.log` (+ `stdout.log`), flushed per line; `write_log()` maps to it.
+
 ## Known gaps / risks
 
 1. **245 platform-conditional lines are unaudited** (`grep -rnE "__PSP2__|__SWITCH__|USE_SDL2"`,

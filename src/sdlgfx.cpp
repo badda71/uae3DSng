@@ -164,17 +164,22 @@ void flush_block ()
 #ifdef __3DS__
 		{ static int n = 0; if (n < 5) { write_log("frame %d: now=%lu next_sync=%lu time_per_frame=%lu\n", n, start, next_synctime, time_per_frame); n++; } }
 #endif
-		if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
-#if defined(__PSP2__)
-			SDL_Delay(((next_synctime - start) - 1000) / 1000);
-#elif defined(__3DS__)
-		{	/* clamp: a wrong clock must never turn into a multi-second sleep */
-			unsigned long d = (next_synctime - start) - 1000;
+#if defined(__3DS__)
+		/* Audio no longer paces the emulator on 3DS (see sound_sdl_new.cpp), so this is a real frame
+		 * limiter: sleep until the next frame is due. Clamped so a wrong clock can never mean a long sleep. */
+		if(start < next_synctime)
+		{
+			unsigned long d = next_synctime - start;
 			if (d > 2 * time_per_frame) d = 2 * time_per_frame;
 			usleep(d);
 		}
 #else
+		if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
+#if defined(__PSP2__)
+			SDL_Delay(((next_synctime - start) - 1000) / 1000);
+#else
 			usleep((next_synctime - start) - 1000);
+#endif
 #endif
 		SDL_Flip(prSDLScreen);
 		last_synctime = read_processor_time();

@@ -208,6 +208,10 @@ void do_start_program (void)
 	m68k_go (1);
 }
 
+#ifdef __3DS__
+extern "C" volatile bool app_exiting;   /* SDL 3DS driver: makes the audio/video threads stop waiting */
+#endif
+
 void do_leave_program (void)
 {
 #ifdef USE_SDL
@@ -224,14 +228,25 @@ void do_leave_program (void)
     SDL_FreeSurface(current_screenshot);
 #endif
 	     
+    write_log("leave: graphics_leave\n");
     graphics_leave ();
     close_joystick ();
+    write_log("leave: close_sound\n");
     close_sound ();
+    write_log("leave: zfile_exit\n");
     zfile_exit ();
 #ifdef USE_SDL
+#ifdef __3DS__
+    /* SDL_Quit() -> SDL_CloseAudio() waits for the audio thread, which may sit in WaitAudio(); this
+     * flag makes it return so the join cannot hang */
+    app_exiting = true;
+#endif
+    write_log("leave: SDL_Quit\n");
     SDL_Quit ();
 #endif
+    write_log("leave: memory_cleanup\n");
     memory_cleanup ();
+    write_log("leave: done\n");
 #ifdef __SWITCH__
     socketExit();
 #endif

@@ -41,6 +41,8 @@ extern volatile bool app_exiting;
 
 static Handle wbufDoneEvent;
 static aptHookCookie aptCookie;
+/* debug counters, read by uae3DSng (src/sound_sdl_new.cpp) to see whether the DSP keeps playing */
+volatile unsigned n3dsaud_dbg_framecb = 0, n3dsaud_dbg_wait_timeouts = 0, n3dsaud_dbg_played = 0;
 
 static const u64 EventTimeout = 1000LL * 1000LL * 100LL;	// 100 ms
 
@@ -155,6 +157,7 @@ static void audioFrameFinished(void *context)
 {
 	SDL_AudioDevice *this = (SDL_AudioDevice *) context;
 
+	n3dsaud_dbg_framecb++;
 	contextLock(this);
 	bool done = this->hidden->waveBuf[this->hidden->nextbuf].status == NDSP_WBUF_DONE;
 	contextUnlock(this);
@@ -181,7 +184,7 @@ retry:
 
 	if (not_done)
 	{
-		svcWaitSynchronization(wbufDoneEvent, EventTimeout);
+		if (R_FAILED(svcWaitSynchronization(wbufDoneEvent, EventTimeout))) n3dsaud_dbg_wait_timeouts++;
 		
 		if (app_exiting)
 		{
@@ -218,6 +221,7 @@ static void N3DSAUD_PlayAudio(_THIS)
 	this->hidden->waveBuf[nextbuf].offset=0;
 	this->hidden->waveBuf[nextbuf].status=NDSP_WBUF_QUEUED;
 	ndspChnWaveBufAdd(0, &this->hidden->waveBuf[nextbuf]);
+	n3dsaud_dbg_played++;
 }
 
 static Uint8 *N3DSAUD_GetAudioBuf(_THIS)
