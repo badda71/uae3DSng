@@ -1,0 +1,45 @@
+# Build uae3DSng in the official devkitARM container. The goal for now is *diagnostics*: compile every file
+# (make -k keeps going after the first error) and link the ELF. The .cia/.3ds/.smdh steps need bannertool and
+# makerom, which are not in the image, so they are expected to fail at the very end and are ignored here.
+name: build
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkitarm:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install libraries
+        run: |
+          dkp-pacman -Syu --noconfirm
+          dkp-pacman -S --noconfirm --needed 3ds-dev
+          for p in 3ds-sdl_image 3ds-sdl_gfx 3ds-libpng 3ds-zlib 3ds-libjpeg-turbo; do
+            dkp-pacman -S --noconfirm --needed "$p" || echo "::warning::package $p could not be installed"
+          done
+          dkp-pacman -Q | grep -E '^(3ds-|libctru|citro|devkitARM|tex3ds)' || true
+
+      - name: Build
+        run: |
+          set -o pipefail
+          make -k -j"$(nproc)" 2>&1 | tee build.log || true
+          echo "---- result ----" | tee -a build.log
+          if [ -f uae3DSng.elf ]; then ls -l uae3DSng.elf | tee -a build.log; else echo "NO ELF PRODUCED" | tee -a build.log; fi
+          echo "errors: $(grep -cE ' error( |:)|undefined reference|\*\*\* \[' build.log || true)" | tee -a build.log
+
+      - name: Upload log and artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uae3DSng-build
+          path: |
+            build.log
+            uae3DSng.elf
+            uae3DSng.3dsx
+          if-no-files-found: ignore
+
+      - name: Fail if no ELF
+        run: test -f uae3DSng.elf
