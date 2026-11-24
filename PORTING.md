@@ -242,6 +242,9 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   would run over the right edge of the window it is written into is cut one column before the frame (`fit_text()` in `write_text()`/`write_text_inv()`,
   using the columns of the last `text_draw_window()`; it matters for long file names in the DF0..DF3 lines and the hard-file lines). (3) The file dialog no
   longer lists `..` in `sdmc:/` (it only led back to the same directory); an empty root keeps one `..` entry so that the list is never empty.
+* **Round 10 (CIA metadata, banner jingle).** `meta/audio.wav` is a new original 2.6 s jingle, synthesised by `tools/banner/make_jingle.py`. CIA metadata: product
+  code `CTR-P-UANG`, unique ID `0x049645` (the old `0x049644` may collide with an installed uae3DS), publisher `badda71`, long description "Amiga 500/1200
+  emulator for the New 3DS (based on uae4all2 and uae3DS)". The icon and banner image are unchanged (new artwork is still open).
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 

@@ -44,8 +44,8 @@ GRAPHICS	:=	gfx
 GFXBUILD	:=	$(BUILD)
 ROMFS		:=	romfs
 APP_TITLE	:=	uae3DSng
-APP_DESCRIPTION	:=	Amiga emulator (uae4all2 based)
-APP_AUTHOR	:=	badda71 <me@badda.de>
+APP_DESCRIPTION	:=	Amiga 500/1200 emulator for the New 3DS (based on uae4all2 and uae3DS)
+APP_AUTHOR	:=	badda71
 ICON		:=	icon.png
 
 VERSION_MAJOR :=	0
@@ -59,8 +59,8 @@ else
 endif
 
 # CIA Build options
-PRODUCT_CODE	:=	CTR-P-UAEN
-UNIQUE_ID		:=	0x049644
+PRODUCT_CODE	:=	CTR-P-UANG
+UNIQUE_ID		:=	0x049645
 CPU_SPEED		:=	804MHz
 ENABLE_L2_CACHE :=	true
 SYSTEM_MODE_EXT :=	124MB
