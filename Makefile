@@ -67,11 +67,12 @@ SYSTEM_MODE_EXT :=	124MB
 BANNER_AUDIO	:=	$(TOPDIR)/$(META)/audio.wav
 BANNER_IMAGE	:=	$(TOPDIR)/$(META)/banner.png
 LOGO			:=	$(TOPDIR)/$(META)/logo.lz11
+FONT			:=	$(TOPDIR)/$(META)/picopixel.ttf
 
 ifeq (, $(shell which gm))
 	MKICOPNG := cp -f
 else
-	MKICOPNG := gm convert -fill white -font "Picopixel-Standard"\
+	MKICOPNG := gm convert -fill white -font $(FONT)\
 		-draw "font-size 8;text 1,47 'v$(VERSION)';"
 endif
 
