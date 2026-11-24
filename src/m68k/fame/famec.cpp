@@ -469,6 +469,21 @@ void famec_SetBank(u32 low_addr, u32 high_addr, hostptr fetch, void *rb, void *r
 	}
 }
 
+/* Divert only the WRITE accesses of a page range to handlers; reads and code fetches stay on the direct pointer.
+ * Used by the 3DS crash diagnostics to watch writes to the Amiga's low memory (vectors, ExecBase pointer). */
+void famec_SetWriteHandlers(u32 low_addr, u32 high_addr, void *wb, void *ww)
+{
+  u32 i = (low_addr >> M68K_DATASFT) & M68K_DATAMASK;
+  u32 j = (high_addr >> M68K_DATASFT) & M68K_DATAMASK;
+
+  while (i <= j)
+  {
+    mem_handlerWB[i] = wb;
+    mem_handlerWW[i] = ww;
+    i++;
+  }
+}
+
 
 // Read / Write functions
 ////////////////////////////////

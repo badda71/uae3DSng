@@ -129,6 +129,15 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   address 0 and the top screen went black with a frozen emulator (hardware log: 11 mode switches at start/selection + 9 menu trips).
   The log now shows `linear free N KB` on every `init_text`/`update_display`/`speed:` line; it must stay flat across menu trips.
   `TRAP: exter_int_helper` (~100/s with a HD mounted) is no longer logged: each log line is a synced SD write and it cost 10-20 fps.
+  **Low-memory write watch:** the 1 MB-chip freeze is not RAM exhaustion (hardware log: 695 KB chip free at the moment of the crash). exec's
+  vectors and ExecBase pointer were overwritten by the first block of an executable (`000003f3 00000000 00000005 ...` = HUNK_HEADER at
+  address 0), i.e. something copied file data to address 0 (a Read() into a NULL buffer?) a frame before the CPU ran off. FAME reaches chip RAM
+  through direct page pointers, so `map_zone()` installs *write-only* handlers (`famec_SetWriteHandlers`) on the page(s) mapping chip offset 0;
+  once exec is up (`crashdiag_frame` arms it), the first write to chip offset 0..7 logs `lowwrite:` with the exact PC, registers, ThisTask
+  name, exec free-chunk list, stack and the last native traps/hardfile requests. Reads/fetches stay direct, so the cost is small. If the
+  frame check reports a trash but the watch saw 0 writes, it was not the CPU (DMA or native code). Also: the `chipmem_*` bank accessors
+  always mask now (they only did with `SAFE_MEMORY_ACCESS`, so native accesses to the mirror at 0x100000..0x1FFFFF of a 1 MB machine ran
+  past the host buffer).
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
   no button reaches it. `menu_memory_disk.cpp` and `menu_fileinfo.cpp` were missing it (Memory/Disk menu froze).
 * **Quit**: `app_exiting` is set before `SDL_Quit()` so the audio thread's `WaitAudio()` returns.

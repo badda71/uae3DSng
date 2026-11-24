@@ -213,6 +213,7 @@ int      m68k_fetch(unsigned address);
 /* CPU context handling functions */
 M68K_CONTEXT *m68k_get_context(void);
 void famec_SetBank(u32 low_addr, u32 high_addr, hostptr fetch, void *rb, void *rw, void *wb, void *ww, void *data);
+void famec_SetWriteHandlers(u32 low_addr, u32 high_addr, void *wb, void *ww);
 int  m68k_set_register(m68k_register reg, unsigned value);
 
 /* Timing functions */
