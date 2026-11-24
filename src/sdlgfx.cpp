@@ -129,6 +129,7 @@ static unsigned long previous_synctime = 0;
 static unsigned long next_synctime = 0;
 #ifdef __3DS__
 static unsigned long dbg_flip_us = 0, dbg_flip_max = 0;   /* time spent in SDL_Flip, for the speed report */
+extern unsigned long dbg_draw_us, dbg_draw_max;           /* drawing.cpp: time spent drawing the frame */
 #endif
 
 void flush_block ()
@@ -205,11 +206,18 @@ void flush_block ()
 				extern int crashdiag_mem (unsigned *chip_kb, unsigned *other_kb);
 				extern unsigned crashdiag_largest_chip_kb (void);
 				unsigned fc = 0, fo = 0; int fok = crashdiag_mem (&fc, &fo);
-				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, flip avg %lu max %lu us, disk reads %u (%lu ms), free mem %s%u/%u KB (chip/other, largest chip chunk %u KB), linear free %u KB\n",
-					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10, spare * 100 / el, worst / 1000, slow,
-					frames ? dbg_flip_us / frames : 0, dbg_flip_max, disk_io_calls, disk_io_us / 1000, fok ? "" : "?", fc, fo, fok ? crashdiag_largest_chip_kb () : 0, log3ds_linear_free_kb());
+				/* Where the time of an average frame goes: draw (bitplanes -> screen) and flip are measured; whatever is
+				 * left of the busy time is the emulated CPU + chipset (copper, blitter, sound, CIAs, disk). */
+				unsigned long busy = (frames && el > spare) ? (el - spare) / frames : 0;
+				unsigned long dr = frames ? dbg_draw_us / frames : 0, fl = frames ? dbg_flip_us / frames : 0;
+				unsigned long rest = busy > dr + fl ? busy - dr - fl : 0;
+				write_log("speed: %u.%u fps (target %u.%u) [%s, cpu %d MHz], spare %lu%%, busy/frame %lu us = emu %lu + draw %lu (max %lu) + flip %lu (max %lu), worst frame %lu ms, %u frames >35 ms, disk reads %u (%lu ms), free mem %s%u/%u KB (chip/other, largest chip chunk %u KB), linear free %u KB\n",
+					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10,
+					(currprefs.chipset_mask & CSMASK_AGA) ? "AGA" : "OCS/ECS", 7 << mainMenu_CPU_speed,
+					spare * 100 / el, busy, rest, dr, dbg_draw_max, fl, dbg_flip_max, worst / 1000, slow,
+					disk_io_calls, disk_io_us / 1000, fok ? "" : "?", fc, fo, fok ? crashdiag_largest_chip_kb () : 0, log3ds_linear_free_kb());
 				t0 = last_synctime; spare = 0; frames = 0; worst = 0; slow = 0; disk_io_us = 0; disk_io_calls = 0;
-				dbg_flip_us = 0; dbg_flip_max = 0;
+				dbg_flip_us = 0; dbg_flip_max = 0; dbg_draw_us = 0; dbg_draw_max = 0;
 			}
 		}
 #endif

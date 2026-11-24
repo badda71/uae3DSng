@@ -225,6 +225,18 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   one `read()` into memory and decoded with `IMG_Load_RW`: libpng's many small stdio reads cost several ms each on uncached SD sectors (1.8 s for a slot
   that was not in the OS cache, 0.15 s for a fresh one). New diagnostics: the `speed:` line has `flip avg/max` (time in `SDL_Flip` per frame), the log has
   one `menu:` line per menu visit (average/maximum time of a menu pass, of which compose and `SDL_Flip`), and the thumbnail line shows the file size.
+* **Round 8 (A500 vs. A1200 speed: what the preset really changes).** The user noticed that A1200 is much slower than A500 even inside the emulator. The
+  menu's *Preset System Setup* is not only a chipset choice. `setSystem()` (menu_main.cpp) sets: A500 = 1 MB chip, no fast, Kickstart 1.x, OCS/ECS, 68000,
+  **CPU speed 7 MHz**; A1200 = 2 MB chip, 8 MB fast, Kickstart 3.x, **AGA**, 68020 flag, **CPU speed 14 MHz**. The FAME core is 68000-only and the "CPU speed"
+  setting only multiplies the cycles it is given per emulated time slice (`famec.cpp`: `io_cycle_counter = cycles << mainMenu_CPU_speed`), so 14 MHz means
+  twice the instructions per frame for code that is busy; an idle Workbench waits most of the time and (presumably, not measured) hardly notices, which would fit the idle Workbench
+  differing by only ~9 points of spare time (64 % A500, 55 % A1200) while a CPU-bound program (`Num`) differs a lot (A500 run: 41..57 % spare, but there its
+  1.1 MB allocation failed, so it did less work; A1200 run: 13..15 % spare, allocation succeeded). The two runs are therefore not like-for-like. To find
+  out how the cost splits, the `speed:` line now starts with the model (`[AGA, cpu 14 MHz]`) and breaks the busy time of an average frame into
+  `emu` (emulated CPU + chipset + sound + disk = busy minus the two measured parts), `draw` (`finish_drawing_frame`, bitplanes to screen; average and max) and
+  `flip`; the `config:` line shows the CPU speed. Experiment for the next log: A1200 with *Misc > CPU Speed = 7 MHz* (cuts the emulated CPU work in half,
+  keeps AGA), and A500 with 14 MHz. If `draw` is small in both, the rest is the CPU; if A1200 `draw` is much bigger, the AGA line conversion
+  (non-NEON C code on ARM11) is the next thing to optimise.
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 

@@ -50,6 +50,7 @@
 #include <time.h>
 #include "menu_config.h"
 #include "menu.h"
+#include "rpt.h"
 
 #ifdef USE_DRAWING_EXTRA_INLINE
 #define _INLINE_ __inline__
@@ -2230,9 +2231,17 @@ void check_all_prefs(void)
 }
 
 
+#ifdef __3DS__
+/* time spent turning the Amiga's bitplanes into the SDL surface, per frame; reported in the speed line (sdlgfx.cpp) */
+unsigned long dbg_draw_us = 0, dbg_draw_max = 0;
+#endif
+
 static _INLINE_ void finish_drawing_frame (void)
 {
 	int i;
+#ifdef __3DS__
+	unsigned long dbg_t0 = read_processor_time ();
+#endif
 
 	lockscr();
 
@@ -2263,6 +2272,9 @@ static _INLINE_ void finish_drawing_frame (void)
 
 		pfield_draw_line (active_line, where);
 	}
+#ifdef __3DS__
+	{ unsigned long dt = read_processor_time () - dbg_t0; dbg_draw_us += dt; if (dt > dbg_draw_max) dbg_draw_max = dt; }
+#endif
 
 		/* HD LED off delay */
 		static int countdown = HDLED_TIMEOUT;
