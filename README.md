@@ -13,3 +13,8 @@ Build (devkitARM + libctru + the portlibs below; on Windows use the devkitPro MS
 
 `fatal error: SDL_rotozoom.h: No such file or directory` means `3ds-sdl_gfx` is missing. The `.cia`/`.3ds` steps at the end need
 `bannertool` and `makerom` in the PATH; the `.3dsx` is built before them.
+
+## Credits
+
+The 3D model in the CIA banner is based on "Commodore Amiga 500 || Computer" by [dark_igorek](https://sketchfab.com/dark_igorek) on Sketchfab,
+licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); it was converted and modified for use as a 3DS banner.

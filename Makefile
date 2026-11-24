@@ -65,7 +65,8 @@ CPU_SPEED		:=	804MHz
 ENABLE_L2_CACHE :=	true
 SYSTEM_MODE_EXT :=	124MB
 BANNER_AUDIO	:=	$(TOPDIR)/$(META)/audio.wav
-BANNER_IMAGE	:=	$(TOPDIR)/$(META)/banner.png
+# spinning 3D banner (.cgfx; the HOME menu rotates it). banner.png (a static image) also works: bannertool then gets -i instead of -ci
+BANNER_IMAGE	:=	$(TOPDIR)/$(META)/banner.cgfx
 LOGO			:=	$(TOPDIR)/$(META)/logo.lz11
 FONT			:=	$(TOPDIR)/$(META)/picopixel.ttf
 
