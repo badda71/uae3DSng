@@ -579,6 +579,8 @@ static void uib_text(const char *s, int x, int y, int maxchars)
 	}
 }
 
+SDL_Surface *uib_font(void) { return font_img; }
+
 static void uib_statusbar_recalc()
 {
 	static uae_u8 dt0 = -1;

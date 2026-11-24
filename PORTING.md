@@ -152,8 +152,12 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   **Confirmed (3rd hardware log):** `AllocMem: size 296960 flags 00010005 FAST CLEAR -> 00000000 *** FAILED ***, task 'Install'` ~6 s before the
   trash, and the DosPacket's sender is the same task: the installer asks for 290 KB of *fast* RAM, gets NULL on the chip-only A500 profile and
   passes it to Read(). Not an emulator bug - a real A500 without fast/slow RAM crashes the same way; with fast or slow RAM (slow RAM counts as
-  fast for AllocMem) or the A1200 profile it works. UX: a failed FAST allocation of >=32 KB now shows `<task>: no FAST RAM for NNNK` on the bottom-
-  screen status bar, and the trash detection shows `CRASH: <task>: alloc failed NNNK` (or `CRASH: Amiga low memory overwritten`) for 60 s.
+  fast for AllocMem) or the A1200 profile it works. UX: when the vector table gets trashed the emulator now shows a **Guru Meditation** banner on the *main* screen (src/3ds/guru.cpp: black box, flashing
+  red border, red 8x8-font text, integer-scaled to the screen width; drawn over the picture right before each flip, so nothing in the emulated machine is touched).
+  A click of the left mouse button reboots the Amiga, like a dead-end alert. The alert number is synthetic - `8000_0004` (CPU exception 4, illegal
+  instruction), the real machine's exact exception is unknowable - and the second number is the address of the task that was running at the last good
+  frame, so it can be matched against the log. The log also names the last failed allocation (`lowmem: last failed allocation: 290K by 'Install'`).
+  Deliberately no bottom-screen message: a real Amiga shows nothing there, and a program that handles a failed AllocMem gracefully must not look like a crash.
   The write watch ignores writes that do not change anything (the ROM's `CLR.L 0` at boot) and goes quiet after the trash. Also: the `chipmem_*` bank accessors
   always mask now (they only did with `SAFE_MEMORY_ACCESS`, so native accesses to the mirror at 0x100000..0x1FFFFF of a 1 MB machine ran
   past the host buffer).

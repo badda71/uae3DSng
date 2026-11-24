@@ -44,6 +44,7 @@
 #include "menu_config.h"
 #ifdef __3DS__
 #include "uibottom.h"
+#include "guru.h"
 #endif
 #include "menu.h"
 #include "savestate.h"
@@ -163,6 +164,9 @@ void flush_block ()
 			CreateScreenshot(SCREENSHOT);
 #endif
 		}
+#ifdef __3DS__
+		guru_draw();   /* "Guru Meditation" banner if the emulated Amiga has crashed */
+#endif
 		unsigned long start = read_processor_time();
 #ifdef __3DS__
 		{ static int n = 0; if (n < 5) { write_log("frame %d: now=%lu next_sync=%lu time_per_frame=%lu\n", n, start, next_synctime, time_per_frame); n++; } }

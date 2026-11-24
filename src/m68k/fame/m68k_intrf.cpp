@@ -118,7 +118,9 @@ static int cd_armed, cd_trashed;
 static unsigned cd_wp_hits, cd_frames_since_reset, cd_full_dumps;
 static unsigned cd_dump_pcs[6];
 static uae_u32 cd_last_eb;
-void crashdiag_reset (void) { cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
+extern void guru_hide (void);
+extern void guru_show (unsigned code, unsigned task);
+void crashdiag_reset (void) { guru_hide (); cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
 unsigned crashdiag_frame_count (void) { return cd_frames_since_reset; }
 
 /* name, type and (for a Process running a CLI command) the command name of a Task; returns the node type, 0 if not plausible */
@@ -330,7 +332,7 @@ static void crashdiag_watch_page (unsigned lo, unsigned hi)
 /* Called once per emulated frame: notices the moment exec's low-memory structures get trashed. */
 void crashdiag_frame (void)
 {
-	static unsigned frame, reports, sane_hf, sane_frame;
+	static unsigned frame, reports, sane_hf, sane_frame, sane_task;
 	static uae_u32 snap[13];
 	uae_u32 eb = cd_long (4);
 	int sane = cd_exec_ok (eb) && cd_long (0x10) >= 0xe00000;
@@ -348,6 +350,7 @@ void crashdiag_frame (void)
 		snap[0] = eb;
 		cd_last_eb = eb;
 		for (i = 0; i < 12; i++) snap[1 + i] = cd_long (8 + i * 4);
+		sane_task = cd_long (eb + 0x114);
 		sane_hf = hardfile_request_count ();
 		sane_frame = frame;
 		cd_was_sane = 1;
@@ -357,15 +360,15 @@ void crashdiag_frame (void)
 	cd_was_sane = 0;
 	cd_trashed = 1;
 	{
-		char who[48], msg[48];
+		/* Same as a real Amiga would show: Guru Meditation on the main screen. The alert number is synthetic (the
+		 * emulator cannot know which exception a real machine would have run into): 8000_0004 = dead-end alert,
+		 * CPU exception 4 (illegal instruction); the second number is the task that was running (as in the log). */
+		char who[48];
 		unsigned kb = 0, at = 0;
 		extern int alloctrace_last_failure (char *name, unsigned nn, unsigned *kb, unsigned *frame);
-		extern void gui_set_message (const char *msg, int t);
-		if (alloctrace_last_failure (who, sizeof who, &kb, &at) && cd_frames_since_reset - at < 3000)
-			snprintf (msg, sizeof msg, "CRASH: %.9s: alloc failed %uK", who, kb);
-		else
-			snprintf (msg, sizeof msg, "CRASH: Amiga low memory overwritten");
-		gui_set_message (msg, 3000);
+		guru_show (0x80000004, sane_task);
+		if (alloctrace_last_failure (who, sizeof who, &kb, &at))
+			write_log ("lowmem: last failed allocation: %uK by '%s', %u frames ago\n", kb, who, cd_frames_since_reset - at);
 	}
 	if (reports++ >= 3) return;
 	write_log ("lowmem: exec structures trashed during frame %u (last good frame %u, hardfile requests since: %u)\n",

@@ -21,6 +21,8 @@ typedef struct {
 
 extern void uib_init(void);
 extern void uib_update(void);
+struct SDL_Surface;
+extern struct SDL_Surface *uib_font(void);   /* the 8x8 romfs font (1 bpp, 16 glyphs per row from ' '), NULL if not loaded */
 
 extern uikbd_key uikbd_keypos[];
 extern volatile int uib_must_redraw;   /* bit mask of enum uib_action */
