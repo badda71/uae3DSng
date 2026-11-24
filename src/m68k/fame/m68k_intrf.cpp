@@ -114,11 +114,12 @@ static int cd_was_sane, cd_logged_exec;
  * Every hit gets one short log line (boot-time exec writes in supervisor mode are expected); a full dump (registers,
  * task, memory chunks, DOS packet candidates, stack) is written for the first few hits from *different* PCs that are
  * either in user mode or happen well after the reset. */
-static int cd_armed;
+static int cd_armed, cd_trashed;
 static unsigned cd_wp_hits, cd_frames_since_reset, cd_full_dumps;
 static unsigned cd_dump_pcs[6];
 static uae_u32 cd_last_eb;
-void crashdiag_reset (void) { cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
+void crashdiag_reset (void) { cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
+unsigned crashdiag_frame_count (void) { return cd_frames_since_reset; }
 
 /* name, type and (for a Process running a CLI command) the command name of a Task; returns the node type, 0 if not plausible */
 static unsigned cd_task_names (uae_u32 task, char *name, unsigned nn, char *cmd, unsigned cn)
@@ -144,6 +145,17 @@ static unsigned cd_task_names (uae_u32 task, char *name, unsigned nn, char *cmd,
 		}
 	}
 	return type;
+}
+
+/* CLI command name (or task name) of the task that is running right now, for the status-bar message */
+void crashdiag_task_name (char *out, unsigned n)
+{
+	uae_u32 eb = cd_long (4);
+	char name[40], cmd[48];
+	strcpy (name, "?");
+	cmd[0] = 0;
+	if (cd_exec_ok (eb)) cd_task_names (cd_long (eb + 0x114), name, sizeof name, cmd, sizeof cmd);
+	snprintf (out, n, "%s", cmd[0] ? cmd : name);
 }
 
 /* "'name' cmd 'xxx'" of the task that is running right now (for the AllocMem trace in filesys.cpp) */
@@ -260,6 +272,7 @@ static void cd_wp_hit (uae_u32 addr, unsigned data, int size)
 {
 	M68K_CONTEXT *c = m68k_get_context ();
 	unsigned pc = m68k_get_pc (), i, full = 0;
+	if (cd_trashed) return;                       /* the machine is already running amok: nothing more to learn */
 	cd_wp_hits++;
 	if (cd_wp_hits <= 80)
 		write_log ("lowwrite: #%u %s write %0*x to %08x by PC=%08x (%s mode, A7=%08x, %u frames after reset)\n", cd_wp_hits,
@@ -290,14 +303,16 @@ static void cd_wp_hit (uae_u32 addr, unsigned data, int size)
 static void cd_wp_b (s32 addr, s32 data)
 {
 	uae_u32 a = (uae_u32) addr & chipmem_mask;
-	if (a < 8 || (uae_u32) addr >= allocated_chipmem) cd_wp_hit (addr, data & 0xFF, 1);
+	if ((uae_u32) addr >= allocated_chipmem || (a < 8 && *((uae_u8 *) (chipmemory + (a ^ 1))) != (uae_u8) data))
+		cd_wp_hit (addr, data & 0xFF, 1);
 	*((uae_u8 *) (chipmemory + (a ^ 1))) = data;
 }
 
 static void cd_wp_w (s32 addr, s32 data)
 {
 	uae_u32 a = (uae_u32) addr & chipmem_mask;
-	if (a < 8 || (uae_u32) addr >= allocated_chipmem) cd_wp_hit (addr, data & 0xFFFF, 2);
+	if ((uae_u32) addr >= allocated_chipmem || (a < 8 && ((a & 1) || *((uae_u16 *) (chipmemory + a)) != (uae_u16) data)))
+		cd_wp_hit (addr, data & 0xFFFF, 2);
 	if (a & 1) {                               /* same layout as FAME's direct odd-address word write */
 		uae_u8 *p = chipmemory + a;
 		*(p - 1) = data >> 8;
@@ -340,6 +355,18 @@ void crashdiag_frame (void)
 	}
 	if (!cd_was_sane) return;                  /* still booting / already reported */
 	cd_was_sane = 0;
+	cd_trashed = 1;
+	{
+		char who[48], msg[48];
+		unsigned kb = 0, at = 0;
+		extern int alloctrace_last_failure (char *name, unsigned nn, unsigned *kb, unsigned *frame);
+		extern void gui_set_message (const char *msg, int t);
+		if (alloctrace_last_failure (who, sizeof who, &kb, &at) && cd_frames_since_reset - at < 3000)
+			snprintf (msg, sizeof msg, "CRASH: %.9s: alloc failed %uK", who, kb);
+		else
+			snprintf (msg, sizeof msg, "CRASH: Amiga low memory overwritten");
+		gui_set_message (msg, 3000);
+	}
 	if (reports++ >= 3) return;
 	write_log ("lowmem: exec structures trashed during frame %u (last good frame %u, hardfile requests since: %u)\n",
 		   frame, sane_frame, hardfile_request_count () - sane_hf);

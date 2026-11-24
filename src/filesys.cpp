@@ -3180,13 +3180,42 @@ void filesys_prepare_reset (void)
  * every failed or large (>= 150000 bytes) request with flags, result, caller and the running task. filesys_diagentry (run
  * on every boot) patches the jump table; the stub's JSR operand receives the original target. */
 extern void crashdiag_task_desc (char *out, unsigned n);
+extern void crashdiag_task_name (char *out, unsigned n);
+extern unsigned crashdiag_frame_count (void);
+extern void gui_set_message (const char *msg, int t);
 static uaecptr alloctrace_stub[2];
 static unsigned alloctrace_logged;
+static struct { int valid; char who[24]; unsigned kb, frame, msg_frame; } alloctrace_fail;
+
+/* last failed allocation, for the crash notice in m68k_intrf.cpp */
+int alloctrace_last_failure (char *name, unsigned nn, unsigned *kb, unsigned *frame)
+{
+    if (!alloctrace_fail.valid) return 0;
+    snprintf (name, nn, "%s", alloctrace_fail.who);
+    *kb = alloctrace_fail.kb;
+    *frame = alloctrace_fail.frame;
+    return 1;
+}
 
 static uae_u32 alloctrace_common (int vec)
 {
     uaecptr sp = m68k_areg (regs, 7);
     uae_u32 size = get_long (sp), flags = get_long (sp + 4), caller = get_long (sp + 8), res = m68k_dreg (regs, 0);
+    if (res == 0 && size >= 32768) {
+	/* big failed request: remember who asked, and tell the user on the status bar right away (a program that uses the
+	 * NULL result, like the hardware log's installer, trashes the Amiga's vector table a few seconds later) */
+	unsigned now = crashdiag_frame_count ();
+	alloctrace_fail.valid = 1;
+	crashdiag_task_name (alloctrace_fail.who, sizeof alloctrace_fail.who);
+	alloctrace_fail.kb = (size + 1023) / 1024;
+	alloctrace_fail.frame = now;
+	if ((flags & 4) && (!alloctrace_fail.msg_frame || now - alloctrace_fail.msg_frame > 500)) {
+	    char msg[48];
+	    alloctrace_fail.msg_frame = now ? now : 1;
+	    snprintf (msg, sizeof msg, "%.10s: no FAST RAM for %uK", alloctrace_fail.who, alloctrace_fail.kb);
+	    gui_set_message (msg, 500);
+	}
+    }
     if ((res == 0 || size >= 150000) && alloctrace_logged < 150) {
 	char who[120];
 	alloctrace_logged++;

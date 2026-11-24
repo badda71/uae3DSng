@@ -148,7 +148,13 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   machine lacks - most likely MEMF_FAST; the A1200 profile has 8 MB fast RAM and works). A real A500 without fast RAM would trash its vectors the
   same way. To confirm, `filesys.cpp` wraps exec's AllocMem (-198) and AllocVec (-684) with guest stubs in the rtarea (`alloctrace_*`,
   patched into the jump table by `filesys_diagentry` on every boot) and logs every failed or >=150000-byte request: size, flags, result,
-  caller, running task and CLI command. The lowwrite dump also names the task that sent a DosPacket (reply port -> mp_SigTask). Also: the `chipmem_*` bank accessors
+  caller, running task and CLI command. The lowwrite dump also names the task that sent a DosPacket (reply port -> mp_SigTask).
+  **Confirmed (3rd hardware log):** `AllocMem: size 296960 flags 00010005 FAST CLEAR -> 00000000 *** FAILED ***, task 'Install'` ~6 s before the
+  trash, and the DosPacket's sender is the same task: the installer asks for 290 KB of *fast* RAM, gets NULL on the chip-only A500 profile and
+  passes it to Read(). Not an emulator bug - a real A500 without fast/slow RAM crashes the same way; with fast or slow RAM (slow RAM counts as
+  fast for AllocMem) or the A1200 profile it works. UX: a failed FAST allocation of >=32 KB now shows `<task>: no FAST RAM for NNNK` on the bottom-
+  screen status bar, and the trash detection shows `CRASH: <task>: alloc failed NNNK` (or `CRASH: Amiga low memory overwritten`) for 60 s.
+  The write watch ignores writes that do not change anything (the ROM's `CLR.L 0` at boot) and goes quiet after the trash. Also: the `chipmem_*` bank accessors
   always mask now (they only did with `SAFE_MEMORY_ACCESS`, so native accesses to the mirror at 0x100000..0x1FFFFF of a 1 MB machine ran
   past the host buffer).
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
