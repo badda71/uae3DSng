@@ -1,3 +1,1 @@
-# Addresses from a 3DS crash dump (PC, LR, ...), one hex address per line; CI resolves them into the build log.
-0014ADC8
-0024DAE4
+# Addresses from a 3DS crash dump (PC, LR, ...), one hex address per line; CI resolves them into the build log (crashlookup.log).

@@ -28,6 +28,26 @@ void process_exception(unsigned int vect);
 
 
 #ifdef __3DS__
+/* Diagnostics must never crash the host: get_long() goes through the address bank handlers, and e.g. kickmem_lget()
+ * does not mask its argument, so reading address 4 while the ROM overlay is mapped at 0 (first frames after reset)
+ * dereferences chipmem-style garbage. FAME's own map (m68k_fetch) masks to 24 bits and is valid for every page. */
+static uae_u32 cd_long (uae_u32 a)
+{
+	a &= 0xFFFFFE;
+	return ((uae_u32) m68k_fetch (a) << 16) | ((uae_u32) m68k_fetch (a + 2) & 0xFFFF);
+}
+static uae_u32 cd_word (uae_u32 a)
+{
+	return (uae_u32) m68k_fetch (a & 0xFFFFFE) & 0xFFFF;
+}
+/* ExecBase lives in chip RAM or in slow/fast RAM, never in the custom chip or CIA area */
+static int cd_exec_ok (uae_u32 eb)
+{
+	return eb >= 0x400 && !(eb & 1) && (eb < 0xA00000 || (eb >= 0xC00000 && eb < 0xD80000));
+}
+#endif
+
+#ifdef __3DS__
 extern void autoconf_dump_traphist (void);
 extern void hardfile_dump_history (void);
 
@@ -40,10 +60,10 @@ static void dump_cpu_context (unsigned opcode, unsigned pc)
 	write_log ("crash: A %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_areg(0), _68k_areg(1), _68k_areg(2), _68k_areg(3), _68k_areg(4), _68k_areg(5), _68k_areg(6), _68k_areg(7));
 	for (i = 0; i < 24; i += 6)
 		write_log ("crash: stack %08x: %08x %08x %08x %08x %08x %08x\n", sp + i * 4,
-			   get_long (sp + i * 4), get_long (sp + i * 4 + 4), get_long (sp + i * 4 + 8),
-			   get_long (sp + i * 4 + 12), get_long (sp + i * 4 + 16), get_long (sp + i * 4 + 20));
+			   cd_long (sp + i * 4), cd_long (sp + i * 4 + 4), cd_long (sp + i * 4 + 8),
+			   cd_long (sp + i * 4 + 12), cd_long (sp + i * 4 + 16), cd_long (sp + i * 4 + 20));
 	write_log ("crash: vectors 2..7: %08x %08x %08x %08x %08x %08x  ExecBase=%08x\n",
-		   get_long (8), get_long (12), get_long (16), get_long (20), get_long (24), get_long (28), get_long (4));
+		   cd_long (8), cd_long (12), cd_long (16), cd_long (20), cd_long (24), cd_long (28), cd_long (4));
 	write_log ("crash: code at PC: %04x %04x %04x %04x\n", m68k_fetch (pc), m68k_fetch (pc + 2), m68k_fetch (pc + 4), m68k_fetch (pc + 6));
 	autoconf_dump_traphist ();
 	hardfile_dump_history ();
@@ -56,15 +76,15 @@ extern unsigned hardfile_request_count (void);
 /* Free memory according to exec's MemList (ExecBase+322), in KB. Returns 0 if ExecBase is not (yet) sane. */
 int crashdiag_mem (unsigned *chip_kb, unsigned *other_kb)
 {
-	uae_u32 eb = get_long (4), node;
+	uae_u32 eb = cd_long (4), node;
 	unsigned n = 0;
 	*chip_kb = *other_kb = 0;
-	if (eb < 0x400 || eb >= 0x200000 || (eb & 1)) return 0;
-	node = get_long (eb + 322);
-	while (n++ < 8 && node >= 0x400 && node < 0x1000000 && !(node & 1) && get_long (node)) {
-		uae_u32 freeb = get_long (node + 28);
-		if (get_word (node + 14) & 2) *chip_kb += freeb / 1024; else *other_kb += freeb / 1024;
-		node = get_long (node);
+	if (!cd_exec_ok (eb)) return 0;
+	node = cd_long (eb + 322);
+	while (n++ < 8 && node >= 0x400 && node < 0x1000000 && !(node & 1) && cd_long (node)) {
+		uae_u32 freeb = cd_long (node + 28);
+		if (cd_word (node + 14) & 2) *chip_kb += freeb / 1024; else *other_kb += freeb / 1024;
+		node = cd_long (node);
 	}
 	return 1;
 }
@@ -77,8 +97,8 @@ void crashdiag_frame (void)
 {
 	static unsigned frame, reports, sane_hf, sane_frame;
 	static uae_u32 snap[13];
-	uae_u32 eb = get_long (4);
-	int sane = eb >= 0x400 && eb < 0x200000 && !(eb & 1) && get_long (0x10) >= 0xe00000;
+	uae_u32 eb = cd_long (4);
+	int sane = cd_exec_ok (eb) && cd_long (0x10) >= 0xe00000;
 	unsigned i;
 	frame++;
 	if (sane) {
@@ -87,10 +107,10 @@ void crashdiag_frame (void)
 			cd_logged_exec = 1;
 			crashdiag_mem (&c, &o);
 			write_log ("exec: base %08x version %d.%d AttnFlags %04x, free memory chip %u KB other %u KB\n", eb,
-				   get_word (eb + 20), get_word (eb + 22), get_word (eb + 296), c, o);
+				   cd_word (eb + 20), cd_word (eb + 22), cd_word (eb + 296), c, o);
 		}
 		snap[0] = eb;
-		for (i = 0; i < 12; i++) snap[1 + i] = get_long (8 + i * 4);
+		for (i = 0; i < 12; i++) snap[1 + i] = cd_long (8 + i * 4);
 		sane_hf = hardfile_request_count ();
 		sane_frame = frame;
 		cd_was_sane = 1;
@@ -105,11 +125,11 @@ void crashdiag_frame (void)
 	for (i = 0; i < 12; i += 4)
 		write_log ("lowmem: vec %02x: was %08x %08x %08x %08x  now %08x %08x %08x %08x\n", 8 + i * 4,
 			   snap[1 + i], snap[2 + i], snap[3 + i], snap[4 + i],
-			   get_long (8 + i * 4), get_long (12 + i * 4), get_long (16 + i * 4), get_long (20 + i * 4));
+			   cd_long (8 + i * 4), cd_long (12 + i * 4), cd_long (16 + i * 4), cd_long (20 + i * 4));
 	for (i = 0; i < 0x80; i += 0x20)
 		write_log ("lowmem: %04x: %08x %08x %08x %08x %08x %08x %08x %08x\n", i,
-			   get_long (i), get_long (i + 4), get_long (i + 8), get_long (i + 12),
-			   get_long (i + 16), get_long (i + 20), get_long (i + 24), get_long (i + 28));
+			   cd_long (i), cd_long (i + 4), cd_long (i + 8), cd_long (i + 12),
+			   cd_long (i + 16), cd_long (i + 20), cd_long (i + 24), cd_long (i + 28));
 	dump_cpu_context (0, m68k_get_pc ());
 }
 #endif
