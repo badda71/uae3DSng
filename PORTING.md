@@ -207,6 +207,14 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   picture and so GPU_LINEAR. `SDL_SetVideoModeScaling` now maps by *aspect only*: Shader "1:1" = scale 1 (hires: 0.5 x 1, exactly 2:1),
   Shader "Fit height" = uniform `240 / lines`; scales within 0.5 % of 1 snap to 1, and the driver selects GPU_NEAREST unless the scale is
   really different from 1 (tolerance 0.001). BILINEAR/POINT were removed from the 3DS shader list (a saved 2/3 becomes 1).
+* **Round 6 (menu look).** The menu font is black (the font bitmap's two palette entries are swapped at load, white is the colour key) on the light grey
+  window pattern; the title is black on the frame. The frame/shadow colours are constant (`menu_win1_color`/`menu_win0_color` in `romfs/data/colors.txt`;
+  `update_window_color()`, which made them pulse, is not called any more). On the 3DS `text_screen` is a transparent *layer* (colour key magenta,
+  software surface): `text_draw_background()` clears it and forgets the window, the first `text_draw_window()` of a screen only records x/y/width/title,
+  and `text_flip()` (-> `menu_compose()`) draws background, then the window with the height of the text that was written (`write_text*()`/bars call
+  `text_force_extent()`), centered horizontally and vertically (dx/dy), then the layer at (dx, dy). A second `text_draw_window()` in the same screen (message
+  box) is drawn into the layer unchanged. The file dialog forces its nominal height (`text_force_extent`), the savestate thumbnail is drawn after the
+  layer at `y + dy`.
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 

@@ -134,6 +134,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	int x_sep = x_win + 1;
 	int x_file = x_win + 1;
 	int x_dir = x_win + w_win - 7;
+	text_force_extent(y_win * 7 + 2 + h_win * 8);   // the list window keeps its size, however many files there are
 	r.x = MENU_X0 + x_win * MENU_CW; r.y=0; r.w = (MENU_X0 + x_dir * MENU_CW) - r.x; r.h=240;   // file names are clipped before the <DIR> column
 	static char sepbuf[64];                       // the separator line is as wide as the window
 	memset(sepbuf, '-', w_win - 2); sepbuf[w_win - 2] = 0;

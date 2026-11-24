@@ -65,6 +65,23 @@ static Uint32 menu_inv_color=0, menu_win0_color=0, menu_win1_color=0;
 static Uint32 menu_barra0_color=0, menu_barra1_color=0;
 static Uint32 menu_win0_color_base=0, menu_win1_color_base=0;
 
+#ifdef __3DS__
+/* ---- menu composition (3DS) ------------------------------------------------------------------------------------------------------
+ * The menu code draws into text_screen with coordinates of a MENU_GRID_W wide grid, and it draws the window first. Here text_screen is only
+ * a transparent *layer* (colour key magenta) that holds the text; text_flip() puts background, window frame and layer together:
+ *  - the window is only as high as the text that was written (win_ext_bottom, see write_text()),
+ *  - the whole window (frame + text) is centered on the 400x240 screen, horizontally and vertically.
+ * A second text_draw_window() in the same screen (message box) is drawn into the layer as it is. */
+static SDL_Surface *menu_layer = NULL;
+static Uint32 layer_key = 0;
+static int win_set = 0, win_geom = 0, win_popup = 0;
+static int win_x = 0, win_y = 0, win_w = 0;
+static char win_title[128];
+static int win_ih = 0, win_dx = 0, win_dy = 0;
+static int win_ext_bottom = 0;
+static void window_draw(int x, int y, int w, int ih, const char *title, int dx, int dy);
+#endif
+
 void write_text_pos(int x, int y, const char * str);
 void write_num(int x, int y, int v);
 int menu_msg_pos=330;
@@ -309,10 +326,14 @@ static void update_window_color(void)
 void text_draw_background()
 {
 #ifdef __3DS__
-	/* fixed background of uae3DS (romfs:/bg_top.png, 400x240): no "Menu Background" option */
-	SDL_BlitSurface(text_background_0,NULL,text_screen,NULL);
-	if (menu_moving)
-		update_window_color();
+	/* a new menu screen: empty text layer, no window yet. The background (romfs:/bg_top.png of uae3DS, 400x240) is drawn by
+	 * text_flip(); the window colours are constant (no update_window_color()). */
+	if (text_screen == menu_layer && text_screen != NULL) {
+		SDL_SetClipRect(text_screen, NULL);
+		SDL_FillRect(text_screen, NULL, layer_key);
+		win_set = win_geom = win_popup = 0;
+		win_ext_bottom = 0;
+	}
 	return;
 #endif
 	static int pos_x=12345678;
@@ -363,6 +384,57 @@ else
 		update_window_color();
 }
 
+#ifdef __3DS__
+/* background + window + text layer -> screen */
+static void menu_compose(void)
+{
+	SDL_BlitSurface(text_background_0, NULL, prSDLScreen, NULL);
+	if (win_set)
+	{
+		if (!win_geom)
+		{
+			int x_screen = MENU_X0 + win_x * MENU_CW;
+			int y_screen = win_y * 7 + 2;
+			int x_corn = x_screen - 2, y_corn = y_screen - 13;
+			win_ih = win_ext_bottom + 4 - y_screen;
+			if (win_ih < 16) win_ih = 16;
+			int w_corn = win_w * MENU_CW + 4, h_corn = win_ih + 4 + 13;
+			win_dx = (prSDLScreen->w - w_corn) / 2 - x_corn;
+			win_dy = (prSDLScreen->h - h_corn) / 2 - y_corn;
+			if (y_corn + win_dy < 0) win_dy = -y_corn;
+			win_geom = 1;
+		}
+		SDL_Surface *layer = text_screen;
+		text_screen = prSDLScreen;
+		window_draw(win_x, win_y, win_w, win_ih, win_title, win_dx, win_dy);
+		text_screen = layer;
+	}
+	else
+		win_dx = win_dy = 0;
+	SDL_Rect d;
+	d.x = win_dx; d.y = win_dy; d.w = 0; d.h = 0;
+	SDL_BlitSurface(text_screen, NULL, prSDLScreen, &d);
+}
+
+void text_flip_with_image(SDL_Surface *img, int x, int y)
+{
+	text_force_extent(y + img->h);
+	menu_compose();
+	SDL_Rect dst;
+	dst.x = x;
+	dst.y = y + win_dy;
+	dst.w = img->w;
+	dst.h = img->h;
+	SDL_BlitSurface(img, NULL, prSDLScreen, &dst);
+	SDL_Flip(prSDLScreen);
+}
+
+void text_flip(void)
+{
+	menu_compose();
+	SDL_Flip(prSDLScreen);
+}
+#else
 void text_flip_with_image(SDL_Surface *img, int x, int y)
 {
 #if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
@@ -403,6 +475,8 @@ void text_flip(void)
 #endif
 	SDL_Flip(prSDLScreen);
 }
+
+#endif
 
 void init_kickstart()
 {
@@ -532,18 +606,33 @@ void init_text(int splash)
 
 	if (!text_screen)
 	{
+#ifdef __3DS__
+		text_screen=SDL_CreateRGBSurface(SDL_SWSURFACE,prSDLScreen->w/MENU_ZOOM,prSDLScreen->h/MENU_ZOOM,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+		if (text_screen) {
+			menu_layer = text_screen;
+			layer_key = SDL_MapRGB(text_screen->format, 255, 0, 255);
+			SDL_SetColorKey(text_screen, SDL_SRCCOLORKEY, layer_key);
+			SDL_FillRect(text_screen, NULL, layer_key);
+		}
+		win_set = win_geom = win_popup = 0;
+#else
 		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/MENU_ZOOM,prSDLScreen->h/MENU_ZOOM,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+#endif
 		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/MENU_ZOOM,prSDLScreen->h/MENU_ZOOM,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 
 #ifdef __3DS__
 		tmp=SDL_LoadBMP(MENU_FILE_FONT8);
 		if (text_screen==NULL || tmp==NULL)
 			exit(-1);
+		{	/* the file has white glyphs on black; the menus are black on light grey: swap the two palette entries */
+			SDL_Color pal[2] = { {255, 255, 255, 0}, {0, 0, 0, 0} };
+			SDL_SetColors(tmp, pal, 0, 2);
+		}
 		text_image_0=SDL_DisplayFormat(tmp);
 		SDL_FreeSurface(tmp);
 		if (text_image_0==NULL)
 			exit(-2);
-		SDL_SetColorKey(text_image_0,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image_0 -> format, 0, 0, 0));
+		SDL_SetColorKey(text_image_0,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image_0 -> format, 255, 255, 255));
 		text_image_1 = NULL;
 		text_image_2 = NULL;
 #else
@@ -721,8 +810,19 @@ void quit_text(void)
 	window_screen = NULL;
 }
 
+#ifdef __3DS__
+void text_force_extent(int bottom)
+{
+	if (!win_popup && bottom > win_ext_bottom)
+		win_ext_bottom = bottom;
+}
+#endif
+
 void write_text(int x, int y, const char * str)
 {
+#ifdef __3DS__
+	text_force_extent(y * 7 + 8);
+#endif
 	write_text_pos(MENU_X0 + x * MENU_CW, y * 7, str);
 }
 
@@ -835,6 +935,9 @@ void write_text_inv(int x, int y, const char * str)
   dest.h = 12;
 
   SDL_FillRect(text_screen, &dest, menu_inv_color);
+#ifdef __3DS__
+  text_force_extent(dest.y + dest.h);
+#endif
 
   write_text(x, y, str);
 }
@@ -873,17 +976,17 @@ void write_num_inv(int x, int y, int v)
   write_num(x, y, v);
 }
 
-void text_draw_window(int x, int y, int w, int h, const char *title)
+/* h (interior height) is in pixels; dx/dy shift the whole window (3DS: centering) */
+static void window_draw(int x, int y, int w, int ih, const char *title, int dx, int dy)
 {
 	int offset_x = MENU_X0;
-	int i,j;
-	int x_screen = offset_x + x * MENU_CW;
-	int y_screen = y * 7 + 2;
+	int x_screen = offset_x + x * MENU_CW + dx;
+	int y_screen = y * 7 + 2 + dy;
 
 	int x_corn = x_screen-2;
 	int y_corn = y_screen-13;
 	int w_corn = (w*MENU_CW)+4;
-	int h_corn = (h*8)+4+13;
+	int h_corn = ih+4+13;
 
 	int x_shadow = x_corn+w_corn;
 	int y_shadow = y_corn+6;
@@ -921,10 +1024,38 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 	dest.x=x_screen;
 	dest.y=y_screen;
 	dest.w=w*MENU_CW;
-	dest.h=h*8;
+	dest.h=ih;
+#ifdef __3DS__
+	SDL_Rect src;                                 // the window pattern is a uniform tile: any part of it will do
+	src.x = 0; src.y = 0; src.w = dest.w; src.h = dest.h;
+	SDL_BlitSurface(window_screen,&src,text_screen,&dest);
+#else
 	SDL_BlitSurface(window_screen,&dest,text_screen,&dest);
+#endif
 
-	write_text_pos(offset_x + (x + ((w - (int)strlen(title)) / 2)) * MENU_CW, (y - 1) * 7 - 1, title);
+	write_text_pos(offset_x + dx + (x + ((w - (int)strlen(title)) / 2)) * MENU_CW, (y - 1) * 7 - 1 + dy, title);
+}
+
+void text_draw_window(int x, int y, int w, int h, const char *title)
+{
+#ifdef __3DS__
+	if (text_screen != NULL && text_screen == menu_layer)
+	{
+		if (!win_set)
+		{
+			/* the main window of this screen: drawn by text_flip() once the amount of text is known */
+			win_set = 1;
+			win_geom = 0;
+			win_popup = 0;
+			win_x = x; win_y = y; win_w = w;
+			strncpy(win_title, title, sizeof(win_title) - 1);
+			win_title[sizeof(win_title) - 1] = 0;
+			return;
+		}
+		win_popup = 1;      // message box on top of the menu: drawn into the layer, the size of the main window stays
+	}
+#endif
+	window_draw(x, y, w, h * 8, title, 0, 0);
 }
 
 void _text_draw_window(SDL_Surface *sf, int x, int y, int w, int h, const char *title)
@@ -952,6 +1083,9 @@ void text_draw_barra(int x, int y, int w, int h, int per, int max)
 	dest.h=h;
 	dest.w=(w*per)/max;
 	SDL_FillRect(text_screen, &dest, menu_barra0_color);
+#ifdef __3DS__
+	text_force_extent(dest.y + dest.h + 1);
+#endif
 }
 
 void text_draw_window_bar(int x, int y, int w, int h, int per, int max, const char *title)
