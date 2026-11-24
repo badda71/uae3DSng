@@ -44,6 +44,13 @@
 #endif
 
 SDL_Surface *thumbnail_image = NULL;
+/* the menu surface is the text screen stretched 2x on the Vita/Switch, drawn 1:1 on the 3DS (menu.cpp: MENU_ZOOM) */
+#ifdef __3DS__
+#define SS_ZOOM 1
+#else
+#define SS_ZOOM 2
+#endif
+
 int savestate_empty = 1;
 
 static const char *text_str_title="SaveStates";
@@ -253,7 +260,7 @@ static inline void draw_savestatesMenu(int c)
 		write_text(leftMargin,menuLine,text_str_deleteslot);
 
 	if (!savestate_empty && thumbnail_image != NULL)
-		text_flip_with_image(thumbnail_image, (prSDLScreen->w - thumbnail_image->w) / 2, 2 * menuLineForThumb * 7 + (132 - thumbnail_image->h / 2));
+		text_flip_with_image(thumbnail_image, (prSDLScreen->w - thumbnail_image->w) / 2, SS_ZOOM * (menuLineForThumb * 7 + 66) - thumbnail_image->h / 2);
 	else
 		text_flip();
 	b++;
@@ -648,7 +655,7 @@ void load_savestate_thumbnail() {
 #ifdef __PSP2__
 				dst.h = (src.h <= 132 * 2)? src.h : 132 * 2;
 #else
-				dst.h = 132 * 2;
+				dst.h = 132 * SS_ZOOM;
 #endif
 				dst.w = (dst.h * src.w) / src.h;
 				if (src.w >= 640) dst.w /= 2;

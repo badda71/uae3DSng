@@ -586,7 +586,7 @@ SDL_Surface *uib_font(void) { return font_img; }
 /* Status line on the bottom screen (what the emulator's own status line shows on the top screen of the other ports):
  * idle time %, power LED + fps, hard disk LED, one LED + track number per floppy drive. Shown when the "Status Line"
  * option is on. A message (gui_set_message: "Saved", "Restored", ...) takes the whole bar for its duration. */
-extern int mainMenu_showStatus, mainMenu_drives, idletime_percent;
+extern int mainMenu_drives, idletime_percent;
 
 static const char *glyph_H[7] = { "x----x", "x----x", "x----x", "xxxxxx", "x----x", "x----x", "x----x" };
 static const char *glyph_D[7] = { "xxxxx-", "x----x", "x----x", "x----x", "x----x", "x----x", "xxxxx-" };
@@ -609,7 +609,7 @@ static void uib_statusbar_recalc()
 	static Uint32 idle_t = 0;
 	static char buf[100] = {0};
 	int upd = 0;
-	int show = mainMenu_showStatus != 0;
+	int show = 1;                                   // always on (there is no option any more)
 	int drives = mainMenu_drives < 1 ? 1 : mainMenu_drives > 4 ? 4 : mainMenu_drives;
 	int cur_fps = gui_data.fps > 99 ? 99 : gui_data.fps;
 	int msg = show_message && SDL_GetTicks() < (Uint32)show_message;

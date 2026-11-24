@@ -308,6 +308,13 @@ static void update_window_color(void)
 
 void text_draw_background()
 {
+#ifdef __3DS__
+	/* fixed background of uae3DS (romfs:/bg_top.png, 400x240): no "Menu Background" option */
+	SDL_BlitSurface(text_background_0,NULL,text_screen,NULL);
+	if (menu_moving)
+		update_window_color();
+	return;
+#endif
 	static int pos_x=12345678;
 	static int pos_y=12345678;
 	SDL_Rect r;
@@ -574,6 +581,16 @@ void init_text(int splash)
 #endif
 		}
 
+#ifdef __3DS__
+		tmp=IMG_Load("romfs:/bg_top.png");
+		if (tmp==NULL)
+			exit(-3);
+		text_background_0=SDL_DisplayFormat(tmp);
+		SDL_FreeSurface(tmp);
+		if (text_background_0==NULL)
+			exit(-3);
+		text_background_1=NULL;
+#else
 		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND_0);
 		if (tmp==NULL)
 			exit(-3);
@@ -589,6 +606,7 @@ void init_text(int splash)
 		SDL_FreeSurface(tmp);
 		if (text_background_1==NULL)
 			exit(-3);
+#endif
 
 		tmp=SDL_LoadBMP(MENU_FILE_WINDOW);
 		if (tmp==NULL)
@@ -678,7 +696,7 @@ void quit_text(void)
 	text_image_1 = NULL;
 	text_image_2 = NULL;
 	SDL_FreeSurface(text_background_0);
-	SDL_FreeSurface(text_background_1);
+	if (text_background_1) SDL_FreeSurface(text_background_1);
 	text_background_0 = NULL;
 	text_background_1 = NULL;
 	SDL_FreeSurface(text_window_background);

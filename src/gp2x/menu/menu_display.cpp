@@ -41,7 +41,6 @@ static const char *text_str_32k="32k";
 static const char *text_str_22k="22k";
 static const char *text_str_11k="11k";
 static const char *text_str_8k="8k";
-static const char *text_str_status_line="Status Line";
 
 int menuDisplay = 0;
 
@@ -69,12 +68,10 @@ enum {
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	MENUDISPLAY_SHADER,
 #endif
-	MENUDISPLAY_STATUSLINE,
 #if defined(USE_UAE4ALL_VKBD)
 	MENUDISPLAY_VKBDLANGUAGE,
 	MENUDISPLAY_VKBDSTYLE,
 #endif
-	MENUDISPLAY_BACKGROUND,
 	MENUDISPLAY_FONT,
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
@@ -328,18 +325,6 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop1,menuLine,value);
 #endif
-	// MENUDISPLAY_STATUSLINE
-	menuLine+=2;
-	write_text(leftMargin, menuLine,text_str_status_line);
-	if ((!mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
-		write_text_inv(tabstop1,menuLine, "Off");
-	else
-		write_text(tabstop1, menuLine, "Off");
-	if ((mainMenu_showStatus)&&((menuDisplay!=MENUDISPLAY_STATUSLINE)||(bb)))
-		write_text_inv(tabstop3, menuLine,"On");
-	else
-		write_text(tabstop3, menuLine,"On");
-
 #if defined(USE_UAE4ALL_VKBD)
 	// MENUDISPLAY_VKBDLANGUAGE
 	menuLine+=2;
@@ -388,21 +373,9 @@ static void draw_displayMenu(int c)
 		write_text(tabstop1+19,menuLine,"Dark");
 #endif
 
-	// MENUDISPLAY_BACKGROUND
-	menuLine+=2;
-	write_text(leftMargin, menuLine,"Menu Background");
-	if ((mainMenu_background==0)&&((menuDisplay!=MENUDISPLAY_BACKGROUND)||(bb)))
-		write_text_inv(tabstop3,menuLine, "Static");
-	else
-		write_text(tabstop3, menuLine, "Static");
-	if ((mainMenu_background==1)&&((menuDisplay!=MENUDISPLAY_BACKGROUND)||(bb)))
-		write_text_inv(tabstop8-2, menuLine,"Moving");
-	else
-		write_text(tabstop8-2, menuLine,"Moving");
-		
 	// MENUDISPLAY_FONT
 	menuLine+=2;
-	write_text(leftMargin, menuLine,"Menu Font");
+	write_text(leftMargin,menuLine,"Menu Font");
 	if ((mainMenu_font==0)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
 		write_text_inv(tabstop3,menuLine, "Narrow");
 	else
@@ -798,11 +771,6 @@ static int key_displayMenu(int *c)
 				}
 				break;
 #endif
-			case MENUDISPLAY_STATUSLINE:
-				if ((left)||(right))
-					mainMenu_showStatus=!mainMenu_showStatus;
-				break;
-
 #if defined(USE_UAE4ALL_VKBD)
 			case MENUDISPLAY_VKBDLANGUAGE:
 				if (left)
@@ -837,10 +805,6 @@ static int key_displayMenu(int *c)
 				}
 				break;
 #endif
-			case MENUDISPLAY_BACKGROUND:
-				if ((left)||(right))
-					mainMenu_background=!mainMenu_background;
-				break;
 			case MENUDISPLAY_FONT:
 				if (left) {
 					if ((mainMenu_font > 0) && (mainMenu_font <= 2)) {

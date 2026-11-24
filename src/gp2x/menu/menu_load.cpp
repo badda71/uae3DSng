@@ -315,8 +315,15 @@ static int menuLoadLoop(char *curr_path)
 	min_in_dir=0;
 	max_in_dir=SHOW_MAX_FILES;
 
+#ifdef __3DS__
+	/* The only file system is "sdmc:/". A saved directory from the Vita days ("/", "ux0:/...") or an empty one is
+	 * replaced, so that the dialog is always usable (it used to list two empty Vita partitions at "/"). */
+	if (strncmp(curr_path, "sdmc:", 5) != 0)
+		strcpy(curr_path, "sdmc:/");
+#endif
+
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-#if !defined(__SWITCH__)
+#if !defined(__SWITCH__) && !defined(__3DS__)
 	if(strcmp(curr_path, "/") == 0 || curr_path[0] == 0) 
 	{
 		struct dirent *ent = NULL;
@@ -349,7 +356,22 @@ static int menuLoadLoop(char *curr_path)
 			for (p = curr_path + strlen(curr_path) - 1; p > curr_path && *p != '/'; p--);
 			*p = 0;
 			fname = p+1;
+#ifdef __3DS__
+			if (strchr(curr_path, '/') == NULL) {   /* "sdmc:" alone would mean the current directory of the device */
+				strcpy(curr_path, "sdmc:/");
+				fname = NULL;
+			}
+#endif
 			dir = opendir(curr_path);
+#ifdef __3DS__
+			if (dir == NULL) {                      /* directory is gone: start at the root */
+				strcpy(curr_path, "sdmc:/");
+				fname = NULL;
+				dir = opendir(curr_path);
+			}
+#endif
+			if (dir == NULL)
+				return 0;
 		}
 
 		struct dirent *ent = NULL;
@@ -614,6 +636,7 @@ static int menuLoadLoop(char *curr_path)
 					if ((menu_load_type == MENU_LOAD_HD_DIR) && hitL)
 					{
 						strcpy(uae4all_hard_dir, curr_path);
+						{ char *e = uae4all_hard_dir + strlen(uae4all_hard_dir) - 1; while (e > uae4all_hard_dir && *e == '/') *e-- = 0; }   // "sdmc:/" + "/" + name -> "sdmc://name"
 						strcat(uae4all_hard_dir, "/");
 						strcat(uae4all_hard_dir, namelist[sel+1]->d_name);
 						loaded = 1;
@@ -630,6 +653,10 @@ static int menuLoadLoop(char *curr_path)
 							while (*p != '/' && p > start) p--;
 							if (p <= start) strcpy(newdir, "/");
 							else { strncpy(newdir, start, p-start); newdir[p-start] = 0; }
+#ifdef __3DS__
+							/* never leave sdmc:/ ("sdmc:" without the slash is relative to the device's cwd) */
+							if (strcmp(newdir, "/") == 0 || strchr(newdir, '/') == NULL) strcpy(newdir, "sdmc:/");
+#endif
 						} 
 						else if (strcmp(namelist[sel+1]->d_name, "uma0:") == 0)
 						{

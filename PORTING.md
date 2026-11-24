@@ -188,6 +188,13 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 * **Status line.** The emulator's own status line (idle %, power LED + fps, HD LED, one LED + track per drive) is no longer drawn into the top
   screen (`#ifndef __3DS__` in `drawing.cpp`); `uibottom.cpp` draws the same on the bottom screen when the "Status Line" option is on (default on
   for the 3DS). Messages ("Saved", ...) cover the whole bar for their duration.
+* **Round 4.** (a) Savestate thumbnails were sized for the Vita's 2x menu surface (`132*2` px high, centred at `2*(y+66)`); `SS_ZOOM` is 1 on the
+  3DS now. (b) The "Menu Background" option is gone; the menu always uses uae3DS's `romfs:/bg_top.png` (400x240, loaded with `IMG_Load`, no
+  tiled/moving variant). The bottom screen already used uae3DS's `bg_bot.png` + `kbd1/kbd2.png`, with no option. (c) The "Status Line" option is gone: the
+  bottom-screen status bar is always on (the config key `showstatus` is still read/written for compatibility but ignored). (d) File dialogs: the
+  Vita pseudo root (`/` listing `ux0:`/`uma0:`) is not used on the 3DS; `menuLoadLoop()` replaces any directory that does not start with `sdmc:`
+  (an old `adfdir.conf` containing `/`, `ux0:/...`) by `sdmc:/`, `..` never leaves `sdmc:/` ("sdmc:" without the slash is relative to the
+  device's cwd), a vanished directory falls back to `sdmc:/`, and the HD-dir path no longer becomes `sdmc://name`.
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 
