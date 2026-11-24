@@ -201,7 +201,7 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   (`savestate thumbnail: decode .. ms, shrink .. ms`). (b) The top-screen virtual keyboard is gone: `src/vkbd`, the 48 `vkbd*.bmp`,
   `USE_UAE4ALL_VKBD` and everything under it (Start no longer opens it), the "Keyb. Lang./Style" options. `vkbdlanguage=`/`vkbdstyle=` stay in
   the config file as unused keys because the file is read positionally. (c) Menus use uae3DS's 8x8 font (`romfs:/8x8font.bmp`, glyph `(c-32)`
-  at `(c&15)*8,(c>>4)*8`, white on black = colour key): cells are `MENU_CW` = 8 px wide, text lines stay 7 px apart (glyph rows 0-6, row 7 only
+  at `(c&15)*8,(c>>4)*8`, white on black = colour key): cells are `MENU_CW` = 8 px wide, text lines were 7 px apart (`MENU_RH`, 6 px since round 9) (glyph rows 0-6, row 7 only
   descenders), `MENU_X0` centres a 44-column grid, the file dialog is 48 columns wide. The "Menu Font" option and `text*.bmp` are unused on
   the 3DS. (d) Blur: the Vita->3DS mapping of the requested picture rectangle was proportional to 960x544, which gave 0.94 x 1.0 for the default 320x240
   picture and so GPU_LINEAR. `SDL_SetVideoModeScaling` now maps by *aspect only*: Shader "1:1" = scale 1 (hires: 0.5 x 1, exactly 2:1),
@@ -235,6 +235,13 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   with the model (`[AGA, cpu 14 MHz]`) and splits the busy time of an average frame into `emu` (emulated CPU + chipset + sound + disk), `draw`
   (`finish_drawing_frame`: bitplanes to screen, average and max) and `flip`; the `config:` line shows the CPU speed. That shows how much headroom is left, e.g.
   whether *Misc > CPU Speed = 28 MHz* could hold 50 fps for CPU-heavy programs, and whether `draw` (C line conversion, no NEON on ARM11) matters at all.
+* **Round 9 (menu tweaks).** (1) Text rows are `MENU_RH` = 6 px apart instead of 7 (menu.h; all row arithmetic in menu.cpp, the file dialog's window extent and
+  the savestate thumbnail position use it). Menu items are two rows apart, so they are 12 px apart instead of 14; the highlight bars of `write_text_inv()` are now
+  `2*MENU_RH-2` = 10 px high (was 12) so that the bars of neighbouring items keep their 2 px gap, popup windows (`h*8` units of the old 7 px rows) are scaled by
+  6/7. Two text rows directly below each other would now overlap by one pixel row (glyph rows 0-6); the menus only put text on every second row. (2) Text that
+  would run over the right edge of the window it is written into is cut one column before the frame (`fit_text()` in `write_text()`/`write_text_inv()`,
+  using the columns of the last `text_draw_window()`; it matters for long file names in the DF0..DF3 lines and the hard-file lines). (3) The file dialog no
+  longer lists `..` in `sdmc:/` (it only led back to the same directory); an empty root keeps one `..` entry so that the list is never empty.
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 

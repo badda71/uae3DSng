@@ -134,7 +134,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	int x_sep = x_win + 1;
 	int x_file = x_win + 1;
 	int x_dir = x_win + w_win - 7;
-	text_force_extent(y_win * 7 + 2 + h_win * 8);   // the list window keeps its size, however many files there are
+	text_force_extent((3 + 2 * SHOW_MAX_FILES) * MENU_RH + 12);   // the list window keeps its size, however many files there are
 	r.x = MENU_X0 + x_win * MENU_CW; r.y=0; r.w = (MENU_X0 + x_dir * MENU_CW) - r.x; r.h=240;   // file names are clipped before the <DIR> column
 	static char sepbuf[64];                       // the separator line is as wide as the window
 	memset(sepbuf, '-', w_win - 2); sepbuf[w_win - 2] = 0;
@@ -397,9 +397,17 @@ static int menuLoadLoop(char *curr_path)
 		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[0]->d_name, ".");
 		namelist[0]->d_type = DT_DIR; n++;
-		namelist[1] = (struct dirent *)malloc(sizeof(struct dirent));
-		strcpy(namelist[1]->d_name, "..");
-		namelist[1]->d_type = DT_DIR; n++;
+#ifdef __3DS__
+		/* sdmc:/ has no parent directory: no ".." entry there (curr_path starts with "sdmc:", see above) */
+		int at_root;
+		{ const char *q = curr_path + 5; while (*q == '/') q++; at_root = (*q == 0); }
+		if (!at_root)
+#endif
+		{
+			namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
+			strcpy(namelist[n]->d_name, "..");
+			namelist[n]->d_type = DT_DIR; n++;
+		}
 
 		while ((ent = readdir (dir)) != NULL) {
 			if(n >= MAX_FILES_PER_DIR-1)
@@ -409,6 +417,13 @@ static int menuLoadLoop(char *curr_path)
 			n++;
 		}
 		closedir(dir);
+#ifdef __3DS__
+		if (n == 1) {                               /* nothing in the root at all: keep an entry to stand on */
+			namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
+			strcpy(namelist[n]->d_name, "..");
+			namelist[n]->d_type = DT_DIR; n++;
+		}
+#endif
 	}
 
 	if(n <= 0) {

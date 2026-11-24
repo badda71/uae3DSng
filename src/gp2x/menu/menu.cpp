@@ -80,6 +80,7 @@ static int win_x = 0, win_y = 0, win_w = 0;
 static char win_title[128];
 static int win_ih = 0, win_dx = 0, win_dy = 0;
 static int win_ext_bottom = 0;
+static int fit_x0 = 0, fit_x1 = 0;   /* columns [fit_x0, fit_x1) of the window that text is written into (fit_x1 == 0: none), see fit_text() */
 static void window_draw(int x, int y, int w, int ih, const char *title, int dx, int dy);
 #endif
 
@@ -334,6 +335,7 @@ void text_draw_background()
 		SDL_FillRect(text_screen, NULL, layer_key);
 		win_set = win_geom = win_popup = 0;
 		win_ext_bottom = 0;
+		fit_x0 = fit_x1 = 0;
 	}
 	return;
 #endif
@@ -407,7 +409,7 @@ static void menu_compose(void)
 		if (!win_geom)
 		{
 			int x_screen = MENU_X0 + win_x * MENU_CW;
-			int y_screen = win_y * 7 + 2;
+			int y_screen = win_y * MENU_RH + 2;
 			int x_corn = x_screen - 2, y_corn = y_screen - 13;
 			win_ih = win_ext_bottom + 4 - y_screen;
 			if (win_ih < 16) win_ih = 16;
@@ -850,12 +852,31 @@ void text_force_extent(int bottom)
 }
 #endif
 
+#ifdef __3DS__
+/* Text that would run over the right edge of the window it is written into (long file names) is cut off one column before the frame. */
+static const char *fit_text(int x, const char *str, char *buf, size_t size)
+{
+	if (fit_x1 <= fit_x0 || x < fit_x0 || x >= fit_x1)
+		return str;
+	int max = fit_x1 - x - 1;
+	if (max < 0) max = 0;
+	if ((size_t)max >= size) max = (int)size - 1;
+	if (strlen(str) <= (size_t)max)
+		return str;
+	memcpy(buf, str, max);
+	buf[max] = 0;
+	return buf;
+}
+#endif
+
 void write_text(int x, int y, const char * str)
 {
 #ifdef __3DS__
-	text_force_extent(y * 7 + 8);
+	char fit[128];
+	str = fit_text(x, str, fit, sizeof(fit));
+	text_force_extent(y * MENU_RH + 8);
 #endif
-	write_text_pos(MENU_X0 + x * MENU_CW, y * 7, str);
+	write_text_pos(MENU_X0 + x * MENU_CW, y * MENU_RH, str);
 }
 
 #ifdef __3DS__
@@ -961,10 +982,19 @@ void write_text_pos(int x, int y, const char * str)
 void write_text_inv(int x, int y, const char * str)
 {
   SDL_Rect dest;
+#ifdef __3DS__
+  char fit[128];
+  str = fit_text(x, str, fit, sizeof(fit));          /* before the bar is sized */
+#endif
   dest.x = MENU_X0 + (x * MENU_CW) -2 ;
+#ifdef __3DS__
+  dest.y = (y * MENU_RH) - 1;                        /* two-row menu items: bars of neighbouring items keep a 2 px gap */
+  dest.h = 2 * MENU_RH - 2;
+#else
   dest.y = (y * 7) /*10*/ - 2;
-  dest.w = (strlen(str) * MENU_CW) + 4;
   dest.h = 12;
+#endif
+  dest.w = (strlen(str) * MENU_CW) + 4;
 
   SDL_FillRect(text_screen, &dest, menu_inv_color);
 #ifdef __3DS__
@@ -999,9 +1029,14 @@ void write_num_inv(int x, int y, int v)
 		break;
 
   dest.x = MENU_X0 + (x * MENU_CW) -2 ;
+#ifdef __3DS__
+  dest.y = (y * MENU_RH) - 1;
+  dest.h = 2 * MENU_RH - 2;
+#else
   dest.y = (y * 7) /*10*/ - 2;
-  dest.w = (l * MENU_CW) + 4;
   dest.h = 12;
+#endif
+  dest.w = (l * MENU_CW) + 4;
 
   SDL_FillRect(text_screen, &dest, menu_inv_color);
 
@@ -1013,7 +1048,7 @@ static void window_draw(int x, int y, int w, int ih, const char *title, int dx, 
 {
 	int offset_x = MENU_X0;
 	int x_screen = offset_x + x * MENU_CW + dx;
-	int y_screen = y * 7 + 2 + dy;
+	int y_screen = y * MENU_RH + 2 + dy;
 
 	int x_corn = x_screen-2;
 	int y_corn = y_screen-13;
@@ -1065,7 +1100,7 @@ static void window_draw(int x, int y, int w, int ih, const char *title, int dx, 
 	SDL_BlitSurface(window_screen,&dest,text_screen,&dest);
 #endif
 
-	write_text_pos(offset_x + dx + (x + ((w - (int)strlen(title)) / 2)) * MENU_CW, (y - 1) * 7 - 1 + dy, title);
+	write_text_pos(offset_x + dx + (x + ((w - (int)strlen(title)) / 2)) * MENU_CW, y_screen - 10, title);   /* 3 px below the top of the frame */
 }
 
 void text_draw_window(int x, int y, int w, int h, const char *title)
@@ -1073,6 +1108,7 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 #ifdef __3DS__
 	if (text_screen != NULL && text_screen == menu_layer)
 	{
+		fit_x0 = x; fit_x1 = x + w;     /* text that follows is written into this window */
 		if (!win_set)
 		{
 			/* the main window of this screen: drawn by text_flip() once the amount of text is known */
@@ -1087,7 +1123,7 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 		win_popup = 1;      // message box on top of the menu: drawn into the layer, the size of the main window stays
 	}
 #endif
-	window_draw(x, y, w, h * 8, title, 0, 0);
+	window_draw(x, y, w, (h * 8 * MENU_RH) / 7, title, 0, 0);   /* h counts 8 px units of the original 7 px rows */
 }
 
 void _text_draw_window(SDL_Surface *sf, int x, int y, int w, int h, const char *title)

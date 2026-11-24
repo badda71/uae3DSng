@@ -9,12 +9,14 @@ extern SDL_Surface *prSDLScreen;
 #define MENU_FILE_WINDOW DATA_PREFIX "window.bmp"
 #define MENU_FILE_TEXT_0 DATA_PREFIX "text.bmp"
 #ifdef __3DS__
-/* the menus use the 8x8 font of uae3DS (romfs:/8x8font.bmp, ASCII 32..127 in 16 x 6 glyphs): cells are 8 px wide, text lines stay 7 px apart */
+/* the menus use the 8x8 font of uae3DS (romfs:/8x8font.bmp, ASCII 32..127 in 16 x 6 glyphs): cells are 8 px wide, text rows are MENU_RH px apart */
 #define MENU_FILE_FONT8 "romfs:/8x8font.bmp"
 #define MENU_CW 8
+#define MENU_RH 6
 #define MENU_GRID_W (44 * MENU_CW)
 #else
 #define MENU_CW 7
+#define MENU_RH 7
 #define MENU_GRID_W 320
 #endif
 /* left edge of column 0 (the menus are laid out for a MENU_GRID_W wide area, centered on the text screen) */
