@@ -102,7 +102,13 @@ else
 	MORECFLAGS := -O0 -ggdb
 endif
 
-COMMON_CFLAGS := -fpermissive -Wno-write-strings -fdata-sections -Wno-sign-compare -fno-exceptions -Wall -Wno-format -Wno-switch -mword-relocations -fomit-frame-pointer -ffunction-sections -ffast-math $(ARCH) $(MORECFLAGS) $(INCLUDE) -DARM11 -D_3DS -D__3DS__ -DVERSION3DS=\"$(VERSION)\" $(UAE_DEFS)
+# The uae4all2 sources are full of harmless -Wall findings (unused variables/functions/labels, misleading indentation, missing
+# parentheses, '/*' in comments, ...) that bury the few warnings that matter (-Wuninitialized, -Wreturn-type, ...). Those
+# categories are switched off; everything else stays on.
+QUIET_WARNINGS := -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-label \
+	-Wno-misleading-indentation -Wno-parentheses -Wno-comment -Wno-address -Wno-int-in-bool-context
+
+COMMON_CFLAGS := -fpermissive -Wno-write-strings -fdata-sections -Wno-sign-compare -fno-exceptions -Wall -Wno-format -Wno-switch $(QUIET_WARNINGS) -mword-relocations -fomit-frame-pointer -ffunction-sections -ffast-math $(ARCH) $(MORECFLAGS) $(INCLUDE) -DARM11 -D_3DS -D__3DS__ -DVERSION3DS=\"$(VERSION)\" $(UAE_DEFS)
 
 CFLAGS		:= $(COMMON_CFLAGS) -std=gnu11 -Wno-discarded-qualifiers
 CXXFLAGS	:= $(COMMON_CFLAGS) -fno-rtti -std=gnu++11
