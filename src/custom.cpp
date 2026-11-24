@@ -4512,7 +4512,7 @@ void custom_prepare_savestate (void)
 
 uae_u8 *restore_custom (uae_u8 *src)
 {
-    uae_u16 dsklen, dskbytr, dskdatr, ru16;
+    uae_u16 dsklen, dskbytr, dskdatr = 0 /* DISK_restore_custom() ignores it */, ru16;
     int dskpt;
     int i;
 

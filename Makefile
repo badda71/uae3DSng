@@ -340,7 +340,7 @@ $(OUTPUT).elf	:	$(OFILES) $(SUBLIBS)
 #---------------------------------------------------------------------------------
 $(APP_ICON): $(RAW_ICON) $(TOPDIR)/Makefile
 	@echo -n generating $@ ...
-	@$(MKICOPNG) $< $@
+	@$(MKICOPNG) $< $@ 2>/dev/null || { cp -f $< $@; echo -n " (no version text: gm cannot find its font) ..."; }
 	@echo OK
 
 icon.icn: $(APP_ICON)
