@@ -45,6 +45,8 @@ static void hf_note (int unit, uaecptr io)
 		   unit, cmd, err, hf_hist[i].data, hf_hist[i].off, hf_hist[i].len);
 }
 
+unsigned hardfile_request_count (void) { return hf_hist_n; }
+
 void hardfile_dump_history (void)
 {
     unsigned i, n = hf_hist_n < HF_HIST ? hf_hist_n : HF_HIST;
@@ -124,9 +126,17 @@ static uae_u32 hardfile_beginio (void)
 			fseek (hfd->fd, offset, SEEK_SET);
 			while (tmp2) {
 				int i;
-				char buffer[512];
+				uae_u8 buffer[512];
 				/* See the comment in CMD_WRITE */
+#ifdef __3DS__
+				if (fread (buffer, 1, 512, hfd->fd) != 512) {   /* never hand uninitialised stack to the Amiga */
+				    memset (buffer, 0, sizeof buffer);
+				    write_log ("hardfile: read error at offset %08x\n", (unsigned) (offset + (get_long (tmp1 + 36) - tmp2)));
+				    put_byte (tmp1 + 31, (uae_u8)-1);       /* IOERR_OPENFAIL: generic failure */
+				}
+#else
 				fread (buffer, 1, 512, hfd->fd);
+#endif
 				for (i = 0; i < 512; i++, dataptr++)
 					put_byte(dataptr, buffer[i]);
 				tmp2 -= 512;
@@ -154,7 +164,14 @@ static uae_u32 hardfile_beginio (void)
 				int i;
 				for (i=0; i < 512; i++, dataptr++)
 					buffer[i] = get_byte(dataptr);
+#ifdef __3DS__
+				if (fwrite (buffer, 1, 512, hfd->fd) != 512) {
+				    write_log ("hardfile: write error at offset %08x\n", (unsigned) (offset + (get_long (tmp1 + 36) - tmp2)));
+				    put_byte (tmp1 + 31, (uae_u8)-1);
+				}
+#else
 				fwrite (buffer, 1, 512, hfd->fd);
+#endif
 				tmp2 -= 512;
 			}
 			break;

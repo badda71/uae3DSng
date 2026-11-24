@@ -117,6 +117,9 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   the last 24 native traps and the last 16 hardfile requests to the log (illegal-instruction lines are throttled, a runaway CPU
   produced 5000 synced log writes). `uaehf.device` now returns `IOERR_BADLENGTH/BADADDRESS` for bad requests instead of
   silently "succeeding", and no longer rejects odd data pointers (the copy is byte-wise).
+  `crashdiag_frame()` (once per frame) logs exec's version/free memory once, appends Amiga free chip/other memory to every `speed:` line,
+  and reports the frame in which ExecBase/the exception vectors get overwritten (hardware log: 1 MB chip-only machine, Format on a 25 MB
+  HDF, then low memory trashed and the CPU ran off into the rtarea strings).
   `TRAP: exter_int_helper` (~100/s with a HD mounted) is no longer logged: each log line is a synced SD write and it cost 10-20 fps.
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
   no button reaches it. `menu_memory_disk.cpp` and `menu_fileinfo.cpp` were missing it (Memory/Disk menu froze).

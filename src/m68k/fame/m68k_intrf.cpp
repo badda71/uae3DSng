@@ -50,6 +50,70 @@ static void dump_cpu_context (unsigned opcode, unsigned pc)
 }
 #endif
 
+#ifdef __3DS__
+extern unsigned hardfile_request_count (void);
+
+/* Free memory according to exec's MemList (ExecBase+322), in KB. Returns 0 if ExecBase is not (yet) sane. */
+int crashdiag_mem (unsigned *chip_kb, unsigned *other_kb)
+{
+	uae_u32 eb = get_long (4), node;
+	unsigned n = 0;
+	*chip_kb = *other_kb = 0;
+	if (eb < 0x400 || eb >= 0x200000 || (eb & 1)) return 0;
+	node = get_long (eb + 322);
+	while (n++ < 8 && node >= 0x400 && node < 0x1000000 && !(node & 1) && get_long (node)) {
+		uae_u32 freeb = get_long (node + 28);
+		if (get_word (node + 14) & 2) *chip_kb += freeb / 1024; else *other_kb += freeb / 1024;
+		node = get_long (node);
+	}
+	return 1;
+}
+
+static int cd_was_sane, cd_logged_exec;
+void crashdiag_reset (void) { cd_was_sane = 0; cd_logged_exec = 0; }
+
+/* Called once per emulated frame: notices the moment exec's low-memory structures get trashed. */
+void crashdiag_frame (void)
+{
+	static unsigned frame, reports, sane_hf, sane_frame;
+	static uae_u32 snap[13];
+	uae_u32 eb = get_long (4);
+	int sane = eb >= 0x400 && eb < 0x200000 && !(eb & 1) && get_long (0x10) >= 0xe00000;
+	unsigned i;
+	frame++;
+	if (sane) {
+		if (!cd_logged_exec) {
+			unsigned c, o;
+			cd_logged_exec = 1;
+			crashdiag_mem (&c, &o);
+			write_log ("exec: base %08x version %d.%d AttnFlags %04x, free memory chip %u KB other %u KB\n", eb,
+				   get_word (eb + 20), get_word (eb + 22), get_word (eb + 296), c, o);
+		}
+		snap[0] = eb;
+		for (i = 0; i < 12; i++) snap[1 + i] = get_long (8 + i * 4);
+		sane_hf = hardfile_request_count ();
+		sane_frame = frame;
+		cd_was_sane = 1;
+		return;
+	}
+	if (!cd_was_sane) return;                  /* still booting / already reported */
+	cd_was_sane = 0;
+	if (reports++ >= 3) return;
+	write_log ("lowmem: exec structures trashed during frame %u (last good frame %u, hardfile requests since: %u)\n",
+		   frame, sane_frame, hardfile_request_count () - sane_hf);
+	write_log ("lowmem: ExecBase %08x -> %08x\n", snap[0], eb);
+	for (i = 0; i < 12; i += 4)
+		write_log ("lowmem: vec %02x: was %08x %08x %08x %08x  now %08x %08x %08x %08x\n", 8 + i * 4,
+			   snap[1 + i], snap[2 + i], snap[3 + i], snap[4 + i],
+			   get_long (8 + i * 4), get_long (12 + i * 4), get_long (16 + i * 4), get_long (20 + i * 4));
+	for (i = 0; i < 0x80; i += 0x20)
+		write_log ("lowmem: %04x: %08x %08x %08x %08x %08x %08x %08x %08x\n", i,
+			   get_long (i), get_long (i + 4), get_long (i + 8), get_long (i + 12),
+			   get_long (i + 16), get_long (i + 20), get_long (i + 24), get_long (i + 28));
+	dump_cpu_context (0, m68k_get_pc ());
+}
+#endif
+
 void uae_chk_handler(unsigned vector)
 {
 	unsigned opcode=m68k_fetch(m68k_get_pc());

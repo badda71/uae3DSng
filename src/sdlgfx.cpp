@@ -199,14 +199,17 @@ void flush_block ()
 				if (work > 35000) slow++;
 			}
 			prev_end = last_synctime;
+			{ extern void crashdiag_frame (void); crashdiag_frame (); }
 			unsigned long el = last_synctime - t0;
 			if (el >= 5000000UL) {
 				unsigned fps10 = (unsigned)(frames * 10000000ULL / el);
 				unsigned tgt10 = (unsigned)(10000000UL / time_per_frame);
 				extern unsigned long disk_io_us; extern unsigned disk_io_calls;
-				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, disk reads %u (%lu ms)\n",
+				extern int crashdiag_mem (unsigned *chip_kb, unsigned *other_kb);
+				unsigned fc = 0, fo = 0; int fok = crashdiag_mem (&fc, &fo);
+				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, disk reads %u (%lu ms), free mem %s%u/%u KB (chip/other)\n",
 					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10, spare * 100 / el, worst / 1000, slow,
-					disk_io_calls, disk_io_us / 1000);
+					disk_io_calls, disk_io_us / 1000, fok ? "" : "?", fc, fo);
 				t0 = last_synctime; spare = 0; frames = 0; worst = 0; slow = 0; disk_io_us = 0; disk_io_calls = 0;
 			}
 		}

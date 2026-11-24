@@ -158,6 +158,11 @@ void m68k_go (int may_quit)
 				mispcflags = 0;
 	    	}
 			write_log("m68k_go: reset_all_systems\n");
+#ifdef __3DS__
+			{ extern void crashdiag_reset (void); crashdiag_reset (); }
+			write_log("config: chip %u KB, slow %u KB, fast %u KB, cpu %d, chipset mask %x\n", prefs_chipmem_size / 1024,
+				  prefs_bogomem_size / 1024, (unsigned) (changed_prefs.fastmem_size / 1024), prefs_cpu_model, (unsigned) changed_prefs.chipset_mask);
+#endif
 			reset_all_systems ();
 			customreset ();
 			write_log("m68k_go: customreset done\n");
