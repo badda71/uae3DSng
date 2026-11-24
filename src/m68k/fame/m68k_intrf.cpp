@@ -106,26 +106,44 @@ int crashdiag_mem (unsigned *chip_kb, unsigned *other_kb)
 static int cd_was_sane, cd_logged_exec;
 
 /* ---- write watch on the Amiga's low memory --------------------------------------------------------------------------
- * Once exec is up, nothing legitimate writes to the reset vectors (address 0..7: initial SSP/PC, and the ExecBase
- * pointer at 4). When a program does it anyway (e.g. a Read() into a NULL buffer), the whole vector table and ExecBase
- * pointer are gone and the machine runs away. FAME accesses chip RAM through direct page pointers, so the write
- * handlers are installed on the page(s) that map chip offset 0 only (reads stay direct); the handler sees the exact
- * PC and registers of the culprit. With 1 MB chip RAM the 2nd megabyte is a mirror, so 0x100000 hits as well. */
+ * Nothing legitimate writes to the reset vectors (address 0..7: initial SSP/PC, and the ExecBase pointer at 4) once exec
+ * is up. When a program does it anyway (e.g. a Read() into a NULL buffer), the whole vector table and ExecBase pointer
+ * are gone and the machine runs away. FAME accesses chip RAM through direct page pointers, so write handlers are
+ * installed on the page(s) that map chip offset 0 (and on the pages of the mirror above the real chip RAM, e.g.
+ * 0x100000..0x1FFFFF with 1 MB); reads stay direct. The handler sees the exact PC and registers of the writer.
+ * Every hit gets one short log line (boot-time exec writes in supervisor mode are expected); a full dump (registers,
+ * task, memory chunks, DOS packet candidates, stack) is written for the first few hits from *different* PCs that are
+ * either in user mode or happen well after the reset. */
 static int cd_armed;
-static unsigned cd_wp_hits;
+static unsigned cd_wp_hits, cd_frames_since_reset, cd_full_dumps;
+static unsigned cd_dump_pcs[6];
 static uae_u32 cd_last_eb;
-void crashdiag_reset (void) { cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_wp_hits = 0; }
+void crashdiag_reset (void) { cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
 
 static void cd_dump_task (void)
 {
 	uae_u32 eb = cd_last_eb, task, nm;
-	char name[40] = "?";
+	char name[40] = "?", cmd[48] = "";
+	unsigned type;
 	if (!eb) { write_log ("lowwrite: no ExecBase known\n"); return; }
 	task = cd_long (eb + 0x114);
+	type = task >= 0x400 ? cd_byte (task + 8) : 0;
 	nm = (task >= 0x400 && task < 0xA00000) ? cd_long (task + 10) : 0;
 	if (nm >= 0x400 && nm < 0xA00000) cd_str (nm, name, sizeof name);
-	write_log ("lowwrite: ExecBase %08x ThisTask %08x '%s' type %u, SPReg %08x SPLower %08x SPUpper %08x, IDNest %d TDNest %d\n",
-		   eb, task, name, task >= 0x400 ? cd_byte (task + 8) : 0, task >= 0x400 ? cd_long (task + 0x36) : 0,
+	if (type == 13) {                           /* NT_PROCESS: name of the CLI command it is running */
+		uae_u32 cli = cd_long (task + 0xAC) << 2;
+		if (cli >= 0x400 && cli < 0xA00000) {
+			uae_u32 s = cd_long (cli + 16) << 2;
+			if (s >= 0x400 && s < 0xA00000) {
+				unsigned l = cd_byte (s), i;
+				if (l > sizeof cmd - 1) l = sizeof cmd - 1;
+				for (i = 0; i < l; i++) { unsigned ch = cd_byte (s + 1 + i); cmd[i] = (ch >= 32 && ch < 127) ? (char) ch : '?'; }
+				cmd[l] = 0;
+			}
+		}
+	}
+	write_log ("lowwrite: ExecBase %08x ThisTask %08x '%s' type %u CLI command '%s', SPReg %08x SPLower %08x SPUpper %08x, IDNest %d TDNest %d\n",
+		   eb, task, name, type, cmd, task >= 0x400 ? cd_long (task + 0x36) : 0,
 		   task >= 0x400 ? cd_long (task + 0x3A) : 0, task >= 0x400 ? cd_long (task + 0x3E) : 0,
 		   (int) (signed char) cd_byte (eb + 0x126), (int) (signed char) cd_byte (eb + 0x127));
 }
@@ -154,6 +172,48 @@ static void cd_dump_mem (void)
 	}
 }
 
+/* Largest free chunk of the chip RAM list in KB (0 if unknown): a program asking for more fails even if the total is large */
+unsigned crashdiag_largest_chip_kb (void)
+{
+	uae_u32 eb = cd_long (4), node;
+	unsigned n = 0, largest = 0;
+	if (!cd_exec_ok (eb)) return 0;
+	node = cd_long (eb + 322);
+	while (n++ < 6 && node >= 0x400 && node < 0x1000000 && !(node & 1) && cd_long (node)) {
+		if (cd_word (node + 14) & 2) {
+			uae_u32 chunk = cd_long (node + 16);
+			unsigned k = 0;
+			while (chunk >= 0x400 && chunk < 0x1000000 && !(chunk & 1) && k++ < 400) {
+				unsigned sz = cd_long (chunk + 4);
+				if (sz > largest) largest = sz;
+				chunk = cd_long (chunk);
+			}
+		}
+		node = cd_long (node);
+	}
+	return largest / 1024;
+}
+
+/* A DosPacket in a register or on the stack: dp_Link points back to the StandardPacket's message (p - 20) */
+static void cd_find_packets (void)
+{
+	uae_u32 cand[8 + 48], seen[4];
+	unsigned n = 0, i, found = 0, sp = _68k_areg (7);
+	for (i = 0; i < 7; i++) cand[n++] = _68k_areg (i);
+	for (i = 0; i < 48; i++) cand[n++] = cd_long (sp + i * 4);
+	for (i = 0; i < n && found < 4; i++) {
+		uae_u32 p = cand[i];
+		unsigned j, dup = 0;
+		if (p < 0x420 || p >= 0xA00000 || (p & 1)) continue;
+		if (cd_long (p) != p - 20 || cd_long (p + 8) > 0x1000) continue;
+		for (j = 0; j < found; j++) if (seen[j] == p) dup = 1;
+		if (dup) continue;
+		seen[found++] = p;
+		write_log ("lowwrite: DosPacket? %08x port %08x type %u res1 %08x res2 %08x arg1 %08x arg2 %08x arg3 %08x (ACTION_READ=82 WRITE=87: arg2=buffer arg3=length)\n",
+			   p, cd_long (p + 4), cd_long (p + 8), cd_long (p + 12), cd_long (p + 16), cd_long (p + 20), cd_long (p + 24), cd_long (p + 28));
+	}
+}
+
 static void cd_dump_stack (const char *what, uae_u32 sp, unsigned n)
 {
 	unsigned i;
@@ -166,15 +226,18 @@ static void cd_dump_stack (const char *what, uae_u32 sp, unsigned n)
 static void cd_wp_hit (uae_u32 addr, unsigned data, int size)
 {
 	M68K_CONTEXT *c = m68k_get_context ();
-	unsigned pc = m68k_get_pc (), i;
+	unsigned pc = m68k_get_pc (), i, full = 0;
 	cd_wp_hits++;
-	if (cd_wp_hits > 12) return;
-	write_log ("lowwrite: #%u %s write %0*x to %08x by PC=%08x (%s mode, A7=%08x USP=%08x)\n", cd_wp_hits,
-		   size == 1 ? "byte" : "word", size * 2, data, addr, pc, c->flag_s ? "supervisor" : "user",
-		   _68k_areg (7), _68k_uspreg);
-	if (cd_wp_hits > 1) return;
+	if (cd_wp_hits <= 80)
+		write_log ("lowwrite: #%u %s write %0*x to %08x by PC=%08x (%s mode, A7=%08x, %u frames after reset)\n", cd_wp_hits,
+			   size == 1 ? "byte" : "word", size * 2, data, addr, pc, c->flag_s ? "supervisor" : "user",
+			   _68k_areg (7), cd_frames_since_reset);
+	if (cd_full_dumps >= 5 || (c->flag_s && cd_frames_since_reset < 300)) return;
+	for (i = 0; i < cd_full_dumps; i++) if (cd_dump_pcs[i] == pc) return;
+	cd_dump_pcs[cd_full_dumps++] = pc;
+	write_log ("lowwrite: ---- full dump for hit #%u ----\n", cd_wp_hits);
 	write_log ("lowwrite: D %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_dreg(0), _68k_dreg(1), _68k_dreg(2), _68k_dreg(3), _68k_dreg(4), _68k_dreg(5), _68k_dreg(6), _68k_dreg(7));
-	write_log ("lowwrite: A %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_areg(0), _68k_areg(1), _68k_areg(2), _68k_areg(3), _68k_areg(4), _68k_areg(5), _68k_areg(6), _68k_areg(7));
+	write_log ("lowwrite: A %08x %08x %08x %08x %08x %08x %08x %08x  USP=%08x\n", _68k_areg(0), _68k_areg(1), _68k_areg(2), _68k_areg(3), _68k_areg(4), _68k_areg(5), _68k_areg(6), _68k_areg(7), _68k_uspreg);
 	write_log ("lowwrite: code before PC:");
 	for (i = 0; i < 12; i++) write_log (" %04x", cd_word (pc - 24 + i * 2));
 	write_log ("  | at PC:");
@@ -182,23 +245,26 @@ static void cd_wp_hit (uae_u32 addr, unsigned data, int size)
 	write_log ("\n");
 	cd_dump_task ();
 	cd_dump_mem ();
+	cd_find_packets ();
 	cd_dump_stack ("stack", _68k_areg (7), 48);
 	if (c->flag_s) cd_dump_stack ("ustack", _68k_uspreg, 24);
-	autoconf_dump_traphist ();
-	hardfile_dump_history ();
+	if (cd_full_dumps == 1) {
+		autoconf_dump_traphist ();
+		hardfile_dump_history ();
+	}
 }
 
 static void cd_wp_b (s32 addr, s32 data)
 {
 	uae_u32 a = (uae_u32) addr & chipmem_mask;
-	if (cd_armed && a < 8) cd_wp_hit (addr, data & 0xFF, 1);
+	if (a < 8 || (uae_u32) addr >= allocated_chipmem) cd_wp_hit (addr, data & 0xFF, 1);
 	*((uae_u8 *) (chipmemory + (a ^ 1))) = data;
 }
 
 static void cd_wp_w (s32 addr, s32 data)
 {
 	uae_u32 a = (uae_u32) addr & chipmem_mask;
-	if (cd_armed && a < 8) cd_wp_hit (addr, data & 0xFFFF, 2);
+	if (a < 8 || (uae_u32) addr >= allocated_chipmem) cd_wp_hit (addr, data & 0xFFFF, 2);
 	if (a & 1) {                               /* same layout as FAME's direct odd-address word write */
 		uae_u8 *p = chipmemory + a;
 		*(p - 1) = data >> 8;
@@ -222,6 +288,7 @@ void crashdiag_frame (void)
 	int sane = cd_exec_ok (eb) && cd_long (0x10) >= 0xe00000;
 	unsigned i;
 	frame++;
+	cd_frames_since_reset++;
 	if (sane) {
 		if (!cd_logged_exec) {
 			unsigned c, o;
@@ -232,7 +299,6 @@ void crashdiag_frame (void)
 		}
 		snap[0] = eb;
 		cd_last_eb = eb;
-		cd_armed = 1;
 		for (i = 0; i < 12; i++) snap[1 + i] = cd_long (8 + i * 4);
 		sane_hf = hardfile_request_count ();
 		sane_frame = frame;
@@ -244,7 +310,7 @@ void crashdiag_frame (void)
 	if (reports++ >= 3) return;
 	write_log ("lowmem: exec structures trashed during frame %u (last good frame %u, hardfile requests since: %u)\n",
 		   frame, sane_frame, hardfile_request_count () - sane_hf);
-	write_log ("lowmem: write watch saw %u writes to chip offset 0..7 since exec came up (0 = not the CPU, e.g. DMA/native code)\n", cd_wp_hits);
+	write_log ("lowmem: write watch saw %u writes to chip offset 0..7 / the chip mirror since the reset (a trash with no hit after the boot-time ones = not the CPU, e.g. DMA/native code)\n", cd_wp_hits);
 	write_log ("lowmem: ExecBase %08x -> %08x\n", snap[0], eb);
 	for (i = 0; i < 12; i += 4)
 		write_log ("lowmem: vec %02x: was %08x %08x %08x %08x  now %08x %08x %08x %08x\n", 8 + i * 4,
@@ -393,7 +459,7 @@ void map_zone(unsigned addr, addrbank* banco, unsigned realstart)
 		offset+=((addr-realstart)<<16);
     famec_SetBank(low_addr, high_addr, offset-low_addr, NULL, NULL, NULL, NULL, (void *)(offset-low_addr));
 #ifdef __3DS__
-    if (banco == &chipmem_bank && addr == realstart)
+    if (banco == &chipmem_bank && (addr == realstart || low_addr >= allocated_chipmem))
       crashdiag_watch_page(low_addr, high_addr);
 #endif
 	}

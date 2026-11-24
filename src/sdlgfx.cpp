@@ -206,10 +206,11 @@ void flush_block ()
 				unsigned tgt10 = (unsigned)(10000000UL / time_per_frame);
 				extern unsigned long disk_io_us; extern unsigned disk_io_calls;
 				extern int crashdiag_mem (unsigned *chip_kb, unsigned *other_kb);
+				extern unsigned crashdiag_largest_chip_kb (void);
 				unsigned fc = 0, fo = 0; int fok = crashdiag_mem (&fc, &fo);
-				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, disk reads %u (%lu ms), free mem %s%u/%u KB (chip/other), linear free %u KB\n",
+				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, disk reads %u (%lu ms), free mem %s%u/%u KB (chip/other, largest chip chunk %u KB), linear free %u KB\n",
 					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10, spare * 100 / el, worst / 1000, slow,
-					disk_io_calls, disk_io_us / 1000, fok ? "" : "?", fc, fo, log3ds_linear_free_kb());
+					disk_io_calls, disk_io_us / 1000, fok ? "" : "?", fc, fo, fok ? crashdiag_largest_chip_kb () : 0, log3ds_linear_free_kb());
 				t0 = last_synctime; spare = 0; frames = 0; worst = 0; slow = 0; disk_io_us = 0; disk_io_calls = 0;
 			}
 		}

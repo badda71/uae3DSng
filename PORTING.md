@@ -133,9 +133,15 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   vectors and ExecBase pointer were overwritten by the first block of an executable (`000003f3 00000000 00000005 ...` = HUNK_HEADER at
   address 0), i.e. something copied file data to address 0 (a Read() into a NULL buffer?) a frame before the CPU ran off. FAME reaches chip RAM
   through direct page pointers, so `map_zone()` installs *write-only* handlers (`famec_SetWriteHandlers`) on the page(s) mapping chip offset 0;
-  once exec is up (`crashdiag_frame` arms it), the first write to chip offset 0..7 logs `lowwrite:` with the exact PC, registers, ThisTask
-  name, exec free-chunk list, stack and the last native traps/hardfile requests. Reads/fetches stay direct, so the cost is small. If the
-  frame check reports a trash but the watch saw 0 writes, it was not the CPU (DMA or native code). Also: the `chipmem_*` bank accessors
+  every write to chip offset 0..7 (and to the mirror above the real chip RAM, e.g. 0x100000.. with 1 MB) logs a short `lowwrite:` line, and
+  the first few hits from different PCs that are in user mode (or >300 frames after the reset) get a full dump: registers, ThisTask name
+  and CLI command name, exec free chunks, DosPacket candidates (ACTION_READ arg2 = buffer), stack and the native trap/hardfile history.
+  Reads/fetches stay direct, so the cost is small. First version armed itself on stale exec data left from the previous Kickstart and
+  spent its log budget on boot writes (Kickstart's chip-size test writes 0xF2D4B689 to 0x100000 and checks address 0; exec sets the ExecBase
+  pointer) - hence the supervisor/300-frame rule. If the frame check reports a trash but the watch saw no later hit, it was not the CPU
+  (DMA or native code). Hardware result so far: the A1200 profile (2 MB chip + 8 MB fast, AGA) completes the same install, the A500 profile
+  (1 MB chip only, ECS) trashes address 0 at the same point every time (identical registers) - the speed line now shows the largest free
+  chip chunk to judge the failed-allocation theory (an installer using a NULL from AllocMem would do exactly this on a real machine too). Also: the `chipmem_*` bank accessors
   always mask now (they only did with `SAFE_MEMORY_ACCESS`, so native accesses to the mirror at 0x100000..0x1FFFFF of a 1 MB machine ran
   past the host buffer).
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
