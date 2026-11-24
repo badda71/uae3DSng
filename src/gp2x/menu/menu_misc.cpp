@@ -368,28 +368,28 @@ static void draw_miscMenu(int c)
 			strcpy(tmpString,"None");
 			break;
 		case 1:
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			strcpy(tmpString,"Y");
 #else
 			strcpy(tmpString,"Square");
 #endif
 			break;
 		case 2:
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			strcpy(tmpString,"X");
 #else
 			strcpy(tmpString,"Triangle");
 #endif
 			break;
 		case 3:
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			strcpy(tmpString,"A");
 #else
 			strcpy(tmpString,"Circle");
 #endif
 			break;
 		case 4:
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			strcpy(tmpString,"B");
 #else
 			strcpy(tmpString,"Cross");

@@ -172,6 +172,8 @@ extern int buttonstate[3];
 extern int lastmx, lastmy, newmousecounters;
 extern void record_key(int kc);
 int nowSuperThrottle = 0;               // "turbo" icon is shown while this is set
+static int uib_led_x0 = 320;            // left edge of the status LEDs; the turbo icon sits left of them
+static int uib_msg_on = 0;              // a message is covering the status bar (the turbo icon is hidden then)
 
 // touchpad tuning (uae3DS defaults)
 static int uib_max_tap_time = 250;
@@ -386,8 +388,8 @@ static void uib_repaint(void *param, int topupdated) {
 	drawImage(&background_spr, 0, 0, 0, 0, 0);
 
 	// statusbar
-	if (nowSuperThrottle)
-		drawImage(&turbo_icon_spr, TD_STARTX - TD_PAD - turbo_icon_spr.w, 0, 0, 0, 0);
+	if (nowSuperThrottle && !uib_msg_on)
+		drawImage(&turbo_icon_spr, uib_led_x0 - TD_PAD - turbo_icon_spr.w, 0, 0, 0, 0);
 	drawImage(&statusbar_spr, 0, 0, 0, 0, 0);
 
 	// keyboard
@@ -509,7 +511,7 @@ void uib_init() {
 	statusbar_spr.fw=(float)(statusbar_spr.w)/512.0f;
 	statusbar_spr.fh=(float)(statusbar_spr.h)/16.0f;
 	makeTexture(&(statusbar_spr.tex), status_gpusrc, 512, 16);
-	td_text_length = TD_STARTX - turbo_icon_spr.w - 2 * TD_PAD;
+	td_text_length = 320;
 
 	// other stuff
 	kb_shown = 1;
@@ -581,63 +583,89 @@ static void uib_text(const char *s, int x, int y, int maxchars)
 
 SDL_Surface *uib_font(void) { return font_img; }
 
+/* Status line on the bottom screen (what the emulator's own status line shows on the top screen of the other ports):
+ * idle time %, power LED + fps, hard disk LED, one LED + track number per floppy drive. Shown when the "Status Line"
+ * option is on. A message (gui_set_message: "Saved", "Restored", ...) takes the whole bar for its duration. */
+extern int mainMenu_showStatus, mainMenu_drives, idletime_percent;
+
+static const char *glyph_H[7] = { "x----x", "x----x", "x----x", "xxxxxx", "x----x", "x----x", "x----x" };
+static const char *glyph_D[7] = { "xxxxx-", "x----x", "x----x", "x----x", "x----x", "x----x", "xxxxx-" };
+
+static void uib_paint_letters(int x, const char **g1, const char **g2)
+{
+	x += TD_PADX;
+	for (int y = 0; y < TD_NUM_HEIGHT; ++y)
+		for (int j = 0; j < 6; ++j) {
+			*((u32*)(status_gpusrc + ((x + j + (y + TD_PADY) * 512)<<2))) = g1[y][j] == 'x' ? 0xffffffff : 0x000000ff;
+			*((u32*)(status_gpusrc + ((TD_NUM_WIDTH + x + j + (y + TD_PADY) * 512)<<2))) = g2[y][j] == 'x' ? 0xffffffff : 0x000000ff;
+		}
+}
+
 static void uib_statusbar_recalc()
 {
-	static uae_u8 dt0 = -1;
-	static uae_u8 dt1 = -1;
-	static uae_u8 dm0 = -1;
-	static uae_u8 dm1 = -1;
-	static uae_u8 pow = -1;
-	static int fps = -1;
-	int upd=0;
-	static char buf[100]={0};
 	extern struct gui_info gui_data;
-
-	if (dt0 != gui_data.drive_track[0] || 
-		dm0 != gui_data.drive_motor[0])
-	{
-		dt0 = gui_data.drive_track[0];
-		dm0 = gui_data.drive_motor[0];
-		uib_paint_led(TD_STARTX + TD_WIDTH, dm0 ? ON_RGB_D : OFF_RGB_D, dt0);
-		upd=1;
-	}
-	if (dt1 != gui_data.drive_track[1] || 
-		dm1 != gui_data.drive_motor[1])
-	{
-		dt1 = gui_data.drive_track[1];
-		dm1 = gui_data.drive_motor[1];
-		uib_paint_led(TD_STARTX + 2*TD_WIDTH, dm1 ? ON_RGB_D : OFF_RGB_D, dt1);
-		upd=1;
-	}
-	
+	static int force = 1, s_show = -1, s_drives = -1, s_idle = -1, s_fps = -1, s_pow = -1, s_hd = -1;
+	static uae_u8 s_tr[4], s_mo[4];
+	static Uint32 idle_t = 0;
+	static char buf[100] = {0};
+	int upd = 0;
+	int show = mainMenu_showStatus != 0;
+	int drives = mainMenu_drives < 1 ? 1 : mainMenu_drives > 4 ? 4 : mainMenu_drives;
 	int cur_fps = gui_data.fps > 99 ? 99 : gui_data.fps;
-	if (pow != gui_data.powerled || fps != cur_fps)	
-	{
-		pow = gui_data.powerled;
-		fps = cur_fps;
-		uib_paint_led(TD_STARTX, pow ? ON_RGB_P : OFF_RGB_P, fps);
-		upd=1;
-	}
+	int msg = show_message && SDL_GetTicks() < (Uint32)show_message;
+	int i;
 
-	// message line: show_message is an end time in SDL ticks (see gui_set_message)
-	if (show_message)
-	{
-		if (SDL_GetTicks() < (Uint32)show_message) {
-			if (strcmp(buf, show_message_str)) {
-				strncpy(buf, show_message_str, 99);
-				SDL_Rect r;
-				r.x = 0; r.y = 0; r.w = td_text_length; r.h = TD_TOTAL_HEIGHT;
-				SDL_FillRect(statusbar_img, &r, 0x70708aff);
-				uib_text(buf, 2, 2, (td_text_length-4)/8);
-				upd=1;
+	if (msg) {
+		// message: the whole bar
+		if (!uib_msg_on || strcmp(buf, show_message_str)) {
+			SDL_Rect r = { 0, 0, 320, TD_TOTAL_HEIGHT };
+			strncpy(buf, show_message_str, 99);
+			SDL_FillRect(statusbar_img, NULL, 0x00000000);
+			SDL_FillRect(statusbar_img, &r, 0x70708aff);
+			uib_text(buf, 2, 2, (320 - 4) / 8);
+			uib_msg_on = 1;
+			upd = 1;
+		}
+	} else {
+		if (uib_msg_on || show_message) {
+			// message over: the LEDs come back
+			uib_msg_on = 0;
+			show_message = 0;
+			*buf = 0;
+			force = 1;
+		}
+
+		int nl = show ? 3 + drives : 0;
+		int idle = idletime_percent > 99 ? 99 : idletime_percent < 0 ? 0 : idletime_percent;
+		if (idle != s_idle) {            // the idle figure flickers: update it ~4x a second only
+			if (s_idle >= 0 && SDL_GetTicks() - idle_t < 250) idle = s_idle;
+			else idle_t = SDL_GetTicks();
+		}
+
+		int changed = force || show != s_show || drives != s_drives;
+		if (show) {
+			changed |= idle != s_idle || cur_fps != s_fps || gui_data.powerled != s_pow || gui_data.hdled != s_hd;
+			for (i = 0; i < drives; i++)
+				changed |= s_tr[i] != gui_data.drive_track[i] || s_mo[i] != gui_data.drive_motor[i];
+		}
+		if (changed) {
+			force = 0;
+			s_show = show; s_drives = drives; s_idle = idle; s_fps = cur_fps;
+			s_pow = gui_data.powerled; s_hd = gui_data.hdled;
+			for (i = 0; i < 4; i++) { s_tr[i] = gui_data.drive_track[i]; s_mo[i] = gui_data.drive_motor[i]; }
+
+			SDL_FillRect(statusbar_img, NULL, 0x00000000);
+			uib_led_x0 = show ? 320 - nl * TD_WIDTH + 4 : 320;
+			if (show) {
+				int x = uib_led_x0;
+				uib_paint_led(x, 0x666666ff, idle);                                         x += TD_WIDTH;
+				uib_paint_led(x, s_pow ? ON_RGB_P : OFF_RGB_P, cur_fps);                    x += TD_WIDTH;
+				uib_paint_led(x, s_hd == HDLED_WRITE ? 0xff0000ff : s_hd == HDLED_READ ? 0x0000ffff : 0x000044ff, -1);
+				uib_paint_letters(x, glyph_H, glyph_D);                                     x += TD_WIDTH;
+				for (i = 0; i < drives; i++, x += TD_WIDTH)
+					uib_paint_led(x, s_mo[i] ? ON_RGB_D : OFF_RGB_D, s_tr[i]);
 			}
-		} else {
-			SDL_Rect r;
-			r.x = 0; r.y = 0; r.w = td_text_length; r.h = TD_TOTAL_HEIGHT;
-			SDL_FillRect(statusbar_img, &r, 0x00000000);
-			show_message=0;
-			*buf=0;
-			upd=1;
+			upd = 1;
 		}
 	}
 	if (upd) {

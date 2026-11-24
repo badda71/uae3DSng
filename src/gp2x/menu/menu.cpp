@@ -15,6 +15,9 @@
 #include <png.h>
 #include "fade.h"
 #include "xwin.h"
+#ifdef __3DS__
+#include "video3ds.h"
+#endif
 
 #if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 #include <SDL_gp2x.h>
@@ -74,9 +77,16 @@ int displaying_menu = 1;
 #ifdef __PSP2__
 int menu_screen_width = 848;
 int menu_screen_height = 480;
+#define MENU_ZOOM 2
+#elif defined(__3DS__)
+/* The menu is drawn 1:1 on the 400x240 top screen (like uae3DS): no 2x software stretch, no scaling by the GPU. */
+int menu_screen_width = 400;
+int menu_screen_height = 240;
+#define MENU_ZOOM 1
 #else
 int menu_screen_width = 854;
 int menu_screen_height = 480;
+#define MENU_ZOOM 2
 #endif
 
 static void obten_colores(void)
@@ -354,9 +364,13 @@ void text_flip_with_image(SDL_Surface *img, int x, int y)
 	SDL_Rect dst;
 	dst.x = 0;
 	dst.y = 0;
-	dst.w = 2 * text_screen->w;
-	dst.h = 2 * text_screen->h;
+	dst.w = MENU_ZOOM * text_screen->w;
+	dst.h = MENU_ZOOM * text_screen->h;
+#if MENU_ZOOM == 1
+	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);
+#else
 	SDL_SoftStretch(text_screen,NULL,prSDLScreen,&dst);
+#endif
 	dst.x = x;
 	dst.y = y;
 	dst.w = img->w;
@@ -370,12 +384,16 @@ void text_flip(void)
 #if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	SDL_Delay(10);
 #endif
+#if MENU_ZOOM == 1
+	SDL_BlitSurface(text_screen,NULL,prSDLScreen,NULL);
+#else
 	SDL_Rect dst;
 	dst.x = 0;
 	dst.y = 0;
-	dst.w = 2 * text_screen->w;
-	dst.h = 2 * text_screen->h;
+	dst.w = MENU_ZOOM * text_screen->w;
+	dst.h = MENU_ZOOM * text_screen->h;
 	SDL_SoftStretch(text_screen,NULL,prSDLScreen,&dst);
+#endif
 	SDL_Flip(prSDLScreen);
 }
 
@@ -426,9 +444,21 @@ void init_kickstart()
 void init_text(int splash)
 {
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
+#ifdef __3DS__
+	/* goMenu() and run_mainMenu() both call init_text(): when the menu's video mode is up already there is nothing to
+	 * switch. (Every mode switch tears down and rebuilds the driver's render targets and thread: slow.) */
+	if (prSDLScreen != NULL && displaying_menu && prSDLScreen->w == menu_screen_width && prSDLScreen->h == menu_screen_height) {
+		video3ds_set_native(0);
+	} else {
+#endif
 	//Display menu always in 320*240 on Vita
 	if(prSDLScreen != NULL) {
+#ifdef __3DS__
+		/* the driver has a single texture, there is no flip chain to clear: one black frame is enough */
+		for (int i=0; i<1; i++)
+#else
 		for (int i=0; i<10; i++)
+#endif
 		{
 			SDL_FillRect(prSDLScreen,NULL,0);
 			SDL_Flip(prSDLScreen);
@@ -453,12 +483,16 @@ void init_text(int splash)
 	write_log("init_text: SetVideoMode(%d,%d,16) -> %p (%s), linear free %u KB\n", menu_screen_width, menu_screen_height, (void*)prSDLScreen, prSDLScreen ? "ok" : SDL_GetError(), log3ds_linear_free_kb());
 #endif
 
+#ifdef __3DS__
+	video3ds_set_native(0);
+#else
 	float sh = 480;
 	float sw = (sh * menu_screen_width) / menu_screen_height;
 	int x = (960 - sw) / 2;
 	int y = (544 - sh) / 2;
 	SDL_SetVideoModeScaling(x, y, sw, sh);
 	printf("init_text: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
+#endif
 
 	//This requires a recent SDL-Vita branch SDL12 for example
    //https://github.com/rsn8887/SDL-Vita/tree/SDL12
@@ -471,6 +505,9 @@ void init_text(int splash)
         shader = NULL;
    }
    shader = new PSP2Shader((PSP2Shader::Shader)5);
+#endif
+#ifdef __3DS__
+	}
 #endif
 
 #elif PANDORA
@@ -488,8 +525,8 @@ void init_text(int splash)
 
 	if (!text_screen)
 	{
-		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/2,prSDLScreen->h/2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
-		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/2,prSDLScreen->h/2,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/MENU_ZOOM,prSDLScreen->h/MENU_ZOOM,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
+		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/MENU_ZOOM,prSDLScreen->h/MENU_ZOOM,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 
 		tmp=SDL_LoadBMP(MENU_FILE_TEXT_0);
 		if (text_screen==NULL || tmp==NULL)

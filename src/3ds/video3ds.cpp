@@ -32,5 +32,11 @@ extern "C" void SDL_SetVideoModeScaling(int x, int y, float sw, float sh)
 	N3DS_SetYOffset(0);
 }
 
+extern "C" void video3ds_set_native(int yoffset)
+{
+	N3DS_SetScalingDirect(1.0f, 1.0f, 1);
+	N3DS_SetYOffset(yoffset);
+}
+
 extern "C" void SDL_SetVideoModeBilinear(int on) { (void)on; }
 extern "C" void SDL_SetVideoModeSync(int on) { (void)on; }

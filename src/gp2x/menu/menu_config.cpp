@@ -14,7 +14,8 @@
 #include "cfgfile.h"
 
 extern int kickstart;
-extern int blitter_in_partial_mode;
+extern int blitter_partial_wanted;
+extern void blitter_sync_mode(void);
 extern int sound_rate;
 extern int skipintro;
 extern int screenWidth;
@@ -600,19 +601,20 @@ void UpdateChipsetSettings()
     case 0x100:
     //Immediate Blitter
         changed_prefs.immediate_blits = true;
-        blitter_in_partial_mode = 0;
+        blitter_partial_wanted = 0;
         break;
     //Improved Blitter
     case 0x200:
         changed_prefs.immediate_blits = false;
-        blitter_in_partial_mode = 1;
+        blitter_partial_wanted = 1;
         break;
     //Normal Blitter
     default:
         changed_prefs.immediate_blits = false;
-        blitter_in_partial_mode = 0;
+        blitter_partial_wanted = 0;
         break;
     }
+    blitter_sync_mode();   /* live: no Amiga reset needed */
 }
 
 

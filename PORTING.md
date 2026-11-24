@@ -167,6 +167,30 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 * `Illegal instruction: 4e7b at 00fc0564` in the log is Kickstart 1.3 probing for a 68010 (MOVEC) - expected.
 * Debug log: `sdmc:/3ds/uae3DSng/uae3DSng.log` (+ `stdout.log`), flushed per line; `write_log()` maps to it.
 
+## Menu, display, status line (hardware feedback, round 3)
+
+* **Menu = 400x240, 1:1.** It used to be an 854x480 surface (the Vita's), pixel-doubled in software by `SDL_SoftStretch`, uploaded as a
+  1024x512 texture and scaled down to ~0.42x/0.44x by the GPU. Now `menu_screen_width/height` = 400x240, `MENU_ZOOM` = 1 (the 427x240
+  `text_screen` of the Vita becomes 400x240 and is blitted, not stretched) and the driver shows it unscaled (`video3ds_set_native`, same as
+  uae3DS's menu). Nothing of the menu can be cut off any more.
+* **Select -> menu took 2-3 s.** The log showed `init_text: SetVideoMode(854,480)` twice, 3.0 s apart: `goMenu()` and `run_mainMenu()` both call
+  `init_text()`, and each call ran 10x `FillRect+SDL_Flip` (a Vita flip-chain clean-up) on whatever surface was up, then freed the surface and
+  called `SDL_SetVideoMode` again (the driver rebuilds its render targets and video thread every time). Now: `init_text()` does nothing when the
+  menu mode is already up, one clearing flip instead of 10 (4 in `update_display()`), and the surface is 6x smaller.
+* **Blitter "Improved" had no effect.** Not wired wrong, but only applied at an Amiga reset: `currprefs.immediate_blits` is copied from
+  `changed_prefs` in `customreset()` only, and the blitter checks `currprefs.immediate_blits` *before* `blitter_in_partial_mode`, so with
+  "Immediate" active (the A500/A1200 preset default) choosing "Improved" did nothing until a reset. `UpdateChipsetSettings()` now sets
+  `blitter_partial_wanted` + `changed_prefs.immediate_blits` and calls `blitter_sync_mode()`, which applies both as soon as no blit is in flight
+  (else `hsync_handler` retries); the log shows `blitter: improved mode`. The emulation code itself is unchanged from upstream.
+* **File dialogs.** 3DS L = `SDLK_RSHIFT` = page-up in the lists; in the HD-directory dialog it now selects the directory (SELECT still does).
+  Button names follow the physical positions (`input3ds.h`: Square=Y, Triangle=X, Cross=B, Circle=A) like the Switch port: titles say "X = Info",
+  the Controls / Autofire entries say Y/X/B/A.
+* **Status line.** The emulator's own status line (idle %, power LED + fps, HD LED, one LED + track per drive) is no longer drawn into the top
+  screen (`#ifndef __3DS__` in `drawing.cpp`); `uibottom.cpp` draws the same on the bottom screen when the "Status Line" option is on (default on
+  for the 3DS). Messages ("Saved", ...) cover the whole bar for their duration.
+* The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
+  and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
+
 ## Known gaps / risks
 
 1. **245 platform-conditional lines are unaudited** (`grep -rnE "__PSP2__|__SWITCH__|USE_SDL2"`,

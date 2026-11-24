@@ -73,7 +73,11 @@ enum { MEMDISK_MENU_CASE_MAIN, MEMDISK_MENU_CASE_MISC };
 #define M68000 000
 #define M68020 020
 
+#ifdef __3DS__
+#define DEFAULT_STATUSLN 1   /* the status line lives on the bottom screen on the 3DS */
+#else
 #define DEFAULT_STATUSLN 0
+#endif
 #define DEFAULT_MOUSEMULTIPLIER 100
 #define DEFAULT_SOUND 1
 #define DEFAULT_AUTOSAVE 1

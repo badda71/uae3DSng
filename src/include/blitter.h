@@ -44,6 +44,9 @@ extern uae_u32 blit_masktable[BLITTER_MAX_WORDS];
 
 // New vars for blitter mode "partial"
 extern int blitter_in_partial_mode;
+extern int blitter_partial_wanted;   /* what the menu asked for; becomes blitter_in_partial_mode when no blit is running */
+extern int blitter_mode_pending;
+extern void blitter_sync_mode(void);
 extern void blitter_do_partial(int do_all);
 extern void blitter_dma_disabled(void);
 extern void blitter_dma_enabled(void);

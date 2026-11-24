@@ -142,7 +142,9 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #ifdef __PSP2__
 		text_draw_window(x_win,y_win,w_win,h_win,"Press SELECT to load HD-dir (Triangle = Info)");
 #else
-#ifdef __SWITCH__
+#ifdef __3DS__
+		text_draw_window(x_win,y_win,w_win,h_win,"Press L to load HD-dir (X = Info)");
+#elif defined(__SWITCH__)
 		text_draw_window(x_win,y_win,w_win,h_win,"Press MINUS to load HD-dir (X = Info)");
 #else
 		text_draw_window(x_win,y_win,w_win,h_win,"Press L-key to load HD-dir");
@@ -152,7 +154,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #ifdef __PSP2__
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .HDF-file (Triangle = Info)");
 #else
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .HDF-file (X = Info)");
 #else
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .HDF-file");
@@ -162,7 +164,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #ifdef __PSP2__
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .CONF-file (Triangle = Info)");
 #else
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .CONF-file (X = Info)");
 #else
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .CONF-file");
@@ -172,7 +174,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #ifdef __PSP2__
 		text_draw_window(x_win,y_win,w_win,h_win,"Delete .CONF-file (Triangle = Info)");
 #else
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		text_draw_window(x_win,y_win,w_win,h_win,"Delete .CONF-file (X = Info)");
 #else
 		text_draw_window(x_win,y_win,w_win,h_win,"Delete .CONF-file");
@@ -182,7 +184,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #ifdef __PSP2__
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .ASF-file (Triangle = Info)");
 #else
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .ASF-file (X = Info)");
 #else
 		text_draw_window(x_win,y_win,w_win,h_win,"Select .ASF-file");
@@ -192,7 +194,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 #ifdef __PSP2__
 		text_draw_window(x_win,y_win,w_win,h_win,"Delete .ASF-file (Triangle = Info)");
 #else
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		text_draw_window(x_win,y_win,w_win,h_win,"Delete .ASF-file (X = Info)");
 #else
 		text_draw_window(x_win,y_win,w_win,h_win,"Delete .ASF-file");
@@ -208,7 +210,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	else if (current_drive==3)
 		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF3 (Triangle = Info)");
 #else
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	else if (current_drive==0)
 		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0 (X = Info)");
 	else if (current_drive==1)
@@ -478,7 +480,11 @@ static int menuLoadLoop(char *curr_path)
 					case SDLK_END: hit0=1; break;
 					case SDLK_PAGEUP: hit0=1; break;
 #endif
+#ifdef __3DS__
+					case SDLK_RSHIFT: if (menu_load_type == MENU_LOAD_HD_DIR) hitL=1; else hit3=1; break;   // 3DS: L = SDLK_RSHIFT
+#else
 					case SDLK_RSHIFT: hit3=1; break;
+#endif
 					case SDLK_RCTRL: hit4=1; break;
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 					// SELECT to select HD dir

@@ -591,7 +591,7 @@ static void draw_controlsMenu(int c)
 #endif
 #if defined(__PSP2__)
 	write_text(leftMargin,menuLine," Square");
-#elif defined(__SWITCH__)
+#elif defined(__SWITCH__) || defined(__3DS__)
 	write_text(leftMargin,menuLine,"    Y");
 #else
 	write_text(leftMargin,menuLine,"    (A)");
@@ -606,7 +606,7 @@ static void draw_controlsMenu(int c)
 	menuLine+=2;
 #if defined(__PSP2__)
 	write_text(leftMargin,menuLine," Triangle");
-#elif defined(__SWITCH__)
+#elif defined(__SWITCH__) || defined(__3DS__)
 	write_text(leftMargin,menuLine,"    X");
 #else
 	write_text(leftMargin,menuLine,"    (Y)");
@@ -621,7 +621,7 @@ static void draw_controlsMenu(int c)
 	menuLine+=2;
 #if defined(__PSP2__)
 	write_text(leftMargin,menuLine," Cross");
-#elif defined(__SWITCH__)
+#elif defined(__SWITCH__) || defined(__3DS__)
 	write_text(leftMargin,menuLine,"    B");
 #else
 	write_text(leftMargin,menuLine,"    (X)");
@@ -636,7 +636,7 @@ static void draw_controlsMenu(int c)
 	menuLine+=2;
 #if defined(__PSP2__)
 	write_text(leftMargin,menuLine," Circle");
-#elif defined(__SWITCH__)
+#elif defined(__SWITCH__) || defined(__3DS__)
 	write_text(leftMargin,menuLine,"    A");
 #else
 	write_text(leftMargin,menuLine,"    (B)");

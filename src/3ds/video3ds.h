@@ -13,6 +13,8 @@ extern "C" {
 void SDL_SetVideoModeScaling(int x, int y, float sw, float sh);
 void SDL_SetVideoModeBilinear(int on);   /* driver picks GPU_LINEAR whenever scale != 1.0 */
 void SDL_SetVideoModeSync(int on);       /* driver always syncs to vblank */
+/* Show the current surface 1:1 (no scaling), shifted down by yoffset pixels (negative = up), centered horizontally. */
+void video3ds_set_native(int yoffset);
 #ifdef __cplusplus
 }
 #endif

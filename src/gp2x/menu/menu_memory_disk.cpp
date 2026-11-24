@@ -294,7 +294,13 @@ static void draw_memDiskMenu(int c)
 
 	menuLine += 2;
 	
+#ifdef __3DS__
+	write_text(3, menuLine, "(Press X to eject HD)");
+#elif defined(__SWITCH__)
+	write_text(3, menuLine, "(Press X to eject HD)");
+#else
 	write_text(3, menuLine, "(Press triangle to eject HD)");
+#endif
 	
 	menuLine += 2;
 		

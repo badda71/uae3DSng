@@ -71,6 +71,26 @@ static int ddat1use;
 
 // New vars for blitter mode "partial"
 int blitter_in_partial_mode = 0;        // Flag for new mode active
+int blitter_partial_wanted = 0;         // blitter mode chosen in the menu ("Improved" = partial)
+int blitter_mode_pending = 0;           // the menu changed the mode while a blit was running
+
+/* Make the mode chosen in the menu the active one. Switching while a blit is in flight would leave the event queue
+ * and the partial-blit state inconsistent, so that case waits (hsync_handler retries) until the blitter is idle.
+ * Before this, the "Blitter" menu entry only took effect after an Amiga reset (currprefs.immediate_blits was copied
+ * in customreset() only) and "Improved" never took effect while "Immediate" was active. */
+void blitter_sync_mode (void)
+{
+	if (bltstate != BLT_done) {
+		blitter_mode_pending = 1;
+		return;
+	}
+	blitter_mode_pending = 0;
+	if (currprefs.immediate_blits != changed_prefs.immediate_blits || blitter_in_partial_mode != blitter_partial_wanted) {
+		currprefs.immediate_blits = changed_prefs.immediate_blits;
+		blitter_in_partial_mode = blitter_partial_wanted;
+		write_log ("blitter: %s mode\n", currprefs.immediate_blits ? "immediate" : blitter_in_partial_mode ? "improved" : "normal");
+	}
+}
 static int blit_total_required_cycles;  // Estimated number of cycles of entire blitter op
 static int blit_cycles_per_op;          // Number of cycles per blitter op
 static int blit_cycles_per_vsize;       // Number of cycles per line

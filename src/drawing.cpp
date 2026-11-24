@@ -2276,6 +2276,7 @@ static _INLINE_ void finish_drawing_frame (void)
 			countdown = HDLED_TIMEOUT;
 		}
 
+#ifndef __3DS__   /* the 3DS port shows the status line on the bottom screen (3ds/uibottom.cpp) */
 	if (mainMenu_showStatus)
 	{
 
@@ -2284,6 +2285,7 @@ static _INLINE_ void finish_drawing_frame (void)
 			draw_status_line (line);
 		}
 	}
+#endif
 	drawfinished=1;
 	do_flush_screen ();
 }

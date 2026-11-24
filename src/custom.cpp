@@ -3831,6 +3831,9 @@ static void hsync_handler (void)
    sync_copper_with_cpu (maxhpos, 0);
 #endif
    
+   if (blitter_mode_pending)
+     blitter_sync_mode();
+
    if(blitter_in_partial_mode && bltstate == BLT_work)
      blitter_do_partial(0);
 
@@ -3976,6 +3979,8 @@ void customreset (void)
 	{
 		currprefs.chipset_mask = changed_prefs.chipset_mask;
 		currprefs.immediate_blits = changed_prefs.immediate_blits; 
+		blitter_in_partial_mode = blitter_partial_wanted;
+		blitter_mode_pending = 0;
 		if ((currprefs.chipset_mask & CSMASK_AGA) == 0) {
 			for (i = 0; i < 32; i++) {
 				current_colors.color_uae_regs_ecs[i] = 0;

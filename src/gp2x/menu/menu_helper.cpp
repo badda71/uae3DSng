@@ -208,7 +208,11 @@ void update_display() {
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
     if (prSDLScreen != NULL) {
         // clear old screen
+#ifdef __3DS__
+        for (int i=0; i<1; i++)   // single texture in the driver: no flip chain to clear
+#else
         for (int i=0; i<4; i++)
+#endif
 		{
 			SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));
 			SDL_Flip(prSDLScreen);
@@ -288,7 +292,11 @@ void update_display() {
 #endif
 
     // clear new screen
+#ifdef __3DS__
+    for (int i=0; i<1; i++)
+#else
     for (int i=0; i<4; i++)
+#endif
 	{
 		SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));
 		SDL_Flip(prSDLScreen);
