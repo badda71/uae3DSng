@@ -298,7 +298,7 @@ void REGPARAM2 call_calltrap(int func)
     int implicit_rts = (trapmode[func] & TRAPFLAG_DORET) != 0;
 
 #ifdef __3DS__
-    if (strcmp (trapstr[func], "exter_int_helper") != 0) {
+    if (strcmp (trapstr[func], "exter_int_helper") != 0 && strcmp (trapstr[func], "alloctrace") != 0) {
 	unsigned k = trap_hist_n++ % TRAP_HIST;
 	trap_hist[k].func = func;
 	trap_hist[k].d0 = _68k_dreg (0);
@@ -310,7 +310,7 @@ void REGPARAM2 call_calltrap(int func)
     if (*trapstr[func] != 0 && trace_traps
 #ifdef __3DS__
 	/* called ~100 times per second while a hard disk is mounted; every log line is a synced SD write */
-	&& strcmp (trapstr[func], "exter_int_helper") != 0
+	&& strcmp (trapstr[func], "exter_int_helper") != 0 && strcmp (trapstr[func], "alloctrace") != 0
 #endif
 	)
 	write_log ("TRAP: %s\n", trapstr[func]);

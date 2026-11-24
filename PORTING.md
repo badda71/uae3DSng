@@ -141,7 +141,14 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   pointer) - hence the supervisor/300-frame rule. If the frame check reports a trash but the watch saw no later hit, it was not the CPU
   (DMA or native code). Hardware result so far: the A1200 profile (2 MB chip + 8 MB fast, AGA) completes the same install, the A500 profile
   (1 MB chip only, ECS) trashes address 0 at the same point every time (identical registers) - the speed line now shows the largest free
-  chip chunk to judge the failed-allocation theory (an installer using a NULL from AllocMem would do exactly this on a real machine too). Also: the `chipmem_*` bank accessors
+  chip chunk to judge the failed-allocation theory (an installer using a NULL from AllocMem would do exactly this on a real machine too).
+  **Root cause of the A500-profile freeze (hardware log, 2nd watch build):** the hit was the `DF1:` handler process running its ROM copy loop
+  for an `ACTION_READ` packet with `arg2 = 0` (buffer) and `arg3 = 290000` (length) - a program asked DOS to read 290000 bytes into address 0,
+  i.e. it used the NULL result of a failed allocation (largest free chip chunk was 696 KB, so the request must have wanted something the
+  machine lacks - most likely MEMF_FAST; the A1200 profile has 8 MB fast RAM and works). A real A500 without fast RAM would trash its vectors the
+  same way. To confirm, `filesys.cpp` wraps exec's AllocMem (-198) and AllocVec (-684) with guest stubs in the rtarea (`alloctrace_*`,
+  patched into the jump table by `filesys_diagentry` on every boot) and logs every failed or >=150000-byte request: size, flags, result,
+  caller, running task and CLI command. The lowwrite dump also names the task that sent a DosPacket (reply port -> mp_SigTask). Also: the `chipmem_*` bank accessors
   always mask now (they only did with `SAFE_MEMORY_ACCESS`, so native accesses to the mirror at 0x100000..0x1FFFFF of a 1 MB machine ran
   past the host buffer).
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise

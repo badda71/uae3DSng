@@ -3172,6 +3172,70 @@ void filesys_prepare_reset (void)
     }
 }
 
+#ifdef __3DS__
+/* ---- AllocMem/AllocVec trace -------------------------------------------------------------------------------------------
+ * A program that gets NULL from a failed allocation and reads/writes through it trashes the Amiga's vector table (hardware
+ * log: ACTION_READ with buffer 0, length 290000, on a machine without fast RAM). To see which program asks for what, two
+ * small guest stubs wrap exec's AllocMem (-198) and AllocVec (-684): save D0/D1, JSR the original, then a native trap logs
+ * every failed or large (>= 150000 bytes) request with flags, result, caller and the running task. filesys_diagentry (run
+ * on every boot) patches the jump table; the stub's JSR operand receives the original target. */
+extern void crashdiag_task_desc (char *out, unsigned n);
+static uaecptr alloctrace_stub[2];
+static unsigned alloctrace_logged;
+
+static uae_u32 alloctrace_common (int vec)
+{
+    uaecptr sp = m68k_areg (regs, 7);
+    uae_u32 size = get_long (sp), flags = get_long (sp + 4), caller = get_long (sp + 8), res = m68k_dreg (regs, 0);
+    if ((res == 0 || size >= 150000) && alloctrace_logged < 150) {
+	char who[120];
+	alloctrace_logged++;
+	crashdiag_task_desc (who, sizeof who);
+	write_log ("%s: size %u flags %08x%s%s%s -> %08x%s, called from %08x, task %s\n", vec ? "AllocVec" : "AllocMem", size, flags,
+		   (flags & 2) ? " CHIP" : "", (flags & 4) ? " FAST" : "", (flags & 0x10000) ? " CLEAR" : "",
+		   res, res ? "" : "  *** FAILED ***", caller, who);
+    }
+    return 0;
+}
+static uae_u32 alloctrace_mem (void) { return alloctrace_common (0); }
+static uae_u32 alloctrace_vec (void) { return alloctrace_common (1); }
+
+static void alloctrace_emit (void)
+{
+    int k;
+    for (k = 0; k < 2; k++) {
+	align (2);
+	alloctrace_stub[k] = here ();
+	dw (0x48E7); dw (0xC000);                  /* MOVEM.L D0-D1,-(SP) */
+	dw (0x4EB9); dl (0);                       /* JSR <original>; operand patched at boot */
+	calltrap (deftrap2 (k ? alloctrace_vec : alloctrace_mem, TRAPFLAG_NO_RETVAL, "alloctrace"));
+	dw (0x4FEF); dw (0x0008);                  /* LEA 8(SP),SP: drops the saved D0/D1, keeps D0 and the flags */
+	dw (RTS);
+    }
+}
+
+static void alloctrace_install (void)
+{
+    static const int lvo[2] = { -198, -684 };
+    uaecptr eb = get_long (4);
+    unsigned negsize;
+    int i;
+    if (!alloctrace_stub[0] || eb < 0x400 || (eb & 1)) return;
+    negsize = get_word (eb + 16);
+    for (i = 0; i < 2; i++) {
+	uaecptr slot = eb + lvo[i];
+	uae_u32 orig, h;
+	if ((unsigned) -lvo[i] + 6 > negsize) continue;        /* e.g. AllocVec does not exist before exec V36 */
+	if (get_word (slot) != 0x4EF9) continue;              /* not a JMP abs.l */
+	orig = get_long (slot + 2);
+	if (orig == alloctrace_stub[i]) continue;
+	h = here (); org (alloctrace_stub[i] + 6); dl (orig); org (h);
+	put_long (slot + 2, alloctrace_stub[i]);
+	write_log ("alloctrace: %s (exec %d.%d) %08x -> stub %08x\n", i ? "AllocVec" : "AllocMem", get_word (eb + 20), get_word (eb + 22), orig, alloctrace_stub[i]);
+    }
+}
+#endif
+
 static uae_u32 filesys_diagentry (void)
 {
     uaecptr resaddr = m68k_areg (regs, 2) + 0x10;
@@ -3179,6 +3243,9 @@ static uae_u32 filesys_diagentry (void)
     uaecptr residents, tmp;
 
     TRACE (("filesystem: diagentry called\n"));
+#ifdef __3DS__
+    alloctrace_install ();
+#endif
 
     filesys_configdev = m68k_areg (regs, 3);
 
@@ -3382,6 +3449,9 @@ void filesys_install (void)
     ROM_filesys_diagentry = here();
     calltrap (deftrap2 (filesys_diagentry, 0, "filesys_diagentry"));
     dw(0x4ED0); /* JMP (a0) - jump to code that inits Residents */
+#ifdef __3DS__
+    alloctrace_emit ();
+#endif
     
     loop = here ();
     

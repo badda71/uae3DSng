@@ -120,28 +120,55 @@ static unsigned cd_dump_pcs[6];
 static uae_u32 cd_last_eb;
 void crashdiag_reset (void) { cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
 
-static void cd_dump_task (void)
+/* name, type and (for a Process running a CLI command) the command name of a Task; returns the node type, 0 if not plausible */
+static unsigned cd_task_names (uae_u32 task, char *name, unsigned nn, char *cmd, unsigned cn)
 {
-	uae_u32 eb = cd_last_eb, task, nm;
-	char name[40] = "?", cmd[48] = "";
 	unsigned type;
-	if (!eb) { write_log ("lowwrite: no ExecBase known\n"); return; }
-	task = cd_long (eb + 0x114);
-	type = task >= 0x400 ? cd_byte (task + 8) : 0;
-	nm = (task >= 0x400 && task < 0xA00000) ? cd_long (task + 10) : 0;
-	if (nm >= 0x400 && nm < 0xA00000) cd_str (nm, name, sizeof name);
+	uae_u32 nm;
+	strcpy (name, "?");
+	cmd[0] = 0;
+	if (task < 0x400 || task >= 0xA00000 || (task & 1)) return 0;
+	type = cd_byte (task + 8);
+	nm = cd_long (task + 10);
+	if (nm >= 0x400 && nm < 0xA00000) cd_str (nm, name, nn);
 	if (type == 13) {                           /* NT_PROCESS: name of the CLI command it is running */
 		uae_u32 cli = cd_long (task + 0xAC) << 2;
 		if (cli >= 0x400 && cli < 0xA00000) {
 			uae_u32 s = cd_long (cli + 16) << 2;
 			if (s >= 0x400 && s < 0xA00000) {
 				unsigned l = cd_byte (s), i;
-				if (l > sizeof cmd - 1) l = sizeof cmd - 1;
+				if (l > cn - 1) l = cn - 1;
 				for (i = 0; i < l; i++) { unsigned ch = cd_byte (s + 1 + i); cmd[i] = (ch >= 32 && ch < 127) ? (char) ch : '?'; }
 				cmd[l] = 0;
 			}
 		}
 	}
+	return type;
+}
+
+/* "'name' cmd 'xxx'" of the task that is running right now (for the AllocMem trace in filesys.cpp) */
+void crashdiag_task_desc (char *out, unsigned n)
+{
+	uae_u32 eb = cd_long (4);
+	char name[40], cmd[48];
+	unsigned type = 0;
+	uae_u32 task = 0;
+	if (cd_exec_ok (eb)) {
+		task = cd_long (eb + 0x114);
+		type = cd_task_names (task, name, sizeof name, cmd, sizeof cmd);
+	}
+	if (!type) { strcpy (name, "?"); cmd[0] = 0; }
+	snprintf (out, n, "%08x '%s' type %u cmd '%s'", task, name, type, cmd);
+}
+
+static void cd_dump_task (void)
+{
+	uae_u32 eb = cd_last_eb, task;
+	char name[40], cmd[48];
+	unsigned type;
+	if (!eb) { write_log ("lowwrite: no ExecBase known\n"); return; }
+	task = cd_long (eb + 0x114);
+	type = cd_task_names (task, name, sizeof name, cmd, sizeof cmd);
 	write_log ("lowwrite: ExecBase %08x ThisTask %08x '%s' type %u CLI command '%s', SPReg %08x SPLower %08x SPUpper %08x, IDNest %d TDNest %d\n",
 		   eb, task, name, type, cmd, task >= 0x400 ? cd_long (task + 0x36) : 0,
 		   task >= 0x400 ? cd_long (task + 0x3A) : 0, task >= 0x400 ? cd_long (task + 0x3E) : 0,
@@ -211,6 +238,12 @@ static void cd_find_packets (void)
 		seen[found++] = p;
 		write_log ("lowwrite: DosPacket? %08x port %08x type %u res1 %08x res2 %08x arg1 %08x arg2 %08x arg3 %08x (ACTION_READ=82 WRITE=87: arg2=buffer arg3=length)\n",
 			   p, cd_long (p + 4), cd_long (p + 8), cd_long (p + 12), cd_long (p + 16), cd_long (p + 20), cd_long (p + 24), cd_long (p + 28));
+		{                                       /* who sent it: the reply port belongs to the client's Process */
+			uae_u32 port = cd_long (p + 4), client = (port >= 0x400 && port < 0xA00000 && !(port & 1)) ? cd_long (port + 16) : 0;
+			char name[40], cmd[48];
+			unsigned type = cd_task_names (client, name, sizeof name, cmd, sizeof cmd);
+			write_log ("lowwrite:   packet sent by task %08x '%s' type %u CLI command '%s'\n", client, name, type, cmd);
+		}
 	}
 }
 
