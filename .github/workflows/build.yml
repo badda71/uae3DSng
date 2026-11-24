@@ -33,6 +33,22 @@ jobs:
           if [ -f uae3DSng.elf ]; then ls -l uae3DSng.elf uae3DSng.3dsx | tee -a build.log; else echo "NO ELF PRODUCED" | tee -a build.log; fi
           echo "errors: $(grep -cE ' error( |:)|undefined reference|\*\*\* \[' build.log || true)" | tee -a build.log
 
+      - name: Resolve crash addresses (tools/crashaddrs.txt)
+        if: always()
+        run: |
+          [ -f uae3DSng.elf ] || exit 0
+          P=arm-none-eabi
+          { echo "==== crash address lookup ===="
+            grep -v '^#' tools/crashaddrs.txt | while read -r a; do
+              [ -n "$a" ] || continue
+              echo "--- 0x$a"
+              $P-addr2line -f -C -i -e uae3DSng.elf "0x$a" || true
+              $P-nm -n -C uae3DSng.elf | awk -v A=$((16#$a)) '{v=strtonum("0x"$1)} v<=A{last=$0} v>A{print "nearest symbol below: " last; exit}'
+              lo=$(( (16#$a) - 96 )); hi=$(( (16#$a) + 32 ))
+              $P-objdump -d -C --start-address=$lo --stop-address=$hi uae3DSng.elf | tail -n +7
+            done
+          } 2>&1 | tee crashlookup.log | tee -a build.log
+
       - name: Upload log and artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -40,6 +56,7 @@ jobs:
           name: uae3DSng-build
           path: |
             build.log
+            crashlookup.log
             uae3DSng.elf
             uae3DSng.3dsx
           if-no-files-found: ignore
