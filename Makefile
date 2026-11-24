@@ -35,7 +35,7 @@ TARGET		:=	uae3DSng
 BUILD		:=	build
 # Explicit directory list (not `find`): src/ contains files that must NOT be built for 3DS
 # (NEON asm, Guichan GUI, OSS sound, 68k JIT stub, ...). See EXCLUDE_FILES below.
-SOURCES		:=	src src/3ds src/gp2x src/gp2x/menu src/menu src/vkbd src/m68k src/m68k/fame
+SOURCES		:=	src src/3ds src/gp2x src/gp2x/menu src/menu src/m68k src/m68k/fame
 DATA		:=	data
 META		:=	meta
 # UAE3DS_SDL/include/SDL: uae4all2 uses both <SDL.h> and <SDL/SDL.h> style includes
@@ -89,7 +89,6 @@ UAE_HOME	:= sdmc:/3ds/uae3DSng
 UAE_DEFS	:= -DGP2X -DPANDORA -DUSE_SDL -DUSE_AUTOCONFIG -DUSE_ZFILE -DUSE_FAME_CORE -DWITH_TESTMODE \
 	-DUSE_UNDERSCORE -DSHM_SUPPORT_LINKS=0 \
 	-DUNALIGNED_PROFITABLE -DOPTIMIZED_FLAGS -DOS_WITHOUT_MEMORY_MANAGEMENT \
-	-DUSE_UAE4ALL_VKBD \
 	-DROM_PATH_PREFIX=\"$(UAE_HOME)/roms/\" -DDATA_PREFIX=\"romfs:/data/\" \
 	-DSAVE_PREFIX=\"$(UAE_HOME)/saves/\" -DTHUMB_PREFIX=\"$(UAE_HOME)/thumbs/\" \
 	-DTMP_PREFIX=\"$(UAE_HOME)/tmp/\" \

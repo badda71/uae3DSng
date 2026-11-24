@@ -139,8 +139,6 @@ int mainMenu_cutLeft = 0;
 int mainMenu_cutRight = 0;
 int mainMenu_ntsc = DEFAULT_NTSC;
 int mainMenu_frameskip = 0;
-int mainMenu_vkbdLanguage = 0; //Default is US Keyboard
-int mainMenu_vkbdStyle = 0; //Default is original style
 int visibleAreaWidth = 320;
 
 
@@ -501,8 +499,6 @@ void SetDefaultMenuSettings(int general)
     mainMenu_cutRight = 0;
     mainMenu_ntsc = DEFAULT_NTSC;
     mainMenu_frameskip = 0;
-    mainMenu_vkbdLanguage = 0; //Default is US Keyboard
-    mainMenu_vkbdStyle = 0; //Default is original style
     mainMenu_autofire = DEFAULT_AUTOFIRE;
 
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
@@ -1171,10 +1167,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "frameskip=%d\n",mainMenu_frameskip);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "vkbdlanguage=%d\n",mainMenu_vkbdLanguage);
-    fputs(buffer,f);
-    snprintf((char*)buffer, 255, "vkbdstyle=%d\n",mainMenu_vkbdStyle);
-    fputs(buffer,f);
+    fputs("vkbdlanguage=0\n",f);   // legacy keys of the removed top-screen keyboard; the file is read positionally, so they stay
+    fputs("vkbdstyle=0\n",f);
     snprintf((char*)buffer, 255, "sound=%d\n",mainMenu_sound + mainMenu_soundStereo * 10);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "soundstereosep=%d\n",mainMenu_soundStereoSep);
@@ -1564,7 +1558,9 @@ void loadconfig(int general)
 #endif
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
         fscanf(f,"shader=%d\n",&mainMenu_shader);
-#if defined(__SWITCH__) || defined(__3DS__)
+#if defined(__3DS__)
+        if (mainMenu_shader > 1) mainMenu_shader = 1;   // 0 = 1:1, 1 = fit height (older configs knew BILINEAR/POINT = fit height too)
+#elif defined(__SWITCH__)
         if (mainMenu_shader > 3) mainMenu_shader = 1;
 #endif
         fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);
@@ -1593,8 +1589,8 @@ void loadconfig(int general)
         fscanf(f,"syncthreshold=%d\n", &timeslice_mode);
 #endif
         fscanf(f,"frameskip=%d\n",&mainMenu_frameskip);
-        fscanf(f,"vkbdlanguage=%d\n",&mainMenu_vkbdLanguage);
-        fscanf(f,"vkbdstyle=%d\n",&mainMenu_vkbdStyle);
+        fscanf(f,"vkbdlanguage=%d\n",&dummy);   // legacy, unused
+        fscanf(f,"vkbdstyle=%d\n",&dummy);
         fscanf(f,"sound=%d\n",&mainMenu_sound );
         if (mainMenu_sound >= 10) {
             mainMenu_soundStereo = 1;

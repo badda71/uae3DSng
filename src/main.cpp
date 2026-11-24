@@ -16,9 +16,6 @@ extern "C" int main( int argc, char *argv[] );
 #include "sysconfig.h"
 #include "sysdeps.h"
 #include <assert.h>
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
-#endif
 #include "config.h"
 #include "uae.h"
 #include "options.h"
@@ -57,9 +54,6 @@ extern SDL_Surface *current_screenshot;
 #include "gp2xutil.h"
 #endif
 
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
-#endif
 
 #ifdef __3DS__
 #include "uibottom.h"
@@ -173,9 +167,6 @@ int quit_program = 0;
 void uae_reset (void)
 {
     gui_purge_events();
-#ifdef USE_UAE4ALL_VKBD
-	vkbd_reset_sticky_keys(); // keyvalues clear on reset, so vkbd must reflect this
-#endif
     black_screen_now();
     quit_program = 2;
     set_special (SPCFLAG_BRK);
@@ -220,9 +211,6 @@ void do_leave_program (void)
 {
 #ifdef USE_SDL
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) //On Vita, only remove keyboard graphics from memory when quitting the emu
-#ifdef USE_UAE4ALL_VKBD
-	vkbd_quit();
-#endif
 #ifdef __PSP2__ // NOT __SWITCH__
 	//De-Initialize touch panels
 	psp2QuitTouch();

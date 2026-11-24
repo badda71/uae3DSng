@@ -44,6 +44,13 @@
 #endif
 
 SDL_Surface *thumbnail_image = NULL;
+
+/* Decoding the screenshot (PNG + scaling) takes a while, so moving over the slots (or holding left/right) only marks the thumbnail as
+ * wanted; it is decoded once the cursor has rested on a slot for THUMB_DELAY_MS. */
+#define THUMB_DELAY_MS 140
+static int thumb_pending = 0;
+static void request_savestate_thumbnail();
+static Uint32 thumb_due = 0;
 /* the menu surface is the text screen stretched 2x on the Vita/Switch, drawn 1:1 on the 3DS (menu.cpp: MENU_ZOOM) */
 #ifdef __3DS__
 #define SS_ZOOM 1
@@ -127,6 +134,9 @@ static inline void draw_savestatesMenu(int c)
 	extern SDL_Surface *text_screen;
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
+	if (thumb_pending && (Sint32)(SDL_GetTicks() - thumb_due) >= 0)
+		load_savestate_thumbnail();            // the cursor has rested on this slot
+
 	text_draw_background();
 	text_draw_window(3,2,39,30,text_str_title);
 
@@ -209,7 +219,7 @@ static inline void draw_savestatesMenu(int c)
 	if (!savestate_empty) {
 		if (thumbnail_image != NULL) {
 			//draw_image_pos(thumbnail_image, (320 - thumbnail_image->w) / 2 , menuLine * 7);
-		} else {
+		} else if (!thumb_pending) {
 			write_text(tabstop1,menuLine+9,"No preview found");
 		}
 	} else {
@@ -404,7 +414,7 @@ static inline int key_saveMenu(int *cp)
 			else
 				saveMenu_n_savestate=11;
 			make_savestate_filenames(savestate_filename, screenshot_filename);
-			load_savestate_thumbnail();
+			request_savestate_thumbnail();
 		}
 		else if (right)
 		{
@@ -413,7 +423,7 @@ static inline int key_saveMenu(int *cp)
 			else
 				saveMenu_n_savestate=0;
 			make_savestate_filenames(savestate_filename, screenshot_filename);
-			load_savestate_thumbnail();
+			request_savestate_thumbnail();
 		}
 		switch(c)
 		{
@@ -630,7 +640,43 @@ void make_savestate_filenames(char *save, char *thumb)
 		stateFilenameToThumbFilename(save, thumb);
 }
 
+#ifdef __3DS__
+/* Area-average shrink of a 16 bit surface into a new 16 bit surface of the same format (no alpha channel, so drawing it is a plain copy).
+ * SDL_gfx's zoomSurface() makes a 32 bit RGBA surface with a per-pixel alpha blit on every frame; this is cheaper and deterministic. */
+static SDL_Surface *thumb_shrink16(SDL_Surface *src, int dw, int dh)
+{
+	SDL_PixelFormat *f = src->format;
+	SDL_Surface *dst = SDL_CreateRGBSurface(SDL_SWSURFACE, dw, dh, 16, f->Rmask, f->Gmask, f->Bmask, 0);
+	if (dst == NULL) return NULL;
+	const int rs = f->Rshift, gs = f->Gshift, bs = f->Bshift;
+	const Uint32 rm = f->Rmask, gm = f->Gmask, bm = f->Bmask;
+	for (int dy = 0; dy < dh; dy++) {
+		int y0 = dy * src->h / dh;
+		int y1 = (dy + 1) * src->h / dh; if (y1 <= y0) y1 = y0 + 1; if (y1 > src->h) y1 = src->h;
+		Uint16 *out = (Uint16 *)((Uint8 *)dst->pixels + dy * dst->pitch);
+		for (int dx = 0; dx < dw; dx++) {
+			int x0 = dx * src->w / dw;
+			int x1 = (dx + 1) * src->w / dw; if (x1 <= x0) x1 = x0 + 1; if (x1 > src->w) x1 = src->w;
+			Uint32 r = 0, g = 0, b = 0;
+			for (int y = y0; y < y1; y++) {
+				const Uint16 *in = (const Uint16 *)((Uint8 *)src->pixels + y * src->pitch) + x0;
+				for (int x = x0; x < x1; x++, in++) {
+					Uint32 px = *in;
+					r += (px & rm) >> rs;
+					g += (px & gm) >> gs;
+					b += (px & bm) >> bs;
+				}
+			}
+			Uint32 n = (Uint32)((y1 - y0) * (x1 - x0));
+			*out++ = (Uint16)((((r / n) << rs) & rm) | (((g / n) << gs) & gm) | (((b / n) << bs) & bm));
+		}
+	}
+	return dst;
+}
+#endif
+
 void load_savestate_thumbnail() {
+	thumb_pending = 0;
 	if (thumbnail_image) {
 		SDL_FreeSurface(thumbnail_image);
 		thumbnail_image = NULL;
@@ -642,11 +688,17 @@ void load_savestate_thumbnail() {
 		FILE *f=fopen(screenshot_filename,"rb");
 		if (f) {
 			fclose(f);
+#ifdef __3DS__
+			Uint32 t0 = SDL_GetTicks();
+#endif
 			SDL_Surface *tmp = IMG_Load(screenshot_filename);
 			SDL_Surface *loadedImage = SDL_DisplayFormat(tmp);
 			if (tmp != NULL) {
 				SDL_FreeSurface(tmp);
 			}
+#ifdef __3DS__
+			Uint32 t1 = SDL_GetTicks();
+#endif
 			if(loadedImage != NULL) {
 				SDL_Rect src = {0, 0, 0, 0 };
 				SDL_Rect dst = {0, 0, 0, 0 };
@@ -662,6 +714,12 @@ void load_savestate_thumbnail() {
 #ifdef __PSP2__
 				thumbnail_image = SDL_CreateRGBSurface(loadedImage->flags, dst.w, dst.h, loadedImage->format->BitsPerPixel, loadedImage->format->Rmask, loadedImage->format->Gmask, loadedImage->format->Bmask, loadedImage->format->Amask);
 				SDL_SoftStretch(loadedImage, &src, thumbnail_image, &dst);
+#elif defined(__3DS__)
+				if (loadedImage->format->BitsPerPixel == 16 && dst.w > 0)
+					thumbnail_image = thumb_shrink16(loadedImage, dst.w, dst.h);
+				if (thumbnail_image == NULL)
+					thumbnail_image = zoomSurface(loadedImage, (float) dst.w / (float) src.w, (float) dst.h / (float) src.h, SMOOTHING_ON);
+				write_log("savestate thumbnail: decode %u ms, shrink %u ms (%dx%d -> %dx%d)\n", (unsigned)(t1 - t0), (unsigned)(SDL_GetTicks() - t1), src.w, src.h, dst.w, dst.h);
 #else
 				thumbnail_image = zoomSurface(loadedImage, (float) dst.w / (float) src.w, (float) dst.h / (float) src.h, SMOOTHING_ON);
 #endif
@@ -669,6 +727,24 @@ void load_savestate_thumbnail() {
 			} else thumbnail_image = NULL;
 		} else thumbnail_image = NULL;
 	} else savestate_empty = 1;
+}
+
+/* slot changed: forget the picture, decode it when the cursor stops moving (see THUMB_DELAY_MS) */
+static void request_savestate_thumbnail()
+{
+	if (thumbnail_image) {
+		SDL_FreeSurface(thumbnail_image);
+		thumbnail_image = NULL;
+	}
+	thumb_pending = 0;
+	FILE *test = fopen(savestate_filename, "rb");
+	if (test) {
+		fclose(test);
+		savestate_empty = 0;
+		thumb_pending = 1;
+		thumb_due = SDL_GetTicks() + THUMB_DELAY_MS;
+	} else
+		savestate_empty = 1;
 }
 
 

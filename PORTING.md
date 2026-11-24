@@ -57,9 +57,9 @@ X=triangle(top), Y=square(left). In menus A=confirm, B=back (Nintendo layout; Vi
   with `roms saves conf kickstarts thumbs tmp` created at start-up.
 * `zfile.cpp`: minizip include for 3DS. `menu_display.cpp`/`menu_config.cpp`: Switch shader set
   (none / sharp-bilinear / bilinear / point) used for 3DS. `SDL_ttf.h` includes removed (nothing calls `TTF_*`).
-* `Makefile`: explicit source list (dirs `src src/3ds src/gp2x src/gp2x/menu src/menu src/vkbd src/m68k
+* `Makefile`: explicit source list (dirs `src src/3ds src/gp2x src/gp2x/menu src/menu src/m68k
   src/m68k/fame`) with `EXCLUDE_FILES`; defines mirror rsn8887's Switch CMake minus SDL2/64-bit.
-* `romfs/data/`: uae4all2 menu graphics and the virtual-keyboard bitmaps (`upstream-data/` is the pristine copy).
+* `romfs/data/`: uae4all2 menu graphics (`upstream-data/` is the pristine copy, minus the removed vkbd bitmaps).
 
 ## Build
 
@@ -195,6 +195,18 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   Vita pseudo root (`/` listing `ux0:`/`uma0:`) is not used on the 3DS; `menuLoadLoop()` replaces any directory that does not start with `sdmc:`
   (an old `adfdir.conf` containing `/`, `ux0:/...`) by `sdmc:/`, `..` never leaves `sdmc:/` ("sdmc:" without the slash is relative to the
   device's cwd), a vanished directory falls back to `sdmc:/`, and the HD-dir path no longer becomes `sdmc://name`.
+* **Round 5.** (a) Savestate menu: the screenshot (PNG, up to 640x240) was decoded + scaled with SDL_gfx on *every* left/right key repeat and
+  drawn as a 32 bit RGBA surface (alpha blit per frame). Now the picture is only decoded once the cursor has rested on a slot for 140 ms,
+  shrunk with an area-average loop into a 16 bit display-format surface (plain copy when drawing); the timings go to the log
+  (`savestate thumbnail: decode .. ms, shrink .. ms`). (b) The top-screen virtual keyboard is gone: `src/vkbd`, the 48 `vkbd*.bmp`,
+  `USE_UAE4ALL_VKBD` and everything under it (Start no longer opens it), the "Keyb. Lang./Style" options. `vkbdlanguage=`/`vkbdstyle=` stay in
+  the config file as unused keys because the file is read positionally. (c) Menus use uae3DS's 8x8 font (`romfs:/8x8font.bmp`, glyph `(c-32)`
+  at `(c&15)*8,(c>>4)*8`, white on black = colour key): cells are `MENU_CW` = 8 px wide, text lines stay 7 px apart (glyph rows 0-6, row 7 only
+  descenders), `MENU_X0` centres a 44-column grid, the file dialog is 48 columns wide. The "Menu Font" option and `text*.bmp` are unused on
+  the 3DS. (d) Blur: the Vita->3DS mapping of the requested picture rectangle was proportional to 960x544, which gave 0.94 x 1.0 for the default 320x240
+  picture and so GPU_LINEAR. `SDL_SetVideoModeScaling` now maps by *aspect only*: Shader "1:1" = scale 1 (hires: 0.5 x 1, exactly 2:1),
+  Shader "Fit height" = uniform `240 / lines`; scales within 0.5 % of 1 snap to 1, and the driver selects GPU_NEAREST unless the scale is
+  really different from 1 (tolerance 0.001). BILINEAR/POINT were removed from the 3DS shader list (a saved 2/3 becomes 1).
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 
@@ -211,8 +223,7 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 3. **Speed**: the FAME core is C; AGA and 68020 will not be playable on Old 3DS (268 MHz), and likely
    marginal on New 3DS. Consider hiding/blocking those options on Old 3DS (`osIsNew3DS()`).
 4. **Bottom screen is not ported yet.** `uae3ds.cpp`, `uibottom.cpp`, `autofire.cpp` are in the tree but
-   in `EXCLUDE_FILES`. The virtual keyboard (`vkbd`, drawn on the *top* screen) is compiled in as the
-   interim keyboard. Dependencies of the uae3DS code that must be provided/adapted:
+   in `EXCLUDE_FILES`. (The interim top-screen virtual keyboard `vkbd` was removed in round 5.) Dependencies of the uae3DS code that must be provided/adapted:
    * from uae3DS's own menu: `text_messagebox`/`MB_*`, `sdl_3dsbuttons buttons3ds[]`, `show_message(_str)`,
      `write_text_full`/`FONT_*`/`ALIGN_*`/`menu_text_color`, `storeConfig`, `nowSuperThrottle`,
      `mainMenu_{max_tap_time,click_time,single_tap_timeout,max_double_tap_time,locked_drag_timeout,

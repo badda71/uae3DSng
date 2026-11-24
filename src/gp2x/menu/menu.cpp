@@ -535,6 +535,18 @@ void init_text(int splash)
 		text_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/MENU_ZOOM,prSDLScreen->h/MENU_ZOOM,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 		window_screen=SDL_CreateRGBSurface(prSDLScreen->flags,prSDLScreen->w/MENU_ZOOM,prSDLScreen->h/MENU_ZOOM,prSDLScreen->format->BitsPerPixel,prSDLScreen->format->Rmask,prSDLScreen->format->Gmask,prSDLScreen->format->Bmask,prSDLScreen->format->Amask);
 
+#ifdef __3DS__
+		tmp=SDL_LoadBMP(MENU_FILE_FONT8);
+		if (text_screen==NULL || tmp==NULL)
+			exit(-1);
+		text_image_0=SDL_DisplayFormat(tmp);
+		SDL_FreeSurface(tmp);
+		if (text_image_0==NULL)
+			exit(-2);
+		SDL_SetColorKey(text_image_0,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image_0 -> format, 0, 0, 0));
+		text_image_1 = NULL;
+		text_image_2 = NULL;
+#else
 		tmp=SDL_LoadBMP(MENU_FILE_TEXT_0);
 		if (text_screen==NULL || tmp==NULL)
 			exit(-1);
@@ -580,6 +592,8 @@ void init_text(int splash)
 			SDL_SetColorKey(text_image_2,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image_2 -> format, 0, 0, 0));
 #endif
 		}
+
+#endif
 
 #ifdef __3DS__
 		tmp=IMG_Load("romfs:/bg_top.png");
@@ -709,9 +723,28 @@ void quit_text(void)
 
 void write_text(int x, int y, const char * str)
 {
-	write_text_pos((text_screen->w - 320) / 2 + x * 7, y * 7, str);
+	write_text_pos(MENU_X0 + x * MENU_CW, y * 7, str);
 }
 
+#ifdef __3DS__
+void write_text_pos(int x, int y, const char * str)
+{
+	SDL_Rect src, dest;
+	src.w = 8;
+	src.h = 8;
+	for (int i = 0; str[i] != 0 && i <= 60; i++)
+	{
+		int c = (str[i] & 0x7f) - 32;
+		if (c <= 0)
+			continue;                          // blank
+		src.x = (c & 15) * 8;
+		src.y = (c >> 4) * 8;
+		dest.x = x + i * MENU_CW;
+		dest.y = y;
+		SDL_BlitSurface(text_image_0, &src, text_screen, &dest);
+	}
+}
+#else
 void write_text_pos(int x, int y, const char * str)
 {
 	int i, c;
@@ -791,13 +824,14 @@ void write_text_pos(int x, int y, const char * str)
 			break;
     }
 }
+#endif
 
 void write_text_inv(int x, int y, const char * str)
 {
   SDL_Rect dest;
-  dest.x = (text_screen->w - 320) / 2 + (x * 7) -2 ;
+  dest.x = MENU_X0 + (x * MENU_CW) -2 ;
   dest.y = (y * 7) /*10*/ - 2;
-  dest.w = (strlen(str) * 7) + 4;
+  dest.w = (strlen(str) * MENU_CW) + 4;
   dest.h = 12;
 
   SDL_FillRect(text_screen, &dest, menu_inv_color);
@@ -829,9 +863,9 @@ void write_num_inv(int x, int y, int v)
   	else
 		break;
 
-  dest.x = (x * 7) -2 ;
-  dest.y = (y * 8) /*10*/ - 2;
-  dest.w = (l * 7) + 4;
+  dest.x = MENU_X0 + (x * MENU_CW) -2 ;
+  dest.y = (y * 7) /*10*/ - 2;
+  dest.w = (l * MENU_CW) + 4;
   dest.h = 12;
 
   SDL_FillRect(text_screen, &dest, menu_inv_color);
@@ -841,14 +875,14 @@ void write_num_inv(int x, int y, int v)
 
 void text_draw_window(int x, int y, int w, int h, const char *title)
 {
-	int offset_x = (text_screen->w - 320) / 2;
+	int offset_x = MENU_X0;
 	int i,j;
-	int x_screen = offset_x + x * 7;
+	int x_screen = offset_x + x * MENU_CW;
 	int y_screen = y * 7 + 2;
 
 	int x_corn = x_screen-2;
 	int y_corn = y_screen-13;
-	int w_corn = (w*7)+4;
+	int w_corn = (w*MENU_CW)+4;
 	int h_corn = (h*8)+4+13;
 
 	int x_shadow = x_corn+w_corn;
@@ -886,11 +920,11 @@ void text_draw_window(int x, int y, int w, int h, const char *title)
 
 	dest.x=x_screen;
 	dest.y=y_screen;
-	dest.w=w*7;
+	dest.w=w*MENU_CW;
 	dest.h=h*8;
 	SDL_BlitSurface(window_screen,&dest,text_screen,&dest);
 
-	write_text_pos(offset_x + (x + ((w - strlen(title)) / 2)) * 7, (y - 1) * 7 - 1, title);
+	write_text_pos(offset_x + (x + ((w - (int)strlen(title)) / 2)) * MENU_CW, (y - 1) * 7 - 1, title);
 }
 
 void _text_draw_window(SDL_Surface *sf, int x, int y, int w, int h, const char *title)

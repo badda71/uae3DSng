@@ -22,10 +22,6 @@
 #include "menu_config.h"
 #include "math.h"
 
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
-static int can_change_vkbd_transparency=1;
-#endif
 
 #ifdef ANDROIDSDL
 #include <android/log.h>
@@ -124,11 +120,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			nr = 1;
 
 	// are we trying to figure out the regular GP2X controls for the primary (or first two) joysticks?
-#ifdef USE_UAE4ALL_VKBD
-	int usingRegularControls = ((!mainMenu_customControls) && ((nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]) && !vkbd_mode);
-#else
 	int usingRegularControls = ((!mainMenu_customControls) && ((nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]));
-#endif
 	//PSP2 updates joysticks in handle_events function which is always called 
 	//just before read_joystick is called. No need to update them again here
 #if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
@@ -155,20 +147,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	mouseScale /= 100;
 
 //Digital mouseemu hotkeys: Triangle changes mouse speed etc.
-#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) && defined(USE_UAE4ALL_VKBD)
-	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL[0] && !triggerR[0] && !gp2xButtonRemappingOn)))
-#else
-#if ( defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) ) && defined(USE_UAE4ALL_VKBD)
-	//on Vita, the L trigger is by default mapped to a mousebutton
-	//so remove the hard coded LTrigger here that was enabling the digital mouse
-	if (!vkbd_mode && ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn))
-#else
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
+	//the L trigger is by default mapped to a mousebutton, so there is no hard coded LTrigger here that enables the digital mouse
 	if ((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn)
 #else
 	if (((mainMenu_customControls && mainMenu_custom_dpad==2) || gp2xMouseEmuOn || (triggerL[0] && !triggerR[0] && !gp2xButtonRemappingOn)))
-#endif
-#endif
 #endif
 	{
 		if (buttonY[0]) {
@@ -231,11 +214,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
 		if (mainMenu_joyConf)
 		{
-#ifdef USE_UAE4ALL_VKBD
-			if (((buttonX[0] && mainMenu_jump > -1) ) && !vkbd_mode)
-#else
 			if (((buttonX[0] && mainMenu_jump > -1) || SDL_JoystickGetButton(joy, mainMenu_jump)))
-#endif
 				top = 1;
 		}
 	}
@@ -289,11 +268,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
 //Analog Mouse on PSP2, only update once per frame (when nr==1)
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-#ifdef USE_UAE4ALL_VKBD
-	if ((nr == 1) && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
-#else
-	if (nr == 1 !(buttonStart[0] && triggerR[0]))
-#endif
+	if (nr == 1 && !(buttonStart[0] && triggerR[0]))
 	{
 		//slow down mouse motion if custom "slow mouse" button is held
 		fast_mouse=false;
@@ -481,11 +456,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	}
 #endif //__PSP2__
 
-#ifdef USE_UAE4ALL_VKBD
-	if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
-#else
 	if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]))
-#endif
 	{
 		for (int i=0; i<nr_joysticks; i++)
 		{
@@ -584,11 +555,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
 	if(!gp2xMouseEmuOn && !gp2xButtonRemappingOn)
 	{
-#ifdef USE_UAE4ALL_VKBD
-		if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
-#else
 		if(mainMenu_customControls && !(buttonStart[0] && triggerR[0]))
-#endif
 		{
 			for (int i=0; i<nr_joysticks; i++)
 			{
@@ -650,131 +617,6 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		}
 	}
 
-#ifdef USE_UAE4ALL_VKBD
-	if (vkbd_mode && nr == 1)
-	{
-		// move around the virtual keyboard instead
-
-		// if Start+Dpad is used (or right analog stick on Vita)
-		// move the keyboard itself and/or change transparency
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-		if (rAnalogY < -1024*10)
-#else
-		if (buttonStart[0] && (dpadUp[0] || top))
-#endif
-		{
-			vkbd_displace_up();
-		}
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-		else if (rAnalogY > 1024*10)
-#else
-		else if (buttonStart[0] && (dpadDown[0] || bot))
-#endif
-		{
-			vkbd_displace_down();
-		}
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-		else if (rAnalogX < -1024*10)
-#else
-		else if (buttonStart[0] && (dpadLeft[0] || left))
-#endif
-		{
-			if (can_change_vkbd_transparency)
-			{
-				vkbd_transparency_up();
-				can_change_vkbd_transparency=0;
-			}
-		}
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-		else if (rAnalogX > 1024*10)
-#else
-		else if (buttonStart[0] && (dpadRight[0] || right))
-#endif
-		{
-			if (can_change_vkbd_transparency)
-			{
-				vkbd_transparency_down();
-				can_change_vkbd_transparency=0;
-			}
-		}
-		else
-		{
-			can_change_vkbd_transparency=1;
-			if (left || dpadLeft[0])
-				vkbd_move |= VKBD_LEFT;
-			else
-			{
-				vkbd_move &= ~VKBD_LEFT;
-				if (right || dpadRight[0])
-					vkbd_move |= VKBD_RIGHT;
-				else
-					vkbd_move &= ~VKBD_RIGHT;
-			}
-			if (top || dpadUp[0])
-				vkbd_move |= VKBD_UP;
-			else
-			{
-				vkbd_move &= ~VKBD_UP;
-				if (bot || dpadDown[0])
-					vkbd_move |= VKBD_DOWN;
-				else
-					vkbd_move &= ~VKBD_DOWN;
-			}
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) //we know the Vita has many buttons available so use those
-#ifdef __SWITCH__
-			if ((!mainMenu_swapAB && buttonX[0]) || (mainMenu_swapAB && buttonB[0]))
-#else
-			if (buttonX[0])
-#endif
-			{
-				vkbd_move=VKBD_BUTTON;
-				buttonX[0] = 0;
-				*button = 0;
-			}
-			else if (buttonY[0])
-			{
-				vkbd_move=VKBD_BUTTON_SHIFT;
-				buttonY[0] = 0;
-				*button = 0;
-			}
-			else if (buttonA[0])
-			{
-				vkbd_move=VKBD_BUTTON_BACKSPACE;
-				buttonA[0] = 0;
-				*button = 0;
-			}
-#ifdef __SWITCH__
-			else if ((!mainMenu_swapAB && buttonB[0]) || (mainMenu_swapAB && buttonX[0]))
-#else
-			else if (buttonB[0])
-#endif
-			{
-				vkbd_move=VKBD_BUTTON_RESET_STICKY;
-				buttonB[0] = 0;
-				*button = 0;
-			}
-#else // in other cases where those buttons might not be available, use the amiga joystick
-			if (*button || buttonX[0] )
-			{
-				vkbd_move=VKBD_BUTTON;
-				buttonX[0] = 0;
-				*button = 0;
-			}
-#endif
-			else { //button release, pressing sticky keys is possible again.
-				if (vkbd_touch_x == -1 && vkbd_touch_y == -1)
-				{
-					for (int i=0; i<NUM_STICKY; i++)
-					{
-						vkbd_sticky_key[i].can_switch=true;
-					}
-				}
-			}
-			// TODO: add vkbd_button2 mapped to button2
-		}
-	}
-	else
-#endif
 	{
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 		// On Vita, map the second player to always using the GP2X mapping, in addition to everything else

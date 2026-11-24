@@ -275,9 +275,11 @@ void N3DS_SetScalingDirect(float x, float y, int permanent) {
 		this_device->hidden->scalex2 = x;
 		this_device->hidden->scaley2 = y;
 	}
-	C3D_TexSetFilter(&spritesheet_tex,
-		(x!=1.0f || y!=1.0f) ? GPU_LINEAR : GPU_NEAREST,
-		GPU_NEAREST);
+	/* only a picture that is really scaled is filtered; 1:1 output must stay sharp (float noise like 1.0000001 must not count as scaled) */
+	{
+		int scaled = (x < 0.999f || x > 1.001f || y < 0.999f || y > 1.001f);
+		C3D_TexSetFilter(&spritesheet_tex, scaled ? GPU_LINEAR : GPU_NEAREST, GPU_NEAREST);
+	}
 }
 
 void N3DS_SetScaling(_THIS)

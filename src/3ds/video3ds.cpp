@@ -11,24 +11,34 @@ extern "C" {
 }
 extern SDL_Surface *prSDLScreen;
 
-#define VITA_W 960.0f
-#define VITA_H 544.0f
 #define TOP_W  400.0f
 #define TOP_H  240.0f
 
+extern int mainMenu_shader;   /* menu_config.cpp: 3DS: 0 = 1:1 (no scaling), 1 = fit the screen height */
+
+static float snap1(float f) { return (f > 0.995f && f < 1.005f) ? 1.0f : f; }
+
+/* The Vita/Switch code asks for a destination rectangle (x, y, sw, sh) in 960x544 pixels. Only its proportions are used here: the
+ * 3DS top screen is 400x240, so the old proportional mapping scaled a 320x240 picture to 0.94 horizontally / 1.0 vertically, which
+ * made the driver filter (GPU_LINEAR whenever the scale is not 1.0) blur the picture although "nothing" was scaled.
+ *   shader 0 (NONE): 1:1, i.e. GPU_NEAREST. A hires (half pixel width) picture is halved horizontally (exactly 2:1).
+ *   otherwise:      uniform scale so that the picture is as high as the screen (0.94 for 256 lines, 1.0 for 240 lines).
+ * The pixel aspect of the request (sw/w : sh/h) is kept in both cases. */
 extern "C" void SDL_SetVideoModeScaling(int x, int y, float sw, float sh)
 {
 	(void)x; (void)y;
 	if (!prSDLScreen || prSDLScreen->w <= 0 || prSDLScreen->h <= 0) return;
 
-	float dw = sw * (TOP_W / VITA_W);          /* destination size on the 3DS top screen */
-	float dh = sh * (TOP_H / VITA_H);
-	float fx = dw / (float)prSDLScreen->w;
-	float fy = dh / (float)prSDLScreen->h;
-	if (fx * prSDLScreen->w > TOP_W) fx = TOP_W / (float)prSDLScreen->w;   /* never exceed the screen */
-	if (fy * prSDLScreen->h > TOP_H) fy = TOP_H / (float)prSDLScreen->h;
-
-	N3DS_SetScalingDirect(fx, fy, 1);
+	float w = (float)prSDLScreen->w, h = (float)prSDLScreen->h;
+	float aspect = (sw / w) / (sh / h);                       /* horizontal / vertical scale of the request: 1 lores, 0.5 hires */
+	float fy = (mainMenu_shader == 0) ? 1.0f : TOP_H / h;
+	float fx = fy * aspect;
+	if (fx * w > TOP_W) {                                      /* never wider than the screen: shrink both axes */
+		float k = TOP_W / (fx * w);
+		fx *= k;
+		fy *= k;
+	}
+	N3DS_SetScalingDirect(snap1(fx), snap1(fy), 1);
 	N3DS_SetYOffset(0);
 }
 

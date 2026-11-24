@@ -16,9 +16,6 @@
 #include "gui.h"
 #include "menu.h"
 #include "menu_config.h"
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
-#endif
 #include "debug_uae4all.h"
 #include "custom.h"
 #include "memory-uae.h"
@@ -65,9 +62,6 @@ int justMovedDown[MAX_NUM_CONTROLLERS]={};
 int justMovedLeft[MAX_NUM_CONTROLLERS]={}; 
 int justMovedRight[MAX_NUM_CONTROLLERS]={};
 int justLComma=0, justLPeriod=0;
-#ifdef USE_UAE4ALL_VKBD
-int justLK=0;
-#endif
 int justMovedStickUp[MAX_NUM_CONTROLLERS]={};
 int justMovedStickDown[MAX_NUM_CONTROLLERS]={};
 int justMovedStickLeft[MAX_NUM_CONTROLLERS]={};
@@ -153,9 +147,6 @@ int haveJoysticksBeenCentered=0;
 extern int mainMenu_leftStickMouse;
 #endif // __PSP2__
 
-#ifdef USE_UAE4ALL_VKBD
-extern int keycode2amiga(SDL_keysym *prKeySym);
-#endif
 extern int uae4all_keystate[];
 
 int emulating=0;
@@ -324,9 +315,6 @@ int gui_init (void)
 		sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
 #endif
 
-#ifdef USE_UAE4ALL_VKBD
-		vkbd_init();
-#endif
 
 #ifdef USE_GUICHAN
 		if (!uae4all_image_file0[0])
@@ -372,11 +360,6 @@ static void goMenu(void)
 	if (quit_program != 0)
 		return;
 	emulating=1;
-#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) //no need to erase all the vkbd graphics from memory on Vita
-#ifdef USE_UAE4ALL_VKBD
-	vkbd_quit();
-#endif	
-#endif
 	pause_sound();
 #ifdef USE_GUICHAN
 	running=true;
@@ -397,15 +380,7 @@ static void goMenu(void)
 		menu_unraise();
 	quit_text();
 #endif
-#ifdef USE_UAE4ALL_VKBD
-#if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__) //no need to reload all the vkbd graphics everytime on Vita
-	vkbd_init();
-#endif
-#endif
 	getChanges();
-#ifdef USE_UAE4ALL_VKBD
-	vkbd_init_button2();
-#endif
 	if (exitmode==1 || exitmode==2)
 	{
 		extern char *savestate_filename;
@@ -764,11 +739,7 @@ void gui_handle_events (void)
 #endif
 		{
 			// analog joystick acts as digital controls with proper circular deadzone
-#ifdef USE_UAE4ALL_VKBD
-			if (i==0 && mainMenu_leftStickMouse && !(buttonStart[0] && triggerR[0]) && !vkbd_mode)
-#else
 			if (i==0 && mainMenu_leftStickMouse && !(buttonStart[0] && triggerR[0]))
-#endif
 			{
 				joyX=rX;
 				joyY=-rY;
@@ -786,9 +757,9 @@ void gui_handle_events (void)
 			int *left = 0;
 			int *right = 0;
 #ifdef __SWITCH__
-			if (mainMenu_customControls && !vkbd_mode && !(buttonStart[0] && triggerR[0]) && !singleJoycons)
+			if (mainMenu_customControls && !(buttonStart[0] && triggerR[0]) && !singleJoycons)
 #else
-			if (mainMenu_customControls && !vkbd_mode && !(buttonStart[0] && triggerR[0]))
+			if (mainMenu_customControls && !(buttonStart[0] && triggerR[0]))
 #endif
 			{
 				up = &stickUp[i];
@@ -837,12 +808,7 @@ void gui_handle_events (void)
 		}
 	}
 
-#ifdef USE_UAE4ALL_VKBD
-	//no autofire when keyboard is displayed
-	if (mainMenu_customAutofireButton && !vkbd_mode)
-#else
 	if (mainMenu_customAutofireButton)
-#endif
 	{
 		int *autoButton;
 		for (int i=0; i<nr_joysticks; i++)
@@ -966,32 +932,6 @@ void gui_handle_events (void)
 
 #ifdef ANDROIDSDL
 
-#ifdef USE_UAE4ALL_VKBD
-	//textUI virtual keyboard via F15 
-	if(keystate[SDLK_F15])
-	{
-		if(!justLK)
-		{
-			sleep(1);
-			vkbd_mode = !vkbd_mode;
-			justLK=1;
-		}
-	}
-	else if(justLK)
-		justLK=0;
-	//Quick Switch - textUI virtual keyboard via buttonB+buttonY
-	if((mainMenu_quickSwitch!=0) && buttonB[0] && buttonY[0])
-	{
-		if(!justLK)
-		{
-			sleep(1);
-			vkbd_mode = !vkbd_mode;
-			justLK=1;
-		}
-	}
-	else if(justLK)
-		justLK=0;
-#endif
 	// Quick Switch - screen lowres/hires
 	if (((mainMenu_quickSwitch==1) && buttonB[0] && dpadUp[0]) || ((mainMenu_quickSwitch==2) && buttonY[0] && dpadUp[0]))
 	{
@@ -1048,9 +988,6 @@ void gui_handle_events (void)
 	}
 #endif 		
 	
-#ifdef USE_UAE4ALL_VKBD
-if(!vkbd_mode)
-#endif
 {
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	if(buttonStart[0] && triggerL[0]) //toggle custom control config 1-3
@@ -1950,28 +1887,8 @@ if(!vkbd_mode)
 	}
 #endif // __PSP2__
 
-} // if(!vkbd_mode)
+}
 
-#ifdef USE_UAE4ALL_VKBD
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-	//on Vita, Start brings up the  virtual keyboard, but Trigger R + Start is used for
-	//quickswitch resolution etc. and Trigger L + Start is used for switching between
-	//custom control configs
-	if(buttonStart[0] && !triggerR[0] && !triggerL[0])
-#else
-	//L+K: virtual keyboard
-	if(triggerL[0] && keystate[SDLK_k])
-#endif
-	{
-		if(!justLK)
-		{
-			vkbd_mode = !vkbd_mode;
-			justLK=1;
-		}
-	}
-	else if(justLK)
-		justLK=0;
-#endif
 
 #if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	if(triggerL[0] && keystate[SDLK_s])
@@ -1994,62 +1911,6 @@ if(!vkbd_mode)
 	}
 #endif
 
-#ifdef USE_UAE4ALL_VKBD
-	if (vkbd_key!=KEYCODE_NOTHING) // This means key was selected by user. We cannot test for zero, because that is a valid Amiga keycode
-	{
-		if (vkbd_key >= 0)
-		{
-			// Handle all sticky keys (release and press) here up front
-			bool sticky=false;
-			for (int i=0; i<NUM_STICKY; i++) 
-			{
-				if (vkbd_key == vkbd_sticky_key[i].code)
-				{
-					if ((vkbd_sticky_key[i].stuck) && uae4all_keystate[vkbd_sticky_key[i].code] == 0)
-					{
-						uae4all_keystate[vkbd_sticky_key[i].code]=1;
-						record_key(vkbd_sticky_key[i].code<<1);
-					}
-					if (!(vkbd_sticky_key[i].stuck) && uae4all_keystate[vkbd_sticky_key[i].code] == 1)
-					{
-						uae4all_keystate[vkbd_sticky_key[i].code]=0;
-						record_key((vkbd_sticky_key[i].code<<1)|1);
-					}
-					sticky=true; // a sticky key was pressed and handled. We are done.
-					break;
-				}
-			}
-			if (!sticky && vkbd_keysave==KEYCODE_NOTHING) // a non-sticky key was pressed and previous key was released. Press the new key
-			{
-				vkbd_keysave=vkbd_key; // remember which key we are pressing so we can release it later
-				if (!uae4all_keystate[vkbd_keysave])
-				{
-					uae4all_keystate[vkbd_keysave]=1;
-					record_key(vkbd_keysave<<1);
-				}
-			}
-		} else if (vkbd_key == KEYCODE_STICKY_RESET) // the special button to reset all sticky keys was pressed
-		{
-			for (int i=0; i<NUM_STICKY; i++) 
-			{
-				if (uae4all_keystate[vkbd_sticky_key[i].code] == 1)
-				{
-					uae4all_keystate[vkbd_sticky_key[i].code]=0;
-					record_key((vkbd_sticky_key[i].code<<1)|1);
-				}
-			}
-		}
-	}
-	else if (vkbd_keysave!=KEYCODE_NOTHING) // some non-sticky key was released
-	{
-		if (vkbd_keysave >= 0) //handle key release 
-		{
-			uae4all_keystate[vkbd_keysave]=0;
-			record_key((vkbd_keysave << 1) | 1);
-		}
-		vkbd_keysave=KEYCODE_NOTHING;
-	}
-#endif
 }
 
 void gui_set_message(const char *msg, int t)

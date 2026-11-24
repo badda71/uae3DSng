@@ -68,11 +68,6 @@ enum {
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	MENUDISPLAY_SHADER,
 #endif
-#if defined(USE_UAE4ALL_VKBD)
-	MENUDISPLAY_VKBDLANGUAGE,
-	MENUDISPLAY_VKBDSTYLE,
-#endif
-	MENUDISPLAY_FONT,
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
 	MENUDISPLAY_STEREO,
@@ -92,12 +87,20 @@ enum {
 };
 #endif
 
-#if defined(__SWITCH__) || defined(__3DS__)
+#if defined(__SWITCH__)
 enum {
 	SHADER_NONE = 0,
 	SHADER_SHARP_BILINEAR_SIMPLE,
 	SHADER_BILINEAR,
 	SHADER_POINT,
+	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
+};
+#endif
+
+#if defined(__3DS__)
+enum {
+	SHADER_NONE = 0,                  // 1:1, no scaling, no filtering
+	SHADER_SHARP_BILINEAR_SIMPLE,     // scaled to the height of the screen (smooth)
 	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
 };
 #endif
@@ -281,7 +284,14 @@ static void draw_displayMenu(int c)
   
   	switch (mainMenu_shader)
   	{
-#if defined(__SWITCH__) || defined(__3DS__)
+#if defined(__3DS__)
+		case SHADER_NONE:
+			snprintf((char*)value, 25, "1:1 (no scaling)");
+			break;
+		case SHADER_SHARP_BILINEAR_SIMPLE:
+			snprintf((char*)value, 25, "Fit height (smooth)");
+			break;
+#elif defined(__SWITCH__)
 		case SHADER_NONE:
 			snprintf((char*)value, 25, "NONE (auto 2x/3x/4x)");
 			break;
@@ -325,71 +335,6 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop1,menuLine,value);
 #endif
-#if defined(USE_UAE4ALL_VKBD)
-	// MENUDISPLAY_VKBDLANGUAGE
-	menuLine+=2;
-	write_text(leftMargin,menuLine,"Keyb. Lang.");
-	if ((mainMenu_vkbdLanguage==0)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
-		write_text_inv(tabstop1,menuLine,"US");
-	else
-		write_text(tabstop1,menuLine,"US");
-
-	if ((mainMenu_vkbdLanguage==1)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
-		write_text_inv(tabstop3,menuLine,"UK");
-	else
-		write_text(tabstop3,menuLine,"UK");
-
-	if ((mainMenu_vkbdLanguage==2)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
-		write_text_inv(tabstop5,menuLine,"German");
-	else
-		write_text(tabstop5,menuLine,"German");
-
-	if ((mainMenu_vkbdLanguage==3)&&((menuDisplay!=MENUDISPLAY_VKBDLANGUAGE)||(bb)))
-		write_text_inv(tabstop5+8,menuLine,"French");
-	else
-		write_text(tabstop5+8,menuLine,"French");
-
-	// MENUDISPLAY_VKBDSTYLE
-	menuLine+=2;
-	write_text(leftMargin,menuLine,"Keyb. Style");
-	if ((mainMenu_vkbdStyle==0)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
-		write_text_inv(tabstop1,menuLine,"Original");
-	else
-		write_text(tabstop1,menuLine,"Original");
-
-	if ((mainMenu_vkbdStyle==1)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
-		write_text_inv(tabstop1+9,menuLine,"Warm");
-	else
-		write_text(tabstop1+9,menuLine,"Warm");
-
-	if ((mainMenu_vkbdStyle==2)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
-		write_text_inv(tabstop1+14,menuLine,"Cool");
-	else
-		write_text(tabstop1+14,menuLine,"Cool");
-
-	if ((mainMenu_vkbdStyle==3)&&((menuDisplay!=MENUDISPLAY_VKBDSTYLE)||(bb)))
-		write_text_inv(tabstop1+19,menuLine,"Dark");
-	else
-		write_text(tabstop1+19,menuLine,"Dark");
-#endif
-
-	// MENUDISPLAY_FONT
-	menuLine+=2;
-	write_text(leftMargin,menuLine,"Menu Font");
-	if ((mainMenu_font==0)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
-		write_text_inv(tabstop3,menuLine, "Narrow");
-	else
-		write_text(tabstop3, menuLine, "Narrow");
-
-	if ((mainMenu_font==1)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
-		write_text_inv(tabstop3+7, menuLine,"Wide");
-	else
-		write_text(tabstop3+7, menuLine,"Wide");
-
-	if ((mainMenu_font==2)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
-		write_text_inv(tabstop3+5+7, menuLine,"Original");
-	else
-		write_text(tabstop3+5+7, menuLine,"Original");
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
@@ -771,55 +716,6 @@ static int key_displayMenu(int *c)
 				}
 				break;
 #endif
-#if defined(USE_UAE4ALL_VKBD)
-			case MENUDISPLAY_VKBDLANGUAGE:
-				if (left)
-				{
-					if (mainMenu_vkbdLanguage <= 0)
-						mainMenu_vkbdLanguage = 0;
-					else 
-						mainMenu_vkbdLanguage -= 1;
-				}
-				else if (right)
-				{
-					if (mainMenu_vkbdLanguage >= 3)
-						mainMenu_vkbdLanguage = 3;
-					else
-						mainMenu_vkbdLanguage +=1;
-				}
-				break;
-			case MENUDISPLAY_VKBDSTYLE:
-				if (left)
-				{
-					if (mainMenu_vkbdStyle <= 0)
-						mainMenu_vkbdStyle = 0;
-					else 
-						mainMenu_vkbdStyle -= 1;
-				}
-				else if (right)
-				{
-					if (mainMenu_vkbdStyle >= 3)
-						mainMenu_vkbdStyle = 3;
-					else
-						mainMenu_vkbdStyle +=1;
-				}
-				break;
-#endif
-			case MENUDISPLAY_FONT:
-				if (left) {
-					if ((mainMenu_font > 0) && (mainMenu_font <= 2)) {
-						mainMenu_font--;
-					} else {
-						mainMenu_font = 2;
-					}
-				} else if (right) {
-					if ((mainMenu_font < 2) && (mainMenu_font >= 0)) {
-						mainMenu_font++;
-					} else {
-						mainMenu_font = 0;
-					}
-				}
-				break;
 			case MENUDISPLAY_SOUND:
 					if (left)
 					{

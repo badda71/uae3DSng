@@ -35,9 +35,6 @@
 #include "keybuf.h"
 #include "gui.h"
 #include "debug.h"
-#ifdef USE_UAE4ALL_VKBD
-#include "vkbd.h"
-#endif
 #include "gp2x.h"
 #include "gp2xutil.h"
 #include "inputmode.h"
@@ -135,19 +132,6 @@ void flush_block ()
 {
 #if !defined(__PSP2__) //no need to unlock screen on Vita unless we have to
 	SDL_UnlockSurface(prSDLScreen);
-#endif
-#ifdef USE_UAE4ALL_VKBD	//draw vkbd and process user input
-#if defined(__PSP2__) //even on Vita, vkbd blitting requires unlock/lock
-	if (vkbd_mode)
-	{
-		SDL_UnlockSurface(prSDLScreen); 
-		vkbd_key=vkbd_process();
-		SDL_LockSurface(prSDLScreen);
-	}
-#else
-	if (vkbd_mode)
-		vkbd_key=vkbd_process();
-#endif
 #endif
 	if (show_inputmode)
 		inputmode_redraw();	
@@ -731,9 +715,6 @@ void handle_events (void)
 			if (rEvent.key.keysym.sym==SDLK_LALT)
 #endif
 			{
-#ifdef USE_UAE4ALL_VKBD
-				if (!vkbd_mode)
-#endif
 				{
 					// only do this if the virtual keyboard isn't visible
 					// state moves thus:
@@ -778,15 +759,6 @@ void handle_events (void)
 				show_inputmode = 1;
 				}
 			}
-#ifdef USE_UAE4ALL_VKBD
-			else if ((!gp2xMouseEmuOn) && (!gp2xButtonRemappingOn) && (!vkbd_mode) && (vkbd_button2!=(SDLKey)0))
-			{
-				if (vkbd_button2) // button2 keyboard was a planned feature, not yet implemented
-					rEvent.key.keysym.sym=vkbd_button2;
-				else
-					break;
-			}
-#endif //UAE_UAE4ALL_VKBD
 
 #ifndef PANDORA
 			if (gp2xButtonRemappingOn)

@@ -130,9 +130,6 @@ int maxvpos = MAXVPOS_PAL;
 int minfirstline = MINFIRSTLINE_PAL;
 static int fmode;
 unsigned int beamcon0 = -1, new_beamcon0;
-#ifdef USE_UAE4ALL_VKBD
-extern int vkbd_mode;
-#endif
 
 /* This is but an educated guess. It seems to be correct, but this stuff
  * isn't documented well. */

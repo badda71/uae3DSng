@@ -125,6 +125,20 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	extern SDL_Surface *text_screen;
 	text_draw_background();
 	// widescreen file list allows for longer filename display
+#ifdef __3DS__
+	/* 400 px wide, 8 px cells: the window spans (almost) the whole screen, columns are counted from MENU_X0 */
+	int x_win = -2;
+	int y_win = 2;
+	int w_win = 48;
+	int h_win = 25;
+	int x_sep = x_win + 1;
+	int x_file = x_win + 1;
+	int x_dir = x_win + w_win - 7;
+	r.x = MENU_X0 + x_win * MENU_CW; r.y=0; r.w = (MENU_X0 + x_dir * MENU_CW) - r.x; r.h=240;   // file names are clipped before the <DIR> column
+	static char sepbuf[64];                       // the separator line is as wide as the window
+	memset(sepbuf, '-', w_win - 2); sepbuf[w_win - 2] = 0;
+	const char *text_str_load_separator = sepbuf;
+#else
 	r.x=80-64; r.y=0; r.w=150-24+64+64+(text_screen->w-320)/2+32; r.h=240;
 	int x_win = 2 - (text_screen->w - 320) / 2 / 7;
 	int y_win = 2;
@@ -137,6 +151,8 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	int x_sep = 3 - (text_screen->w - 320) / 2 / 7;
 	int x_file = 3 - (text_screen->w - 320) / 2 / 7;
 	int x_dir = 38 + (text_screen->w - 320) / 2 / 7;
+
+#endif
 
 	if (menu_load_type == MENU_LOAD_HD_DIR)
 #ifdef __PSP2__
