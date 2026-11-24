@@ -22,6 +22,42 @@
 
 static int opencount = 0;
 
+#ifdef __3DS__
+/* last hardfile requests, dumped by the illegal-instruction handler (see m68k_intrf.cpp) */
+#define HF_HIST 16
+static struct { uae_u16 cmd; uae_s8 err; uae_u32 data, off, len; } hf_hist[HF_HIST];
+static unsigned hf_hist_n, hf_nreads, hf_nwrites, hf_nerrs;
+
+static void hf_note (int unit, uaecptr io)
+{
+    unsigned cmd = get_word (io + 28);
+    int err = (uae_s8) get_byte (io + 31);
+    unsigned i = hf_hist_n++ % HF_HIST;
+    hf_hist[i].cmd = cmd;
+    hf_hist[i].err = err;
+    hf_hist[i].data = get_long (io + 40);
+    hf_hist[i].off = get_long (io + 44);
+    hf_hist[i].len = get_long (io + 36);
+    if (cmd == CMD_READ) hf_nreads++;
+    if (cmd == CMD_WRITE || cmd == 11) hf_nwrites++;
+    if (err != 0 && hf_nerrs++ < 40)
+	write_log ("hardfile: unit %d cmd %d failed with io_Error %d (data %08x offset %08x length %08x)\n",
+		   unit, cmd, err, hf_hist[i].data, hf_hist[i].off, hf_hist[i].len);
+}
+
+void hardfile_dump_history (void)
+{
+    unsigned i, n = hf_hist_n < HF_HIST ? hf_hist_n : HF_HIST;
+    write_log ("hardfile history: %u requests (%u reads, %u writes, %u failed); last %u, newest last:\n",
+	       hf_hist_n, hf_nreads, hf_nwrites, hf_nerrs, n);
+    for (i = 0; i < n; i++) {
+	unsigned k = (hf_hist_n - n + i) % HF_HIST;
+	write_log ("  cmd %2u err %d data %08x offset %08x length %08x\n",
+		   hf_hist[k].cmd, hf_hist[k].err, hf_hist[k].data, hf_hist[k].off, hf_hist[k].len);
+    }
+}
+#endif
+
 static uae_u32 hardfile_open (void)
 {
     uaecptr tmp1 = m68k_areg(regs, 1); /* IOReq */
@@ -75,14 +111,12 @@ static uae_u32 hardfile_beginio (void)
 			gui_data.hdled = HDLED_READ;
 			
 			dataptr = get_long (tmp1 + 40);
-			if (dataptr & 1)
-				goto bad_command;
-			offset = get_long (tmp1 + 44);
+						offset = get_long (tmp1 + 44);
 			if (offset & 511)
 				goto bad_command;
 			tmp2 = get_long (tmp1 + 36); /* io_Length */
 			if (tmp2 & 511)
-				goto bad_command;
+				goto bad_length;
 			if (tmp2 + offset > (uae_u32)hfd->size)
 				goto bad_command;
 			
@@ -104,14 +138,12 @@ static uae_u32 hardfile_beginio (void)
 			gui_data.hdled = HDLED_WRITE;
 			
 			dataptr = get_long (tmp1 + 40);
-			if (dataptr & 1)
-				goto bad_command;
-			offset = get_long (tmp1 + 44);
+						offset = get_long (tmp1 + 44);
 			if (offset & 511)
 				goto bad_command;
 			tmp2 = get_long (tmp1 + 36); /* io_Length */
 			if (tmp2 & 511)
-				goto bad_command;
+				goto bad_length;
 			if (tmp2 + offset > (uae_u32)hfd->size)
 				goto bad_command;
 			
@@ -127,7 +159,14 @@ static uae_u32 hardfile_beginio (void)
 			}
 			break;
 			
+			bad_length:
+			put_byte (tmp1 + 31, (uae_u8)-4); /* IOERR_BADLENGTH */
+			put_long (tmp1 + 32, 0);
+			break;
+
 			bad_command:
+			put_byte (tmp1 + 31, (uae_u8)-5); /* IOERR_BADADDRESS */
+			put_long (tmp1 + 32, 0);
 			break;
 			
 		case 18: /* GetDriveType */
@@ -161,6 +200,9 @@ static uae_u32 hardfile_beginio (void)
 			retval = 0;
 			break;
 	}
+#ifdef __3DS__
+	hf_note (unit, tmp1);
+#endif
 	return retval;
 }
 

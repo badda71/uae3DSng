@@ -271,12 +271,42 @@ void REGPARAM2 rtarea_bput (uaecptr addr, uae_u32 value)
 #ifdef USE_AUTOCONFIG
 static int trace_traps = 1;
 
+#ifdef __3DS__
+/* last native traps (except the periodic exter_int_helper) for crash dumps */
+#define TRAP_HIST 24
+static struct { int func; uae_u32 d0, a0, a1, a7; } trap_hist[TRAP_HIST];
+static unsigned trap_hist_n;
+
+void autoconf_dump_traphist (void)
+{
+    unsigned i, n = trap_hist_n < TRAP_HIST ? trap_hist_n : TRAP_HIST;
+    write_log ("trap history (%u calls, newest last):\n", trap_hist_n);
+    for (i = 0; i < n; i++) {
+	unsigned k = (trap_hist_n - n + i) % TRAP_HIST;
+	int f = trap_hist[k].func;
+	write_log ("  #%d %s d0=%08x a0=%08x a1=%08x sp=%08x\n", f, (f >= 0 && f < max_trap && trapstr[f] && *trapstr[f]) ? trapstr[f] : "?",
+		   trap_hist[k].d0, trap_hist[k].a0, trap_hist[k].a1, trap_hist[k].a7);
+    }
+}
+#endif
+
+
 void REGPARAM2 call_calltrap(int func)
 {
     uae_u32 retval = 0;
     int has_retval = (trapmode[func] & TRAPFLAG_NO_RETVAL) == 0;
     int implicit_rts = (trapmode[func] & TRAPFLAG_DORET) != 0;
 
+#ifdef __3DS__
+    if (strcmp (trapstr[func], "exter_int_helper") != 0) {
+	unsigned k = trap_hist_n++ % TRAP_HIST;
+	trap_hist[k].func = func;
+	trap_hist[k].d0 = _68k_dreg (0);
+	trap_hist[k].a0 = _68k_areg (0);
+	trap_hist[k].a1 = _68k_areg (1);
+	trap_hist[k].a7 = _68k_areg (7);
+    }
+#endif
     if (*trapstr[func] != 0 && trace_traps
 #ifdef __3DS__
 	/* called ~100 times per second while a hard disk is mounted; every log line is a synced SD write */

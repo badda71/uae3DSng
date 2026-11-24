@@ -113,6 +113,10 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   boot code looks the volume's DosType up in `FileSystem.resource`, which only exists from Kickstart 2.0 on, so an
   FFS-formatted HDF is not mounted under Kickstart 1.3 (hardware log: the filesys traps all run, no drive appears).
   `filesys_dev_bootfilesys` now logs `hardfile unit N: DosType ...` and whether a handler was found.
+  Crash diagnostics: the first illegal instruction that is not the Kickstart's MOVEC probe dumps registers, stack, vectors,
+  the last 24 native traps and the last 16 hardfile requests to the log (illegal-instruction lines are throttled, a runaway CPU
+  produced 5000 synced log writes). `uaehf.device` now returns `IOERR_BADLENGTH/BADADDRESS` for bad requests instead of
+  silently "succeeding", and no longer rejects odd data pointers (the copy is byte-wise).
   `TRAP: exter_int_helper` (~100/s with a HD mounted) is no longer logged: each log line is a synced SD write and it cost 10-20 fps.
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
   no button reaches it. `menu_memory_disk.cpp` and `menu_fileinfo.cpp` were missing it (Memory/Disk menu froze).

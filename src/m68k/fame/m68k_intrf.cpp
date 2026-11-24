@@ -27,6 +27,29 @@ static hostptr micontexto_fpa[256];
 void process_exception(unsigned int vect);
 
 
+#ifdef __3DS__
+extern void autoconf_dump_traphist (void);
+extern void hardfile_dump_history (void);
+
+/* Registers, stack, exception vectors and recent native traps: enough to see who jumped where */
+static void dump_cpu_context (unsigned opcode, unsigned pc)
+{
+	unsigned i, sp = _68k_areg(7);
+	write_log ("crash: PC=%08x opcode=%04x SR=%04x USP=%08x ISP=%08x\n", pc, opcode, _68k_sreg, _68k_uspreg, _68k_ispreg);
+	write_log ("crash: D %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_dreg(0), _68k_dreg(1), _68k_dreg(2), _68k_dreg(3), _68k_dreg(4), _68k_dreg(5), _68k_dreg(6), _68k_dreg(7));
+	write_log ("crash: A %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_areg(0), _68k_areg(1), _68k_areg(2), _68k_areg(3), _68k_areg(4), _68k_areg(5), _68k_areg(6), _68k_areg(7));
+	for (i = 0; i < 24; i += 6)
+		write_log ("crash: stack %08x: %08x %08x %08x %08x %08x %08x\n", sp + i * 4,
+			   get_long (sp + i * 4), get_long (sp + i * 4 + 4), get_long (sp + i * 4 + 8),
+			   get_long (sp + i * 4 + 12), get_long (sp + i * 4 + 16), get_long (sp + i * 4 + 20));
+	write_log ("crash: vectors 2..7: %08x %08x %08x %08x %08x %08x  ExecBase=%08x\n",
+		   get_long (8), get_long (12), get_long (16), get_long (20), get_long (24), get_long (28), get_long (4));
+	write_log ("crash: code at PC: %04x %04x %04x %04x\n", m68k_fetch (pc), m68k_fetch (pc + 2), m68k_fetch (pc + 4), m68k_fetch (pc + 6));
+	autoconf_dump_traphist ();
+	hardfile_dump_history ();
+}
+#endif
+
 void uae_chk_handler(unsigned vector)
 {
 	unsigned opcode=m68k_fetch(m68k_get_pc());
@@ -84,7 +107,21 @@ void uae_chk_handler(unsigned vector)
 		return;
 	}
 
+#ifdef __3DS__
+	{
+		static unsigned n_illegal;
+		/* a runaway CPU raises thousands of these; every log line is a synced SD write */
+		if (n_illegal < 30 || n_illegal % 2000 == 0)
+			write_log ("Illegal instruction: %04x at %08lx (#%u)\n", opcode, pc, n_illegal + 1);
+		if (n_illegal == 0 && opcode != 0x4e7b)
+			dump_cpu_context (opcode, pc);
+		else if (n_illegal == 1 || (n_illegal == 2 && opcode != 0x4e7b))
+			dump_cpu_context (opcode, pc);
+		n_illegal++;
+	}
+#else
 	write_log ("Illegal instruction: %04x at %08lx\n", opcode, pc);
+#endif
 	process_exception(0x4);
 }
 
