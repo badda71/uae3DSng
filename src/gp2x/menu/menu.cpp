@@ -449,6 +449,9 @@ void init_text(int splash)
 
 	prSDLScreen = SDL_SetVideoMode(menu_screen_width, menu_screen_height, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", menu_screen_width, menu_screen_height);
+#ifdef __3DS__
+	write_log("init_text: SetVideoMode(%d,%d,16) -> %p (%s), linear free %u KB\n", menu_screen_width, menu_screen_height, (void*)prSDLScreen, prSDLScreen ? "ok" : SDL_GetError(), log3ds_linear_free_kb());
+#endif
 
 	float sh = 480;
 	float sw = (sh * menu_screen_width) / menu_screen_height;

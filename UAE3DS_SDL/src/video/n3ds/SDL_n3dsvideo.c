@@ -404,6 +404,17 @@ int hh= next_pow2(height);
 		this->hidden->palettedbuffer = NULL;
 	}
 
+	/* Release what the previous mode created. The video thread is stopped, so nothing uses these any more.
+	 * Without this every SDL_SetVideoMode() leaked the spritesheet texture (up to 1 MB of linear memory for a 1024x512 mode)
+	 * plus a semaphore and an event handle; a few dozen menu round trips exhausted the 26 MB of linear memory and the
+	 * next texture upload went to address 0 (black top screen, frozen emulator). */
+	if (spritesheet_tex.data) {
+		C3D_TexDelete(&spritesheet_tex);
+		spritesheet_tex.data = NULL;
+	}
+	if (privateSem1) { svcCloseHandle(privateSem1); privateSem1 = 0; }
+	if (repaintRequired) { svcCloseHandle(repaintRequired); repaintRequired = 0; }
+
 	this->hidden->buffer = (u8*) linearAlloc(hw * hh * this->hidden->byteperpixel);
 	if ( ! this->hidden->buffer ) {
 		SDL_SetError("Couldn't allocate buffer for requested mode");
@@ -483,7 +494,13 @@ int hh= next_pow2(height);
 	if (mode==2) mode = 3; 
 
 	// Setup the textures
-	C3D_TexInit(&spritesheet_tex, hw, hh, this->hidden->mode);
+	if (!C3D_TexInit(&spritesheet_tex, hw, hh, this->hidden->mode)) {
+		spritesheet_tex.data = NULL;
+		linearFree(this->hidden->buffer);
+		this->hidden->buffer = NULL;
+		SDL_SetError("Couldn't allocate %dx%d texture (linear memory free: %u KB)", hw, hh, (unsigned)(linearSpaceFree() / 1024));
+		return(NULL);
+	}
 
 	N3DS_SetScaling(this);
 	

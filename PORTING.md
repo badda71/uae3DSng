@@ -123,6 +123,11 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   Crash dumps from the 3DS exception screen can be resolved by putting the PC/LR addresses into `tools/crashaddrs.txt`: CI prints function,
   source line and disassembly into the build log (`crashlookup.log`). Lesson: diagnostics must read Amiga memory through FAME's map
   (`m68k_fetch`), not `get_long()`: `kickmem_lget()` does not mask and crashed the host while the ROM overlay was mapped at 0.
+  **SDL fork leak (fixed):** every `SDL_SetVideoMode()` in `UAE3DS_SDL/src/video/n3ds/SDL_n3dsvideo.c` allocated the spritesheet texture
+  (`C3D_TexInit`, linear memory: 1 MB for the 1024x512 menu mode) plus a semaphore and an event without freeing the previous ones. The menu
+  switches modes 3x per round trip, so after ~33 calls the 26 MB of linear memory was gone, the texture pointer was NULL, the transfer went to
+  address 0 and the top screen went black with a frozen emulator (hardware log: 11 mode switches at start/selection + 9 menu trips).
+  The log now shows `linear free N KB` on every `init_text`/`update_display`/`speed:` line; it must stay flat across menu trips.
   `TRAP: exter_int_helper` (~100/s with a HD mounted) is no longer logged: each log line is a synced SD write and it cost 10-20 fps.
 * **Menus**: every file that polls events in the menus must use `N3DS_PollEvent` (via `#define SDL_PollEvent`), otherwise
   no button reaches it. `menu_memory_disk.cpp` and `menu_fileinfo.cpp` were missing it (Memory/Disk menu froze).

@@ -14,6 +14,7 @@ extern "C" {
 
 void log3ds(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void log3ds_mem(const char *tag);   /* free application memory / linear heap / malloc usage */
+unsigned log3ds_linear_free_kb(void);   /* free linear memory (textures, audio, bottom-screen images), in KB */
 
 #ifdef __cplusplus
 }

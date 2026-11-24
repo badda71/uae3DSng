@@ -234,7 +234,7 @@ void update_display() {
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
     printf("update_display: SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
 #ifdef __3DS__
-    write_log("update_display: SetVideoMode(%d,%d,16) -> %p (%s)\n", visibleAreaWidth, mainMenu_displayedLines, (void*)prSDLScreen, prSDLScreen ? "ok" : SDL_GetError());
+    write_log("update_display: SetVideoMode(%d,%d,16) -> %p (%s), linear free %u KB\n", visibleAreaWidth, mainMenu_displayedLines, (void*)prSDLScreen, prSDLScreen ? "ok" : SDL_GetError(), log3ds_linear_free_kb());
 #endif
 
     float sh;

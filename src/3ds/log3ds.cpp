@@ -50,6 +50,8 @@ extern "C" void log3ds(const char *fmt, ...)
 	fsync(fileno(g_log));
 }
 
+extern "C" unsigned log3ds_linear_free_kb(void) { return (unsigned)(linearSpaceFree() / 1024); }
+
 extern "C" void log3ds_mem(const char *tag)
 {
 	struct mallinfo mi = mallinfo();
