@@ -17,6 +17,17 @@
 static FILE *g_log = NULL;
 static int g_tried = 0;
 static u64 g_t0 = 0;
+static int g_lazy = 0, g_dirty = 0;
+static unsigned g_last_sync = 0;      /* ms */
+
+static unsigned log_ms(void) { return (unsigned)((svcGetSystemTick() - g_t0) / (SYSCLOCK_ARM11 / 1000)); }
+
+static void log_sync(void)
+{
+	if (g_log) fsync(fileno(g_log));
+	g_dirty = 0;
+	g_last_sync = log_ms();
+}
 
 static void log_open(void)
 {
@@ -47,7 +58,26 @@ extern "C" void log3ds(const char *fmt, ...)
 	size_t l = strlen(buf);
 	if (l == 0 || buf[l - 1] != '\n') fputc('\n', g_log);
 	fflush(g_log);
-	fsync(fileno(g_log));
+	if (g_lazy) g_dirty = 1;
+	else log_sync();
+}
+
+extern "C" void log3ds_lazy(int on)
+{
+	if (!on && g_lazy && g_dirty) log_sync();
+	g_lazy = on;
+	if (on) g_last_sync = g_log ? log_ms() : 0;
+}
+
+/* Called once per emulated frame (before the limiter sleeps for slack_us). The first call after the menu/start-up turns lazy
+ * mode on. A pending sync is done when 2 s old and there is idle time to hide it in (its cost is made up for by the limiter's
+ * catch-up allowance), at the latest after 10 s. */
+extern "C" void log3ds_tick(unsigned slack_us)
+{
+	if (!g_lazy) { log3ds_lazy(1); return; }
+	if (!g_dirty || !g_log) return;
+	unsigned age = log_ms() - g_last_sync;
+	if ((age >= 2000 && slack_us >= 6000) || age >= 10000) log_sync();
 }
 
 extern "C" unsigned log3ds_linear_free_kb(void) { return (unsigned)(linearSpaceFree() / 1024); }

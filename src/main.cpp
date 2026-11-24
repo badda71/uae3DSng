@@ -220,6 +220,9 @@ void do_leave_program (void)
     SDL_FreeSurface(current_screenshot);
 #endif
 	     
+#ifdef __3DS__
+    log3ds_lazy (0);   /* from here on every line is synced again: the shutdown steps are what a freeze would be diagnosed from */
+#endif
     write_log("leave: graphics_leave\n");
     graphics_leave ();
     close_joystick ();

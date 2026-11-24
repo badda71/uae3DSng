@@ -215,6 +215,16 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   `text_force_extent()`), centered horizontally and vertically (dx/dy), then the layer at (dx, dy). A second `text_draw_window()` in the same screen (message
   box) is drawn into the layer unchanged. The file dialog forces its nominal height (`text_force_extent`), the savestate thumbnail is drawn after the
   layer at `y + dy`.
+* **Round 7 (speed while the Amiga uses files).** The log from the round-6 build showed 2,583 `TRAP: filesys_handler` lines: one per DOS packet of the
+  directory file system (thousands while a game loads). Every `write_log()` was `fflush` + `fsync`, and an `fsync` on the SD card takes 10..90 ms: the
+  frames in which the Amiga accessed files ran at 28..47 fps with 130..430 ms hitches, frames without file access were fine (49.6 fps, worst frame 20 ms,
+  spare time the same as in the pre-round-3 builds). Changes: (1) `autoconf.cpp` logs each trap only its first 3 times; (2) `log3ds` has a lazy mode:
+  while frames are emulated, lines are written but not synced, and `log3ds_tick()` (called per frame from `flush_block`) syncs at most every 2 s, only when
+  the limiter has >= 6 ms of idle time to hide it in (the limiter's 4-frame catch-up covers the rest; forced after 10 s). `init_text()` (menu) and
+  `do_leave_program()` switch back to sync-every-line, so start-up, menu and shutdown breadcrumbs stay crash-safe. (3) Savestate thumbnails are read with
+  one `read()` into memory and decoded with `IMG_Load_RW`: libpng's many small stdio reads cost several ms each on uncached SD sectors (1.8 s for a slot
+  that was not in the OS cache, 0.15 s for a fresh one). New diagnostics: the `speed:` line has `flip avg/max` (time in `SDL_Flip` per frame), the log has
+  one `menu:` line per menu visit (average/maximum time of a menu pass, of which compose and `SDL_Flip`), and the thumbnail line shows the file size.
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 

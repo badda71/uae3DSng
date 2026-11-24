@@ -45,6 +45,35 @@
 
 SDL_Surface *thumbnail_image = NULL;
 
+#ifdef __3DS__
+#include <fcntl.h>
+#include <unistd.h>
+/* Reads the screenshot with one big read instead of the many small ones that libpng makes through SDL_RWops/stdio: every
+ * uncached small read costs several ms on the SD card (the log showed 1.8 s for a ~100 KB screenshot that was not in the OS's
+ * cache, 0.15 s for one that had just been written). */
+static SDL_Surface *thumb_load(const char *fn, long *size)
+{
+	*size = -1;
+	int fd = open(fn, O_RDONLY);
+	if (fd < 0) return IMG_Load(fn);
+	off_t n = lseek(fd, 0, SEEK_END);
+	lseek(fd, 0, SEEK_SET);
+	if (n <= 0 || n > 4 * 1024 * 1024) {
+		close(fd);
+		return IMG_Load(fn);
+	}
+	void *buf = malloc((size_t)n);
+	ssize_t got = buf ? read(fd, buf, (size_t)n) : -1;
+	close(fd);
+	*size = (long)n;
+	SDL_Surface *img = NULL;
+	if (got == (ssize_t)n)
+		img = IMG_Load_RW(SDL_RWFromMem(buf, (int)n), 1);
+	free(buf);
+	return img ? img : IMG_Load(fn);
+}
+#endif
+
 /* Decoding the screenshot (PNG + scaling) takes a while, so moving over the slots (or holding left/right) only marks the thumbnail as
  * wanted; it is decoded once the cursor has rested on a slot for THUMB_DELAY_MS. */
 #define THUMB_DELAY_MS 140
@@ -690,8 +719,11 @@ void load_savestate_thumbnail() {
 			fclose(f);
 #ifdef __3DS__
 			Uint32 t0 = SDL_GetTicks();
-#endif
+			long fsize;
+			SDL_Surface *tmp = thumb_load(screenshot_filename, &fsize);
+#else
 			SDL_Surface *tmp = IMG_Load(screenshot_filename);
+#endif
 			SDL_Surface *loadedImage = SDL_DisplayFormat(tmp);
 			if (tmp != NULL) {
 				SDL_FreeSurface(tmp);
@@ -719,7 +751,7 @@ void load_savestate_thumbnail() {
 					thumbnail_image = thumb_shrink16(loadedImage, dst.w, dst.h);
 				if (thumbnail_image == NULL)
 					thumbnail_image = zoomSurface(loadedImage, (float) dst.w / (float) src.w, (float) dst.h / (float) src.h, SMOOTHING_ON);
-				write_log("savestate thumbnail: decode %u ms, shrink %u ms (%dx%d -> %dx%d)\n", (unsigned)(t1 - t0), (unsigned)(SDL_GetTicks() - t1), src.w, src.h, dst.w, dst.h);
+				write_log("savestate thumbnail: file %ld bytes, load+decode %u ms, shrink %u ms (%dx%d -> %dx%d)\n", fsize, (unsigned)(t1 - t0), (unsigned)(SDL_GetTicks() - t1), src.w, src.h, dst.w, dst.h);
 #else
 				thumbnail_image = zoomSurface(loadedImage, (float) dst.w / (float) src.w, (float) dst.h / (float) src.h, SMOOTHING_ON);
 #endif

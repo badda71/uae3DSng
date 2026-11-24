@@ -276,6 +276,7 @@ static int trace_traps = 1;
 #define TRAP_HIST 24
 static struct { int func; uae_u32 d0, a0, a1, a7; } trap_hist[TRAP_HIST];
 static unsigned trap_hist_n;
+static unsigned short trap_logged[MAX_TRAPS];   /* log lines written per trap */
 
 void autoconf_dump_traphist (void)
 {
@@ -309,8 +310,10 @@ void REGPARAM2 call_calltrap(int func)
 #endif
     if (*trapstr[func] != 0 && trace_traps
 #ifdef __3DS__
-	/* called ~100 times per second while a hard disk is mounted; every log line is a synced SD write */
+	/* exter_int_helper is called ~100 times per second while a hard disk is mounted, filesys_handler once per DOS packet
+	 * (thousands while a game loads): a log line is an SD card write, so each trap is only logged its first few times. */
 	&& strcmp (trapstr[func], "exter_int_helper") != 0 && strcmp (trapstr[func], "alloctrace") != 0
+	&& func >= 0 && func < MAX_TRAPS && trap_logged[func] < 3 && ++trap_logged[func]
 #endif
 	)
 	write_log ("TRAP: %s\n", trapstr[func]);

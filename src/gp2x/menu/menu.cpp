@@ -17,6 +17,7 @@
 #include "xwin.h"
 #ifdef __3DS__
 #include "video3ds.h"
+#include "rpt.h"
 #endif
 
 #if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
@@ -385,6 +386,18 @@ else
 }
 
 #ifdef __3DS__
+/* menu speed accounting (logged when the menu is left, see menu_log_stats) */
+static unsigned menu_st_n;
+static unsigned long menu_st_compose, menu_st_flip, menu_st_loop, menu_st_loop_max, menu_st_prev;
+
+void menu_log_stats(void)
+{
+	if (menu_st_n)
+		write_log("menu: %u flips, one pass (text drawing + input + compose + flip) avg %lu max %lu us, of which compose %lu us, SDL_Flip %lu us\n",
+			menu_st_n, menu_st_loop / menu_st_n, menu_st_loop_max, menu_st_compose / menu_st_n, menu_st_flip / menu_st_n);
+	menu_st_n = 0; menu_st_compose = menu_st_flip = menu_st_loop = menu_st_loop_max = menu_st_prev = 0;
+}
+
 /* background + window + text layer -> screen */
 static void menu_compose(void)
 {
@@ -416,8 +429,25 @@ static void menu_compose(void)
 	SDL_BlitSurface(text_screen, NULL, prSDLScreen, &d);
 }
 
+static void menu_present(unsigned long t0, unsigned long t1)   /* t0: start of compose, t1: end of compose / start of flip */
+{
+	SDL_Flip(prSDLScreen);
+	unsigned long t2 = read_processor_time();
+	/* the first pass and passes after a long wait (a modal dialog) are not counted */
+	if (menu_st_prev && t2 - menu_st_prev < 1000000UL) {
+		unsigned long loop = t2 - menu_st_prev;
+		menu_st_n++;
+		menu_st_compose += t1 - t0;
+		menu_st_flip += t2 - t1;
+		menu_st_loop += loop;
+		if (loop > menu_st_loop_max) menu_st_loop_max = loop;
+	}
+	menu_st_prev = t2;
+}
+
 void text_flip_with_image(SDL_Surface *img, int x, int y)
 {
+	unsigned long t0 = read_processor_time();
 	text_force_extent(y + img->h);
 	menu_compose();
 	SDL_Rect dst;
@@ -426,13 +456,14 @@ void text_flip_with_image(SDL_Surface *img, int x, int y)
 	dst.w = img->w;
 	dst.h = img->h;
 	SDL_BlitSurface(img, NULL, prSDLScreen, &dst);
-	SDL_Flip(prSDLScreen);
+	menu_present(t0, read_processor_time());
 }
 
 void text_flip(void)
 {
+	unsigned long t0 = read_processor_time();
 	menu_compose();
-	SDL_Flip(prSDLScreen);
+	menu_present(t0, read_processor_time());
 }
 #else
 void text_flip_with_image(SDL_Surface *img, int x, int y)
@@ -526,6 +557,7 @@ void init_text(int splash)
 {
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #ifdef __3DS__
+	log3ds_lazy(0);   /* menu: every log line synced again (the emulator is not running, so it costs nothing) */
 	/* goMenu() and run_mainMenu() both call init_text(): when the menu's video mode is up already there is nothing to
 	 * switch. (Every mode switch tears down and rebuilds the driver's render targets and thread: slow.) */
 	if (prSDLScreen != NULL && displaying_menu && prSDLScreen->w == menu_screen_width && prSDLScreen->h == menu_screen_height) {

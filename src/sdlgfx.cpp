@@ -127,6 +127,9 @@ static int shiftWasPressed = 0;
 
 static unsigned long previous_synctime = 0;
 static unsigned long next_synctime = 0;
+#ifdef __3DS__
+static unsigned long dbg_flip_us = 0, dbg_flip_max = 0;   /* time spent in SDL_Flip, for the speed report */
+#endif
 
 void flush_block ()
 {
@@ -153,14 +156,16 @@ void flush_block ()
 #endif
 		unsigned long start = read_processor_time();
 #ifdef __3DS__
+		log3ds_tick (start < next_synctime ? (unsigned)(next_synctime - start) : 0);   /* deferred log sync, see log3ds.cpp */
 		{ static int n = 0; if (n < 5) { write_log("frame %d: now=%lu next_sync=%lu time_per_frame=%lu\n", n, start, next_synctime, time_per_frame); n++; } }
 #endif
 #if defined(__3DS__)
 		/* Audio no longer paces the emulator on 3DS (see sound_sdl_new.cpp), so this is a real frame
 		 * limiter: sleep until the next frame is due. Clamped so a wrong clock can never mean a long sleep. */
-		if(start < next_synctime && !nowSuperThrottle)
+		unsigned long now2 = read_processor_time();   /* log3ds_tick() may have used some of the idle time */
+		if(now2 < next_synctime && !nowSuperThrottle)
 		{
-			unsigned long d = next_synctime - start;
+			unsigned long d = next_synctime - now2;
 			if (d > 2 * time_per_frame) d = 2 * time_per_frame;
 			usleep(d);
 		}
@@ -172,9 +177,13 @@ void flush_block ()
 			usleep((next_synctime - start) - 1000);
 #endif
 #endif
+#ifdef __3DS__
+		unsigned long flip_t0 = read_processor_time();
+#endif
 		SDL_Flip(prSDLScreen);
 		last_synctime = read_processor_time();
 #ifdef __3DS__
+		{ unsigned long fl = last_synctime - flip_t0; dbg_flip_us += fl; if (fl > dbg_flip_max) dbg_flip_max = fl; }
 		{	/* speed report every ~5 s: real fps vs target and how much of the time the emulator had to spare */
 			static unsigned long t0 = 0, spare = 0; static unsigned frames = 0;
 			if (t0 == 0) t0 = last_synctime;
@@ -196,10 +205,11 @@ void flush_block ()
 				extern int crashdiag_mem (unsigned *chip_kb, unsigned *other_kb);
 				extern unsigned crashdiag_largest_chip_kb (void);
 				unsigned fc = 0, fo = 0; int fok = crashdiag_mem (&fc, &fo);
-				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, disk reads %u (%lu ms), free mem %s%u/%u KB (chip/other, largest chip chunk %u KB), linear free %u KB\n",
+				write_log("speed: %u.%u fps (target %u.%u), spare %lu%%, worst frame %lu ms, %u frames >35 ms, flip avg %lu max %lu us, disk reads %u (%lu ms), free mem %s%u/%u KB (chip/other, largest chip chunk %u KB), linear free %u KB\n",
 					fps10 / 10, fps10 % 10, tgt10 / 10, tgt10 % 10, spare * 100 / el, worst / 1000, slow,
-					disk_io_calls, disk_io_us / 1000, fok ? "" : "?", fc, fo, fok ? crashdiag_largest_chip_kb () : 0, log3ds_linear_free_kb());
+					frames ? dbg_flip_us / frames : 0, dbg_flip_max, disk_io_calls, disk_io_us / 1000, fok ? "" : "?", fc, fo, fok ? crashdiag_largest_chip_kb () : 0, log3ds_linear_free_kb());
 				t0 = last_synctime; spare = 0; frames = 0; worst = 0; slow = 0; disk_io_us = 0; disk_io_calls = 0;
+				dbg_flip_us = 0; dbg_flip_max = 0;
 			}
 		}
 #endif

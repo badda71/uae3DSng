@@ -48,6 +48,9 @@ void draw_image_pos(SDL_Surface *img, int x, int y);
 int createScript(int bIcon=0);
 
 void text_flip(void);
+#ifdef __3DS__
+void menu_log_stats(void);   /* one log line with the menu's frame timing; call when the menu is left */
+#endif
 void text_force_extent(int bottom);   /* 3DS: the window of this menu is at least tall enough to hold everything down to this pixel row */
 void text_flip_with_image(SDL_Surface *img, int x, int y);
 void set_joyConf(void);

@@ -233,6 +233,9 @@ void update_display() {
 	vita2d_texture_set_alloc_memblock_type(SCE_KERNEL_MEMBLOCK_TYPE_USER_RW);
 #endif
 
+#ifdef __3DS__
+	menu_log_stats();
+#endif
 	displaying_menu = 0;
 
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
