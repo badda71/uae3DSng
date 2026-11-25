@@ -282,6 +282,7 @@ release: all
 
 all: $(BUILD) $(GFXBUILD) $(DEPSDIR) $(ROMFS_T3XFILES) $(T3XHFILES)
 	@echo building $(APP_TITLE)
+	@$(if $(filter release,$(MAKECMDGOALS)),:,echo "*** NOTE: this is NOT a release build (-O0 -ggdb, about 2-3x slower). Use 'make release' (run 'make clean' first if you built without it before).")
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile $(MAKECMDGOALS)
 
 $(BUILD):

@@ -279,7 +279,13 @@ void real_main (int argc, char **argv)
 #endif
 
 #if defined(__3DS__)
-    { bool n3 = false; APT_CheckNew3DS(&n3); write_log("uae3DSng built %s %s, new3ds=%d\n", __DATE__, __TIME__, (int)n3); }
+    { bool n3 = false; APT_CheckNew3DS(&n3); 
+#ifdef __OPTIMIZE__
+        const char *flavor = "release build";
+#else
+        const char *flavor = "DEBUG build (-O0, much slower; use make release)";
+#endif
+        write_log("uae3DSng built %s %s, %s, new3ds=%d\n", __DATE__, __TIME__, flavor, (int)n3); }
     log3ds_mem("start");
     romfsInit();                  /* romfs:/data = menu graphics, romfs:/*.png = bottom screen UI */
     osSetSpeedupEnable(true);     /* New 3DS: 804 MHz + L2 cache; harmless on Old 3DS */
