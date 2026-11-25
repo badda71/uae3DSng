@@ -356,22 +356,94 @@ static void cd_halt_machine (void)
  * busy-wait loop), what does it wait for (interrupt enable/request bits, disk DMA, drive state). */
 extern void DISK_dump_state (void);
 
+/* one Task (or Process) of exec's lists for the snapshot: name, state, the CLI command it runs, what it waits for */
+static void cd_snapshot_task (uae_u32 task, const char *tag)
+{
+	char name[40], cmd[48];
+	unsigned type;
+	if (task < 0x400 || task >= 0xA00000 || (task & 1)) return;
+	type = cd_task_names (task, name, sizeof name, cmd, sizeof cmd);
+	write_log ("snapshot: %s %08x '%s' type %u state %u pri %d CLI command '%s' sigwait %08x sigrecvd %08x SPReg %08x\n", tag, task, name, type,
+		   cd_byte (task + 15), (int) (signed char) cd_byte (task + 9), cmd, cd_long (task + 22), cd_long (task + 26), cd_long (task + 54));
+}
+
+static int cd_addr_ok (uae_u32 a)
+{
+	return a >= 0x400 && (a < 0xA00000 || (a >= 0xE00000 && a < 0xE80000) || (a >= 0xF80000 && a < 0x1000000));
+}
+
 void crashdiag_snapshot (const char *why)
 {
 	unsigned pc = m68k_get_pc (), sp = _68k_areg (7), i;
 	write_log ("snapshot (%s): %u frames after the reset\n", why, cd_frames_since_reset);
-	write_log ("snapshot: PC=%08x SR=%04x USP=%08x  code at PC:", pc, _68k_sreg, _68k_uspreg);
-	for (i = 0; i < 8; i++) write_log (" %04x", cd_word (pc + i * 2));
-	write_log ("\n");
+	{
+		char line[160];
+		int n = snprintf (line, sizeof line, "snapshot: PC=%08x SR=%04x USP=%08x  code at PC:", pc, _68k_sreg, _68k_uspreg);
+		for (i = 0; i < 8; i++) n += snprintf (line + n, sizeof line - n, " %04x", cd_word (pc + i * 2));
+		write_log ("%s\n", line);
+	}
 	write_log ("snapshot: D %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_dreg(0), _68k_dreg(1), _68k_dreg(2), _68k_dreg(3), _68k_dreg(4), _68k_dreg(5), _68k_dreg(6), _68k_dreg(7));
 	write_log ("snapshot: A %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_areg(0), _68k_areg(1), _68k_areg(2), _68k_areg(3), _68k_areg(4), _68k_areg(5), _68k_areg(6), sp);
-	write_log ("snapshot: stack %08x: %08x %08x %08x %08x %08x %08x\n", sp, cd_long (sp), cd_long (sp + 4), cd_long (sp + 8), cd_long (sp + 12), cd_long (sp + 16), cd_long (sp + 20));
+	for (i = 0; i < 24; i += 6)
+		write_log ("snapshot: stack %08x: %08x %08x %08x %08x %08x %08x\n", sp + i * 4, cd_long (sp + i * 4), cd_long (sp + i * 4 + 4), cd_long (sp + i * 4 + 8), cd_long (sp + i * 4 + 12), cd_long (sp + i * 4 + 16), cd_long (sp + i * 4 + 20));
 	write_log ("snapshot: vectors 0x64..0x7c (levels 1..7): %08x %08x %08x %08x %08x %08x %08x\n", cd_long (0x64), cd_long (0x68), cd_long (0x6c), cd_long (0x70), cd_long (0x74), cd_long (0x78), cd_long (0x7c));
-	write_log ("snapshot: PC at the end of the last %u frames (newest last):", cd_pc_n < 32 ? cd_pc_n : 32);
-	for (i = cd_pc_n < 32 ? 0 : cd_pc_n - 32; i < cd_pc_n; i++) write_log (" %x", cd_pc_ring[i & 31]);
-	write_log ("\n");
+	{
+		char line[400];
+		int n = snprintf (line, sizeof line, "snapshot: PC at the end of the last %u frames (newest last):", cd_pc_n < 32 ? cd_pc_n : 32);
+		for (i = cd_pc_n < 32 ? 0 : cd_pc_n - 32; i < cd_pc_n; i++) n += snprintf (line + n, sizeof line - n, " %x", cd_pc_ring[i & 31]);
+		write_log ("%s\n", line);
+	}
 	dumpcustom ();
 	DISK_dump_state ();
+	/* what the registers point at (BCPL strings of the DOS, buffers, tables) */
+	for (i = 0; i < 7; i++) {
+		uae_u32 a = _68k_areg (i);
+		unsigned k;
+		char line[200];
+		int n;
+		if (!cd_addr_ok (a)) continue;
+		n = snprintf (line, sizeof line, "snapshot: A%u -> %08x:", i, a);
+		for (k = 0; k < 24; k++) n += snprintf (line + n, sizeof line - n, " %02x", cd_byte (a + k));
+		n += snprintf (line + n, sizeof line - n, "  '");
+		for (k = 0; k < 24; k++) { unsigned c = cd_byte (a + k); line[n++] = (c >= 32 && c < 127) ? (char) c : '.'; }
+		line[n++] = '\'';
+		line[n] = 0;
+		write_log ("%s\n", line);
+	}
+	/* the tasks: who runs, who is ready, who waits (the exec structures are only read when they were sane at the last good frame) */
+	if (cd_last_eb && cd_exec_ok (cd_last_eb)) {
+		uae_u32 eb = cd_last_eb;
+		unsigned list;
+		write_log ("snapshot: ExecBase %08x IdleCount %u DispCount %u IDNest %d TDNest %d\n", eb, cd_long (eb + 0x118), cd_long (eb + 0x11C),
+			   (int) (signed char) cd_byte (eb + 0x126), (int) (signed char) cd_byte (eb + 0x127));
+		cd_snapshot_task (cd_long (eb + 0x114), "ThisTask");
+		for (list = 0; list < 2; list++) {
+			uae_u32 node = cd_long (eb + (list ? 0x1A4 : 0x196));
+			unsigned n = 0;
+			while (n++ < 12 && cd_addr_ok (node) && !(node & 1) && cd_long (node)) {
+				cd_snapshot_task (node, list ? "waiting" : "ready");
+				node = cd_long (node);
+			}
+		}
+	}
+	/* the code around the PCs of the last frames: lets a busy-wait loop in a ROM or a game be read from the log */
+	{
+		uae_u32 win[6];
+		unsigned nw = 0, j, k;
+		for (i = cd_pc_n < 32 ? 0 : cd_pc_n - 32; i < cd_pc_n; i++) {
+			uae_u32 w = cd_pc_ring[i & 31] & ~0x7FU;
+			for (j = 0; j < nw && win[j] != w; j++) ;
+			if (j == nw && nw < 6 && cd_addr_ok (w)) win[nw++] = w;
+		}
+		for (j = 0; j < nw; j++)
+			for (k = 0; k < 128; k += 32) {
+				unsigned m;
+				char line[200];
+				int n = snprintf (line, sizeof line, "snapshot: memory %06x:", win[j] + k);
+				for (m = 0; m < 32; m += 2) n += snprintf (line + n, sizeof line - n, " %04x", cd_word (win[j] + k + m));
+				write_log ("%s\n", line);
+			}
+	}
 }
 
 /* The exec structures are gone *and* the CPU keeps raising illegal-instruction exceptions: the machine has run amok. Same as a

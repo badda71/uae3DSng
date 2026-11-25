@@ -142,6 +142,26 @@ typedef struct {
 
 static drive floppy[4];
 
+#ifdef __3DS__
+/* The last disk events (track decodes, head steps, motor, DMA start/finish/stop), written to the log by DISK_dump_state(): a
+ * loader that fails on the 3DS can be compared with what the same loader does on the real hardware. */
+extern unsigned crashdiag_frame_count (void);
+#define DT_RING 192
+static struct { unsigned frame; char ev; unsigned a, b, c; } dt_ring[DT_RING];
+static unsigned dt_n, dt_decodes, dt_steps, dt_index, dt_started, dt_finished, dt_stopped;
+static void dt (char ev, unsigned a, unsigned b, unsigned c)
+{
+    unsigned i = dt_n++ % DT_RING;
+    dt_ring[i].frame = crashdiag_frame_count ();
+    dt_ring[i].ev = ev;
+    dt_ring[i].a = a;
+    dt_ring[i].b = b;
+    dt_ring[i].c = c;
+}
+#else
+#define dt(e, a, b, c) ((void) 0)
+#endif
+
 /* Keeps track of whether the Amiga program seems to be using the data coming
    in from the disk; if this remains 0 for several seconds, we stop calling
    disk_doupdate_read, even if the motor is still on.  This is a rather large
@@ -424,6 +444,10 @@ static void drive_step (drive * drv)
 #ifdef DEBUG_DISK
     write_log ("track %d\n", drv->cyl);
 #endif
+#ifdef __3DS__
+    dt_steps++;
+    dt ('P', drv->cyl, direction ? 1 : 0, 0);
+#endif
 }
 
 static int drive_track0 (drive * drv)
@@ -456,6 +480,10 @@ static void drive_motor (drive * drv, int off)
     if (!drv->motoroff && off) {
 	drv->drive_id_scnt = 0; /* Reset id shift reg counter */
     }
+#ifdef __3DS__
+    if (drv->motoroff != off)
+	dt ('M', off ? 0 : 1, (unsigned) (drv - floppy), 0);
+#endif
     drv->motoroff = off;
     if (drv->motoroff) {
 	drv->dskready = 0;
@@ -650,6 +678,10 @@ static void drive_fill_bigbuf (drive * drv)
     }
     if (drv->buffered_cyl == drv->cyl && drv->buffered_side == side)
 	return;
+#ifdef __3DS__
+    dt_decodes++;
+    dt ('T', (unsigned) tr, 0, 0);
+#endif
 
   if (ti->type == TRACK_AMIGADOS) {
 	  decode_amigados (drv);
@@ -1069,6 +1101,10 @@ static uae_u32 dskpt;
 
 static void disk_dmafinished (void)
 {
+#ifdef __3DS__
+    dt_finished++;
+    dt ('F', 0, (unsigned) dskpt, 0);
+#endif
     INTREQ (0x8002);
     dskdmaen = 0; /* ??? */
 #ifdef DEBUG_DISK
@@ -1097,8 +1133,12 @@ void DISK_handler (void)
     eventtab[ev_disk].active = 0;
     if (disk_sync[disk_sync_cycle] & DISK_WORDSYNC)
 	INTREQ (0x9000);
-    if (disk_sync[disk_sync_cycle] & DISK_INDEXSYNC)
+    if (disk_sync[disk_sync_cycle] & DISK_INDEXSYNC) {
+#ifdef __3DS__
+	dt_index++;
+#endif
 	cia_diskindex ();
+    }
     disk_sync[disk_sync_cycle] = 0;
     disk_events (disk_sync_cycle);
 }
@@ -1347,6 +1387,12 @@ void DSKLEN (uae_u16 v, int hpos)
 	/* Megalomania does this */
 	if (dskdmaen == 3)
 	    write_log ("warning: Disk write DMA aborted, %d words left\n", dsklength);
+#ifdef __3DS__
+	if (dskdmaen >= 2) {
+	    dt_stopped++;
+	    dt ('A', (unsigned) dsklength, (unsigned) dskpt, 0);
+	}
+#endif
 	dskdmaen = 0;
     }
     dsklength = v & 0x3ffe;
@@ -1354,6 +1400,10 @@ void DSKLEN (uae_u16 v, int hpos)
 	return;
     if (v & 0x4000)
 	dskdmaen = 3;
+#ifdef __3DS__
+    dt_started++;
+    dt (dskdmaen == 3 ? 'W' : 'D', (unsigned) dsklength, (unsigned) dskpt, (adkcon & 0x400) ? 0x10000 | dsksync : 0);
+#endif
 #ifdef DEBUG_DISK
     {
 	int dr;
@@ -1487,6 +1537,9 @@ void DISK_reset (void)
     disk_data_used = 0;
     dskdmaen = 0;
     disabled = 0;
+#ifdef __3DS__
+    dt_n = dt_decodes = dt_steps = dt_index = dt_started = dt_finished = dt_stopped = 0;
+#endif
     for (i = 0; i < 4; i++) {
 	reset_drive (i);
     }
@@ -1515,6 +1568,35 @@ void DISK_dump_state (void)
 	if (!d->diskfile) { write_log ("snapshot: DF%d empty, cyl %d\n", i, d->cyl); continue; }
 	write_log ("snapshot: DF%d cyl %d motor %s ready %d state %d mfmpos %d tracklen %d dmalen %d trackspeed %d changed %d\n", i, d->cyl,
 		   d->motoroff ? "off" : "on", d->dskready, d->state, d->mfmpos, d->tracklen, d->dmalen, d->trackspeed, d->dskchange);
+    }
+    write_log ("snapshot: disk since the reset: %u track decodes, %u head steps, %u index pulses, %u DMAs started, %u finished, %u stopped by the program\n",
+	       dt_decodes, dt_steps, dt_index, dt_started, dt_finished, dt_stopped);
+    {
+	unsigned n = dt_n < DT_RING ? dt_n : DT_RING, first = dt_n - n, k;
+	write_log ("snapshot: the last %u disk events (frame:event; T track decoded, P head step to cyl/dir, M motor on/off+drive, D read DMA words@ptr/sync, W write DMA, F DMA finished at ptr, A DMA stopped with N words left):\n", n);
+	for (k = 0; k < n; k += 6) {
+	    unsigned j;
+	    char line[300];
+	    int len = 0;
+	    for (j = k; j < k + 6 && j < n; j++) {
+		unsigned i = (first + j) % DT_RING;
+		switch (dt_ring[i].ev) {
+		case 'T': len += snprintf (line + len, sizeof line - len, " %u:T%u", dt_ring[i].frame, dt_ring[i].a); break;
+		case 'P': len += snprintf (line + len, sizeof line - len, " %u:P%u/%u", dt_ring[i].frame, dt_ring[i].a, dt_ring[i].b); break;
+		case 'M': len += snprintf (line + len, sizeof line - len, " %u:M%u(DF%u)", dt_ring[i].frame, dt_ring[i].a, dt_ring[i].b); break;
+		case 'D': case 'W':
+		    len += snprintf (line + len, sizeof line - len, " %u:%c%u@%x/", dt_ring[i].frame, dt_ring[i].ev, dt_ring[i].a, dt_ring[i].b);
+		    if (dt_ring[i].c) len += snprintf (line + len, sizeof line - len, "%04x", dt_ring[i].c & 0xffff);
+		    else len += snprintf (line + len, sizeof line - len, "-");
+		    break;
+		case 'F': len += snprintf (line + len, sizeof line - len, " %u:F@%x", dt_ring[i].frame, dt_ring[i].b); break;
+		case 'A': len += snprintf (line + len, sizeof line - len, " %u:A%u", dt_ring[i].frame, dt_ring[i].a); break;
+		}
+		if (len > (int) sizeof line - 40) break;
+	    }
+	    line[len] = 0;
+	    write_log ("snapshot: disk%s\n", line);
+	}
     }
 }
 #endif

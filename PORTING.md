@@ -287,6 +287,14 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   the PC at the end of each of the last 32 frames (a busy-wait loop shows up as the same few addresses), `dumpcustom()` (DMACON/INTENA/INTREQ/COP/DIW/DDF) and
   `DISK_dump_state()` (disk DMA state, DSKLEN/DSKPT/DSKSYNC, per drive: cylinder, motor, ready, track position). To use it: let the game hang, press the menu button,
   leave again, send the log.
+* **Round 16 (snapshot v2: tasks, code, disk events).** A simulation of the Shadow of the Beast (a) hardware loader (a small 68000 interpreter plus a model of the
+  CIA/Paula floppy registers, run offline against the ADF) shows that the disk itself is fine: the loader reads the first file (track 40, then 39..24) and the cruncher
+  produces valid code at `$500`. So the A1200 failure (`jsr $500` into stale RAM) and the A500 hang have to come from the emulator or from the timing of the profile.
+  The loader waits for `DSKBLK` with a loop of `$186a0` iterations (about 0.6 s on a 7 MHz 68000, about 0.3 s at the "14 MHz" setting of the A1200 profile; a track read
+  needs ~0.21 s, so the margin shrinks to ~0.1 s: a suspect, not proven). `crashdiag_snapshot()` therefore also writes: the PC windows (128 bytes of code around each of the PCs of the
+  last frames, so a Kickstart loop can be read from the log), 24 bytes at each address register (BCPL strings), 24 stack longs, ExecBase counters, ThisTask and the
+  ready/wait lists (name, state, CLI command, signals), and the last 192 disk events from a ring in `disk.cpp` (`T` track decoded, `P` head step, `M` motor, `D`/`W`
+  DMA start with length, pointer and sync word, `F` DMA finished, `A` DMA stopped by the program with N words left) with counters since the reset.
 
 ## Known gaps / risks
 
