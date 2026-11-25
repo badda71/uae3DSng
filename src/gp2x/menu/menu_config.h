@@ -125,6 +125,11 @@ extern char custom_kickrom[256];
 extern int mainMenu_leftStickMouse;
 extern int mainMenu_touchControls;
 extern int mainMenu_shader;
+#ifdef __3DS__
+extern int mainMenu_displayMode;   /* DISPLAY_1TO1, _FITHEIGHT, _FITWIDTH, _CUSTOM (video3ds.h) */
+extern int mainMenu_zoom;          /* Custom: percent, 100 = 1:1 */
+extern int mainMenu_vpan;          /* Custom: vertical pan in pixels, 0 = centered */
+#endif
 extern int mainMenu_deadZone;
 extern int mainMenu_custom_controlSet;
 extern int mainMenu_customPreset_up[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];

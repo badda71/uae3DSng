@@ -244,6 +244,12 @@ void update_display() {
     write_log("update_display: SetVideoMode(%d,%d,16) -> %p (%s), linear free %u KB\n", visibleAreaWidth, mainMenu_displayedLines, (void*)prSDLScreen, prSDLScreen ? "ok" : SDL_GetError(), log3ds_linear_free_kb());
 #endif
 
+#ifdef __3DS__
+    // the GPU puts the 320x256 PAL window on the 400x240 screen: mode, zoom and pan (video3ds.h)
+    video3ds_apply_display();
+    SDL_SetVideoModeSync(1);
+    write_log("update_display: display mode %s, zoom %d%%, pan %d\n", video3ds_mode_name(mainMenu_displayMode), video3ds_zoom(), video3ds_pan());
+#else
     float sh;
     float sw;
     int x;
@@ -281,8 +287,6 @@ void update_display() {
 	 printf("update_display: SDL_SetVideoModeScaling(%i, %i, %i, %i)\n", x, y, (int)sw, (int)sh);
 
     SDL_SetVideoModeSync(1);
-#ifdef __3DS__
-    write_log("update_display: scaling x=%d y=%d w=%d h=%d\n", x, y, (int)sw, (int)sh);
 #endif
 
 #ifdef __PSP2__ // NOT __SWITCH__

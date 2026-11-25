@@ -134,6 +134,14 @@ static myRes quickSwitchModes[] = {
 };
 extern int moveY;
 
+/* While this is true the analog stick acts as a DPad (and does not reach the custom controls): Start+R+DPad on Vita/Switch,
+ * Start+DPad on the 3DS (zoom / vertical pan of the picture, see display_gesture()). */
+#ifdef __3DS__
+#define DPAD_GESTURE_HELD (buttonStart[0])
+#else
+#define DPAD_GESTURE_HELD (buttonStart[0] && triggerR[0])
+#endif
+
 //analog stick values for mouse emulation on Vita
 int lAnalogX=0;
 int lAnalogY=0;
@@ -592,6 +600,71 @@ void getMapping(int customId)
 #define JOY_AXIS(j, a)    SDL_JoystickGetAxis((j), (a))
 #endif
 
+#ifdef __3DS__
+/* Start + DPad (or circle pad): left/right = zoom in 1% steps, up/down = move the picture up/down by 1 pixel, see video3ds.h.
+ * A direction that is held repeats, and repeats faster the longer it is held (so 50% to 200% does not take forever).
+ * The DPad / stick directions are cleared while Start is held: they must not move the game's joystick at the same time. Called
+ * every frame (also with Start released: that is what ends a repeat). */
+static void display_gesture(void)
+{
+	static struct { int dir; Uint32 since, last; } ax[2];
+	int dir[2] = { 0, 0 };
+
+	if (buttonStart[0])
+	{
+		dir[0] = (dpadRight[0] ? 1 : 0) - (dpadLeft[0] ? 1 : 0);
+		dir[1] = (dpadDown[0] ? 1 : 0) - (dpadUp[0] ? 1 : 0);
+		dpadUp[0] = dpadDown[0] = dpadLeft[0] = dpadRight[0] = 0;
+		stickUp[0] = stickDown[0] = stickLeft[0] = stickRight[0] = 0;
+	}
+
+	Uint32 now = SDL_GetTicks();
+	int shown = 0;
+	for (int a = 0; a < 2; a++)
+	{
+		int step = 0;
+		if (dir[a] == 0)
+		{
+			ax[a].dir = 0;
+			continue;
+		}
+		if (dir[a] != ax[a].dir)
+		{
+			// pressed (or reversed): one step at once
+			ax[a].dir = dir[a];
+			ax[a].since = ax[a].last = now;
+			step = 1;
+		}
+		else
+		{
+			// held: nothing for 0.4 s, then 12 steps/s, from 1 s on 25 steps/s, from 2 s on one step per frame
+			Uint32 held = now - ax[a].since;
+			Uint32 every = held < 400 ? 0 : held < 1000 ? 80 : held < 2000 ? 40 : 1;
+			if (every && now - ax[a].last >= every)
+			{
+				ax[a].last = now;
+				step = 1;
+			}
+		}
+		if (step)
+		{
+			if (a == 0)
+				video3ds_zoom_step(dir[a]);
+			else
+				video3ds_pan_step(dir[a]);
+			shown = 1;
+		}
+	}
+	if (shown)
+	{
+		char msg[32];   // gui_set_message() keeps 36 characters: a shorter buffer cannot be truncated
+		video3ds_apply_display();
+		video3ds_readout(msg, sizeof(msg));
+		gui_set_message(msg, 60);
+	}
+}
+#endif
+
 void gui_handle_events (void)
 {
 #ifdef USE_SDL2
@@ -745,7 +818,7 @@ void gui_handle_events (void)
 #endif
 		{
 			// analog joystick acts as digital controls with proper circular deadzone
-			if (i==0 && mainMenu_leftStickMouse && !(buttonStart[0] && triggerR[0]))
+			if (i==0 && mainMenu_leftStickMouse && !DPAD_GESTURE_HELD)
 			{
 				joyX=rX;
 				joyY=-rY;
@@ -763,9 +836,9 @@ void gui_handle_events (void)
 			int *left = 0;
 			int *right = 0;
 #ifdef __SWITCH__
-			if (mainMenu_customControls && !(buttonStart[0] && triggerR[0]) && !singleJoycons)
+			if (mainMenu_customControls && !DPAD_GESTURE_HELD && !singleJoycons)
 #else
-			if (mainMenu_customControls && !(buttonStart[0] && triggerR[0]))
+			if (mainMenu_customControls && !DPAD_GESTURE_HELD)
 #endif
 			{
 				up = &stickUp[i];
@@ -995,6 +1068,9 @@ void gui_handle_events (void)
 #endif 		
 	
 {
+#ifdef __3DS__
+	display_gesture();   // Start + DPad: zoom / vertical pan of the picture (the DPad is cleared while Start is held)
+#endif
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 	if(buttonStart[0] && triggerL[0]) //toggle custom control config 1-3
 	{
@@ -1023,11 +1099,19 @@ void gui_handle_events (void)
 	{
 		can_change_custom_controlSet = 1;
 	}
+#ifdef __3DS__
+	else if(buttonStart[0])
+	{
+		// Start + DPad is handled by display_gesture() above (nothing else is triggered while Start is held)
+	}
+#else
 	else if(buttonStart[0] && triggerR[0])
+#endif
 #else
 	//L + R
 	if(triggerL[0] && triggerR[0])
 #endif
+#ifndef __3DS__
 	{
 		//up
 		if(dpadUp[0])
@@ -1304,6 +1388,7 @@ void gui_handle_events (void)
 		}
 #endif //!defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 	}
+#endif // !__3DS__ (on the 3DS the chain ends with the Start branch above)
 	if (mainMenu_customControls && !gp2xMouseEmuOn && !gp2xButtonRemappingOn)
 	{
 		int quickSave = 0;

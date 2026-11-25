@@ -146,9 +146,14 @@ int saveMenu_n_savestate = 0;
 
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
 #if defined(__SWITCH__) || defined(__3DS__)
-int mainMenu_shader = 1;
+int mainMenu_shader = 1;   /* 3DS: only read from old config files (the display mode replaced it) */
 #else
 int mainMenu_shader = 5;
+#endif
+#ifdef __3DS__
+int mainMenu_displayMode = 0;   /* 1:1 */
+int mainMenu_zoom = 100;
+int mainMenu_vpan = 0;
 #endif
 int mainMenu_leftStickMouse = 0;
 int mainMenu_touchControls = 1;
@@ -506,6 +511,12 @@ void SetDefaultMenuSettings(int general)
     mainMenu_shader = 1;
 #else
     mainMenu_shader = 5;
+#endif
+#ifdef __3DS__
+    mainMenu_displayMode = DISPLAY_1TO1;
+    mainMenu_zoom = 100;
+    mainMenu_vpan = 0;
+    video3ds_fix_window();
 #endif
     mainMenu_leftStickMouse = 0;
     mainMenu_touchControls = 1;
@@ -1134,7 +1145,11 @@ int saveconfig(int general)
 #endif
     fputs(buffer,f);
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
+#ifdef __3DS__
+    snprintf((char*)buffer, 255, "shader=%d\n",mainMenu_displayMode != DISPLAY_1TO1);   // legacy slot, the real settings are the displaymode/zoom/vpan lines at the end
+#else
     snprintf((char*)buffer, 255, "shader=%d\n",mainMenu_shader);
+#endif
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "leftstickmouse=%d\n",mainMenu_leftStickMouse);
     fputs(buffer,f);
@@ -1452,6 +1467,14 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "useSavesFolder=%d\n",mainMenu_useSavesFolder);
     fputs(buffer,f);
+#ifdef __3DS__
+    snprintf((char*)buffer, 255, "displaymode=%d\n",mainMenu_displayMode);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "zoom=%d\n",mainMenu_zoom);
+    fputs(buffer,f);
+    snprintf((char*)buffer, 255, "vpan=%d\n",mainMenu_vpan);
+    fputs(buffer,f);
+#endif
 #ifdef __SWITCH__
     snprintf((char*)buffer, 255, "swapAB=%d\n",mainMenu_swapAB);
     fputs(buffer,f);
@@ -1902,16 +1925,32 @@ void loadconfig(int general)
         // ignore this option. All saves are always made into saves folder now
         fscanf(f,"useSavesFolder=%d\n",&mainMenu_useSavesFolder);
         mainMenu_useSavesFolder = DEFAULT_USESAVESFOLDER;
+#ifdef __3DS__
+        // display mode, zoom and pan (the last lines of the file; older files have none)
+        if (fscanf(f,"displaymode=%d\n",&mainMenu_displayMode) == 1) {
+            fscanf(f,"zoom=%d\n",&mainMenu_zoom);
+            fscanf(f,"vpan=%d\n",&mainMenu_vpan);
+        } else {
+            // old file: it knew 1:1 / fit height (shader) and the number of displayed lines; 240 lines were 1:1 at that time
+            mainMenu_displayMode = (mainMenu_shader != 0 && mainMenu_displayedLines >= 250) ? DISPLAY_FITHEIGHT : DISPLAY_1TO1;
+            mainMenu_zoom = 100;
+            mainMenu_vpan = 0;
+        }
+#endif
 #ifdef __SWITCH__ 
         fscanf(f,"swapAB=%d\n",&mainMenu_swapAB);
         fscanf(f,"singleJoycons=%d\n",&mainMenu_singleJoycons);
 #endif
         fclose(f);
     }
+#ifdef __3DS__
+    video3ds_fix_window();   // the 3DS always renders the 320x256 PAL window; the old presets / lines / width of a file are ignored
+#else
 // make sure the just-loaded mainMenu_displayedLines is not changed by setPresetMode
     int old_displayedLines = mainMenu_displayedLines;
     SetPresetMode(presetModeId);
     mainMenu_displayedLines = old_displayedLines;
+#endif
     UpdateCPUModelSettings();
     UpdateChipsetSettings();
 #ifdef USE_GUICHAN

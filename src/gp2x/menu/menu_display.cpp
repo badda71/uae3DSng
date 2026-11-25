@@ -52,6 +52,11 @@ extern int emulating;
 
 enum { 
 	MENUDISPLAY_RETURNMAIN = 0,
+#ifdef __3DS__
+	MENUDISPLAY_MODE,                  // 1:1, fit height, fit width, custom
+	MENUDISPLAY_ZOOM,
+	MENUDISPLAY_VPAN,
+#else
 	MENUDISPLAY_PRESETWIDTH,
 	MENUDISPLAY_PRESETHEIGHT,
 	MENUDISPLAY_DISPLINES,
@@ -63,9 +68,10 @@ enum {
 	MENUDISPLAY_CUTLEFT,
 	MENUDISPLAY_CUTRIGHT,
 #endif
+#endif // !__3DS__
 	MENUDISPLAY_REFRESHRATE,
 	MENUDISPLAY_FRAMESKIP,
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
+#if defined(__PSP2__) || defined(__SWITCH__)
 	MENUDISPLAY_SHADER,
 #endif
 	MENUDISPLAY_SOUND,
@@ -93,14 +99,6 @@ enum {
 	SHADER_SHARP_BILINEAR_SIMPLE,
 	SHADER_BILINEAR,
 	SHADER_POINT,
-	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
-};
-#endif
-
-#if defined(__3DS__)
-enum {
-	SHADER_NONE = 0,                  // 1:1, no scaling, no filtering
-	SHADER_SHARP_BILINEAR_SIMPLE,     // scaled to the height of the screen (smooth)
 	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
 };
 #endif
@@ -141,6 +139,39 @@ static void draw_displayMenu(int c)
 	write_text(leftMargin,menuLine,text_str_display_separator);
 	menuLine++;
 
+#ifdef __3DS__
+	// MENUDISPLAY_MODE
+	write_text(leftMargin,menuLine,"Mode");
+	snprintf(value, 25, "%s", video3ds_mode_name(mainMenu_displayMode));
+	if ((menuDisplay!=MENUDISPLAY_MODE)||(bb))
+		write_text(tabstop1,menuLine,value);
+	else
+		write_text_inv(tabstop1,menuLine,value);
+
+	// MENUDISPLAY_ZOOM (what is on the screen: also shows the zoom of the fit modes)
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Zoom");
+	snprintf(value, 25, "%d%%", video3ds_zoom());
+	if ((menuDisplay!=MENUDISPLAY_ZOOM)||(bb))
+		write_text(tabstop1,menuLine,value);
+	else
+		write_text_inv(tabstop1,menuLine,value);
+
+	// MENUDISPLAY_VPAN
+	menuLine+=2;
+	write_text(leftMargin,menuLine,"Vertical Pan");
+	snprintf(value, 25, "%+d", video3ds_pan());
+	if ((menuDisplay!=MENUDISPLAY_VPAN)||(bb))
+		write_text(tabstop1,menuLine,value);
+	else
+		write_text_inv(tabstop1,menuLine,value);
+
+	menuLine++;
+	write_text(leftMargin,menuLine,"(in game: Start + DPad = zoom / pan)");
+	menuLine++;
+	write_text(leftMargin,menuLine,text_str_display_separator);
+	menuLine++;
+#else
 	// MENUDISPLAY_PRESETWIDTH
 	write_text(leftMargin,menuLine,"Preset Width");
 	snprintf(value, 20, "%d", visibleAreaWidth);
@@ -214,6 +245,7 @@ static void draw_displayMenu(int c)
 	write_text(leftMargin,menuLine,text_str_display_separator);
 	menuLine++;
 #endif
+#endif // !__3DS__
 	// MENUDISPLAY_REFRESHRATE
 	write_text(leftMargin,menuLine,"Refresh Rate");
 	if ((!mainMenu_ntsc)&&((menuDisplay!=MENUDISPLAY_REFRESHRATE)||(bb)))
@@ -239,7 +271,11 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3+19,menuLine,"1");
 #else
 	menuLine+=2;
+#ifdef __3DS__
+	write_text(leftMargin,menuLine,"Frameskip");
+#else
 	write_text(tabstop3+7,menuLine,"Frameskip");
+#endif
 	if ((mainMenu_frameskip==1)&&((menuDisplay!=MENUDISPLAY_FRAMESKIP)||(bb)))
 		write_text_inv(tabstop2,menuLine,"1");
 	else
@@ -273,10 +309,14 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop9,menuLine,"8");
 
+#ifdef __3DS__
+	menuLine++;
+#else
 	menuLine+=2;
 #endif
+#endif
 
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)	
+#if defined(__PSP2__) || defined(__SWITCH__)
 	//Shader settings on Vita
 	//MENUDISPLAY_SHADER
 	menuLine+=2;
@@ -284,14 +324,7 @@ static void draw_displayMenu(int c)
   
   	switch (mainMenu_shader)
   	{
-#if defined(__3DS__)
-		case SHADER_NONE:
-			snprintf((char*)value, 25, "1:1 (no scaling)");
-			break;
-		case SHADER_SHARP_BILINEAR_SIMPLE:
-			snprintf((char*)value, 25, "Fit height (smooth)");
-			break;
-#elif defined(__SWITCH__)
+#if defined(__SWITCH__)
 		case SHADER_NONE:
 			snprintf((char*)value, 25, "NONE (auto 2x/3x/4x)");
 			break;
@@ -557,6 +590,28 @@ static int key_displayMenu(int *c)
 				if (hit0)
 					end = -1;
 				break;
+#ifdef __3DS__
+			case MENUDISPLAY_MODE:
+				if (left)
+					mainMenu_displayMode = (mainMenu_displayMode + DISPLAY_NUMMODES - 1) % DISPLAY_NUMMODES;
+				else if (right)
+					mainMenu_displayMode = (mainMenu_displayMode + 1) % DISPLAY_NUMMODES;
+				break;
+			case MENUDISPLAY_ZOOM:
+				// 1% per step (the key repeat of the menu does the rest); anything but Custom becomes Custom, starting at what it showed
+				if (left)
+					video3ds_zoom_step(-1);
+				else if (right)
+					video3ds_zoom_step(1);
+				break;
+			case MENUDISPLAY_VPAN:
+				// positive = the picture is lower
+				if (left)
+					video3ds_pan_step(-1);
+				else if (right)
+					video3ds_pan_step(1);
+				break;
+#else
 			case MENUDISPLAY_PRESETWIDTH:
 				if (left)
 				{
@@ -647,6 +702,7 @@ static int key_displayMenu(int *c)
 						moveY++;
 				}
 				break;
+#endif // !__3DS__
 #if !defined(__PSP2__) && !defined(__SWITCH__) && !defined(__3DS__)
 			case MENUDISPLAY_CUTLEFT:
 				if (left)
@@ -698,7 +754,7 @@ static int key_displayMenu(int *c)
 				if ((left)||(right))
 						mainMenu_ntsc = !mainMenu_ntsc;
 				break;
-#if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__) //shader choice on VITA
+#if defined(__PSP2__) || defined(__SWITCH__) //shader choice on VITA
 			case MENUDISPLAY_SHADER:
 				if (left)
 				{

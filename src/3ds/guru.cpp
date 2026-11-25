@@ -113,14 +113,16 @@ void guru_draw(void)
 	if (!g_banner || g_w != scr->w) build_banner();
 	if (!g_banner) return;
 
-	SDL_Rect r = { 0, 0, (Uint16)g_banner->w, (Uint16)g_banner->h };
+	/* the picture may be zoomed / panned so that its first lines are off the screen: put the banner on the first visible line */
+	int oy = video3ds_visible_top();
+	SDL_Rect r = { 0, (Sint16)oy, (Uint16)g_banner->w, (Uint16)g_banner->h };
 	SDL_BlitSurface(g_banner, NULL, scr, &r);
 
 	/* the border of the real alert flashes about once a second */
 	int b = 2 * g_k, w = g_banner->w, h = g_banner->h;
 	Uint32 col = SDL_MapRGB(scr->format, ((SDL_GetTicks() - g_since) / 600) & 1 ? 0 : 0xff, 0, 0);
-	SDL_Rect top = { 0, 0, (Uint16)w, (Uint16)b }, bot = { 0, (Sint16)(h - b), (Uint16)w, (Uint16)b };
-	SDL_Rect lft = { 0, 0, (Uint16)b, (Uint16)h }, rgt = { (Sint16)(w - b), 0, (Uint16)b, (Uint16)h };
+	SDL_Rect top = { 0, (Sint16)oy, (Uint16)w, (Uint16)b }, bot = { 0, (Sint16)(oy + h - b), (Uint16)w, (Uint16)b };
+	SDL_Rect lft = { 0, (Sint16)oy, (Uint16)b, (Uint16)h }, rgt = { (Sint16)(w - b), (Sint16)oy, (Uint16)b, (Uint16)h };
 	SDL_FillRect(scr, &top, col);
 	SDL_FillRect(scr, &bot, col);
 	SDL_FillRect(scr, &lft, col);

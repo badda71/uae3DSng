@@ -249,8 +249,21 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 * **Round 11 (default mouse buttons).** Without custom controls, L = left mouse button and R = right mouse button (they were swapped, a Vita convention); the New 3DS
   ZL button is a second right mouse button (`triggerL2`/`triggerR2` are now polled on the 3DS too; both read 0 on an Old 3DS). The default of custom preset 1 follows
   the same convention (`menu_config.cpp`). Saved configs keep their stored mapping. ZL/ZR cannot be assigned in the custom controls menu yet.
-* The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
-  and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
+* **Round 12 (display redesign).** The 400x240 top screen made Preset Width/Height, Displayed Lines, Vertical Position and Shader pointless, so they are gone from
+  the Display menu (3DS only; the Vita/Switch code is untouched). The emulator now always renders the whole PAL window, 320x256 lores (`moveY` 18 = Amiga line 44
+  .. 299; `video3ds_fix_window()` forces the old preset/lines/width variables to that, also after loading a config), and the GPU places it (`src/3ds/video3ds.cpp`,
+  `video3ds_apply_display()` -> `N3DS_SetScalingDirect`/`N3DS_SetYOffset`, so a change is instant and costs no re-render). *Mode*: **1:1** (default; sharp, the
+  middle 240 of the 256 lines are visible), **Fit height** (256 lines = 94 %), **Fit width** (125 %, 192 lines visible), **Custom** (*Zoom* 50..200 %, 100 % = 1:1,
+  *Vertical Pan* in screen pixels, 0 = centered, positive = picture lower, limited so that the picture's edge stays on the screen; always centered horizontally).
+  Only exactly 100 % is drawn with GPU_NEAREST, everything else smooth. **Start + DPad** adjusts it while playing: left/right = zoom in **1 %** steps, up/down =
+  pan 1 px, with auto-repeat that speeds up (nothing for 0.4 s, 12/s, from 1 s 25/s, from 2 s once per frame); a short readout ("Zoom 105%   Pan -3") goes to the
+  status bar of the bottom screen; the DPad/circle pad do not reach the game while Start is held. The first adjustment from another mode switches to Custom
+  at the zoom that was on the screen (menu and gesture alike). The old Start+R+DPad (vertical position / quick-switch resolutions) is gone on the 3DS; Start+L
+  (custom control set) is unchanged. Nothing in the port bound Start to Reset. Config file: three new lines `displaymode=`, `zoom=`, `vpan=` at the end (older
+  files do not have them: 1:1, except an old fit-height file with >= 250 lines becomes Fit height); the old positional keys (`shader`, `presetModeId`, `moveX/Y`,
+  `displayedLines`, `screenWidth`, `cutLeft/Right`) stay in the file but their values are ignored. The Guru banner is drawn on the first *visible* line
+  (`video3ds_visible_top()`); savestate thumbnails are the whole 320x256 window. Not reachable any more: lines outside the PAL window (overscan), hires. Also fixed:
+  the "Frameskip" label of the Display menu sat on top of the digits.
 
 ## Known gaps / risks
 
