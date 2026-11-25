@@ -330,8 +330,8 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_B[0][0] = 23; // space
 	mainMenu_customPreset_A[0][0] = -3; // ply1 fire 1
 	mainMenu_customPreset_Y[0][0] = -4; // ply1 fire 2
-	mainMenu_customPreset_L[0][0] = -2; // right mouse
-	mainMenu_customPreset_R[0][0] = -1; // left mouse
+	mainMenu_customPreset_L[0][0] = -1; // left mouse
+	mainMenu_customPreset_R[0][0] = -2; // right mouse
 #ifdef __SWITCH__
 	mainMenu_customPreset_L2[0][0] = -26; // fast mouse
 	mainMenu_customPreset_R2[0][0] = -25; // slow mouse

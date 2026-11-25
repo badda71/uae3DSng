@@ -246,6 +246,9 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   uae3DS), publisher `badda71`, long description "Amiga 500/1200 emulator for the New 3DS (based on uae4all2 and uae3DS)". `meta/banner.cgfx` (spinning 3D banner, the
   HOME menu does the rotating; `BANNER_IMAGE` in the Makefile, bannertool gets `-ci` for a `.cgfx`) and `meta/audio.wav` (2.4 s, 44.1 kHz stereo 16-bit) are supplied
   by badda71; the banner model is credited in README.md. `meta/banner.png` is no longer used by the build. **The banner has not been seen on hardware yet.**
+* **Round 11 (default mouse buttons).** Without custom controls, L = left mouse button and R = right mouse button (they were swapped, a Vita convention); the New 3DS
+  ZL button is a second right mouse button (`triggerL2`/`triggerR2` are now polled on the 3DS too; both read 0 on an Old 3DS). The default of custom preset 1 follows
+  the same convention (`menu_config.cpp`). Saved configs keep their stored mapping. ZL/ZR cannot be assigned in the custom controls menu yet.
 * The game picture is already scaled to fit 400x240 by `SDL_SetVideoModeScaling`; what can be "cut off" are Amiga lines: *Displayed Lines*
   and *Vertical Position* (`moveY`, default 16 = first shown line 42; the standard PAL window is lines 44..299) in the Display menu.
 

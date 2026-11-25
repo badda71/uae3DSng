@@ -180,9 +180,11 @@ int buttonX[MAX_NUM_CONTROLLERS]={}; // Vita Cross, GP2X_BUTTON_X
 int buttonY[MAX_NUM_CONTROLLERS]={}; // Vita Triangle, GP2X_BUTTON_Y
 int triggerL[MAX_NUM_CONTROLLERS]={};
 int triggerR[MAX_NUM_CONTROLLERS]={};
+#if defined(__SWITCH__) || defined(__3DS__)
+int triggerL2[MAX_NUM_CONTROLLERS]={};   // ZL (New 3DS / Switch)
+int triggerR2[MAX_NUM_CONTROLLERS]={};   // ZR (New 3DS / Switch)
+#endif
 #ifdef __SWITCH__
-int triggerL2[MAX_NUM_CONTROLLERS]={};
-int triggerR2[MAX_NUM_CONTROLLERS]={};
 int triggerL3[MAX_NUM_CONTROLLERS]={};
 int triggerR3[MAX_NUM_CONTROLLERS]={};
 #endif
@@ -690,6 +692,10 @@ void gui_handle_events (void)
 
 		buttonSelect[i] = JOY_BTN(currentJoy, PAD_SELECT);
 		buttonStart[i] = JOY_BTN(currentJoy, PAD_START);
+#ifdef __3DS__
+		triggerL2[i] = JOY_BTN(currentJoy, PAD_L2);   // ZL/ZR exist on the New 3DS only
+		triggerR2[i] = JOY_BTN(currentJoy, PAD_R2);
+#endif
 #ifdef __SWITCH__
 		triggerL2[i] = JOY_BTN(currentJoy, PAD_L2);
 		triggerR2[i] = JOY_BTN(currentJoy, PAD_R2);
@@ -1848,41 +1854,45 @@ void gui_handle_events (void)
 	}
 	
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-	//VITA Controls: If not using custom controls, use L=right mouse, R=left mouse 
-	//because analog stick = mouse movement is always on for Vita
+	//Default (no custom controls): L = left mouse button, R and ZL (New 3DS) = right mouse button.
+	//The analog stick / circle pad always moves the mouse pointer.
 	if(!mainMenu_customControls)
 	{
-		//(R) button
-		if(triggerR[0])
-		{
-			if(!justPressedR[0])
-			{
-				//left mouse-button down
-				buttonstate[0] = 1;
-				justPressedR[0]=1;
-			}
-		}
-		else if(justPressedR[0])
-		{
-			//left mouse-button up
-			buttonstate[0] = 0;
-			justPressedR[0]=0;
-		}
 		//(L) button
 		if(triggerL[0])
 		{
 			if(!justPressedL[0])
 			{
-				//right mouse-button down
-				buttonstate[2] = 1;
+				//left mouse-button down
+				buttonstate[0] = 1;
 				justPressedL[0]=1;
 			}
 		}
 		else if(justPressedL[0])
 		{
+			//left mouse-button up
+			buttonstate[0] = 0;
+			justPressedL[0]=0;
+		}
+		//(R) button or (ZL) button
+		if(triggerR[0]
+#ifdef __3DS__
+			|| triggerL2[0]
+#endif
+		)
+		{
+			if(!justPressedR[0])
+			{
+				//right mouse-button down
+				buttonstate[2] = 1;
+				justPressedR[0]=1;
+			}
+		}
+		else if(justPressedR[0])
+		{
 			//right mouse-button up
 			buttonstate[2] = 0;
-			justPressedL[0]=0;
+			justPressedR[0]=0;
 		}
 	}
 #endif // __PSP2__
