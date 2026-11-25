@@ -461,7 +461,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		for (int i=0; i<nr_joysticks; i++)
 		{
 			// mapping directions
-			int u, d, l, r;
+			int u = -32768, d = -32768, l = -32768, r = -32768;   // no mapping can match these unless nr is 0..3
 			switch (nr)
 			{
 				case 0:
@@ -560,7 +560,7 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			for (int i=0; i<nr_joysticks; i++)
 			{
 				// mapping buttons
-				int b1, b2;
+				int b1 = -32768, b2 = -32768;   // no mapping can match these unless nr is 0..3
 				switch (nr)
 				{
 					case 0:

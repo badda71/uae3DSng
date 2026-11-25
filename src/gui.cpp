@@ -813,7 +813,7 @@ void gui_handle_events (void)
 		int *autoButton;
 		for (int i=0; i<nr_joysticks; i++)
 		{
-			int *autoButton;
+			int *autoButton = NULL;
 			switch (mainMenu_customAutofireButton)
 			{
 				case 1: 
@@ -843,7 +843,7 @@ void gui_handle_events (void)
 					break;
 #endif
 			}
-			if (*autoButton)
+			if (autoButton && *autoButton)
 			{
 				if (customAutofireDelay[i]>mainMenu_autofireRate)
 				{

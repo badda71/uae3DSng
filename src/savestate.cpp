@@ -301,6 +301,7 @@ void restore_state (char *filename)
 	    continue;
 	}
 
+	end = chunk + len;   /* unknown chunks are skipped as a whole */
 	if (!strcmp (name, "CPU "))
 	    end = restore_cpu (chunk);
 	else if (!strcmp (name, "AGAC"))

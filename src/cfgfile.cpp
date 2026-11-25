@@ -30,9 +30,7 @@ char * make_hard_dir_cfg_line (char *dst) {
 			if ((uae4all_hard_dir[i] == '/')||(uae4all_hard_dir[i] == '\\'))
 				break;
 		if (i > 0) {
-			strncpy(buffer, &uae4all_hard_dir[i+1], 256);
-			strcat(buffer, ":");
-			strncat(buffer, uae4all_hard_dir, 256 - strlen(buffer));
+			snprintf(buffer, sizeof(buffer), "%s:%s", &uae4all_hard_dir[i+1], uae4all_hard_dir);   // always NUL-terminated
 			strcpy(dst, buffer); 
 		} else
 			return NULL;
