@@ -295,6 +295,13 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   last frames, so a Kickstart loop can be read from the log), 24 bytes at each address register (BCPL strings), 24 stack longs, ExecBase counters, ThisTask and the
   ready/wait lists (name, state, CLI command, signals), and the last 192 disk events from a ring in `disk.cpp` (`T` track decoded, `P` head step, `M` motor, `D`/`W`
   DMA start with length, pointer and sync word, `F` DMA finished, `A` DMA stopped by the program with N words left) with counters since the reset.
+* **Round 17 (snapshot v3).** Results of the Round 16 build: (1) A1200 at 14 MHz: the first file load of the Beast crack fails, at 7 MHz it works (the loader's
+  `DSKBLK` timeout of `$186a0` loop iterations is tuned to a 7 MHz 68000), so the emulated timing is right and the crack is not A1200-safe at 14 MHz. (2) A500 hang:
+  the snapshot shows the Initial CLI running with `Forbid()` active (TDNestCnt 0) while two ready `File System` processes wait for the CPU, and the code is a walk
+  over a linked list whose nodes have their BCPL name at +40 (`DevInfo`/`DeviceList`), comparing names with capitalisation: a cycle in the DOS device list would
+  explain it. The snapshot now walks `DosInfo->di_DevInfo` (nodes, types, names, `CYCLE` detection), prints the DOS packets waiting in the ports of the processes and
+  the strings in the BCPL frame. (3) A1200 at 7 MHz crashes during the game with alert `$80000006` (CHK exception); `crashdiag_exception()` now logs the first 12
+  bus/address error, divide-by-zero, CHK and TRAPV exceptions per run with PC, the code around it, registers and stack.
 
 ## Known gaps / risks
 

@@ -48,6 +48,10 @@
 
 extern int prefs_cpu_model;
 extern int mainMenu_CPU_speed;
+#ifdef __3DS__
+/* debug only (DEBUG_CHANGES.md A8): log bus/address error, divide by zero, CHK and TRAPV exceptions with PC and registers */
+extern void crashdiag_exception (unsigned vect, unsigned pc, unsigned sr);
+#endif
 
 /******************************/
 /* 68K core types definitions */
@@ -951,6 +955,10 @@ void process_exception(unsigned int vect)
 
 static FAMEC_EXTRA_INLINE void execute_exception(s32 vect)
 {
+#ifdef __3DS__
+	if (vect == 2 || vect == 3 || (vect >= 5 && vect <= 7))
+		crashdiag_exception ((unsigned) vect, (unsigned) ((hostptr) PC - BasePC), (unsigned) (GET_SR));
+#endif
 	m68kcontext.io_cycle_counter -= (exception_cycle_table[vect]);
 	
 	/* comprobar si hay tabla funciones manejadoras */

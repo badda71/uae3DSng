@@ -124,10 +124,11 @@ static int cd_guru_shown;
 static unsigned cd_pc_ring[32], cd_pc_n;     /* PC at the end of each of the last frames, for crashdiag_snapshot() */
 static unsigned cd_wp_hits, cd_frames_since_reset, cd_full_dumps;
 static unsigned cd_dump_pcs[6];
+static unsigned cd_exc_n;                    /* exceptions logged since the reset (crashdiag_exception) */
 static uae_u32 cd_last_eb;
 extern void guru_hide (void);
 extern void guru_show (unsigned code, unsigned task);
-void crashdiag_reset (void) { cd_pc_n = 0; guru_hide (); cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_illegal_win = 0; cd_guru_task = 0; cd_guru_shown = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
+void crashdiag_reset (void) { cd_pc_n = 0; guru_hide (); cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_illegal_win = 0; cd_guru_task = 0; cd_guru_shown = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; cd_exc_n = 0; }
 unsigned crashdiag_frame_count (void) { return cd_frames_since_reset; }
 
 /* name, type and (for a Process running a CLI command) the command name of a Task; returns the node type, 0 if not plausible */
@@ -356,6 +357,8 @@ static void cd_halt_machine (void)
  * busy-wait loop), what does it wait for (interrupt enable/request bits, disk DMA, drive state). */
 extern void DISK_dump_state (void);
 
+static void cd_snapshot_packets (uae_u32 task);
+
 /* one Task (or Process) of exec's lists for the snapshot: name, state, the CLI command it runs, what it waits for */
 static void cd_snapshot_task (uae_u32 task, const char *tag)
 {
@@ -365,11 +368,97 @@ static void cd_snapshot_task (uae_u32 task, const char *tag)
 	type = cd_task_names (task, name, sizeof name, cmd, sizeof cmd);
 	write_log ("snapshot: %s %08x '%s' type %u state %u pri %d CLI command '%s' sigwait %08x sigrecvd %08x SPReg %08x\n", tag, task, name, type,
 		   cd_byte (task + 15), (int) (signed char) cd_byte (task + 9), cmd, cd_long (task + 22), cd_long (task + 26), cd_long (task + 54));
+	if (type == 13) cd_snapshot_packets (task);
 }
 
 static int cd_addr_ok (uae_u32 a)
 {
 	return a >= 0x400 && (a < 0xA00000 || (a >= 0xE00000 && a < 0xE80000) || (a >= 0xF80000 && a < 0x1000000));
+}
+
+/* BCPL string behind a BPTR (word address): length byte, then the characters */
+static void cd_bstr (uae_u32 bptr, char *out, unsigned n)
+{
+	uae_u32 a = bptr << 2;
+	unsigned l, i;
+	out[0] = 0;
+	if (!cd_addr_ok (a)) { snprintf (out, n, "?"); return; }
+	l = cd_byte (a);
+	if (l > n - 1) l = n - 1;
+	for (i = 0; i < l; i++) { unsigned c = cd_byte (a + 1 + i); out[i] = (c >= 32 && c < 127) ? (char) c : '?'; }
+	out[l] = 0;
+}
+
+/* DOS packets waiting in the message port of a Process (pr_MsgPort at +0x5C, message list at +20 in it) */
+static void cd_snapshot_packets (uae_u32 task)
+{
+	uae_u32 msg = cd_long (task + 0x5C + 20);
+	unsigned k = 0;
+	while (k++ < 4 && cd_addr_ok (msg) && !(msg & 1) && cd_long (msg)) {
+		uae_u32 pkt = cd_long (msg + 10);
+		if (cd_addr_ok (pkt)) {
+			char nm[40];
+			cd_bstr (cd_long (pkt + 24), nm, sizeof nm);
+			write_log ("snapshot:     pending packet %08x type %d arg1 %08x arg2 %08x '%s' arg3 %08x\n", pkt, (int) cd_long (pkt + 8),
+				   cd_long (pkt + 20), cd_long (pkt + 24), nm, cd_long (pkt + 28));
+		}
+		msg = cd_long (msg);
+	}
+}
+
+/* dos.library's device/volume list (DosInfo->di_DevInfo): is it a proper list, or does a node point back (a search then never ends)? */
+static void cd_dump_dos_list (uae_u32 eb)
+{
+	uae_u32 lib = cd_long (eb + 0x17A), dosbase = 0, root, info, node, seen[32];
+	unsigned n = 0, k, i;
+	char name[48];
+	while (n++ < 40 && cd_addr_ok (lib) && !(lib & 1) && cd_long (lib)) {
+		uae_u32 nm = cd_long (lib + 10);
+		if (cd_addr_ok (nm)) {
+			cd_str (nm, name, sizeof name);
+			if (!strcmp (name, "dos.library")) { dosbase = lib; break; }
+		}
+		lib = cd_long (lib);
+	}
+	if (!dosbase) { write_log ("snapshot: dos.library not found in the library list\n"); return; }
+	root = cd_long (dosbase + 34);
+	info = cd_addr_ok (root) ? cd_long (root + 24) << 2 : 0;
+	node = cd_addr_ok (info) ? cd_long (info + 4) << 2 : 0;
+	write_log ("snapshot: dos.library %08x RootNode %08x DosInfo %08x DevInfo list head %08x\n", dosbase, root, info, node);
+	for (k = 0; k < 32 && cd_addr_ok (node) && !(node & 3); k++) {
+		for (i = 0; i < k && seen[i] != node; i++) ;
+		if (i < k) { write_log ("snapshot: dos list: CYCLE, node %08x was already #%u\n", node, i); return; }
+		seen[k] = node;
+		cd_bstr (cd_long (node + 40), name, sizeof name);
+		write_log ("snapshot: dos list #%u node %08x next %08x type %u task %08x lock %08x name '%s'\n", k, node, cd_long (node) << 2,
+			   cd_long (node + 4), cd_long (node + 8), cd_long (node + 12) << 2, name);
+		node = cd_long (node) << 2;
+	}
+	if (k == 32) write_log ("snapshot: dos list: more than 32 nodes\n");
+}
+
+/* Bus/address error, divide by zero, CHK and TRAPV exceptions: called from FAME's execute_exception() (famec.cpp) */
+void crashdiag_exception (unsigned vect, unsigned pc, unsigned sr)
+{
+	unsigned i, sp = _68k_areg (7);
+	if (cd_exc_n++ >= 12) return;
+	write_log ("exception %u at PC=%08x SR=%04x, %u frames after the reset; code before | after: %04x %04x %04x | %04x %04x %04x\n", vect, pc, sr,
+		   cd_frames_since_reset, cd_word (pc - 6), cd_word (pc - 4), cd_word (pc - 2), cd_word (pc), cd_word (pc + 2), cd_word (pc + 4));
+	write_log ("exception: D %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_dreg(0), _68k_dreg(1), _68k_dreg(2), _68k_dreg(3), _68k_dreg(4), _68k_dreg(5), _68k_dreg(6), _68k_dreg(7));
+	write_log ("exception: A %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_areg(0), _68k_areg(1), _68k_areg(2), _68k_areg(3), _68k_areg(4), _68k_areg(5), _68k_areg(6), sp);
+	write_log ("exception: stack %08x: %08x %08x %08x %08x %08x %08x\n", sp, cd_long (sp), cd_long (sp + 4), cd_long (sp + 8), cd_long (sp + 12), cd_long (sp + 16), cd_long (sp + 20));
+	write_log ("exception: vector %u -> %08x, ThisTask %08x\n", vect, cd_long (vect * 4), cd_last_eb ? cd_long (cd_last_eb + 0x114) : 0);
+	if (cd_exc_n == 1)
+		for (i = 0; i < 6; i++) {
+			uae_u32 a = _68k_areg (i);
+			char line[160];
+			unsigned k;
+			int n;
+			if (!cd_addr_ok (a)) continue;
+			n = snprintf (line, sizeof line, "exception: A%u -> %08x:", i, a);
+			for (k = 0; k < 16; k++) n += snprintf (line + n, sizeof line - n, " %02x", cd_byte (a + k));
+			write_log ("%s\n", line);
+		}
 }
 
 void crashdiag_snapshot (const char *why)
@@ -425,6 +514,19 @@ void crashdiag_snapshot (const char *why)
 				node = cd_long (node);
 			}
 		}
+	}
+	if (cd_last_eb && cd_exec_ok (cd_last_eb)) cd_dump_dos_list (cd_last_eb);
+	/* BCPL frame (A1 in the DOS): the words that look like BPTRs to strings (names being compared, file names) */
+	{
+		uae_u32 p = _68k_areg (1);
+		if (cd_addr_ok (p))
+			for (i = 0; i < 6; i++) {
+				uae_u32 w = cd_long (p + i * 4);
+				char nm[48];
+				if (!cd_addr_ok (w << 2) || w >= 0x40000) continue;
+				cd_bstr (w, nm, sizeof nm);
+				write_log ("snapshot: BCPL frame word %u = %08x -> string at %08x '%s'\n", i, w, w << 2, nm);
+			}
 	}
 	/* the code around the PCs of the last frames: lets a busy-wait loop in a ROM or a game be read from the log */
 	{
