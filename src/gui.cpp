@@ -371,6 +371,9 @@ static void goMenu(void)
 		return;
 	emulating=1;
 	pause_sound();
+#ifdef __3DS__
+	{ extern void crashdiag_snapshot (const char *why); crashdiag_snapshot ("menu opened during the game"); }
+#endif
 #ifdef USE_GUICHAN
 	running=true;
 	exitmode=run_mainMenuGuichan();

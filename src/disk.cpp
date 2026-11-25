@@ -1503,6 +1503,22 @@ void dumpdisk (void)
 
 /* Disk save/restore code */
 
+#ifdef __3DS__
+/* state of the disk DMA and the drives for the "snapshot" log lines (what is the program waiting for?) */
+void DISK_dump_state (void)
+{
+    int i;
+    write_log ("snapshot: disk DMA %d (0 off, 1/2 armed, 3 running) dsklength %u dskpt %08x dsksync %04x, select mask %x, side %d, writing %d, frames since the program used disk data: %d\n",
+	       dskdmaen, (unsigned) dsklength, (unsigned) dskpt, (unsigned) dsksync, (unsigned) selected, side, writing, disk_data_used);
+    for (i = 0; i < mainMenu_drives; i++) {
+	drive *d = floppy + i;
+	if (!d->diskfile) { write_log ("snapshot: DF%d empty, cyl %d\n", i, d->cyl); continue; }
+	write_log ("snapshot: DF%d cyl %d motor %s ready %d state %d mfmpos %d tracklen %d dmalen %d trackspeed %d changed %d\n", i, d->cyl,
+		   d->motoroff ? "off" : "on", d->dskready, d->state, d->mfmpos, d->tracklen, d->dmalen, d->trackspeed, d->dskchange);
+    }
+}
+#endif
+
 void DISK_save_custom (uae_u32 *pdskpt, uae_u16 *pdsklength, uae_u16 *pdsksync, uae_u16 *pdskdatr, uae_u16 *pdskbytr)
 {
     if (pdskpt) *pdskpt = dskpt;

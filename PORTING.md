@@ -281,6 +281,12 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   insertion logs `disk: DFn '<file>' inserted, <size> bytes` (an ADF is 901120 bytes), so a log can be matched to the disks without guessing. What the log shows
   about the game: Disk1 (then Disk2 swapped in through the menu) runs for minutes in the A500 profile; in the A1200 profile it hooks different vectors (it goes the
   OS-friendly way: level-3 vector stays on the ROM handler) and is much more fragile - an old trackloader written for Kickstart 1.x.
+* **Round 15 (hang snapshot).** Three of the four Shadow of the Beast combinations do not crash but *hang* (static picture, no disk reads), and the log cannot
+  say where the CPU waits. Opening the menu during a game now writes a `snapshot:` block to the log (`crashdiag_snapshot()`, `m68k_intrf.cpp`; it is called from
+  `goMenu()` only, so it costs nothing during play): PC/SR/USP and the code words at the PC, D0-D7/A0-A7, the top of the stack, the level 1-7 interrupt vectors,
+  the PC at the end of each of the last 32 frames (a busy-wait loop shows up as the same few addresses), `dumpcustom()` (DMACON/INTENA/INTREQ/COP/DIW/DDF) and
+  `DISK_dump_state()` (disk DMA state, DSKLEN/DSKPT/DSKSYNC, per drive: cylinder, motor, ready, track position). To use it: let the game hang, press the menu button,
+  leave again, send the log.
 
 ## Known gaps / risks
 

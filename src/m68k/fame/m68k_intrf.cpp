@@ -121,12 +121,13 @@ static int cd_armed, cd_trashed;
 #define CD_RUNAWAY_ILLEGALS 20
 static unsigned cd_illegal_win, cd_guru_task;
 static int cd_guru_shown;
+static unsigned cd_pc_ring[32], cd_pc_n;     /* PC at the end of each of the last frames, for crashdiag_snapshot() */
 static unsigned cd_wp_hits, cd_frames_since_reset, cd_full_dumps;
 static unsigned cd_dump_pcs[6];
 static uae_u32 cd_last_eb;
 extern void guru_hide (void);
 extern void guru_show (unsigned code, unsigned task);
-void crashdiag_reset (void) { guru_hide (); cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_illegal_win = 0; cd_guru_task = 0; cd_guru_shown = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
+void crashdiag_reset (void) { cd_pc_n = 0; guru_hide (); cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_illegal_win = 0; cd_guru_task = 0; cd_guru_shown = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
 unsigned crashdiag_frame_count (void) { return cd_frames_since_reset; }
 
 /* name, type and (for a Process running a CLI command) the command name of a Task; returns the node type, 0 if not plausible */
@@ -350,6 +351,29 @@ static void cd_halt_machine (void)
 	for (ch = 0; ch < 4; ch++) audio_channel_disable_dma (ch);
 }
 
+/* ---- snapshot of a program that seems to hang ----------------------------------------------------------------------------
+ * Written when the menu is opened during a game (and by nothing else): where is the CPU (the PCs of the last frames show a
+ * busy-wait loop), what does it wait for (interrupt enable/request bits, disk DMA, drive state). */
+extern void DISK_dump_state (void);
+
+void crashdiag_snapshot (const char *why)
+{
+	unsigned pc = m68k_get_pc (), sp = _68k_areg (7), i;
+	write_log ("snapshot (%s): %u frames after the reset\n", why, cd_frames_since_reset);
+	write_log ("snapshot: PC=%08x SR=%04x USP=%08x  code at PC:", pc, _68k_sreg, _68k_uspreg);
+	for (i = 0; i < 8; i++) write_log (" %04x", cd_word (pc + i * 2));
+	write_log ("\n");
+	write_log ("snapshot: D %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_dreg(0), _68k_dreg(1), _68k_dreg(2), _68k_dreg(3), _68k_dreg(4), _68k_dreg(5), _68k_dreg(6), _68k_dreg(7));
+	write_log ("snapshot: A %08x %08x %08x %08x %08x %08x %08x %08x\n", _68k_areg(0), _68k_areg(1), _68k_areg(2), _68k_areg(3), _68k_areg(4), _68k_areg(5), _68k_areg(6), sp);
+	write_log ("snapshot: stack %08x: %08x %08x %08x %08x %08x %08x\n", sp, cd_long (sp), cd_long (sp + 4), cd_long (sp + 8), cd_long (sp + 12), cd_long (sp + 16), cd_long (sp + 20));
+	write_log ("snapshot: vectors 0x64..0x7c (levels 1..7): %08x %08x %08x %08x %08x %08x %08x\n", cd_long (0x64), cd_long (0x68), cd_long (0x6c), cd_long (0x70), cd_long (0x74), cd_long (0x78), cd_long (0x7c));
+	write_log ("snapshot: PC at the end of the last %u frames (newest last):", cd_pc_n < 32 ? cd_pc_n : 32);
+	for (i = cd_pc_n < 32 ? 0 : cd_pc_n - 32; i < cd_pc_n; i++) write_log (" %x", cd_pc_ring[i & 31]);
+	write_log ("\n");
+	dumpcustom ();
+	DISK_dump_state ();
+}
+
 /* The exec structures are gone *and* the CPU keeps raising illegal-instruction exceptions: the machine has run amok. Same as a
  * real Amiga would show: Guru Meditation on the main screen. The alert number is synthetic (the emulator cannot know which
  * exception a real machine would have run into): 8000_0004 = dead-end alert, CPU exception 4 (illegal instruction); the
@@ -379,6 +403,7 @@ void crashdiag_frame (void)
 	unsigned i;
 	frame++;
 	cd_frames_since_reset++;
+	cd_pc_ring[cd_pc_n++ & 31] = m68k_get_pc ();
 	cd_check_runaway ();
 	if (cd_guru_shown) cd_halt_machine ();
 	if (cd_frames_since_reset % 50 == 0) cd_illegal_win = 0;
