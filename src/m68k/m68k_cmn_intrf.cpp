@@ -161,9 +161,12 @@ void m68k_go (int may_quit)
 #ifdef __3DS__
 			{ extern void crashdiag_reset (void); crashdiag_reset (); }
 			{ extern int mainMenu_CPU_speed;
-			write_log("config: chip %u KB, slow %u KB, fast %u KB, cpu %d, chipset mask %x, cpu speed %d MHz (menu setting %d), cpu_level %d\n", prefs_chipmem_size / 1024,
-				  prefs_bogomem_size / 1024, (unsigned) (changed_prefs.fastmem_size / 1024), prefs_cpu_model, (unsigned) changed_prefs.chipset_mask,
-				  7 << mainMenu_CPU_speed, mainMenu_CPU_speed, (int) changed_prefs.cpu_level); }
+			extern char uae4all_image_file0[256], uae4all_image_file1[256];
+			/* cpu_level is the model of this run (the core is switched to it right after this line); "core was" is the model of the previous run */
+			write_log("config: chip %u KB, slow %u KB, fast %u KB, cpu_level %d (core was %d), chipset mask %x, cpu speed %d MHz (menu setting %d)\n", prefs_chipmem_size / 1024,
+				  prefs_bogomem_size / 1024, (unsigned) (changed_prefs.fastmem_size / 1024), (int) changed_prefs.cpu_level, prefs_cpu_model,
+				  (unsigned) changed_prefs.chipset_mask, 7 << mainMenu_CPU_speed, mainMenu_CPU_speed);
+			write_log("config: DF0 '%s'  DF1 '%s'\n", uae4all_image_file0, uae4all_image_file1); }
 #endif
 			reset_all_systems ();
 			customreset ();

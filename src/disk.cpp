@@ -326,6 +326,9 @@ static int drive_insert (drive *drv, int dnum, const char *fname)
 	size = zfile_ftell (drv->diskfile);
 	zfile_fseek (drv->diskfile, 0, SEEK_SET);
     }
+#ifdef __3DS__
+    write_log ("disk: DF%d '%s' inserted, %d bytes%s\n", dnum, fname, size, drv->wrprot ? ", write-protected" : "");
+#endif
 
     if (strncmp ((char *) buffer, "UAE-1ADF", 8) == 0) {
 	read_header_ext2 (drv->diskfile, drv->trackdata, &drv->num_tracks, &drv->ddhd);

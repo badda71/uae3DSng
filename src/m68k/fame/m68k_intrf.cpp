@@ -335,6 +335,21 @@ static void crashdiag_watch_page (unsigned lo, unsigned hi)
 	famec_SetWriteHandlers (lo, hi, (void *) &cd_wp_b, (void *) &cd_wp_w);
 }
 
+/* A dead-end alert stops the machine: nothing may run on behind the banner (a runaway CPU raises garbage interrupts,
+ * makes noise and could even write to the disk image). The CPU is put into STOP with all interrupts masked (only level 7
+ * would wake it, the Amiga never raises that); the display keeps showing the last picture, audio DMA is switched off.
+ * A click on the banner resets the machine. Repeated every frame: the context is only authoritative while the CPU is not
+ * inside m68k_emulate(), and a write that landed there would be lost. */
+static void cd_halt_machine (void)
+{
+	M68K_CONTEXT *c = m68k_get_context ();
+	extern void audio_channel_disable_dma (int n_channel);
+	int ch;
+	c->sr |= 0x0700;
+	c->execinfo |= 0x0080;                     /* M68K_HALTED */
+	for (ch = 0; ch < 4; ch++) audio_channel_disable_dma (ch);
+}
+
 /* The exec structures are gone *and* the CPU keeps raising illegal-instruction exceptions: the machine has run amok. Same as a
  * real Amiga would show: Guru Meditation on the main screen. The alert number is synthetic (the emulator cannot know which
  * exception a real machine would have run into): 8000_0004 = dead-end alert, CPU exception 4 (illegal instruction); the
@@ -348,6 +363,8 @@ static void cd_check_runaway (void)
 	cd_guru_shown = 1;
 	write_log ("lowmem: %u illegal instructions within 50 frames after the trash: the CPU has run amok\n", cd_illegal_win);
 	guru_show (0x80000004, cd_guru_task);
+	cd_halt_machine ();
+	write_log ("lowmem: machine halted behind the banner\n");
 	if (alloctrace_last_failure (who, sizeof who, &kb, &at))
 		write_log ("lowmem: last failed allocation: %uK by '%s', %u frames ago\n", kb, who, cd_frames_since_reset - at);
 }
@@ -363,6 +380,7 @@ void crashdiag_frame (void)
 	frame++;
 	cd_frames_since_reset++;
 	cd_check_runaway ();
+	if (cd_guru_shown) cd_halt_machine ();
 	if (cd_frames_since_reset % 50 == 0) cd_illegal_win = 0;
 	if (sane) {
 		if (!cd_logged_exec) {

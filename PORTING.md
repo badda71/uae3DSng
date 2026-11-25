@@ -273,6 +273,14 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   buffer, ExecBase pointer -> 0) still shows the banner a frame or two after the trash. The log line `lowmem: N illegal instructions in this window of 50 frames;
   Guru Meditation banner shown / only if it floods` tells which case a log is. Also: the "(in game: Start + DPad = zoom / pan)" hint of the Display menu sits on the
   same 2-row grid as the other items now (it was one row below "Vertical Pan").
+* **Round 14 (Shadow of the Beast, second hardware log).** The banner after a real runaway (A1200 profile, `Beast I (a).adf`: `jsr $500.w` into garbage, 126 illegal
+  instructions in a second) is correct, but the machine used to run on behind it (garbage interrupts, noise, `DSKDAT written` - a runaway CPU could even write to the
+  ADF). The banner now **halts the machine** like a dead-end alert: CPU in STOP with the interrupt mask at 7 (re-applied every frame), audio DMA off; a click still
+  reboots. The per-run `config:` line now prints the model of *this* run (`cpu_level N (core was M)`; the old `cpu` value was the previous run's model, which looked
+  like a lagging core but is not: `uae4all_reset()` switches the jump table right after the line) and a new `config: DF0 '...' DF1 '...'` line, and every disk
+  insertion logs `disk: DFn '<file>' inserted, <size> bytes` (an ADF is 901120 bytes), so a log can be matched to the disks without guessing. What the log shows
+  about the game: Disk1 (then Disk2 swapped in through the menu) runs for minutes in the A500 profile; in the A1200 profile it hooks different vectors (it goes the
+  OS-friendly way: level-3 vector stays on the ROM handler) and is much more fragile - an old trackloader written for Kickstart 1.x.
 
 ## Known gaps / risks
 
