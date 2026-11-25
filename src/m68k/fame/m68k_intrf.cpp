@@ -115,12 +115,18 @@ static int cd_was_sane, cd_logged_exec;
  * task, memory chunks, DOS packet candidates, stack) is written for the first few hits from *different* PCs that are
  * either in user mode or happen well after the reset. */
 static int cd_armed, cd_trashed;
+/* A program that takes over the machine (trackloader games) overwrites exec's low memory on purpose and runs on happily:
+ * "exec trashed" alone is not a crash. A CPU that really ran amok raises illegal-instruction exceptions by the hundreds
+ * (every vector is garbage), so the Guru Meditation banner waits for such a flood (counted per window of 50 frames). */
+#define CD_RUNAWAY_ILLEGALS 20
+static unsigned cd_illegal_win, cd_guru_task;
+static int cd_guru_shown;
 static unsigned cd_wp_hits, cd_frames_since_reset, cd_full_dumps;
 static unsigned cd_dump_pcs[6];
 static uae_u32 cd_last_eb;
 extern void guru_hide (void);
 extern void guru_show (unsigned code, unsigned task);
-void crashdiag_reset (void) { guru_hide (); cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
+void crashdiag_reset (void) { guru_hide (); cd_was_sane = 0; cd_logged_exec = 0; cd_armed = 0; cd_trashed = 0; cd_illegal_win = 0; cd_guru_task = 0; cd_guru_shown = 0; cd_wp_hits = 0; cd_frames_since_reset = 0; cd_full_dumps = 0; }
 unsigned crashdiag_frame_count (void) { return cd_frames_since_reset; }
 
 /* name, type and (for a Process running a CLI command) the command name of a Task; returns the node type, 0 if not plausible */
@@ -329,6 +335,23 @@ static void crashdiag_watch_page (unsigned lo, unsigned hi)
 	famec_SetWriteHandlers (lo, hi, (void *) &cd_wp_b, (void *) &cd_wp_w);
 }
 
+/* The exec structures are gone *and* the CPU keeps raising illegal-instruction exceptions: the machine has run amok. Same as a
+ * real Amiga would show: Guru Meditation on the main screen. The alert number is synthetic (the emulator cannot know which
+ * exception a real machine would have run into): 8000_0004 = dead-end alert, CPU exception 4 (illegal instruction); the
+ * second number is the task that was running at the last good frame (as in the log). */
+static void cd_check_runaway (void)
+{
+	char who[48];
+	unsigned kb = 0, at = 0;
+	extern int alloctrace_last_failure (char *name, unsigned nn, unsigned *kb, unsigned *frame);
+	if (!cd_trashed || cd_guru_shown || cd_illegal_win < CD_RUNAWAY_ILLEGALS) return;
+	cd_guru_shown = 1;
+	write_log ("lowmem: %u illegal instructions within 50 frames after the trash: the CPU has run amok\n", cd_illegal_win);
+	guru_show (0x80000004, cd_guru_task);
+	if (alloctrace_last_failure (who, sizeof who, &kb, &at))
+		write_log ("lowmem: last failed allocation: %uK by '%s', %u frames ago\n", kb, who, cd_frames_since_reset - at);
+}
+
 /* Called once per emulated frame: notices the moment exec's low-memory structures get trashed. */
 void crashdiag_frame (void)
 {
@@ -339,6 +362,8 @@ void crashdiag_frame (void)
 	unsigned i;
 	frame++;
 	cd_frames_since_reset++;
+	cd_check_runaway ();
+	if (cd_frames_since_reset % 50 == 0) cd_illegal_win = 0;
 	if (sane) {
 		if (!cd_logged_exec) {
 			unsigned c, o;
@@ -359,21 +384,14 @@ void crashdiag_frame (void)
 	if (!cd_was_sane) return;                  /* still booting / already reported */
 	cd_was_sane = 0;
 	cd_trashed = 1;
-	{
-		/* Same as a real Amiga would show: Guru Meditation on the main screen. The alert number is synthetic (the
-		 * emulator cannot know which exception a real machine would have run into): 8000_0004 = dead-end alert,
-		 * CPU exception 4 (illegal instruction); the second number is the task that was running (as in the log). */
-		char who[48];
-		unsigned kb = 0, at = 0;
-		extern int alloctrace_last_failure (char *name, unsigned nn, unsigned *kb, unsigned *frame);
-		guru_show (0x80000004, sane_task);
-		if (alloctrace_last_failure (who, sizeof who, &kb, &at))
-			write_log ("lowmem: last failed allocation: %uK by '%s', %u frames ago\n", kb, who, cd_frames_since_reset - at);
-	}
+	cd_guru_task = sane_task;
+	cd_check_runaway ();                       /* normally too early: the flood of illegal instructions comes in the next frames */
 	if (reports++ >= 3) return;
 	write_log ("lowmem: exec structures trashed during frame %u (last good frame %u, hardfile requests since: %u)\n",
 		   frame, sane_frame, hardfile_request_count () - sane_hf);
-	write_log ("lowmem: write watch saw %u writes to chip offset 0..7 / the chip mirror since the reset (a trash with no hit after the boot-time ones = not the CPU, e.g. DMA/native code)\n", cd_wp_hits);
+	write_log ("lowmem: write watch saw %u writes to chip offset 0..7 / the chip mirror since the reset (only those 8 bytes are watched: the vectors above are not)\n", cd_wp_hits);
+	write_log ("lowmem: %u illegal instructions in this window of 50 frames; Guru Meditation banner %s\n", cd_illegal_win,
+		   cd_guru_shown ? "shown" : "only if it floods (a game that took over the machine overwrites the vectors and runs on)");
 	write_log ("lowmem: ExecBase %08x -> %08x\n", snap[0], eb);
 	for (i = 0; i < 12; i += 4)
 		write_log ("lowmem: vec %02x: was %08x %08x %08x %08x  now %08x %08x %08x %08x\n", 8 + i * 4,
@@ -455,6 +473,7 @@ void uae_chk_handler(unsigned vector)
 		else if (n_illegal == 1 || (n_illegal == 2 && opcode != 0x4e7b))
 			dump_cpu_context (opcode, pc);
 		n_illegal++;
+		cd_illegal_win++;
 	}
 #else
 	write_log ("Illegal instruction: %04x at %08lx\n", opcode, pc);

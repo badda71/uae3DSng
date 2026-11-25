@@ -264,6 +264,15 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   `displayedLines`, `screenWidth`, `cutLeft/Right`) stay in the file but their values are ignored. The Guru banner is drawn on the first *visible* line
   (`video3ds_visible_top()`); savestate thumbnails are the whole 320x256 window. Not reachable any more: lines outside the PAL window (overscan), hires. Also fixed:
   the "Frameskip" label of the Display menu sat on top of the digits.
+* **Round 13 (Guru false positive, menu spacing).** A trackloader game (Shadow of the Beast, hardware log 13:02) "crashed" after minutes of play: the **Guru Meditation**
+  banner appeared and the game's fire button (left mouse button) rebooted the Amiga. The game was alive all the time (50 fps, still loading from disk behind the
+  banner): it takes over the machine and writes its own data over the exception vectors 08..10 (the same three words `0005164c 00059770 0000190c` on the A500 and A1200 profiles,
+  the level-3 vector at 0x6c points to its own handler), which `crashdiag_frame()` took for trashed exec structures. The 8-byte write watch cannot see those
+  writes (hence "3 writes" in the log). Now the trash is only logged (as before); the banner needs the *runaway signature* as well: >= 20 illegal-instruction exceptions
+  within a window of 50 frames (a runaway CPU with garbage vectors raises thousands, a game that took over raises none). The genuine case (Install reading into a NULL
+  buffer, ExecBase pointer -> 0) still shows the banner a frame or two after the trash. The log line `lowmem: N illegal instructions in this window of 50 frames;
+  Guru Meditation banner shown / only if it floods` tells which case a log is. Also: the "(in game: Start + DPad = zoom / pan)" hint of the Display menu sits on the
+  same 2-row grid as the other items now (it was one row below "Vertical Pan").
 
 ## Known gaps / risks
 

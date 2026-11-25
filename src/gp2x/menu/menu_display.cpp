@@ -166,7 +166,7 @@ static void draw_displayMenu(int c)
 	else
 		write_text_inv(tabstop1,menuLine,value);
 
-	menuLine++;
+	menuLine+=2;   // same 2-row rhythm as the items above (the separator follows in the gap row below)
 	write_text(leftMargin,menuLine,"(in game: Start + DPad = zoom / pan)");
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
