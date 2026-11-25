@@ -1569,6 +1569,20 @@ void loadconfig(int general)
         // Set everthing to default and clear HD settings
         SetDefaultMenuSettings(general);
 
+        // The config of one HD (general 2 = hdf file, 4 = hd dir) is only about the machine settings (memory, cpu, ...).
+        // It must not replace the HD setup the user has just made in the menu: the file holds a snapshot of the HD
+        // slots and of "Boot HD" from when it was saved, which would eject the other HDs and flip the boot selection.
+        const bool keepHDSetup = (general == 2 || general == 4);
+        char keepHdDir[256], keepHdFile[4][256];
+        int keepBootHD = mainMenu_bootHD;
+        if (keepHDSetup) {
+            memcpy(keepHdDir, uae4all_hard_dir, sizeof(keepHdDir));
+            memcpy(keepHdFile[0], uae4all_hard_file0, 256);
+            memcpy(keepHdFile[1], uae4all_hard_file1, 256);
+            memcpy(keepHdFile[2], uae4all_hard_file2, 256);
+            memcpy(keepHdFile[3], uae4all_hard_file3, 256);
+        }
+
         char filebuffer[256];
 #if defined(PANDORA) || defined(ANDROIDSDL)
         int dummy;
@@ -1878,6 +1892,15 @@ void loadconfig(int general)
             }
             if (uae4all_hard_file3[0] == '*')
                 uae4all_hard_file3[0] = '\0';
+        }
+        if (keepHDSetup) {
+            // (the HD lines of the file were read to get to the settings behind them, but are not applied)
+            memcpy(uae4all_hard_dir, keepHdDir, sizeof(keepHdDir));
+            memcpy(uae4all_hard_file0, keepHdFile[0], 256);
+            memcpy(uae4all_hard_file1, keepHdFile[1], 256);
+            memcpy(uae4all_hard_file2, keepHdFile[2], 256);
+            memcpy(uae4all_hard_file3, keepHdFile[3], 256);
+            mainMenu_bootHD = keepBootHD;
         }
         fscanf(f,"chipmemory=%d\n",&mainMenu_chipMemory);
         fscanf(f,"slowmemory=%d\n",&mainMenu_slowMemory);
