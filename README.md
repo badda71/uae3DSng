@@ -14,6 +14,16 @@ Build (devkitARM + libctru + the portlibs below; on Windows use the devkitPro MS
 `fatal error: SDL_rotozoom.h: No such file or directory` means `3ds-sdl_gfx` is missing. The `.cia`/`.3ds` steps at the end need
 `bannertool` and `makerom` in the PATH; the `.3dsx` is built before them.
 
+## WHDLoad games (.lha) – experimental
+
+*Memory and Disk Options → "WHDLoad Games (.lha)..."* unpacks a WHDLoad archive straight into a folder on the SD card and starts it
+(the folder becomes the boot "HD Dir", a startup sequence runs the game's `.slave`). Not tested on hardware yet. On the SD card, under `3ds/uae3DSng/`:
+
+* `whdload/C/WHDLoad` – the WHDLoad program itself (from the WHDLoad package, not included here).
+* `kickstarts/` – your Kickstart ROMs as for floppies. The ones WHDLoad needs are copied to `whdload/Devs/Kickstarts` under their WHDLoad names on the first
+  start (`kick13.rom` → `kick34005.A500`, `kick31.rom` → `kick40068.A1200`, ...), together with any `.rtb`, `.pat` and `.key` files found there.
+* Games land in `whdload/<archive name>/`. Your current CPU/chipset/memory/Kickstart settings are kept, so pick the machine the game needs before you start it.
+
 ## Credits
 
 The 3D model in the CIA banner is based on "Commodore Amiga 500 || Computer" by [dark_igorek](https://sketchfab.com/dark_igorek) on Sketchfab,

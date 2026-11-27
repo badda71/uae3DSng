@@ -35,7 +35,7 @@ TARGET		:=	uae3DSng
 BUILD		:=	build
 # Explicit directory list (not `find`): src/ contains files that must NOT be built for 3DS
 # (NEON asm, Guichan GUI, OSS sound, 68k JIT stub, ...). See EXCLUDE_FILES below.
-SOURCES		:=	src src/3ds src/gp2x src/gp2x/menu src/menu src/m68k src/m68k/fame
+SOURCES		:=	src src/3ds src/3ds/lhasa src/gp2x src/gp2x/menu src/menu src/m68k src/m68k/fame
 DATA		:=	data
 META		:=	meta
 # UAE3DS_SDL/include/SDL: uae4all2 uses both <SDL.h> and <SDL/SDL.h> style includes
@@ -190,7 +190,8 @@ PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
 EXCLUDE_FILES	:=	compiler.cpp filesys_bootrom.cpp fsusage_win32.cpp sound.cpp sound_gp2x.cpp sound_sdl_new.cpp \
 			homedir.cpp neon_helper.s memcpy.s memset.s \
 			http.cpp update.cpp qr-scanner.cpp 3ds_cia.cpp \
-			uae3ds.cpp autofire.cpp
+			uae3ds.cpp autofire.cpp \
+			lh_new_decoder.c bit_stream_reader.c tree_decode.c pma_common.c
 CFILES		:=	$(filter-out $(EXCLUDE_FILES),$(CFILES))
 CPPFILES	:=	$(filter-out $(EXCLUDE_FILES),$(CPPFILES))
 SFILES		:=	$(filter-out $(EXCLUDE_FILES),$(SFILES))

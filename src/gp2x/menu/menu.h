@@ -72,6 +72,7 @@ int run_menuMisc();
 int run_menuControls();
 int run_menuDisplay();
 int run_menuMemDisk();
+int run_menuWhdload(void);
 void update_display();
 #ifdef USE_GUICHAN
 int run_mainMenuGuichan();
@@ -132,6 +133,7 @@ enum { MEMDISK_MENU_CASE_MAIN, MEMDISK_MENU_CASE_MISC };
 #define MENU_LOAD_DELETE_CONFIG 6
 #define MENU_LOAD_IMPORT_SAVE 7
 #define MENU_LOAD_DELETE_SAVE 8
+#define MENU_LOAD_LHA 9
 
 #ifdef __SWITCH__
 #define DEFAULT_SWAPAB 1

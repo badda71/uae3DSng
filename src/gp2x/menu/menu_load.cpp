@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<strings.h>
 #include "sysconfig.h"
 #include "sysdeps.h"
 #include "config.h"
@@ -49,6 +50,7 @@ extern char filename3[256];
 extern char currentDir[300];
 extern char config_load_filename[300];
 extern char save_import_filename[300];
+extern char whdload_lha_path[300];
 
 const char *text_str_load_separator="------------------------------------------------------";
 const char *text_str_load_dir="#DIR#";
@@ -217,6 +219,8 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 		text_draw_window(x_win,y_win,w_win,h_win,"Delete .ASF-file");
 #endif
 #endif
+	else if (menu_load_type == MENU_LOAD_LHA)
+		text_draw_window(x_win,y_win,w_win,h_win,"Select WHDLoad .LHA archive");
 #ifdef __PSP2__
 	else if (current_drive==0)
 		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0 (Triangle = Info)");
@@ -645,6 +649,15 @@ static int menuLoadLoop(char *curr_path)
 							else
 								strcpy(config_load_filename,filename);
 							break;
+						case MENU_LOAD_LHA:
+						{
+							size_t fl = strlen(filename);
+							if (fl < 5 || (strcasecmp(filename + fl - 4, ".lha") != 0 && strcasecmp(filename + fl - 4, ".lzh") != 0))
+								showWarning("LHA archive must be selected.");
+							else
+								snprintf(whdload_lha_path, sizeof(whdload_lha_path), "%s", filename);
+							break;
+						}
 						case MENU_LOAD_IMPORT_SAVE:
 						case MENU_LOAD_DELETE_SAVE:
 							if (strstr(filename, ".asf") == NULL)

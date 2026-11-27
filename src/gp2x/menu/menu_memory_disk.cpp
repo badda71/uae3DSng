@@ -60,6 +60,7 @@ enum {
 	MENUDISK_BOOTHD,
 	MENUDISK_HDDIR,
 	MENUDISK_HDFILE,
+	MENUDISK_WHDLOAD,
 	MENUDISK_SAVEHDCONF,
 	MENUDISK_FLOPPYSPEED,
 	MENUDISK_END
@@ -303,7 +304,14 @@ static void draw_memDiskMenu(int c)
 #endif
 	
 	menuLine += 2;
-		
+
+	if ((c==MENUDISK_WHDLOAD)&&(bb))
+		write_text_inv(3, menuLine, "WHDLoad Games (.lha)...");
+	else
+		write_text(3, menuLine, "WHDLoad Games (.lha)...");
+
+	menuLine++;
+
 	if ((c==MENUDISK_SAVEHDCONF)&&(bb))
 		write_text_inv(3, menuLine, "Save Config for current HD");
 	else
@@ -468,7 +476,7 @@ static int key_memDiskMenu(int *c)
 			if (menuMemDisk==MENUDISK_RETURNMAIN) menuMemDisk=MENUDISK_END - 1;
 			else if (menuMemDisk==MENUDISK_HDFILE && current_hdf>0) 
 					current_hdf--;
-			else if (menuMemDisk==MENUDISK_SAVEHDCONF)
+			else if (menuMemDisk==MENUDISK_WHDLOAD)
 			{
 				current_hdf=3;
 				menuMemDisk=MENUDISK_HDFILE;
@@ -594,6 +602,14 @@ static int key_memDiskMenu(int *c)
 						uae4all_hard_file2[0] = '\0';
 					else if (current_hdf==3)
 						uae4all_hard_file3[0] = '\0';
+				}
+				break;
+			case MENUDISK_WHDLOAD:
+				if (hit0)
+				{
+					int r = run_menuWhdload();	/* 1: game started (reset follows), -1: leave the menus, 0: back */
+					if (r != 0)
+						end = r;
 				}
 				break;
 			case MENUDISK_SAVEHDCONF:

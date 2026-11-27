@@ -307,6 +307,29 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   the strings in the BCPL frame. (3) A1200 at 7 MHz crashes during the game with alert `$80000006` (CHK exception); `crashdiag_exception()` now logs the first 12
   bus/address error, divide-by-zero, CHK and TRAPV exceptions per run with PC, the code around it, registers and stack.
 
+## WHDLoad .lha installation (branch `whdload-lha`, experimental)
+
+Goal: install a WHDLoad `.lha` on the SD card and boot it without leaving the emulator (the Vita fork has this; its code is not reusable as it
+depends on its own file layer, so only its design was taken: a shared `DH0:`-style root with `C/WHDLoad`, `S/Startup-Sequence`, `Devs/Kickstarts` and one
+folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>" PRELOAD`).
+
+* **Extractor**: [Lhasa](https://github.com/fragglet/lhasa) (ISC licence) is vendored in `src/3ds/lhasa` (37 files; provenance, the two files left out and
+  the one platform file we wrote, `lha_arch_3ds.c`, are in `README-3DS.txt`; the licence is `COPYING.md`). Writing a decoder of our own was the first plan;
+  Lhasa already handles LH0/LH1/LH5/LH6/LH7/LHD and the other methods real archives use and is tested against Amiga LHA 1.22/2.12 output, so it was taken instead.
+  `Makefile`: `src/3ds/lhasa` is a source/include dir, `lh_new_decoder.c bit_stream_reader.c tree_decode.c pma_common.c` are `#include`d by other files and excluded.
+* **`src/3ds/whdload3ds.cpp`** (plain stdio/POSIX, no libctru): `whd_install_lha` (two passes: count, then decode with 64 KB buffers, CRC-16 and length checked
+  against the header, `..` rejected, FAT-illegal/non-ASCII characters replaced by `_`, cancel removes the partial file), `whd_list_games`, `whd_prepare_launch`
+  (copies Kickstarts under their WHDLoad names, picks the `.slave`, writes `S/Startup-Sequence`; a user's own Workbench-style startup file is backed up to
+  `Startup-Sequence.orig` and gets the launch lines before its `EndCLI`).
+* **UI**: `src/gp2x/menu/menu_whdload.cpp` + a row in `menu_memory_disk.cpp` + `MENU_LOAD_LHA` in `menu_load.cpp`. Starting a game sets `uae4all_hard_dir` to the
+  whdload root, `mainMenu_bootHD = 1`, ejects the floppies and sets `resetOnStartingApp`, so the main menu does the Reset (which rebuilds the HD units).
+* **Verified on a PC** (`tools/whdload_test/run.sh <lhasa>/test/archives`, ASan/UBSan): 198 archives from Lhasa's test suite (Amiga LHA 1.22/2.12, Unix, OS-9, Mac),
+  181 install, the 17 failures are the expected ones (corrupt by design, methods Lhasa lacks, name clashes, MacBinary), every `gpl-2` inside is byte-identical
+  (57 archives), plus cancel/garbage/missing-file tests and the startup-sequence logic. The menu code passes `tools/hostcheck/check.sh`.
+* **Not verified**: anything on a 3DS: that the CI build links, install speed on the SD card (the in-emulator copy was very slow, many small files are the suspect;
+  `whd_install_stats.elapsed_ms` is shown after an install so this can be measured; if it is too slow the next step is extracting into a pre-made HDF instead),
+  and whether WHDLoad boots with the Kickstart/chipset the user has selected. WHDLoad itself is copyrighted and not shipped.
+
 ## Known gaps / risks
 
 1. **245 platform-conditional lines are unaudited** (`grep -rnE "__PSP2__|__SWITCH__|USE_SDL2"`,
