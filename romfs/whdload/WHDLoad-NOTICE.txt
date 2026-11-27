@@ -1,0 +1,15 @@
+WHDLoad (the file "WHDLoad" in this folder)
+
+  WHDLoad 20.0 [build 7051] (27.03.2026)
+  Copyright 1995-2026 by Bert Jahn. All rights reserved.
+  Home page and documentation: https://www.whdload.de
+  Copyright / license page:    https://www.whdload.de/docs/en/copy.html
+
+The author's terms: WHDLoad is copyrighted, all rights reserved; commercial use is only allowed with an explicit, written
+permission by the author. It is provided as is, without warranty.
+
+uae3DSng only copies this file to  sdmc:/3ds/uae3DSng/whdload/C/WHDLoad  when you have not put a WHDLoad there yourself
+(your own file is never replaced), and runs it inside the emulated Amiga to start WHDLoad game installs (.slave files).
+It is not part of uae3DSng's own source code and is not covered by uae3DSng's license.
+
+To use a different version, put it into whdload/C/ on the SD card. To get the built-in one back, delete that file.

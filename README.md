@@ -19,7 +19,9 @@ Build (devkitARM + libctru + the portlibs below; on Windows use the devkitPro MS
 *Memory and Disk Options → "WHDLoad Games (.lha)..."* unpacks a WHDLoad archive straight into a folder on the SD card and starts it
 (the folder becomes the boot "HD Dir", a startup sequence runs the game's `.slave`). Not tested on hardware yet. On the SD card, under `3ds/uae3DSng/`:
 
-* `whdload/C/WHDLoad` – the WHDLoad program itself (from the WHDLoad package, not included here).
+* `whdload/C/WHDLoad` – the WHDLoad program. If you have none there, the copy built into the app (WHDLoad 20.0, `romfs/whdload`) is put there when you
+  start a game; a file you put there yourself is never replaced (use it for another version; delete it to get the built-in one back).
+  WHDLoad is © Bert Jahn, all rights reserved, see `romfs/whdload/WHDLoad-NOTICE.txt`.
 * `kickstarts/` – your Kickstart ROMs as for floppies. The ones WHDLoad needs are copied to `whdload/Devs/Kickstarts` under their WHDLoad names on the first
   start (`kick13.rom` → `kick34005.A500`, `kick31.rom` → `kick40068.A1200`, ...), together with any `.rtb`, `.pat` and `.key` files found there.
 * Games land in `whdload/<archive name>/`. Your current CPU/chipset/memory/Kickstart settings are kept, so pick the machine the game needs before you start it.

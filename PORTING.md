@@ -328,7 +328,12 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
   (57 archives), plus cancel/garbage/missing-file tests and the startup-sequence logic. The menu code passes `tools/hostcheck/check.sh`.
 * **Not verified**: anything on a 3DS: that the CI build links, install speed on the SD card (the in-emulator copy was very slow, many small files are the suspect;
   `whd_install_stats.elapsed_ms` is shown after an install so this can be measured; if it is too slow the next step is extracting into a pre-made HDF instead),
-  and whether WHDLoad boots with the Kickstart/chipset the user has selected. WHDLoad itself is copyrighted and not shipped.
+  and whether WHDLoad boots with the Kickstart/chipset the user has selected.
+* **Built-in WHDLoad** (`romfs/whdload/WHDLoad`, fallback only): when `whdload/C/WHDLoad` is missing on the SD card, `whd_prepare_launch` copies it from the romfs; an existing file is never
+  replaced (`whd_builtin_whdload`, tested on the PC). The file is WHDLoad 20.0 build 7051 (27.03.2026), byte-identical to the one in the Vita fork's `psp2data/data/whdload_base/C`
+  (sha256 `5e66d140…adb5`); it was **not** compared against the official USR package. **Licence:** WHDLoad is © Bert Jahn, all rights reserved, "commercial use only with explicit, written
+  permission" (https://www.whdload.de/docs/en/copy.html); the page says nothing about redistribution by others, so asking the author before a public release is advisable.
+  The binary is its own commit and `romfs/whdload/` can simply be deleted: the code then shows the "WHDLoad is missing" message as before.
 
 ## Known gaps / risks
 
