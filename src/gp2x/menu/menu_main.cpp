@@ -80,7 +80,9 @@ extern char config_load_filename[300];
 
 extern bool resetOnStartingApp;
 
-#ifdef __PSP2__
+#ifdef __3DS__
+static const char *text_str_title=    "----- uae3DSng " VERSION3DS " -----";   /* VERSION3DS = x.y (x.y.z if micro != 0), from the Makefile */
+#elif defined(__PSP2__)
 static const char *text_str_title=    "----- UAE4All Vita " VERSION_MAJOR "." VERSION_MINOR " -----";
 #else
 #ifdef __SWITCH__
