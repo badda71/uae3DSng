@@ -317,17 +317,35 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
   the one platform file we wrote, `lha_arch_3ds.c`, are in `README-3DS.txt`; the licence is `COPYING.md`). Writing a decoder of our own was the first plan;
   Lhasa already handles LH0/LH1/LH5/LH6/LH7/LHD and the other methods real archives use and is tested against Amiga LHA 1.22/2.12 output, so it was taken instead.
   `Makefile`: `src/3ds/lhasa` is a source/include dir, `lh_new_decoder.c bit_stream_reader.c tree_decode.c pma_common.c` are `#include`d by other files and excluded.
-* **`src/3ds/whdload3ds.cpp`** (plain stdio/POSIX, no libctru): `whd_install_lha` (two passes: count, then decode with 64 KB buffers, CRC-16 and length checked
-  against the header, `..` rejected, FAT-illegal/non-ASCII characters replaced by `_`, cancel removes the partial file), `whd_list_games`, `whd_prepare_launch`
-  (copies Kickstarts under their WHDLoad names, picks the `.slave`, writes `S/Startup-Sequence`; a user's own Workbench-style startup file is backed up to
-  `Startup-Sequence.orig` and gets the launch lines before its `EndCLI`).
-* **UI**: `src/gp2x/menu/menu_whdload.cpp` + a row in `menu_memory_disk.cpp` + `MENU_LOAD_LHA` in `menu_load.cpp`. Starting a game sets `uae4all_hard_dir` to the
-  whdload root, `mainMenu_bootHD = 1`, ejects the floppies and sets `resetOnStartingApp`, so the main menu does the Reset (which rebuilds the HD units).
-* **Verified on a PC** (`tools/whdload_test/run.sh <lhasa>/test/archives`, ASan/UBSan): 198 archives from Lhasa's test suite (Amiga LHA 1.22/2.12, Unix, OS-9, Mac),
-  181 install, the 17 failures are the expected ones (corrupt by design, methods Lhasa lacks, name clashes, MacBinary), every `gpl-2` inside is byte-identical
-  (57 archives), plus cancel/garbage/missing-file tests and the startup-sequence logic. The menu code passes `tools/hostcheck/check.sh`.
-* **Not verified**: anything on a 3DS: that the CI build links, install speed on the SD card (the in-emulator copy was very slow, many small files are the suspect;
-  `whd_install_stats.elapsed_ms` is shown after an install so this can be measured; if it is too slow the next step is extracting into a pre-made HDF instead),
+* **`src/3ds/whdload3ds.cpp`** (plain stdio/POSIX, no libctru): `whd_install_lha` (two passes: headers, then decode with 64 KB buffers, CRC-16 and length checked
+  against the header), `whd_list_games`, `whd_prepare_launch` (copies Kickstarts under their WHDLoad names, picks the `.slave`, writes `S/Startup-Sequence`; a
+  user's own Workbench-style startup file is backed up to `Startup-Sequence.orig` and gets the launch lines before its `EndCLI`). Two install modes:
+  `WHD_INSTALL_IMAGE` (what the app uses, see below) and `WHD_INSTALL_FOLDER` (the first version: files in `whdload/<name>/`, kept for old installs and tests).
+* **`src/3ds/ofs_image.cpp`** (no emulator/3DS dependencies): writer for Amiga **OFS** (`DOS\0`) images. The emulator announces its hard files as `DOS\0` (`filesys.cpp`
+  parameter packet), so OFS is what has to be written. Geometry 32 sectors/1 surface/2 reserved/512 bytes, size = multiple of 32 blocks (what `make_hard_file_cfg_line` and
+  `parse_hardfile_spec` produce), root block in the middle, ≥ 2 GB refused. Two phases: all entries are added first (`ofs_add_dir/file`), `ofs_layout` then fixes every
+  block number (metadata - root, bitmap, bitmap extensions, folder and file headers, file extension blocks - is kept in RAM and emitted at the root position; data blocks
+  are numbered from block 2 and jump over that hole), so the image is written strictly front to back with no seeking. Names: `:` → `_`, cut to 30 characters,
+  bytes kept as they are (Latin-1). A name used twice is skipped (first wins).
+* **Image install**: pass 1 reads the lha headers (unsupported method / no `.slave` = fail before anything is written), pass 2 decodes into `<name>.hdf.tmp`, the
+  tmp file is renamed over the old image only when everything was written (a failed or cancelled install leaves the old one untouched), then `<name>.whd` (the
+  slave path, chosen from the entry list with the same rule as before: depth ≤ 4, closest to the top, shortest name, alphabetical) is written. Launch needs no scan of the image.
+* **UI**: `src/gp2x/menu/menu_whdload.cpp` + a row in `menu_memory_disk.cpp` + `MENU_LOAD_LHA` in `menu_load.cpp`. Starting an image game sets `uae4all_hard_dir` to the
+  whdload root (boot unit, holds `C/WHDLoad`, `S/Startup-Sequence`, `Devs/Kickstarts`) and `uae4all_hard_file0` to `32:1:2:512:<image>`, `mainMenu_bootHD = 1` (dir first,
+  then hard files: equal priority, so mount order = boot order), ejects the floppies and sets `resetOnStartingApp`, so the main menu does the Reset (which rebuilds the HD
+  units from these variables). `loadconfig(2)` of the HD menu's HDF selection is deliberately not called. The generated startup sequence does
+  `CD "WHDGame:<dir>"` + `C:WHDLoad "<slave>" PRELOAD` (`*` and `"` escaped for AmigaDOS).
+* **Why**: measured on a New 3DS with the folder version (`uae3DSng.log`): 639 files / 3.8 MB installed in 182 s (285 ms per file), finding the `.slave` (opendir/readdir/stat) 54 s
+  (85 ms per stat), 6.5 min until WHDLoad had opened all the files through the emulated filesystem (3870 `filesys_handler` traps), then 50 fps. The three numbers fit
+  "the FAT service scans a large flat directory for every create/stat/open"; this was not measured directly. The image removes that per-file cost.
+* **Verified on a PC** (`tools/whdload_test/run.sh <lhasa>/test/archives`, ASan/UBSan): the OFS writer (`ofs_host_test.cpp`, 852 checks: sizes at every block/extension boundary,
+  nested folders, 700 files in one folder with forced hash collisions, 56 MB and 330 MB images with bitmap extension blocks) against `ofs_reader.h`, an **independent checker**
+  that follows the layout rules of amitools' validator (checksums, types, own keys, parents, hash placement, data chains, bitmap vs. used blocks, no block twice);
+  hand-made archives (slave choice, escaping, bad CRC, cancel, duplicates, "no leftovers on failure"); 198 archives from Lhasa's test suite (Amiga LHA 1.22/2.12, Unix, OS-9, Mac):
+  181 install as folder and as image and every file is identical in both (names that had to be cut are compared by count and size), the 17 failures are the expected ones (corrupt by
+  design, methods Lhasa lacks, name clashes, MacBinary), the 4.7 GB file of `h2_huge.lzh` cannot go into an image, every `gpl-2` inside is byte-identical (57 archives).
+  The menu code passes `tools/hostcheck/check.sh`. **Not done:** running amitools itself on a sample image (it was not run here; `xdftool <image> info` / `fsck` on a PC would be a good extra check).
+* **Not verified**: anything on a 3DS: that the CI build links, install and load speed of the image version, that the emulator mounts the image as `WHDGame:` with Kickstart 1.3/3.1,
   and whether WHDLoad boots with the Kickstart/chipset the user has selected.
 * **Built-in WHDLoad** (`romfs/whdload/WHDLoad`, fallback only): when `whdload/C/WHDLoad` is missing on the SD card, `whd_prepare_launch` copies it from the romfs; an existing file is never
   replaced (`whd_builtin_whdload`, tested on the PC). The file is WHDLoad 20.0 build 7051 (27.03.2026), byte-identical to the one in the Vita fork's `psp2data/data/whdload_base/C`

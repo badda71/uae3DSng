@@ -1,9 +1,12 @@
 /*
  * uae3DSng - "WHDLoad Games" screen (reached from Memory and Disk Options).
  *
- *   - Install game from .lha archive...  : pick an archive, it is extracted into sdmc:/3ds/uae3DSng/whdload/<name>/
- *   - <game>                              : write S/Startup-Sequence, mount the whdload folder as the boot "HD Dir",
- *                                           eject the floppies and reset (the main menu does the reset)
+ *   - Install game from .lha archive...  : pick an archive, it is installed into ONE Amiga disk image
+ *                                           sdmc:/3ds/uae3DSng/whdload/<name>.hdf (hundreds of small files are far
+ *                                           too slow on the 3DS SD card)
+ *   - <game>                              : write S/Startup-Sequence, mount the whdload folder as the boot "HD Dir"
+ *                                           and the image as a hard file behind it, eject the floppies and reset
+ *                                           (the main menu does the reset)
  *
  * The work itself is in src/3ds/whdload3ds.cpp (tested on a PC), this file is only the user interface.
  */
@@ -176,7 +179,8 @@ static int install_from_archive(const char *archive)
 
     char folder[WHD_NAME_MAX], err[200];
     whd_install_stats st;
-    int ok = whd_install_lha(WHD_ROOT, archive, install_progress, &ui, folder, sizeof(folder), &st, err, sizeof(err));
+    int ok = whd_install_lha(WHD_ROOT, archive, WHD_INSTALL_IMAGE, install_progress, &ui, folder, sizeof(folder), &st,
+                             err, sizeof(err));
     refresh_games();
     if (!ok) {
         char msg[300];
@@ -187,7 +191,7 @@ static int install_from_archive(const char *archive)
     char msg[300];
     double secs = st.elapsed_ms / 1000.0;
     snprintf(msg, sizeof(msg), "Installed \"%s\"\n%u files, %.1f MB in %.1f s%s", folder, st.files,
-             st.bytes / 1048576.0, secs, st.renamed ? "\nSome file names had to be changed (see log)" : "");
+             st.bytes / 1048576.0, secs, st.renamed ? "\nSome long names were shortened (see log)" : "");
     whd_message_box("WHDLoad", msg);
     return find_game(folder);
 }
@@ -199,19 +203,43 @@ static int install_from_archive(const char *archive)
 static int launch_game(const char *game)
 {
     char err[200];
-    if (!whd_prepare_launch(WHD_ROOT, game, WHD_KICKSTART_DIR, NULL, err, sizeof(err))) {
+    whd_launch_info info;
+    if (!whd_prepare_launch(WHD_ROOT, game, WHD_KICKSTART_DIR, NULL, &info, err, sizeof(err))) {
         whd_message_box("Cannot start", err);
         return 0;
     }
+
+    /* The game's disk image becomes hard file 0. The setting holds the geometry spec in front of the path
+       ("32:1:2:512:<path>", the same as the HDF selection in the HD menu makes), which has to fit into 255 bytes. */
+    char hardfile[256];
+    hardfile[0] = '\0';
+    if (info.hdf_path[0]) {
+        if (strlen(info.hdf_path) + 16 > sizeof(hardfile)) {
+            whd_message_box("Cannot start", "The path of the game image is too long.");
+            return 0;
+        }
+        snprintf(hardfile, sizeof(hardfile), "%s", info.hdf_path);
+        if (!make_hard_file_cfg_line(hardfile)) {
+            whd_message_box("Cannot start", "Cannot open the game image.");
+            return 0;
+        }
+    }
+
     /* the whdload folder is the boot "HD Dir" (the main menu's Reset builds the units from these settings) */
     strncpy(uae4all_hard_dir, WHD_ROOT, 255);
     uae4all_hard_dir[255] = '\0';
     make_hard_dir_cfg_line(uae4all_hard_dir);
-    mainMenu_bootHD = 1;                            /* Dir first (the HD files, if any, stay mounted behind it) */
+    if (hardfile[0]) {
+        memcpy(uae4all_hard_file0, hardfile, sizeof(hardfile));
+    } else if (strstr(uae4all_hard_file0, WHD_ROOT)) {
+        uae4all_hard_file0[0] = '\0';                  /* the image of the game started before must not stay mounted */
+    }
+    mainMenu_bootHD = 1;                            /* Dir first, then the hard files: the folder boots, the image is "WHDGame:" */
     uae4all_image_file0[0] = uae4all_image_file1[0] = uae4all_image_file2[0] = uae4all_image_file3[0] = '\0';
     resetOnStartingApp = true;                      /* main menu: reset / start right after this menu closes */
-    log3ds("whdload: starting '%s' (HD dir '%s', chip %d, slow %d, fast %d, kickstart %d)", game, uae4all_hard_dir,
-           mainMenu_chipMemory, mainMenu_slowMemory, mainMenu_fastMemory, kickstart);
+    log3ds("whdload: starting '%s' (HD dir '%s', hard file 0 '%s', chip %d, slow %d, fast %d, kickstart %d)", game,
+           uae4all_hard_dir, uae4all_hard_file0, mainMenu_chipMemory, mainMenu_slowMemory, mainMenu_fastMemory,
+           kickstart);
     return 1;
 }
 
