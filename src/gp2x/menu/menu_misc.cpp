@@ -312,7 +312,7 @@ static void draw_miscMenu(int c)
 	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(Sq=Fire X=Autofire Tr=Space O=2nd)");
 	else if (mainMenu_joyConf==2) write_text(3,menuLine,"(Sq=Autofire X=Jump Tr=Fire O=2nd)");
 	else if (mainMenu_joyConf==3) write_text(3,menuLine,"(Sq=Fire X=Jump Tr=Autofire O=2nd)");
-#elif defined(__SWITCH__)
+#elif defined(__SWITCH__) || defined(__3DS__)   /* Nintendo face buttons by position: Y left, X top, A right, B bottom */
 	if (mainMenu_joyConf==0) write_text(3,menuLine,"(Y=Autofire B=Fire X=Space A=2nd)");
 	else if (mainMenu_joyConf==1) write_text(3,menuLine,"(Y=Fire B=Autofire X=Space A=2nd)");
 	else if (mainMenu_joyConf==2) write_text(3,menuLine,"(Y=Autofire B=Jump X=Fire A=2nd)");

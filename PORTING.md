@@ -249,6 +249,8 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 * **Round 11 (default mouse buttons).** Without custom controls, L = left mouse button and R = right mouse button (they were swapped, a Vita convention); the New 3DS
   ZL button is a second right mouse button (`triggerL2`/`triggerR2` are now polled on the 3DS too; both read 0 on an Old 3DS). The default of custom preset 1 follows
   the same convention (`menu_config.cpp`). Saved configs keep their stored mapping. ZL/ZR cannot be assigned in the custom controls menu yet.
+* **Round 12 (Control Config legend).** The line under More Options -> Control Config 1..4 fell through to the Pandora text on the 3DS ("A=Autofire X=Fire Y=Space B=2nd"),
+  while the buttons really follow the physical positions (Y=Autofire B=Fire X=Space A=2nd, as on the Switch). Only the legend was wrong; `set_joyConf()` and the button polling were right.
 * **Round 12 (display redesign).** The 400x240 top screen made Preset Width/Height, Displayed Lines, Vertical Position and Shader pointless, so they are gone from
   the Display menu (3DS only; the Vita/Switch code is untouched). The emulator now always renders the whole PAL window, 320x256 lores (`moveY` 18 = Amiga line 44
   .. 299; `video3ds_fix_window()` forces the old preset/lines/width variables to that, also after loading a config), and the GPU places it (`src/3ds/video3ds.cpp`,
