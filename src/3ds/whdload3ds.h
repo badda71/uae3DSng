@@ -3,7 +3,8 @@
  *
  * Layout on the SD card (WHD_ROOT is mounted as the boot "HD Dir" when a game is launched):
  *
- *   whdload/C/WHDLoad            the WHDLoad program (you supply it; it is not part of this project)
+ *   whdload/C/WHDLoad            the WHDLoad program: yours if you put one there, otherwise the copy from the romfs is
+ *                                put there when a game is started (see WHD_BUILTIN_WHDLOAD)
  *   whdload/S/Startup-Sequence   written for every launch (CD into the game, run WHDLoad)
  *   whdload/Devs/Kickstarts/     ROM images / .RTB / .PAT files, copied from the kickstarts folder when missing
  *   whdload/<Game>/              one folder per installed .lha, e.g. whdload/Beast/Beast/Beast.slave
@@ -24,6 +25,12 @@
 #define WHD_KICKSTART_DIR "sdmc:/3ds/uae3DSng/kickstarts"
 #endif
 
+/* The WHDLoad program that ships inside the app (romfs/whdload/WHDLoad). It is only a fallback: a C/WHDLoad that is
+   already on the SD card is never replaced. */
+#ifndef WHD_BUILTIN_WHDLOAD
+#define WHD_BUILTIN_WHDLOAD "romfs:/whdload/WHDLoad"
+#endif
+
 #define WHD_NAME_MAX 128      /* length of one game folder name */
 
 /* Called while extracting: item = name of the current file inside the archive. Return non-zero to cancel. */
@@ -41,6 +48,9 @@ typedef struct {
 extern "C" {
 #endif
 
+/* Where the fallback WHDLoad is read from (defaults to WHD_BUILTIN_WHDLOAD; the host test points it elsewhere) */
+extern const char *whd_builtin_whdload;
+
 /* Extract archive (.lha/.lzh) into <root>/<name of the archive>/ . Returns 1 on success (game_folder = folder name,
    below root), 0 on failure (err = message for the user). Files of an earlier install are overwritten. */
 int whd_install_lha(const char *root, const char *archive, whd_progress_fn progress, void *user,
@@ -50,7 +60,7 @@ int whd_install_lha(const char *root, const char *archive, whd_progress_fn progr
 /* Names of the installed games (= sub folders of root except the system folders), sorted. Returns the count. */
 int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names);
 
-/* Make the game start: checks C/WHDLoad, copies Kickstart images (from kick_dir, may be NULL) into
+/* Make the game start: makes sure C/WHDLoad exists (copies the built-in one if the SD card has none), copies Kickstart images (from kick_dir, may be NULL) into
    Devs/Kickstarts, finds the .slave and writes S/Startup-Sequence. extra_args may be NULL (default "PRELOAD").
    Returns 1 on success, 0 on failure (err = message for the user). */
 int whd_prepare_launch(const char *root, const char *game, const char *kick_dir, const char *extra_args,

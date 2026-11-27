@@ -123,6 +123,20 @@ static void unit_tests(const std::string &work)
     CHECK(!whd_prepare_launch(root.c_str(), "nogame", nullptr, nullptr, err, sizeof err) && strstr(err, "not found"));
     CHECK(!whd_prepare_launch(root.c_str(), "../x", nullptr, nullptr, err, sizeof err));
     CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, err, sizeof err) && strstr(err, "WHDLoad is missing"));
+    /* built-in WHDLoad (romfs on the 3DS): used when the SD card has none, never replaces a file that is there */
+    std::string builtin = work + "/builtin_WHDLoad";
+    write_file(builtin, "BUILTIN-WHDLOAD");
+    whd_builtin_whdload = builtin.c_str();
+    CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));  /* got past the check */
+    CHECK(slurp(root + "/C/WHDLoad") == "BUILTIN-WHDLOAD");
+    write_file(root + "/C/WHDLoad", "binary");                                    /* the user's own copy */
+    write_file(builtin, "OTHER-BUILTIN");
+    CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));
+    CHECK(slurp(root + "/C/WHDLoad") == "binary");                                /* untouched */
+    remove((root + "/C/WHDLoad").c_str());
+    remove((root + "/C").c_str());                                                /* even the C folder is created */
+    CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));
+    CHECK(slurp(root + "/C/WHDLoad") == "OTHER-BUILTIN");
     write_file(root + "/C/WHDLoad", "binary");
     CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));
 

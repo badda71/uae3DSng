@@ -45,6 +45,7 @@ extern const char *text_str_memdisk_separator;
 
 static char games[MAX_GAMES][WHD_NAME_MAX];
 static int n_games = 0;
+static int have_builtin_whdload = 0;        /* a WHDLoad ships in the romfs (the SD card copy, if any, is preferred) */
 
 static void refresh_games(void)
 {
@@ -238,9 +239,15 @@ static void draw_list(int sel, int top)
 
     if (n_games == 0) {
         write_text(3, line + 1, "No games installed yet.");
-        write_text(3, line + 3, "WHDLoad itself is not included:");
-        write_text(3, line + 4, "put it into whdload/C/WHDLoad");
-        write_text(3, line + 5, "on the SD card (3ds/uae3DSng).");
+        if (have_builtin_whdload) {
+            write_text(3, line + 3, "A WHDLoad is built in. To use your");
+            write_text(3, line + 4, "own, put it into whdload/C/WHDLoad");
+            write_text(3, line + 5, "on the SD card (3ds/uae3DSng).");
+        } else {
+            write_text(3, line + 3, "WHDLoad itself is not included:");
+            write_text(3, line + 4, "put it into whdload/C/WHDLoad");
+            write_text(3, line + 5, "on the SD card (3ds/uae3DSng).");
+        }
     } else {
         for (int i = 0; i < LIST_ROWS && top + i < n_games; i++) {
             int idx = top + i + 1;                  /* list item 0 is the install row */
@@ -263,6 +270,12 @@ static void draw_list(int sel, int top)
 int run_menuWhdload(void)
 {
     refresh_games();
+    {
+        FILE *f = whd_builtin_whdload ? fopen(whd_builtin_whdload, "rb") : NULL;
+        have_builtin_whdload = f != NULL;
+        if (f)
+            fclose(f);
+    }
     int sel = 0, top = 0;
     int result = 0;
 

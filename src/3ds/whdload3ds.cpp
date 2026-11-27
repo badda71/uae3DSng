@@ -41,6 +41,8 @@ extern "C" {
 /* small helpers                                                                                                    */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
+const char *whd_builtin_whdload = WHD_BUILTIN_WHDLOAD;
+
 static void set_err(char *err, size_t err_size, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
 static void set_err(char *err, size_t err_size, const char *fmt, ...)
 {
@@ -644,8 +646,16 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
     char path[MAX_PATH_LEN];
     snprintf(path, sizeof(path), "%s/C/WHDLoad", root);
     if (file_size(path) <= 0) {
-        set_err(err, err_size, "WHDLoad is missing: copy it to %s", path);
-        return 0;
+        /* none on the SD card: use the copy that ships with the app (a file the user put there is never touched) */
+        if (!whd_builtin_whdload || file_size(whd_builtin_whdload) <= 0) {
+            set_err(err, err_size, "WHDLoad is missing: copy it to %s", path);
+            return 0;
+        }
+        if (!copy_file(whd_builtin_whdload, path) || file_size(path) != file_size(whd_builtin_whdload)) {
+            set_err(err, err_size, "Cannot write %s (SD card full or locked?)", path);
+            return 0;
+        }
+        WHD_LOG("whdload: no C/WHDLoad on the SD card, installed the built-in copy (%ld bytes)", file_size(path));
     }
 
     deploy_kickstarts(root, kick_dir);
