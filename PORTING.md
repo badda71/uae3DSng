@@ -248,7 +248,7 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
   by badda71; the banner model is credited in README.md. `meta/banner.png` is no longer used by the build. **The banner has not been seen on hardware yet.**
 * **Round 11 (default mouse buttons).** Without custom controls, L = left mouse button and R = right mouse button (they were swapped, a Vita convention); the New 3DS
   ZL button is a second right mouse button (`triggerL2`/`triggerR2` are now polled on the 3DS too; both read 0 on an Old 3DS). The default of custom preset 1 follows
-  the same convention (`menu_config.cpp`). Saved configs keep their stored mapping. ZL/ZR cannot be assigned in the custom controls menu yet.
+  the same convention (`menu_config.cpp`). Saved configs keep their stored mapping. (ZL/ZR in the custom controls menu: see "ZL / ZR" below.)
 * **Round 12 (Control Config legend).** The line under More Options -> Control Config 1..4 fell through to the Pandora text on the 3DS ("A=Autofire X=Fire Y=Space B=2nd"),
   while the buttons really follow the physical positions (Y=Autofire B=Fire X=Space A=2nd, as on the Switch). Only the legend was wrong; `set_joyConf()` and the button polling were right.
 * **Round 12 (menu title).** The main menu window was titled "UAE4All Pandora" on the 3DS (it had no branch of its own in `menu_main.cpp`). It now reads "uae3DSng <version>",
@@ -377,6 +377,14 @@ generated startup sequence that runs `C:WHDLoad "<slave>" PRELOAD`). The first v
   writes `PRELOAD <options>`. Both files are replaced through `<file>.tmp`, an install of the same game again keeps its options (and the favourite, which is by name), an uninstall removes the favourite.
   The `slave=` / `options=` lines are only found at the start of a line (an option text containing `slave=` cannot be taken for the slave). The text is entered with the system software keyboard
   (`src/3ds/textinput3ds.cpp`, libctru `swkbd`); anything outside ASCII 32..126 becomes `?`. **Not verified on hardware:** the keyboard applet from inside the emulator's menu (nothing else in the app uses it yet) and the new list layout.
+* **ZL / ZR (New 3DS)** (asked for by the maintainer): without custom controls ZL = right and ZR = left mouse button (ZR is new; L = left and R = right as before, ZL/ZR are second buttons for the same).
+  With custom controls the *Custom Controls* menu has two more lines, ZL and ZR, below L and R (two text lines apart like all lines): they are `mainMenu_custom_L2/R2` and
+  `mainMenu_customPreset_L2/R2`, which already existed for the Switch (the `#ifdef __SWITCH__` around them is now `defined(__SWITCH__) || defined(__3DS__)`; L3/R3 stay Switch only;
+  `gui.cpp` polls them as buttons 14/15 of the custom button loop, `od-joy.cpp` maps them to directions, fire buttons and the slow/fast mouse functions like any other button).
+  Defaults: set 1, controller 1: ZL = right mouse button, ZR = left mouse button (the Switch has fast/slow mouse there); the Pinball set has the two flippers (left/right Alt) on them
+  like on the Switch; everything else is empty. Config file: for every controller and set two lines `custom<set>_L2_Ply<controller>=` and `custom<set>_R2_Ply<controller>=` at the very
+  end of the file (after `vpan=`), so that older files, which have none of them, still load and keep the defaults (tested on the PC with a copy of the read/write code: round trip, file
+  without the lines, truncated file). On an Old 3DS the two buttons do not exist (`hidKeysHeld()` never reports them); the menu lines are there anyway. **Not verified on hardware.**
 * **Menu spacing**: every line of text in the WHDLoad screens is two text lines apart from the next one (only a separator line may sit in between): the game list is drawn
   at lines 5, 7, 9, ... (12 rows), the help text of the empty list, the lines of the message / question boxes ("Installed ...", "Delete ...?") and the progress screens likewise;
   the WHDLoad row in Memory and Disk Options has one empty line before "Save Config for current HD".

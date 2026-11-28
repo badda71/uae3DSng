@@ -100,9 +100,11 @@ int mainMenu_custom_X[MAX_NUM_CONTROLLERS] = { };
 int mainMenu_custom_Y[MAX_NUM_CONTROLLERS] = { };
 int mainMenu_custom_L[MAX_NUM_CONTROLLERS] = { };
 int mainMenu_custom_R[MAX_NUM_CONTROLLERS] = { };
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 int mainMenu_custom_L2[MAX_NUM_CONTROLLERS] = { };
 int mainMenu_custom_R2[MAX_NUM_CONTROLLERS] = { };
+#endif
+#ifdef __SWITCH__
 int mainMenu_custom_L3[MAX_NUM_CONTROLLERS] = { };
 int mainMenu_custom_R3[MAX_NUM_CONTROLLERS] = { };
 #endif
@@ -122,9 +124,11 @@ int mainMenu_customPreset_X[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
 int mainMenu_customPreset_Y[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
 int mainMenu_customPreset_L[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
 int mainMenu_customPreset_R[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 int mainMenu_customPreset_L2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
 int mainMenu_customPreset_R2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
+#endif
+#ifdef __SWITCH__
 int mainMenu_customPreset_L3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
 int mainMenu_customPreset_R3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS] = { };
 #endif
@@ -281,9 +285,11 @@ void SetDefaultMenuSettings(int general)
 		 mainMenu_custom_Y[i] = 0;
 		 mainMenu_custom_L[i] = 0;
 		 mainMenu_custom_R[i] = 0;
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		 mainMenu_custom_L2[i] = 0;
 		 mainMenu_custom_R2[i] = 0;
+#endif
+#ifdef __SWITCH__
 		 mainMenu_custom_L3[i] = 0;
 		 mainMenu_custom_R3[i] = 0;
 #endif
@@ -308,9 +314,11 @@ void SetDefaultMenuSettings(int general)
 			mainMenu_customPreset_Y[j][i] = 0;
 			mainMenu_customPreset_L[j][i] = 0;
 			mainMenu_customPreset_R[j][i] = 0;
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			mainMenu_customPreset_L2[j][i] = 0;
 			mainMenu_customPreset_R2[j][i] = 0;
+#endif
+#ifdef __SWITCH__
 			mainMenu_customPreset_L3[j][i] = 0;
 			mainMenu_customPreset_R3[j][i] = 0;
 #endif
@@ -337,9 +345,14 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[0][0] = -4; // ply1 fire 2
 	mainMenu_customPreset_L[0][0] = -1; // left mouse
 	mainMenu_customPreset_R[0][0] = -2; // right mouse
-#ifdef __SWITCH__
+#if defined(__3DS__)
+	mainMenu_customPreset_L2[0][0] = -2; // ZL: right mouse
+	mainMenu_customPreset_R2[0][0] = -1; // ZR: left mouse
+#elif defined(__SWITCH__)
 	mainMenu_customPreset_L2[0][0] = -26; // fast mouse
 	mainMenu_customPreset_R2[0][0] = -25; // slow mouse
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[0][0] = 0;
 	mainMenu_customPreset_R3[0][0] = 0;
 #endif
@@ -358,9 +371,11 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[0][1] = -2; // right mouse (ply2 fire 2)
 	mainMenu_customPreset_L[0][1] = 0;
 	mainMenu_customPreset_R[0][1] = 0;
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[0][1] = 0;
 	mainMenu_customPreset_R2[0][1] = 0;
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[0][1] = 0;
 	mainMenu_customPreset_R3[0][1] = 0;
 #endif
@@ -379,9 +394,11 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[0][2] = -14; // ply3 fire 2
 	mainMenu_customPreset_L[0][2] = 0;
 	mainMenu_customPreset_R[0][2] = 0;
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[0][2] = 0;
 	mainMenu_customPreset_R2[0][2] = 0;
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[0][2] = 0;
 	mainMenu_customPreset_R3[0][2] = 0;
 #endif
@@ -400,9 +417,11 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[0][3] = -20; // ply4 fire 2
 	mainMenu_customPreset_L[0][3] = 0;
 	mainMenu_customPreset_R[0][3] = 0;
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[0][3] = 0;
 	mainMenu_customPreset_R2[0][3] = 0;
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[0][3] = 0;
 	mainMenu_customPreset_R3[0][3] = 0;
 #endif
@@ -423,9 +442,11 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[1][0] = 87; // F1 (start 1 player game)
 	mainMenu_customPreset_L[1][0] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R[1][0] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[1][0] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R2[1][0] = 34; // right alt (right flipper)
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[1][0] = 0;
 	mainMenu_customPreset_R3[1][0] = 0;
 #endif
@@ -445,9 +466,11 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[1][1] = 88; // F2 (start 2 player game)
 	mainMenu_customPreset_L[1][1] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R[1][1] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[1][1] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R2[1][1] = 34; // right alt (right flipper)
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[1][1] = 0;
 	mainMenu_customPreset_R3[1][1] = 0;
 #endif
@@ -467,9 +490,11 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[1][2] = 89; // F3 (start 3 player game)
 	mainMenu_customPreset_L[1][2] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R[1][2] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[1][2] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R2[1][2] = 34; // right alt (right flipper)
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[1][2] = 0;
 	mainMenu_customPreset_R3[1][2] = 0;
 #endif
@@ -489,9 +514,11 @@ void SetDefaultMenuSettings(int general)
 	mainMenu_customPreset_Y[1][3] = 90; // F4 (start 4 player game)
 	mainMenu_customPreset_L[1][3] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R[1][3] = 34; // right alt (right flipper)
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[1][3] = 33; // left alt (left flipper)
 	mainMenu_customPreset_R2[1][3] = 34; // right alt (right flipper)
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[1][3] = 0;
 	mainMenu_customPreset_R3[1][3] = 0;
 #endif
@@ -1474,6 +1501,17 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "vpan=%d\n",mainMenu_vpan);
     fputs(buffer,f);
+    // ZL / ZR (New 3DS) of the custom control sets: the very last lines, older files have none
+    for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
+    {
+        for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++)
+        {
+            snprintf((char*)buffer, 255, "custom%d_L2_Ply%d=%d\n",j+1,i,mainMenu_customPreset_L2[j][i]);
+            fputs(buffer,f);
+            snprintf((char*)buffer, 255, "custom%d_R2_Ply%d=%d\n",j+1,i,mainMenu_customPreset_R2[j][i]);
+            fputs(buffer,f);
+        }
+    }
 #endif
 #ifdef __SWITCH__
     snprintf((char*)buffer, 255, "swapAB=%d\n",mainMenu_swapAB);
@@ -1958,6 +1996,25 @@ void loadconfig(int general)
             mainMenu_displayMode = (mainMenu_shader != 0 && mainMenu_displayedLines >= 250) ? DISPLAY_FITHEIGHT : DISPLAY_1TO1;
             mainMenu_zoom = 100;
             mainMenu_vpan = 0;
+        }
+        // ZL / ZR of the custom control sets (the very last lines; an older file has none and keeps the defaults)
+        {
+            int ok = 1;
+            for (int i=0; ok && i<MAX_NUM_CONTROLLERS; i++)
+            {
+                for (int j=0; ok && j<MAX_NUM_CUSTOM_PRESETS; j++)
+                {
+                    int l=0, m=0, zl=0, zr=0;
+                    if (fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&zl) == 3 && fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&zr) == 3)
+                    {
+                        mainMenu_customPreset_L2[j][i] = zl;
+                        mainMenu_customPreset_R2[j][i] = zr;
+                    }
+                    else
+                        ok = 0;
+                }
+            }
+            remap_custom_controls();   // the sets were mapped to the custom variables before ZL / ZR were read
         }
 #endif
 #ifdef __SWITCH__ 

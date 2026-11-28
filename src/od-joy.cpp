@@ -47,9 +47,11 @@ extern int buttonX[MAX_NUM_CONTROLLERS];
 extern int buttonY[MAX_NUM_CONTROLLERS];
 extern int triggerL[MAX_NUM_CONTROLLERS];
 extern int triggerR[MAX_NUM_CONTROLLERS];
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 extern int triggerL2[MAX_NUM_CONTROLLERS];
 extern int triggerR2[MAX_NUM_CONTROLLERS];
+#endif
+#ifdef __SWITCH__
 extern int triggerL3[MAX_NUM_CONTROLLERS];
 extern int triggerR3[MAX_NUM_CONTROLLERS];
 #endif
@@ -286,12 +288,15 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 						(mainMenu_custom_L[i]==-25 && triggerL[i]) ||
 						(mainMenu_custom_R[i]==-25 && triggerR[i])
 					) ||
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 					(
 						(mainMenu_custom_L2[i]==-25 && triggerL2[i]) ||
-						(mainMenu_custom_R2[i]==-25 && triggerR2[i]) ||
+						(mainMenu_custom_R2[i]==-25 && triggerR2[i])
+#ifdef __SWITCH__
+						||
 						(mainMenu_custom_L3[i]==-25 && triggerL3[i]) ||
 						(mainMenu_custom_R3[i]==-25 && triggerR3[i])
+#endif
 					) ||
 #endif
 					(
@@ -336,12 +341,15 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 						(mainMenu_custom_L[i]==-26 && triggerL[i]) ||
 						(mainMenu_custom_R[i]==-26 && triggerR[i])
 					) ||
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 					(
 						(mainMenu_custom_L2[i]==-26 && triggerL2[i]) ||
-						(mainMenu_custom_R2[i]==-26 && triggerR2[i]) ||
+						(mainMenu_custom_R2[i]==-26 && triggerR2[i])
+#ifdef __SWITCH__
+						||
 						(mainMenu_custom_L3[i]==-26 && triggerL3[i]) ||
 						(mainMenu_custom_R3[i]==-26 && triggerR3[i])
+#endif
 					) ||
 #endif
 					(
@@ -496,8 +504,10 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					break;
 			}
 			if((mainMenu_custom_A[i]==u && buttonA[i]) || (mainMenu_custom_B[i]==u && buttonB[i]) || (mainMenu_custom_X[i]==u && buttonX[i]) || (mainMenu_custom_Y[i]==u && buttonY[i]) || (mainMenu_custom_L[i]==u && triggerL[i]) || (mainMenu_custom_R[i]==u && triggerR[i])
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			|| (mainMenu_custom_L2[i]==u && triggerL2[i]) || (mainMenu_custom_R2[i]==u && triggerR2[i])
+#endif
+#ifdef __SWITCH__
 			|| (mainMenu_custom_L3[i]==u && triggerL3[i]) || (mainMenu_custom_R3[i]==u && triggerR3[i])
 #endif
 			)
@@ -510,8 +520,10 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			}
 
 			if((mainMenu_custom_A[i]==d && buttonA[i]) || (mainMenu_custom_B[i]==d && buttonB[i]) || (mainMenu_custom_X[i]==d && buttonX[i]) || (mainMenu_custom_Y[i]==d && buttonY[i]) || (mainMenu_custom_L[i]==d && triggerL[i]) || (mainMenu_custom_R[i]==d && triggerR[i])
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			|| (mainMenu_custom_L2[i]==d && triggerL2[i]) || (mainMenu_custom_R2[i]==d && triggerR2[i])
+#endif
+#ifdef __SWITCH__
 			|| (mainMenu_custom_L3[i]==d && triggerL3[i]) || (mainMenu_custom_R3[i]==d && triggerR3[i])
 #endif
 			)
@@ -524,8 +536,10 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			}
 
 			if((mainMenu_custom_A[i]==l && buttonA[i]) || (mainMenu_custom_B[i]==l && buttonB[i]) || (mainMenu_custom_X[i]==l && buttonX[i]) || (mainMenu_custom_Y[i]==l && buttonY[i]) || (mainMenu_custom_L[i]==l && triggerL[i]) || (mainMenu_custom_R[i]==l && triggerR[i])
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			|| (mainMenu_custom_L2[i]==l && triggerL2[i]) || (mainMenu_custom_R2[i]==l && triggerR2[i])
+#endif
+#ifdef __SWITCH__
 			|| (mainMenu_custom_L3[i]==l && triggerL3[i]) || (mainMenu_custom_R3[i]==l && triggerR3[i])
 #endif
 			)
@@ -538,8 +552,10 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			}
 
 			if((mainMenu_custom_A[i]==r && buttonA[i]) || (mainMenu_custom_B[i]==r && buttonB[i]) || (mainMenu_custom_X[i]==r && buttonX[i]) || (mainMenu_custom_Y[i]==r && buttonY[i]) || (mainMenu_custom_L[i]==r && triggerL[i]) || (mainMenu_custom_R[i]==r && triggerR[i])
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			|| (mainMenu_custom_L2[i]==r && triggerL2[i]) || (mainMenu_custom_R2[i]==r && triggerR2[i])
+#endif
+#ifdef __SWITCH__
 			|| (mainMenu_custom_L3[i]==r && triggerL3[i]) || (mainMenu_custom_R3[i]==r && triggerR3[i])
 #endif
 			)
@@ -588,8 +604,10 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				}
 				//mapping buttons
 				if((mainMenu_custom_A[i]==b1 && buttonA[i]) || (mainMenu_custom_B[i]==b1 && buttonB[i]) || (mainMenu_custom_X[i]==b1 && buttonX[i]) || (mainMenu_custom_Y[i]==b1 && buttonY[i]) || (mainMenu_custom_L[i]==b1 && triggerL[i]) || (mainMenu_custom_R[i]==b1 && triggerR[i])
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 				|| (mainMenu_custom_L2[i]==b1 && triggerL2[i]) || (mainMenu_custom_R2[i]==b1 && triggerR2[i])
+#endif
+#ifdef __SWITCH__
 				|| (mainMenu_custom_L3[i]==b1 && triggerL3[i]) || (mainMenu_custom_R3[i]==b1 && triggerR3[i])
 #endif
 				)
@@ -601,8 +619,10 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 						*button = 1;
 				}
 				if((mainMenu_custom_A[i]==b2 && buttonA[i]) || (mainMenu_custom_B[i]==b2 && buttonB[i]) || (mainMenu_custom_X[i]==b2 && buttonX[i]) || (mainMenu_custom_Y[i]==b2 && buttonY[i]) || (mainMenu_custom_L[i]==b2 && triggerL[i]) || (mainMenu_custom_R[i]==b2 && triggerR[i])
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 				|| (mainMenu_custom_L2[i]==b2 && triggerL2[i]) || (mainMenu_custom_R2[i]==b2 && triggerR2[i])
+#endif
+#ifdef __SWITCH__
 				|| (mainMenu_custom_L3[i]==b2 && triggerL3[i]) || (mainMenu_custom_R3[i]==b2 && triggerR3[i])
 #endif
 				)

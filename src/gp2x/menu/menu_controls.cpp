@@ -69,7 +69,7 @@ enum {
   MENUCONTROLS_B,
   MENUCONTROLS_L,
   MENUCONTROLS_R,
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
   MENUCONTROLS_L2,
   MENUCONTROLS_R2,
 #endif
@@ -344,9 +344,11 @@ void mapback_custom_controls() // assign currently used custom set to custom con
 	mainMenu_customPreset_Y[j][i] = mainMenu_custom_Y[i];
 	mainMenu_customPreset_L[j][i] = mainMenu_custom_L[i];
 	mainMenu_customPreset_R[j][i] = mainMenu_custom_R[i];
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	mainMenu_customPreset_L2[j][i] = mainMenu_custom_L2[i];
 	mainMenu_customPreset_R2[j][i] = mainMenu_custom_R2[i];
+#endif
+#ifdef __SWITCH__
 	mainMenu_customPreset_L3[j][i] = mainMenu_custom_L3[i];
 	mainMenu_customPreset_R3[j][i] = mainMenu_custom_R3[i];
 #endif
@@ -669,7 +671,7 @@ static void draw_controlsMenu(int c)
 	else
 		write_text(tabstop1-2,menuLine,mapping);
 
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 	// MENUCONTROLS_L2
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"   ZL");
@@ -846,7 +848,7 @@ static int key_controlsMenu(int *c)
 			if (menuControls==MENUCONTROLS_A && mainMenu_custom_dpad>0) menuControls=MENUCONTROLS_DPAD;
 			else 
 #endif
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			if (menuControls==MENUCONTROLS_RETURNMAIN) menuControls=MENUCONTROLS_R2;
 #else
 			if (menuControls==MENUCONTROLS_RETURNMAIN) menuControls=MENUCONTROLS_R;
@@ -859,7 +861,7 @@ static int key_controlsMenu(int *c)
 			if (menuControls==MENUCONTROLS_DPAD && mainMenu_custom_dpad>0) menuControls=MENUCONTROLS_A;
 			else 
 #endif
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			if (menuControls==MENUCONTROLS_R2) menuControls=MENUCONTROLS_RETURNMAIN;
 #else
 			if (menuControls==MENUCONTROLS_R) menuControls=MENUCONTROLS_RETURNMAIN;
@@ -1309,7 +1311,7 @@ static int key_controlsMenu(int *c)
 #endif
 				}	
 				break;
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 			case MENUCONTROLS_L2:
 				if (left)
 				{

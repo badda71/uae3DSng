@@ -54,9 +54,11 @@ extern int mainMenu_custom_X[MAX_NUM_CONTROLLERS];
 extern int mainMenu_custom_Y[MAX_NUM_CONTROLLERS];
 extern int mainMenu_custom_L[MAX_NUM_CONTROLLERS];
 extern int mainMenu_custom_R[MAX_NUM_CONTROLLERS];
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 extern int mainMenu_custom_L2[MAX_NUM_CONTROLLERS];
 extern int mainMenu_custom_R2[MAX_NUM_CONTROLLERS];
+#endif
+#ifdef __SWITCH__
 extern int mainMenu_custom_L3[MAX_NUM_CONTROLLERS];
 extern int mainMenu_custom_R3[MAX_NUM_CONTROLLERS];
 #endif
@@ -146,9 +148,11 @@ extern int mainMenu_customPreset_X[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 extern int mainMenu_customPreset_Y[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 extern int mainMenu_customPreset_L[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 extern int mainMenu_customPreset_R[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 extern int mainMenu_customPreset_L2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 extern int mainMenu_customPreset_R2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+#endif
+#ifdef __SWITCH__
 extern int mainMenu_customPreset_L3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 extern int mainMenu_customPreset_R3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 #endif

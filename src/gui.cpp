@@ -72,9 +72,11 @@ int justPressedX[MAX_NUM_CONTROLLERS]={};
 int justPressedY[MAX_NUM_CONTROLLERS]={};
 int justPressedL[MAX_NUM_CONTROLLERS]={};
 int justPressedR[MAX_NUM_CONTROLLERS]={};
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 int justPressedL2[MAX_NUM_CONTROLLERS]={};
 int justPressedR2[MAX_NUM_CONTROLLERS]={};
+#endif
+#ifdef __SWITCH__
 int justPressedL3[MAX_NUM_CONTROLLERS]={};
 int justPressedR3[MAX_NUM_CONTROLLERS]={};
 #endif
@@ -280,9 +282,11 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 		mainMenu_custom_Y[i] = mainMenu_customPreset_Y[j][i];
 		mainMenu_custom_L[i] = mainMenu_customPreset_L[j][i];
 		mainMenu_custom_R[i] = mainMenu_customPreset_R[j][i];
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 		mainMenu_custom_L2[i] = mainMenu_customPreset_L2[j][i];
 		mainMenu_custom_R2[i] = mainMenu_customPreset_R2[j][i];
+#endif
+#ifdef __SWITCH__
 		mainMenu_custom_L3[i] = mainMenu_customPreset_L3[j][i];
 		mainMenu_custom_R3[i] = mainMenu_customPreset_R3[j][i];
 #endif
@@ -1403,8 +1407,10 @@ void gui_handle_events (void)
 		{		
 			if(mainMenu_custom_dpad == 0) // always true on Vita
 			{
-#ifdef __SWITCH__
+#if defined(__SWITCH__)
 				for (int j = 0; j < 18; j++)
+#elif defined(__3DS__)
+				for (int j = 0; j < 16; j++)           // ... + ZL, ZR (New 3DS)
 #else				
 				for (int j = 0; j < 14; j++)
 #endif
@@ -1495,7 +1501,7 @@ void gui_handle_events (void)
 							justPressed = &(justPressedR[i]);
 							mainMenu_custom = &(mainMenu_custom_R[i]);
 							break;
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__3DS__)
 						case 14:
 							//(L2)
 							button = &(triggerL2[i]);
@@ -1508,6 +1514,8 @@ void gui_handle_events (void)
 							justPressed = &(justPressedR2[i]);
 							mainMenu_custom = &(mainMenu_custom_R2[i]);
 							break;
+#endif
+#ifdef __SWITCH__
 						case 16:
 							//(L3)
 							button = &(triggerL3[i]);
@@ -1942,12 +1950,16 @@ void gui_handle_events (void)
 	}
 	
 #if defined(__PSP2__) || defined(__SWITCH__) || defined(__3DS__)
-	//Default (no custom controls): L = left mouse button, R and ZL (New 3DS) = right mouse button.
+	//Default (no custom controls): L and ZR (New 3DS) = left mouse button, R and ZL (New 3DS) = right mouse button.
 	//The analog stick / circle pad always moves the mouse pointer.
 	if(!mainMenu_customControls)
 	{
-		//(L) button
-		if(triggerL[0])
+		//(L) button or (ZR) button
+		if(triggerL[0]
+#ifdef __3DS__
+			|| triggerR2[0]
+#endif
+		)
 		{
 			if(!justPressedL[0])
 			{
