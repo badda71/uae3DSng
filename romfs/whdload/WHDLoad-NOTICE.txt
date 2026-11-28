@@ -13,3 +13,14 @@ uae3DSng only copies this file to  sdmc:/3ds/uae3DSng/whdload/C/WHDLoad  when yo
 It is not part of uae3DSng's own source code and is not covered by uae3DSng's license.
 
 To use a different version, put it into whdload/C/ on the SD card. To get the built-in one back, delete that file.
+
+Kickstarts/ (the .RTB and .PAT files in that folder)
+
+  The Kickstart relocation / patch tables that WHDLoad's Kickstart emulation reads (kick34005.A500.RTB for Kickstart 1.3
+  and so on). They belong to the WHDLoad package: same author (Bert Jahn), same terms as above, same use here. They are
+  small tables of offsets (.RTB) and a few patch bytes (.PAT), not Kickstart ROM images. The ROM images themselves are
+  NOT included: put your own into the kickstarts folder of uae3DSng.
+
+  uae3DSng copies each of these files to  sdmc:/3ds/uae3DSng/whdload/Devs/Kickstarts  when a game is started and the file
+  is not there yet (a file of your own is not replaced by them; a .rtb/.pat of your own in the kickstarts folder replaces
+  the copy there when its size differs). To use other versions, put them into whdload/Devs/Kickstarts yourself.
