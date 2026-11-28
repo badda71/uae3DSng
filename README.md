@@ -22,7 +22,7 @@ folder of files: the first version extracted the archive into a folder, and on a
 to find the `.slave` and 6 more minutes of loading inside the emulator: every create/stat/open of a file on the 3DS SD card is slow once a folder holds hundreds of files.
 One big file is written at full speed and opened once. On the SD card, under `3ds/uae3DSng/`:
 
-* `whdload/C/WHDLoad` – the WHDLoad program. If you have none there, the copy built into the app (WHDLoad 20.0, `romfs/whdload`) is put there when you
+* `whdload/C/WHDLoad` – the WHDLoad program. If you have none there, the copy built into the app (WHDLoad 20.1, `romfs/whdload`) is put there when you
   start a game; a file you put there yourself is never replaced (use it for another version; delete it to get the built-in one back).
   WHDLoad is © Bert Jahn, all rights reserved, see `romfs/whdload/WHDLoad-NOTICE.txt`.
 * `kickstarts/` – your Kickstart ROMs as for floppies. The ones WHDLoad needs are copied to `whdload/Devs/Kickstarts` under their WHDLoad names on the first

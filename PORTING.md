@@ -350,9 +350,11 @@ generated startup sequence that runs `C:WHDLoad "<slave>" PRELOAD`). The first v
   The menu code passes `tools/hostcheck/check.sh`. **Not done:** running amitools itself on a sample image (it was not run here; `xdftool <image> info` / `fsck` on a PC would be a good extra check).
 * **Verified on hardware (user, New 3DS)**: CI build links, install takes seconds, the image is mounted as `WHDGame:`, a game loads and runs at 50 fps. **Not verified**: every Kickstart/chipset combination (Elvira 2 needed the relocation tables, see below).
 * **Built-in WHDLoad** (`romfs/whdload/WHDLoad`, fallback only): when `whdload/C/WHDLoad` is missing on the SD card, `whd_prepare_launch` copies it from the romfs; an existing file is never
-  replaced (`whd_builtin_whdload`, tested on the PC). The file is WHDLoad 20.0 build 7051 (27.03.2026), byte-identical to the one in the Vita fork's `psp2data/data/whdload_base/C`
-  (sha256 `5e66d140…adb5`); it was **not** compared against the official USR package. **Licence:** WHDLoad is © Bert Jahn, all rights reserved, "commercial use only with explicit, written
-  permission" (https://www.whdload.de/docs/en/copy.html); the page says nothing about redistribution by others, so asking the author before a public release is advisable.
+  replaced (`whd_builtin_whdload`, tested on the PC). The file is WHDLoad 20.1 build 7190 (13.10.2026), `WHDLoad/C/WHDLoad` from the `WHDLoad_usr_small.lha` package that the maintainer supplied
+  (sha256 `e904dbe9…cd8e`, 162,674 bytes; replaces 20.0 build 7051 from the Vita fork's `psp2data`). Only this one file is used from it (the package has no Kickstart tables; those below are unchanged): the rest of the package
+  (docs, `WHDLoad.VFS`, `WHDLoadCD32`, ...) is not needed. A copy that is already on the SD card is never replaced, so an SD card that got 20.0 keeps it until `whdload/C/WHDLoad` is deleted.
+  **Licence:** WHDLoad is © Bert Jahn, all rights reserved, "commercial use only with explicit, written
+  permission" (https://www.whdload.de/docs/en/copy.html); the page says nothing about redistribution by others. The maintainer decided not to ask the author, since uae3DSng is free and open source itself.
   The binary is its own commit and `romfs/whdload/` can simply be deleted: the code then shows the "WHDLoad is missing" message as before.
 * **Built-in Kickstart tables** (`romfs/whdload/Kickstarts`, 35 `.RTB`/`.PAT` files, 98 KB, copied from the Vita fork's `psp2data/data/whdload_base/Devs/Kickstarts`):
   hardware test of Elvira 2 failed with "DOS Error #205 on reading devs:kickstarts/kick34005.a500.rtb" - WHDLoad's Kickstart emulation needs the ROM *and* its relocation table.

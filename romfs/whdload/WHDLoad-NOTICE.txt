@@ -1,6 +1,6 @@
 WHDLoad (the file "WHDLoad" in this folder)
 
-  WHDLoad 20.0 [build 7051] (27.03.2026)
+  WHDLoad 20.1 [build 7190] (13.10.2026)
   Copyright 1995-2026 by Bert Jahn. All rights reserved.
   Home page and documentation: https://www.whdload.de
   Copyright / license page:    https://www.whdload.de/docs/en/copy.html
@@ -11,6 +11,10 @@ permission by the author. It is provided as is, without warranty.
 uae3DSng only copies this file to  sdmc:/3ds/uae3DSng/whdload/C/WHDLoad  when you have not put a WHDLoad there yourself
 (your own file is never replaced), and runs it inside the emulated Amiga to start WHDLoad game installs (.slave files).
 It is not part of uae3DSng's own source code and is not covered by uae3DSng's license.
+
+WHDLoad contains contributions from other authors (as listed on the copy page above): disassembler code from BeerMon/HRTmon by
+Carnivore, the decompression routines RNC1/2 (Rob Northen), Imploder (Albert-Jan Brouwer, Peter Struijk), TPWM (Wolfgang
+Meyerle) and CrunchMania (Thomas Schwarz), and the SHA-256 implementation by Robert Leffmann.
 
 To use a different version, put it into whdload/C/ on the SD card. To get the built-in one back, delete that file.
 
