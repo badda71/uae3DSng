@@ -38,6 +38,10 @@ One big file is written at full speed and opened once. On the SD card, under `3d
 * To uninstall a game, select it in the *WHDLoad Games* list and press **X** (asked first): its `.hdf` and its `.whd` are deleted.
   A game that is loaded in the running emulator cannot be deleted: start another game or eject the hard
   disk and reset first. Saved games inside the image go with it.
+* **Favourites:** press **Y** on a game in the list to mark it (`*`) or unmark it; favourites are listed first. They are kept in `whdload/favorites.txt` (one game name per line).
+* **Options:** many slaves have settings you give on the WHDLoad command line (`CUSTOM1=1`, `QUITKEY=$5D`, `NOCACHE`, ...). Press **L** on a game: the 3DS keyboard asks for
+  them (empty = none); they are shown under the list and added to the command line after `PRELOAD` every time the game starts. They are stored per game as an
+  `options=` line in `whdload/<name>.whd` (you can also edit that file) and survive installing the same archive again.
 * Starting a game sets "HD Dir" to the `whdload` folder (boots from it) and hard file 0 to the game's image, ejects the floppies and resets. Your current
   CPU/chipset/memory/Kickstart settings are kept, so pick the machine the game needs before you start it. Hard file 0 is overwritten by this.
 

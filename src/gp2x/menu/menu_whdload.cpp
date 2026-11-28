@@ -31,6 +31,7 @@
 #include "sound.h"
 #include "cfgfile.h"
 #include "whdload3ds.h"
+#include "textinput3ds.h"
 #include "log3ds.h"
 
 #ifdef __3DS__
@@ -52,12 +53,34 @@ extern const char *text_str_memdisk_separator;
 #define MAX_GAMES 256
 
 static char games[MAX_GAMES][WHD_NAME_MAX];
+static unsigned char favorites[MAX_GAMES];  /* 1 = favourite (the favourites are listed first) */
 static int n_games = 0;
 static int have_builtin_whdload = 0;        /* a WHDLoad ships in the romfs (the SD card copy, if any, is preferred) */
 
+/* the options of the selected game, shown under the list (read when the selection changes, not on every redraw) */
+static char shown_game[WHD_NAME_MAX] = "";
+static char shown_options[WHD_OPTIONS_MAX] = "";
+
 static void refresh_games(void)
 {
-    n_games = whd_list_games(WHD_ROOT, games, MAX_GAMES);
+    n_games = whd_list_games(WHD_ROOT, games, MAX_GAMES, favorites);
+    shown_game[0] = '\0';                   /* options may have changed */
+}
+
+/* dst = src, cut to maxchars characters with ".." at the end when it was longer */
+static void fit_text(char *dst, size_t dst_size, const char *src, size_t maxchars)
+{
+    if (maxchars + 1 > dst_size)
+        maxchars = dst_size - 1;
+    size_t len = strlen(src);
+    if (len <= maxchars) {
+        memcpy(dst, src, len + 1);
+        return;
+    }
+    size_t keep = maxchars > 2 ? maxchars - 2 : 0;
+    memcpy(dst, src, keep);
+    memcpy(dst + keep, "..", maxchars > 2 ? 3 : 1);
+    dst[maxchars] = '\0';
 }
 
 static int find_game(const char *name)
@@ -320,6 +343,38 @@ static int uninstall_game(const char *game)
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
+/* favourites and options                                                                                           */
+/* ---------------------------------------------------------------------------------------------------------------- */
+
+static void toggle_favorite(const char *game)
+{
+    int idx = find_game(game);
+    int now = idx >= 0 && favorites[idx];
+    char err[200];
+    if (!whd_set_favorite(WHD_ROOT, game, !now, err, sizeof(err))) {
+        char msg[300];
+        snprintf(msg, sizeof(msg), "Not saved: %s", err);
+        whd_message_box("WHDLoad", msg);
+    }
+    refresh_games();
+}
+
+/* The options are added to the WHDLoad command line after PRELOAD (e.g. CUSTOM1=1 QUITKEY=$5D). The 3DS keyboard asks for them. */
+static void edit_options(const char *game)
+{
+    char current[WHD_OPTIONS_MAX], entered[WHD_OPTIONS_MAX], err[200];
+    whd_get_options(WHD_ROOT, game, current, sizeof(current));
+    if (!textinput3ds("WHDLoad options, e.g. CUSTOM1=1", current, entered, sizeof(entered)))
+        return;
+    if (!whd_set_options(WHD_ROOT, game, entered, err, sizeof(err))) {
+        char msg[300];
+        snprintf(msg, sizeof(msg), "Not saved: %s", err);
+        whd_message_box("WHDLoad", msg);
+    }
+    refresh_games();                                    /* the shown options are read again */
+}
+
+/* ---------------------------------------------------------------------------------------------------------------- */
 /* the list                                                                                                         */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
@@ -330,7 +385,7 @@ static void draw_list(int sel, int top)
     b++;
 
     text_draw_background();
-    text_draw_window(2, 2, 40, 30, "WHDLoad Games");
+    text_draw_window(2, 2, 40, 34, "WHDLoad Games");
 
     int line = 3;
     if (sel == 0 && bb)
@@ -355,19 +410,37 @@ static void draw_list(int sel, int top)
     } else {
         for (int i = 0; i < LIST_ROWS && top + i < n_games; i++) {
             int idx = top + i + 1;                  /* list item 0 is the install row */
+            char name[48];
+            fit_text(name, sizeof(name), games[top + i], 35);
+            if (favorites[top + i])
+                write_text(3, line, "*");           /* a favourite */
             if (sel == idx && bb)
-                write_text_inv(3, line, games[top + i]);
+                write_text_inv(5, line, name);
             else
-                write_text(3, line, games[top + i]);
+                write_text(5, line, name);
             line += 2;
         }
         line = LIST_FIRST_LINE + 2 * LIST_ROWS;
-        char info[64];
+        char info[WHD_OPTIONS_MAX + 64], shown[48];
         snprintf(info, sizeof(info), "%d game%s", n_games, n_games == 1 ? "" : "s");
-        write_text(3, line, info);
+        if (sel >= 1 && sel - 1 < n_games) {
+            if (strcmp(shown_game, games[sel - 1]) != 0) {
+                snprintf(shown_game, sizeof(shown_game), "%s", games[sel - 1]);
+                whd_get_options(WHD_ROOT, shown_game, shown_options, sizeof(shown_options));
+            }
+            if (shown_options[0])
+                snprintf(info + strlen(info), sizeof(info) - strlen(info), "   Options: %s", shown_options);
+        }
+        fit_text(shown, sizeof(shown), info, 37);
+        write_text(3, line, shown);
     }
-    write_text(3, LIST_FIRST_LINE + 2 * LIST_ROWS + 2,
-               (sel == 0 || n_games == 0) ? "A = install              B = back" : "A = start    X = delete    B = back");
+    int hint = LIST_FIRST_LINE + 2 * LIST_ROWS + 2;
+    if (sel == 0 || n_games == 0) {
+        write_text(3, hint, "A = install              B = back");
+    } else {
+        write_text(3, hint, "A = start    X = delete    B = back");
+        write_text(3, hint + 2, favorites[sel - 1] ? "Y = no favourite    L = options" : "Y = favourite       L = options");
+    }
     text_flip();
 }
 
@@ -391,7 +464,7 @@ int run_menuWhdload(void)
 
     for (;;) {
         draw_list(sel, top);
-        int hit0 = 0, hit1 = 0, hit2 = 0, del = 0, up = 0, down = 0, left = 0, right = 0;
+        int hit0 = 0, hit1 = 0, hit2 = 0, del = 0, up = 0, down = 0, left = 0, right = 0, fav = 0, opts = 0;
         while (SDL_PollEvent(&ev) > 0) {
             if (ev.type == SDL_QUIT)
                 hit1 = 1;
@@ -406,6 +479,8 @@ int run_menuWhdload(void)
                 case SDLK_END:      hit1 = 1; break;
                 case SDLK_LCTRL:    hit2 = 1; break;
                 case SDLK_DELETE: case SDLK_BACKSPACE: case SDLK_ESCAPE: case SDLK_PAGEUP: del = 1; break;     /* X, as for "eject HD" */
+                case SDLK_HOME:     fav = 1; break;                                                             /* Y */
+                case SDLK_RSHIFT:   opts = 1; break;                                                            /* L */
                 default: break;
                 }
             }
@@ -438,6 +513,25 @@ int run_menuWhdload(void)
                     top = n_games > LIST_ROWS ? n_games - LIST_ROWS : 0;
             }
             continue;                               /* the key events of this round are used up */
+        }
+        if ((fav || opts) && sel >= 1 && sel - 1 < n_games) {
+            char name[WHD_NAME_MAX];
+            snprintf(name, sizeof(name), "%s", games[sel - 1]);
+            if (fav)
+                toggle_favorite(name);
+            else
+                edit_options(name);
+            int idx = find_game(name);                  /* a favourite moves in the list: stay on the game */
+            if (idx >= 0) {
+                sel = idx + 1;
+                if (sel - 1 < top)
+                    top = sel - 1;
+                if (sel - 1 >= top + LIST_ROWS)
+                    top = sel - LIST_ROWS;
+            }
+            while (SDL_PollEvent(&ev))
+                SDL_Delay(5);
+            continue;
         }
         if (hit2 && emulating) {
             quit_pressed_in_submenu = 1;

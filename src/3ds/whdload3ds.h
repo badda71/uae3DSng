@@ -9,7 +9,9 @@
  *   whdload/Devs/Kickstarts/     the .RTB / .PAT tables from the romfs, plus the ROM images (and your own .RTB / .PAT /
  *                                .key) from the kickstarts folder, copied when missing
  *   whdload/<Game>.hdf           one Amiga disk image (OFS, volume "WHDGame") per installed .lha, mounted as a hard file
- *   whdload/<Game>.whd           its info file: names the .slave inside the image
+ *   whdload/<Game>.whd           its info file: names the .slave inside the image (slave=) and holds the options the game is
+ *                                started with (options=, optional, edited in the menu)
+ *   whdload/favorites.txt        the names of the favourite games, one per line; they are listed first
  *
  * Installing = decoding the .lha (with the vendored Lhasa library, every file is CRC-checked) straight into the image
  * with large buffered writes (src/3ds/ofs_image.cpp). One big file, because hundreds of small files are very slow on the
@@ -40,6 +42,7 @@
 #endif
 
 #define WHD_NAME_MAX 128      /* length of a game name (the archive's name without .lha) */
+#define WHD_OPTIONS_MAX 200   /* size of the options string of a game, including the 0 */
 
 /* Called while extracting: item = name of the current file inside the archive. Return non-zero to cancel. */
 typedef int (*whd_progress_fn)(void *user, const char *item, unsigned files_done, unsigned files_total,
@@ -81,17 +84,31 @@ extern const char *whd_builtin_kickstarts;
 int whd_install_lha(const char *root, const char *archive, whd_progress_fn progress, void *user, char *game_name,
                     size_t game_name_size, whd_install_stats *stats, char *err, size_t err_size);
 
-/* Names of the installed games (images <name>.hdf together with <name>.whd), sorted, each name once. Returns the count. */
-int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names);
+/* Names of the installed games (images <name>.hdf together with <name>.whd), each name once: the favourites first, then
+   the others, both sorted by name. Returns the count. favorite (may be NULL, else max_names entries) gets 1 for every
+   listed favourite. */
+int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names, unsigned char *favorite);
 
-/* Uninstall a game as listed by whd_list_games: deletes <game>.whd, <game>.hdf and a left-over <game>.hdf.tmp. Returns 1
+/* Make a game a favourite (favorite != 0) or not. Returns 1 on success, 0 on failure (err = message for the user). */
+int whd_set_favorite(const char *root, const char *game, int favorite, char *err, size_t err_size);
+
+/* The options a game is started with (added to the WHDLoad command line after PRELOAD, e.g. "CUSTOM1=1 QUITKEY=$5D").
+   whd_get_options returns 1 when the game's info file could be read (options = "" when it has none), else 0.
+   whd_set_options stores them (an empty string removes them): characters outside ' '..'~' are replaced, blanks at both
+   ends removed, longer than WHD_OPTIONS_MAX - 1 characters is cut. Returns 1 on success, 0 on failure (err = message). A
+   reinstall of the game keeps its options. */
+int whd_get_options(const char *root, const char *game, char *options, size_t options_size);
+int whd_set_options(const char *root, const char *game, const char *options, char *err, size_t err_size);
+
+/* Uninstall a game as listed by whd_list_games: deletes <game>.whd, <game>.hdf and a left-over <game>.hdf.tmp (and removes it from
+   the favourites). Returns 1
    when nothing of the game is left, 0 on failure (err = message for the user; a game whose image could not be deleted is
    no longer listed as soon as its .whd is gone). */
 int whd_uninstall(const char *root, const char *game, char *err, size_t err_size);
 
 /* Make the game start: makes sure C/WHDLoad exists (copies the built-in one if the SD card has none), copies Kickstart images (from kick_dir, may be NULL) into
-   Devs/Kickstarts, reads the .slave's name from <game>.whd and writes S/Startup-Sequence. extra_args may be NULL (default "PRELOAD").
-   info may be NULL. Returns 1 on success, 0 on failure (err = message for the user). */
+   Devs/Kickstarts, reads the .slave's name from <game>.whd and writes S/Startup-Sequence. The command line is "PRELOAD" and the game's
+   options (see whd_set_options); a non-NULL extra_args replaces all of it. info may be NULL. Returns 1 on success, 0 on failure (err = message for the user). */
 int whd_prepare_launch(const char *root, const char *game, const char *kick_dir, const char *extra_args,
                        whd_launch_info *info, char *err, size_t err_size);
 

@@ -371,6 +371,12 @@ generated startup sequence that runs `C:WHDLoad "<slave>" PRELOAD`). The first v
   checked on the PC). A write drops the window if it overlaps it (`hfcache_written`); the data still goes straight to the file. A read that fails gives zero bytes and io_Error -1 as before.
   All hard files use it (not only WHDLoad images). Memory: 64 KB per mounted hard file, allocated by its first read. Tested on the PC (`hfcache_host_test.cpp`: data equals the file for
   random mixes of reads and writes, the 11,606-block sequential read needs 94 file reads, window/write overlap, end of file, unreadable file). **Not verified on hardware**: the effect on the load time.
+* **Favourites and options per game** (`whd_set_favorite`, `whd_get_options`, `whd_set_options` in `whdload3ds.cpp`, keys Y and L in `menu_whdload.cpp`; asked for by the maintainer; the Vita fork has one global
+  options string and favourites in a text file): favourites are the names in `whdload/favorites.txt` (read once per list refresh, not per game: reading a `.whd` for every game would cost an SD card access each),
+  `whd_list_games` puts them first (stable, so both groups stay sorted). The options are an `options=` line in the game's `.whd`, read when the selection changes and by `whd_prepare_launch`, which
+  writes `PRELOAD <options>`. Both files are replaced through `<file>.tmp`, an install of the same game again keeps its options (and the favourite, which is by name), an uninstall removes the favourite.
+  The `slave=` / `options=` lines are only found at the start of a line (an option text containing `slave=` cannot be taken for the slave). The text is entered with the system software keyboard
+  (`src/3ds/textinput3ds.cpp`, libctru `swkbd`); anything outside ASCII 32..126 becomes `?`. **Not verified on hardware:** the keyboard applet from inside the emulator's menu (nothing else in the app uses it yet) and the new list layout.
 * **Menu spacing**: every line of text in the WHDLoad screens is two text lines apart from the next one (only a separator line may sit in between): the game list is drawn
   at lines 5, 7, 9, ... (12 rows), the help text of the empty list, the lines of the message / question boxes ("Installed ...", "Delete ...?") and the progress screens likewise;
   the WHDLoad row in Memory and Disk Options has one empty line before "Save Config for current HD".

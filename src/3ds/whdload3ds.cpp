@@ -524,8 +524,11 @@ static int install_image(const char *root, const char *archive, const char *name
         }
     }
     if (ok) {
-        char text[MAX_PATH_LEN + 64];
+        char text[MAX_PATH_LEN + WHD_OPTIONS_MAX + 64];
         snprintf(text, sizeof(text), "; uae3DSng WHDLoad game image\nslave=%s\n", have_slave ? slave.rel : "");
+        char options[WHD_OPTIONS_MAX];
+        if (whd_get_options(root, name, options, sizeof(options)) && options[0])    /* a reinstall keeps them */
+            snprintf(text + strlen(text), sizeof(text) - strlen(text), "options=%s\n", options);
         if (!write_text_file(info, text)) {
             set_err(err, err_size, "Cannot write %s", info);
             remove(hdf);
@@ -574,9 +577,140 @@ static int name_cmp(const void *a, const void *b)
     return strcasecmp((const char *)a, (const char *)b);
 }
 
-int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names)
+/* A game name as it may be used for a file name inside the root: not empty, no path, no system folder */
+static int game_name_ok(const char *game)
+{
+    return game && game[0] && game[0] != '.' && !strchr(game, '/') && !strchr(game, '\\') && !strchr(game, ':') &&
+           !is_system_folder(game) && strlen(game) < WHD_NAME_MAX;
+}
+
+/* The value of the line "key=value" (the line starts with the key) of an info file. Returns 1 when there is such a line
+   (out = the value without the line end), else 0 (out = ""). A value that does not fit is cut. */
+static int info_get(const char *text, const char *key, char *out, size_t out_size)
+{
+    if (out_size)
+        out[0] = '\0';
+    if (!text || out_size == 0)
+        return 0;
+    size_t klen = strlen(key);
+    const char *p = text;
+    while (*p) {
+        if (strncmp(p, key, klen) == 0 && p[klen] == '=') {
+            const char *v = p + klen + 1;
+            size_t n = strcspn(v, "\r\n");
+            if (n >= out_size)
+                n = out_size - 1;
+            memcpy(out, v, n);
+            out[n] = '\0';
+            return 1;
+        }
+        p += strcspn(p, "\n");
+        if (*p == '\n')
+            p++;
+    }
+    return 0;
+}
+
+/* Replace <path> by <text>: the new content is written to <path>.tmp first, so that a failure leaves the old file alone */
+static int replace_text_file(const char *path, const char *text)
+{
+    char tmp[MAX_PATH_LEN];
+    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
+    if (!write_text_file(tmp, text)) {
+        remove(tmp);
+        return 0;
+    }
+    remove(path);
+    if (rename(tmp, path) != 0) {
+        remove(tmp);
+        return 0;
+    }
+    return 1;
+}
+
+/* ---- favourites: <root>/favorites.txt, one game name per line ---- */
+
+static void favorites_path(const char *root, char *path, size_t size)
+{
+    snprintf(path, size, "%s/favorites.txt", root);
+}
+
+/* is the line at p (up to the line end) the name? FAT does not care about the case */
+static int line_is_name(const char *p, const char *name)
+{
+    size_t n = strcspn(p, "\r\n");
+    return n == strlen(name) && strncasecmp(p, name, n) == 0;
+}
+
+static int in_favorites(const char *text, const char *name)
+{
+    for (const char *p = text; text && *p;) {
+        if (line_is_name(p, name))
+            return 1;
+        p += strcspn(p, "\n");
+        if (*p == '\n')
+            p++;
+    }
+    return 0;
+}
+
+/* the favourites file without the name, plus the name at the end when add != 0 (returns malloc'ed text) */
+static char *favorites_with(const char *text, const char *name, int add)
+{
+    size_t cap = (text ? strlen(text) : 0) + strlen(name) + 4;
+    char *out = (char *)calloc(1, cap);
+    if (!out)
+        return NULL;
+    size_t len = 0;
+    for (const char *p = text; text && *p;) {
+        size_t n = strcspn(p, "\r\n");
+        if (n > 0 && !line_is_name(p, name)) {
+            memcpy(out + len, p, n);
+            len += n;
+            out[len++] = '\n';
+        }
+        p += n;
+        while (*p == '\r' || *p == '\n')
+            p++;
+    }
+    if (add) {
+        memcpy(out + len, name, strlen(name));
+        len += strlen(name);
+        out[len++] = '\n';
+    }
+    out[len] = '\0';
+    return out;
+}
+
+int whd_set_favorite(const char *root, const char *game, int favorite, char *err, size_t err_size)
+{
+    if (err && err_size)
+        err[0] = '\0';
+    if (!game_name_ok(game)) {
+        set_err(err, err_size, "Invalid game name");
+        return 0;
+    }
+    char path[MAX_PATH_LEN];
+    favorites_path(root, path, sizeof(path));
+    char *text = read_text_file(path, 64000);
+    char *out = favorites_with(text, game, favorite != 0);
+    free(text);
+    if (!out) {
+        set_err(err, err_size, "Out of memory");
+        return 0;
+    }
+    int ok = replace_text_file(path, out);
+    free(out);
+    if (!ok)
+        set_err(err, err_size, "Cannot write %s (SD card full or locked?)", path);
+    return ok;
+}
+
+int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names, unsigned char *favorite)
 {
     DIR *d = opendir(root);
+    if (favorite)
+        memset(favorite, 0, (size_t)(max_names > 0 ? max_names : 0));
     if (!d)
         return 0;
     int count = 0;
@@ -605,7 +739,113 @@ int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names)
             }
         count = out;
     }
+
+    /* the favourites first (stable: both groups stay sorted by name) */
+    if (count > 0) {
+        char path[MAX_PATH_LEN];
+        favorites_path(root, path, sizeof(path));
+        char *text = read_text_file(path, 64000);
+        char (*sorted)[WHD_NAME_MAX] = text ? (char (*)[WHD_NAME_MAX])malloc((size_t)count * WHD_NAME_MAX) : NULL;
+        if (sorted) {
+            int n = 0, nfav = 0;
+            for (int i = 0; i < count; i++)
+                if (in_favorites(text, names[i]))
+                    memcpy(sorted[n++], names[i], WHD_NAME_MAX);
+            nfav = n;
+            for (int i = 0; i < count; i++)
+                if (!in_favorites(text, names[i]))
+                    memcpy(sorted[n++], names[i], WHD_NAME_MAX);
+            memcpy(names, sorted, (size_t)count * WHD_NAME_MAX);
+            if (favorite)
+                memset(favorite, 1, (size_t)nfav);
+        }
+        free(sorted);
+        free(text);
+    }
     return count;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------- */
+/* options of a game                                                                                                */
+/* ---------------------------------------------------------------------------------------------------------------- */
+
+int whd_get_options(const char *root, const char *game, char *options, size_t options_size)
+{
+    if (options_size)
+        options[0] = '\0';
+    if (!game_name_ok(game))
+        return 0;
+    char info[MAX_PATH_LEN];
+    snprintf(info, sizeof(info), "%s/%s.whd", root, game);
+    char *text = read_text_file(info, 4000);
+    if (!text)
+        return 0;
+    info_get(text, "options", options, options_size);
+    free(text);
+    return 1;
+}
+
+int whd_set_options(const char *root, const char *game, const char *options, char *err, size_t err_size)
+{
+    if (err && err_size)
+        err[0] = '\0';
+    if (!game_name_ok(game)) {
+        set_err(err, err_size, "Invalid game name");
+        return 0;
+    }
+    char info[MAX_PATH_LEN];
+    snprintf(info, sizeof(info), "%s/%s.whd", root, game);
+    char *old = read_text_file(info, 4000);
+    if (!old || !old[0]) {
+        free(old);
+        set_err(err, err_size, "Game not found: %s", game);
+        return 0;
+    }
+
+    char clean[WHD_OPTIONS_MAX];
+    size_t n = 0;
+    for (const char *p = options ? options : ""; *p && n + 1 < sizeof(clean); p++)
+        clean[n++] = (*p >= ' ' && *p <= '~') ? *p : '?';
+    while (n > 0 && clean[n - 1] == ' ')
+        n--;
+    clean[n] = '\0';
+    const char *start = clean;
+    while (*start == ' ')
+        start++;
+
+    /* the old file without its options= lines, then the new one */
+    size_t cap = strlen(old) + strlen(start) + 16;
+    char *text = (char *)calloc(1, cap);
+    if (!text) {
+        free(old);
+        set_err(err, err_size, "Out of memory");
+        return 0;
+    }
+    size_t len = 0;
+    for (const char *p = old; *p;) {
+        size_t line = strcspn(p, "\n");
+        if (*(p + line) == '\n')
+            line++;
+        if (strncmp(p, "options=", 8) != 0) {
+            memcpy(text + len, p, line);
+            len += line;
+        }
+        p += line;
+    }
+    if (len > 0 && text[len - 1] != '\n')
+        text[len++] = '\n';
+    if (*start)
+        len += (size_t)snprintf(text + len, cap - len, "options=%s\n", start);
+    text[len] = '\0';
+    free(old);
+
+    int ok = replace_text_file(info, text);
+    free(text);
+    if (!ok)
+        set_err(err, err_size, "Cannot write %s.whd (SD card full or locked?)", game);
+    else
+        WHD_LOG("whdload: options of '%s': '%s'", game, start);
+    return ok;
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
@@ -620,8 +860,7 @@ static int path_exists(const char *path)
 
 int whd_uninstall(const char *root, const char *game, char *err, size_t err_size)
 {
-    if (!game || !game[0] || game[0] == '.' || strchr(game, '/') || strchr(game, '\\') || strchr(game, ':') ||
-        is_system_folder(game) || strlen(game) >= WHD_NAME_MAX) {
+    if (!game_name_ok(game)) {
         set_err(err, err_size, "Invalid game name");
         return 0;
     }
@@ -646,6 +885,14 @@ int whd_uninstall(const char *root, const char *game, char *err, size_t err_size
             WHD_LOG("whdload: cannot delete %s (errno %d)", files[i], errno);
             return 0;
         }
+    }
+    {
+        char fav[MAX_PATH_LEN];                             /* no longer a favourite (no harm if this fails) */
+        favorites_path(root, fav, sizeof(fav));
+        char *text = read_text_file(fav, 64000);
+        if (text && in_favorites(text, game))
+            whd_set_favorite(root, game, 0, NULL, 0);
+        free(text);
     }
     WHD_LOG("whdload: uninstalled '%s'", game);
     return 1;
@@ -822,19 +1069,13 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
     deploy_kickstarts(root, kick_dir);
 
     /* the info file written by the installer names the slave: no scan of the image */
-    char slave_rel[MAX_PATH_LEN];
+    char slave_rel[MAX_PATH_LEN], game_options[WHD_OPTIONS_MAX];
     slave_rel[0] = '\0';
+    game_options[0] = '\0';
     {
         char *text = read_text_file(info_path, 4000);
-        const char *line = text ? strstr(text, "slave=") : NULL;
-        if (line) {
-            line += 6;
-            size_t n = strcspn(line, "\r\n");
-            if (n > 0 && n < sizeof(slave_rel)) {
-                memcpy(slave_rel, line, n);
-                slave_rel[n] = '\0';
-            }
-        }
+        info_get(text, "slave", slave_rel, sizeof(slave_rel));
+        info_get(text, "options", game_options, sizeof(game_options));
         free(text);
         if (!slave_rel[0]) {
             set_err(err, err_size, "%s.whd is damaged: install the game again", game);
@@ -857,8 +1098,13 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
     }
     snprintf(amiga_dir, sizeof(amiga_dir), "%s%s", volume, dir_part);
 
-    char args[256];
-    snprintf(args, sizeof(args), "%s", (extra_args && extra_args[0]) ? extra_args : "PRELOAD");
+    char args[WHD_OPTIONS_MAX + 16];
+    if (extra_args && extra_args[0])
+        snprintf(args, sizeof(args), "%s", extra_args);
+    else if (game_options[0])
+        snprintf(args, sizeof(args), "PRELOAD %s", game_options);
+    else
+        snprintf(args, sizeof(args), "PRELOAD");
     for (char *p = args; *p; p++)
         if (*p == '\n' || *p == '\r')
             *p = ' ';

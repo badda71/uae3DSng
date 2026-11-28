@@ -99,7 +99,7 @@ static void unit_tests(const std::string &work)
     write_file(root + "/.hid.hdf", "img");
     write_file(root + "/.hid.whd", "slave=x.slave\n");
     char names[16][WHD_NAME_MAX];
-    int n = whd_list_games(root.c_str(), names, 16);
+    int n = whd_list_games(root.c_str(), names, 16, nullptr);
     CHECK(n == 3 && !strcmp(names[0], "alpha") && !strcmp(names[1], "Beta") && !strcmp(names[2], "Zebra"));
 
     char err[200];
@@ -323,7 +323,7 @@ static void image_tests(const std::string &work)
     CHECK(content("TestGame/Caf\xe9_x") == "latin1 and a colon");                  /* bytes kept, ':' replaced */
     std::string info = slurp(root + "/Test Game.whd");
     CHECK(info.find("slave=TestGame/TestGame.slave\n") != std::string::npos);
-    int n = whd_list_games(root.c_str(), names, 16);
+    int n = whd_list_games(root.c_str(), names, 16, nullptr);
     CHECK(n == 1 && !strcmp(names[0], "Test Game"));
 
     /* launch */
@@ -343,7 +343,7 @@ static void image_tests(const std::string &work)
     /* folders in the root (e.g. the first version's folder installs) are no games */
     mkdir((root + "/Test Game").c_str(), 0777);
     mkdir((root + "/Old Folder Game").c_str(), 0777);
-    n = whd_list_games(root.c_str(), names, 16);
+    n = whd_list_games(root.c_str(), names, 16, nullptr);
     CHECK(n == 1 && !strcmp(names[0], "Test Game"));
     CHECK(!whd_prepare_launch(root.c_str(), "Old Folder Game", kdir.c_str(), nullptr, &li, err, sizeof err) && strstr(err, "not found"));
     CHECK(launch_ok(root.c_str(), "Test Game", kdir.c_str(), nullptr, &li) && li.hdf_path[0]);
@@ -382,7 +382,7 @@ static void image_tests(const std::string &work)
         write_file(root + "/Fate.hdf.tmp", "left over");
         CHECK(whd_uninstall(root.c_str(), "Fate", err, sizeof err));
         CHECK(!exists(root + "/Fate.hdf") && !exists(root + "/Fate.whd") && !exists(root + "/Fate.hdf.tmp"));
-        n = whd_list_games(root.c_str(), names, 16);
+        n = whd_list_games(root.c_str(), names, 16, nullptr);
         bool fate_listed = false; for (int i = 0; i < n; i++) if (!strcmp(names[i], "Fate")) fate_listed = true;
         CHECK(!fate_listed);
         CHECK(!whd_uninstall(root.c_str(), "Fate", err, sizeof err) && strstr(err, "not found"));
@@ -436,7 +436,7 @@ static void image_tests(const std::string &work)
     CHECK(!whd_prepare_launch(root.c_str(), "Test Game", kdir.c_str(), nullptr, &li, err, sizeof err) && strstr(err, "damaged"));
     /* image without info file: not a game (not listed) */
     remove((root + "/Test Game.whd").c_str());
-    n = whd_list_games(root.c_str(), names, 16);
+    n = whd_list_games(root.c_str(), names, 16, nullptr);
     bool listed = false; for (int i = 0; i < n; i++) if (!strcmp(names[i], "Test Game")) listed = true;
     CHECK(!listed);
     printf("  image tests done, %d failure(s) so far\n", g_fail);
@@ -467,6 +467,119 @@ static bool install_suite_archive(const std::string &rel, const std::string &ima
     return true;
 }
 
+static void options_favorites_tests(const std::string &work)
+{
+    printf("== game options and favourites\n");
+    std::string root = work + "/optfav";
+    mkdir(root.c_str(), 0777);
+    for (const char *g : { "alpha", "Beta", "gamma", "Zebra" }) {
+        write_file(root + "/" + g + ".hdf", "img");
+        write_file(root + "/" + g + ".whd", (std::string("; uae3DSng WHDLoad game image\nslave=") + g + "/Game.slave\n").c_str());
+    }
+    char names[16][WHD_NAME_MAX], err[256];
+    unsigned char fav[16];
+    auto order = [&](int max = 16) {
+        int n = whd_list_games(root.c_str(), names, max, fav);
+        std::string o;
+        for (int i = 0; i < n; i++) o += std::string(i ? "," : "") + (fav[i] ? "*" : "") + names[i];
+        return o;
+    };
+
+    /* favourites: first in the list, each group sorted by name */
+    CHECK(order() == "alpha,Beta,gamma,Zebra");
+    CHECK(whd_set_favorite(root.c_str(), "Zebra", 1, err, sizeof err));
+    CHECK(order() == "*Zebra,alpha,Beta,gamma");
+    CHECK(whd_set_favorite(root.c_str(), "gamma", 1, err, sizeof err));
+    CHECK(order() == "*gamma,*Zebra,alpha,Beta");
+    CHECK(whd_set_favorite(root.c_str(), "gamma", 1, err, sizeof err));                 /* twice: still once */
+    CHECK(slurp(root + "/favorites.txt") == "Zebra\ngamma\n");
+    CHECK(whd_set_favorite(root.c_str(), "ZEBRA", 0, err, sizeof err));                 /* FAT: the case does not matter */
+    CHECK(order() == "*gamma,alpha,Beta,Zebra");
+    CHECK(whd_set_favorite(root.c_str(), "Zebra", 0, err, sizeof err));                 /* not a favourite: nothing to do */
+    CHECK(whd_list_games(root.c_str(), names, 2, fav) == 2);                             /* a short list is a short list */
+    CHECK(!exists(root + "/favorites.txt.tmp"));
+    for (const char *bad : { "", ".hidden", "../x", "a/b", "a:b", "S", "C" }) {
+        CHECK(!whd_set_favorite(root.c_str(), bad, 1, err, sizeof err) && strstr(err, "Invalid"));
+    }
+    CHECK(slurp(root + "/favorites.txt") == "gamma\n");
+    write_file(root + "/favorites.txt", "ghost\r\nBeta\r\n\r\nalpha");                  /* hand-edited: CRLF, blank line, unknown game, no final newline */
+    CHECK(order() == "*alpha,*Beta,gamma,Zebra");
+    CHECK(whd_set_favorite(root.c_str(), "Zebra", 1, err, sizeof err));
+    CHECK(slurp(root + "/favorites.txt") == "ghost\nBeta\nalpha\nZebra\n");
+    CHECK(whd_list_games(root.c_str(), names, 16, nullptr) == 4);                        /* favorite may be NULL */
+    remove((root + "/favorites.txt").c_str());
+    CHECK(order() == "alpha,Beta,gamma,Zebra");
+
+    /* uninstall removes the favourite */
+    CHECK(whd_set_favorite(root.c_str(), "Beta", 1, err, sizeof err));
+    CHECK(whd_uninstall(root.c_str(), "Beta", err, sizeof err));
+    CHECK(slurp(root + "/favorites.txt") == "");
+    CHECK(order() == "alpha,gamma,Zebra");
+
+    /* options */
+    char opt[WHD_OPTIONS_MAX];
+    std::string orig = slurp(root + "/alpha.whd");
+    CHECK(whd_get_options(root.c_str(), "alpha", opt, sizeof opt) && opt[0] == 0);
+    CHECK(whd_set_options(root.c_str(), "alpha", "CUSTOM1=1 QUITKEY=$5D", err, sizeof err));
+    CHECK(whd_get_options(root.c_str(), "alpha", opt, sizeof opt) && !strcmp(opt, "CUSTOM1=1 QUITKEY=$5D"));
+    CHECK(slurp(root + "/alpha.whd") == orig + "options=CUSTOM1=1 QUITKEY=$5D\n");     /* slave line and comment untouched */
+    CHECK(whd_set_options(root.c_str(), "alpha", "  A\tB\n C  ", err, sizeof err));
+    CHECK(whd_get_options(root.c_str(), "alpha", opt, sizeof opt) && !strcmp(opt, "A?B? C"));
+    CHECK(slurp(root + "/alpha.whd") == orig + "options=A?B? C\n");                    /* replaced, not added */
+    CHECK(whd_set_options(root.c_str(), "alpha", std::string(300, 'x').c_str(), err, sizeof err));
+    CHECK(whd_get_options(root.c_str(), "alpha", opt, sizeof opt) && strlen(opt) == WHD_OPTIONS_MAX - 1);
+    CHECK(whd_set_options(root.c_str(), "alpha", "   ", err, sizeof err));            /* blank = none */
+    CHECK(slurp(root + "/alpha.whd") == orig);
+    CHECK(whd_set_options(root.c_str(), "alpha", "", err, sizeof err));
+    CHECK(slurp(root + "/alpha.whd") == orig && !exists(root + "/alpha.whd.tmp"));
+    write_file(root + "/gamma.whd", "slave=gamma/Game.slave");                         /* no final newline */
+    CHECK(whd_set_options(root.c_str(), "gamma", "NOCACHE", err, sizeof err));
+    CHECK(slurp(root + "/gamma.whd") == "slave=gamma/Game.slave\noptions=NOCACHE\n");
+    CHECK(!whd_set_options(root.c_str(), "nogame", "X", err, sizeof err) && strstr(err, "not found"));
+    CHECK(!whd_set_options(root.c_str(), "../alpha", "X", err, sizeof err) && strstr(err, "Invalid"));
+    CHECK(!whd_get_options(root.c_str(), "nogame", opt, sizeof opt) && opt[0] == 0);
+    CHECK(!whd_get_options(root.c_str(), "a/b", opt, sizeof opt));
+    char small[8];                                                                         /* a short buffer is cut, not overrun */
+    CHECK(whd_get_options(root.c_str(), "gamma", small, sizeof small) && !strcmp(small, "NOCACHE"));
+    CHECK(whd_get_options(root.c_str(), "gamma", small, 4) && !strcmp(small, "NOC"));
+
+    /* the options end up in the startup sequence, after PRELOAD; "slave=" inside them is no slave */
+    mkdir((root + "/C").c_str(), 0777);
+    write_file(root + "/C/WHDLoad", "binary");
+    std::string kdir = work + "/kicks";
+    const char *head = "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:alpha\"\nC:WHDLoad \"Game.slave\" ";
+    CHECK(launch_ok(root.c_str(), "alpha", kdir.c_str(), nullptr, nullptr));
+    CHECK(slurp(root + "/S/Startup-Sequence") == std::string(head) + "PRELOAD\n");
+    CHECK(whd_set_options(root.c_str(), "alpha", "slave=evil.slave CUSTOM1=1", err, sizeof err));
+    CHECK(launch_ok(root.c_str(), "alpha", kdir.c_str(), nullptr, nullptr));
+    CHECK(slurp(root + "/S/Startup-Sequence") == std::string(head) + "PRELOAD slave=evil.slave CUSTOM1=1\n");
+    CHECK(launch_ok(root.c_str(), "alpha", kdir.c_str(), "NOVBRMOVE", nullptr));       /* an explicit command line replaces it all */
+    CHECK(slurp(root + "/S/Startup-Sequence") == std::string(head) + "NOVBRMOVE\n");
+    write_file(root + "/alpha.whd", "; hand edited\r\nslave=alpha/Game.slave\r\noptions=CUSTOM1=2\r\n");   /* CRLF */
+    CHECK(whd_get_options(root.c_str(), "alpha", opt, sizeof opt) && !strcmp(opt, "CUSTOM1=2"));
+    CHECK(launch_ok(root.c_str(), "alpha", kdir.c_str(), nullptr, nullptr));
+    CHECK(slurp(root + "/S/Startup-Sequence") == std::string(head) + "PRELOAD CUSTOM1=2\n");
+
+    /* a reinstall keeps the options, an uninstall + install does not */
+    std::string iroot = work + "/optfav_img";
+    mkdir(iroot.c_str(), 0777);
+    std::vector<LhaEntry> game = { { "Mygame/", "", true }, { "Mygame/G.slave", pseudo(1000, 3) }, { "Mygame/d.dat", pseudo(5000, 4) } };
+    make_lha(work + "/G.lha", game);
+    char folder[WHD_NAME_MAX];
+    whd_install_stats st;
+    whd_image_requires_slave = 1;
+    CHECK(whd_install_lha(iroot.c_str(), (work + "/G.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(slurp(iroot + "/G.whd") == "; uae3DSng WHDLoad game image\nslave=Mygame/G.slave\n");
+    CHECK(whd_set_options(iroot.c_str(), "G", "CUSTOM1=1", err, sizeof err));
+    CHECK(whd_install_lha(iroot.c_str(), (work + "/G.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(slurp(iroot + "/G.whd") == "; uae3DSng WHDLoad game image\nslave=Mygame/G.slave\noptions=CUSTOM1=1\n");
+    CHECK(whd_uninstall(iroot.c_str(), "G", err, sizeof err));
+    CHECK(whd_install_lha(iroot.c_str(), (work + "/G.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(slurp(iroot + "/G.whd") == "; uae3DSng WHDLoad game image\nslave=Mygame/G.slave\n");
+    remove((iroot + "/G.hdf").c_str());
+    remove((iroot + "/G.whd").c_str());
+}
+
 int main(int argc, char **argv)
 {
     if (argc < 3) { fprintf(stderr, "usage: %s <archive dir> <work dir>\n", argv[0]); return 2; }
@@ -474,6 +587,7 @@ int main(int argc, char **argv)
     mkdir(work.c_str(), 0777);
     unit_tests(work);
     image_tests(work);
+    options_favorites_tests(work);
 
     std::vector<std::string> archives;
     walk(argv[1], archives);
