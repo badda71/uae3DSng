@@ -43,6 +43,7 @@
 #include "scsidev.h"
 #include "fsdb.h"
 #include "gui.h"
+#include "hfcache.h"
 
 #define TRACING_ENABLED 0
 #if TRACING_ENABLED
@@ -156,6 +157,8 @@ static void close_filesys_unit (UnitInfo *uip)
 {
     if (uip->hf.fd != 0)
  	fclose (uip->hf.fd);
+    hfcache_free (uip->hf.cache);
+    uip->hf.cache = 0;
     if (uip->volname != 0)
 	free (uip->volname);
     if (uip->devname != 0)
@@ -209,6 +212,7 @@ static char *set_filesys_unit_1 (struct uaedev_mount_info *mountinfo, int nr,
 	return "No slot allocated for this unit";
 
     ui->hf.fd = 0;
+    ui->hf.cache = 0;
     
     ui->hf.size = 0;
     ui->hf.nrcyls = 0;
@@ -365,6 +369,7 @@ struct uaedev_mount_info *alloc_mountinfo (void)
     ui = info->ui;
     
     ui->hf.fd = 0;
+    ui->hf.cache = 0;
     ui->hf.size = 0;
     ui->hf.nrcyls = 0;
     ui->hf.secspertrack = 0;
@@ -410,6 +415,7 @@ struct uaedev_mount_info *dup_mountinfo (struct uaedev_mount_info *mip)
 	    uip->volname = my_strdup (uip->volname);
 	if (uip->rootdir)
 	    uip->rootdir = my_strdup (uip->rootdir);
+	uip->hf.cache = 0;		/* the copy fills its own cache */
 #if !(defined __PSP2__)
 	// Broken in latest VitaSDK 20240214 (fdopen returns 0), causing crashes with hdf
 	if (uip->hf.fd)

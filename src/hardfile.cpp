@@ -19,6 +19,7 @@
 #include "filesys.h"
 #include "execlib.h"
 #include "gui.h"
+#include "hfcache.h"
 
 static int opencount = 0;
 
@@ -123,24 +124,43 @@ static uae_u32 hardfile_beginio (void)
 				goto bad_command;
 			
 			put_long (tmp1 + 32, tmp2); /* set io_Actual */
+#ifdef __3DS__
+			/* Served from a read-ahead cache: one read of up to 64 KB from the SD card instead of 128 reads of 512 bytes */
+			if (!hfd->cache)
+				hfd->cache = hfcache_new ();
+			while (tmp2) {
+				unsigned avail, n, i;
+				const uae_u8 *p = hfcache_get (hfd->cache, hfd->fd, hfd->size, offset, &avail);
+				if (p) {
+					n = avail < tmp2 ? avail : tmp2;
+					for (i = 0; i < n; i++)
+						put_byte (dataptr + i, p[i]);
+				} else {
+					/* never hand uninitialised data to the Amiga: the rest of this block is zero */
+					n = 512 - (offset & 511);
+					if (n > tmp2)
+						n = tmp2;
+					for (i = 0; i < n; i++)
+						put_byte (dataptr + i, 0);
+					write_log ("hardfile: read error at offset %08x\n", (unsigned) offset);
+					put_byte (tmp1 + 31, (uae_u8)-1);       /* IOERR_OPENFAIL: generic failure */
+				}
+				dataptr += n;
+				offset += n;
+				tmp2 -= n;
+			}
+#else
 			fseek (hfd->fd, offset, SEEK_SET);
 			while (tmp2) {
 				int i;
 				uae_u8 buffer[512];
 				/* See the comment in CMD_WRITE */
-#ifdef __3DS__
-				if (fread (buffer, 1, 512, hfd->fd) != 512) {   /* never hand uninitialised stack to the Amiga */
-				    memset (buffer, 0, sizeof buffer);
-				    write_log ("hardfile: read error at offset %08x\n", (unsigned) (offset + (get_long (tmp1 + 36) - tmp2)));
-				    put_byte (tmp1 + 31, (uae_u8)-1);       /* IOERR_OPENFAIL: generic failure */
-				}
-#else
 				fread (buffer, 1, 512, hfd->fd);
-#endif
 				for (i = 0; i < 512; i++, dataptr++)
 					put_byte(dataptr, buffer[i]);
 				tmp2 -= 512;
 			}
+#endif
 			break;
 			
 		case CMD_WRITE:
@@ -158,6 +178,9 @@ static uae_u32 hardfile_beginio (void)
 				goto bad_command;
 			
 			put_long (tmp1 + 32, tmp2); /* set io_Actual */
+#ifdef __3DS__
+			hfcache_written (hfd->cache, offset, tmp2);     /* what the cache holds of this range is old now */
+#endif
 			fseek (hfd->fd, offset, SEEK_SET);
 			while (tmp2) {
 				char buffer[512];

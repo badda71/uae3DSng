@@ -11,6 +11,8 @@
 #define FILESYS_HARDFILE_RDB 2
 #define FILESYS_HARDDRIVE 3
 
+struct HfCache;                 /* read-ahead cache of the file, see src/3ds/hfcache.h */
+
 struct hardfiledata {
     unsigned long size;
     int nrcyls;
@@ -19,6 +21,7 @@ struct hardfiledata {
     int reservedblocks;
     int blocksize;
     FILE *fd;
+    struct HfCache *cache;      /* allocated by the first read; never shared between copies of the mount info */
 };
 #ifdef WIN32
 int truncate (const char *name, long int len);

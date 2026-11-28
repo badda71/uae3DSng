@@ -362,6 +362,13 @@ generated startup sequence that runs `C:WHDLoad "<slave>" PRELOAD`). The first v
 * **Uninstall** (`whd_uninstall`, X in the game list, with a yes/no box): deletes `<name>.whd` first (so a half-deleted game is no longer listed), then `<name>.hdf.tmp` and `<name>.hdf`.
   Names with `/ \\ :`, a leading dot or a system folder name are refused, and a folder is never deleted, so only games can be removed. The menu refuses while a hard file setting points to the image and the emulator is running (it has the file open); otherwise the setting is cleared after the delete.
   Not verified on hardware: uninstall as a whole, and deleting an image that the emulator still has open after the hard disk was ejected without a reset (the menu cannot tell; the delete is attempted).
+* **Hard file read-ahead cache** (`src/3ds/hfcache.cpp/.h`, used by `hardfile_beginio` in `hardfile.cpp`, one cache per unit in `struct hardfiledata`, freed in `close_filesys_unit`, never
+  copied by `dup_mountinfo`): the log of Elvira 2 shows ~11,600 reads of one 512-byte block each while WHDLoad loads (~37 s at 10-15 fps, i.e. far more host time per Amiga frame than a fully busy 68k needs);
+  each read was an `fseek` + `fread` of 512 bytes on the SD card. That the SD card access dominates was **inferred, not measured**. A read now fills a window from the file and the
+  following requests are served from RAM: 4 KB after a jump, doubling with every miss that continues right behind the window, up to 64 KB (sequential reads: ~90 reads of the file instead of 11,600,
+  checked on the PC). A write drops the window if it overlaps it (`hfcache_written`); the data still goes straight to the file. A read that fails gives zero bytes and io_Error -1 as before.
+  All hard files use it (not only WHDLoad images). Memory: 64 KB per mounted hard file, allocated by its first read. Tested on the PC (`hfcache_host_test.cpp`: data equals the file for
+  random mixes of reads and writes, the 11,606-block sequential read needs 94 file reads, window/write overlap, end of file, unreadable file). **Not verified on hardware**: the effect on the load time.
 * **Menu spacing**: every line of text in the WHDLoad screens is two text lines apart from the next one (only a separator line may sit in between): the game list is drawn
   at lines 5, 7, 9, ... (12 rows), the help text of the empty list, the lines of the message / question boxes ("Installed ...", "Delete ...?") and the progress screens likewise;
   the WHDLoad row in Memory and Disk Options has one empty line before "Save Config for current HD".

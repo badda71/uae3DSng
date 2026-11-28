@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Host test of the WHDLoad installer (src/3ds/whdload3ds.cpp, src/3ds/ofs_image.cpp + vendored Lhasa), with AddressSanitizer/UBSan.
+# Host test of the WHDLoad installer (src/3ds/whdload3ds.cpp, src/3ds/ofs_image.cpp + vendored Lhasa) and of the hard file read-ahead
+# cache (src/3ds/hfcache.cpp), with AddressSanitizer/UBSan.
 #   tools/whdload_test/run.sh /path/to/lhasa/test/archives
 # The archives are the ones of the Lhasa test-suite (https://github.com/fragglet/lhasa, test/archives): real files made
 # by LHA on the Amiga (1.22, 2.12), MorphOS, Unix, OS/2, Windows, ...
@@ -18,6 +19,10 @@ WARN="-Wall -Wextra -Wno-unused-parameter -Wno-format-truncation"
 g++ -std=gnu++14 -O1 -g -fsanitize=address,undefined $WARN -I"$top/src/3ds" -I"$here" \
     "$here/ofs_host_test.cpp" "$top/src/3ds/ofs_image.cpp" -o "$out/ofs_host_test"
 "$out/ofs_host_test"
+# the read-ahead cache of the hard files (src/3ds/hfcache.cpp)
+g++ -std=gnu++14 -O1 -g -fsanitize=address,undefined $WARN -I"$top/src/3ds" \
+    "$here/hfcache_host_test.cpp" "$top/src/3ds/hfcache.cpp" -o "$out/hfcache_host_test"
+"$out/hfcache_host_test" "$out/work"
 # ... and the installer: hand made archives + every archive of the Lhasa suite, installed as images
 g++ -std=gnu++14 -O1 -g -fsanitize=address,undefined $WARN \
     -I"$top/src/3ds" -I"$top/src/3ds/lhasa" -I"$here" "$here/whdload_host_test.cpp" "$top/src/3ds/whdload3ds.cpp" \
