@@ -159,6 +159,11 @@ int main(int argc, char **argv)
         add("123456789012345678901234567890", 1);             /* exactly 30 characters */
         std::string longname(40, 'L');
         add("Game/" + longname, 2);                           /* 40 characters: cut to 30 */
+        std::string longslave = "FateGatesOfDawnUncensored.slave";       /* 31 characters: the extension must stay */
+        add("Game/" + longslave, 4);
+        std::string longext = std::string(26, 'E') + ".012345678901234";     /* extension too long to keep: plain cut */
+        add("Game/" + longext, 5);
+        add("Game/" + std::string(40, 'M') + ".info", 6);       /* extension kept, name part cut */
         OfsRead r;
         CHECK(build_and_check(img, specs, 1 << 20, &r, "folders", 77));
         CHECK(r.dirs.count("Game") && r.dirs.count("Game/data") && r.dirs.count("Game/data/deep") &&
@@ -169,6 +174,9 @@ int main(int argc, char **argv)
         CHECK(r.files["lead/slash/x"] == specs[6].data);
         CHECK(r.files["123456789012345678901234567890"] == specs[7].data);
         CHECK(r.files.count("Game/" + longname.substr(0, 30)) && r.files["Game/" + longname.substr(0, 30)] == specs[8].data);
+        CHECK(r.files.count("Game/FateGatesOfDawnUncensore.slave") && r.files["Game/FateGatesOfDawnUncensore.slave"] == specs[9].data);
+        CHECK(r.files.count("Game/" + longext.substr(0, 30)) && r.files["Game/" + longext.substr(0, 30)] == specs[10].data);
+        CHECK(r.files.count("Game/" + std::string(25, 'M') + ".info") && r.files["Game/" + std::string(25, 'M') + ".info"] == specs[11].data);
         (void)cleaned;
     }
 

@@ -17,7 +17,7 @@ Build (devkitARM + libctru + the portlibs below; on Windows use the devkitPro MS
 ## WHDLoad games (.lha) – experimental
 
 *Memory and Disk Options → "WHDLoad Games (.lha)..."* installs a WHDLoad archive into **one Amiga disk image** on the SD card and starts it
-(the image is mounted as a hard file, `WHDGame:`, a startup sequence runs the game's `.slave`). Not tested on hardware yet. Why an image and not a
+(the image is mounted as a hard file, `WHDGame:`, a startup sequence runs the game's `.slave`). Tested on a New 3DS (installs in seconds, the game runs at 50 fps). Why an image and not a
 folder of files: the first version extracted the archive into a folder, and on a real New 3DS that took 3 minutes for 639 files (3.8 MB) plus about a minute
 to find the `.slave` and 6 more minutes of loading inside the emulator: every create/stat/open of a file on the 3DS SD card is slow once a folder holds hundreds of files.
 One big file is written at full speed and opened once. On the SD card, under `3ds/uae3DSng/`:
@@ -27,9 +27,14 @@ One big file is written at full speed and opened once. On the SD card, under `3d
   WHDLoad is © Bert Jahn, all rights reserved, see `romfs/whdload/WHDLoad-NOTICE.txt`.
 * `kickstarts/` – your Kickstart ROMs as for floppies. The ones WHDLoad needs are copied to `whdload/Devs/Kickstarts` under their WHDLoad names on the first
   start (`kick13.rom` → `kick34005.A500`, `kick31.rom` → `kick40068.A1200`, ...), together with any `.rtb`, `.pat` and `.key` files found there.
+  The Kickstart relocation tables WHDLoad needs for those ROMs (`kick34005.A500.RTB` and friends, © Bert Jahn like WHDLoad, see `romfs/whdload/WHDLoad-NOTICE.txt`)
+  are built into the app (`romfs/whdload/Kickstarts`) and copied to `whdload/Devs/Kickstarts` when missing; a table of your own with another size replaces the built-in one.
+  The Kickstart ROMs themselves are not included, you have to supply them.
 * A game lands in `whdload/<archive name>.hdf` (an OFS disk image, 2 MB + 3 % larger than the game so savegames fit) with a small `<archive name>.whd` next to it that
   names the `.slave`. Both files belong together; delete both to remove a game. The image is also a normal hard file: it can be opened with Amiga tools (volume `WHDGame`).
   Games installed by the first version (a folder `whdload/<name>/`) are still listed and start as before; an image of the same name wins.
+  Amiga file names are at most 30 characters long: a longer name inside an archive is shortened in the middle and keeps its extension
+  (`FateGatesOfDawnUncensored.slave` → `FateGatesOfDawnUncensore.slave`).
 * Starting a game sets "HD Dir" to the `whdload` folder (boots from it) and hard file 0 to the game's image, ejects the floppies and resets. Your current
   CPU/chipset/memory/Kickstart settings are kept, so pick the machine the game needs before you start it. Hard file 0 is overwritten by this.
 

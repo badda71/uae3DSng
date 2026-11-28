@@ -43,7 +43,8 @@ extern SDL_Surface *text_screen;
 extern int kickstart;
 extern const char *text_str_memdisk_separator;
 
-#define LIST_ROWS 13                        /* visible entries */
+#define LIST_ROWS 12                        /* visible entries; like in all menus, items are two text lines apart */
+#define LIST_FIRST_LINE 5                   /* text line of the first game (the install row is line 3, the separator line 4) */
 #define MAX_GAMES 256
 
 static char games[MAX_GAMES][WHD_NAME_MAX];
@@ -262,19 +263,19 @@ static void draw_list(int sel, int top)
     else
         write_text(3, line, "Install game from .lha archive...");
     line++;
-    write_text(3, line, text_str_memdisk_separator);
-    line++;
+    write_text(3, line, text_str_memdisk_separator);        /* the only thing that may sit between two items */
+    line = LIST_FIRST_LINE;
 
     if (n_games == 0) {
-        write_text(3, line + 1, "No games installed yet.");
+        write_text(3, line, "No games installed yet.");
         if (have_builtin_whdload) {
-            write_text(3, line + 3, "A WHDLoad is built in. To use your");
-            write_text(3, line + 4, "own, put it into whdload/C/WHDLoad");
-            write_text(3, line + 5, "on the SD card (3ds/uae3DSng).");
+            write_text(3, line + 2, "A WHDLoad is built in. To use your");
+            write_text(3, line + 3, "own, put it into whdload/C/WHDLoad");
+            write_text(3, line + 4, "on the SD card (3ds/uae3DSng).");
         } else {
-            write_text(3, line + 3, "WHDLoad itself is not included:");
-            write_text(3, line + 4, "put it into whdload/C/WHDLoad");
-            write_text(3, line + 5, "on the SD card (3ds/uae3DSng).");
+            write_text(3, line + 2, "WHDLoad itself is not included:");
+            write_text(3, line + 3, "put it into whdload/C/WHDLoad");
+            write_text(3, line + 4, "on the SD card (3ds/uae3DSng).");
         }
     } else {
         for (int i = 0; i < LIST_ROWS && top + i < n_games; i++) {
@@ -283,14 +284,14 @@ static void draw_list(int sel, int top)
                 write_text_inv(3, line, games[top + i]);
             else
                 write_text(3, line, games[top + i]);
-            line++;
+            line += 2;
         }
-        line = 3 + 2 + LIST_ROWS;
+        line = LIST_FIRST_LINE + 2 * LIST_ROWS;
         char info[64];
         snprintf(info, sizeof(info), "%d game%s", n_games, n_games == 1 ? "" : "s");
         write_text(3, line, info);
     }
-    write_text(3, 3 + 2 + LIST_ROWS + 2, "A = install / start     B = back");
+    write_text(3, LIST_FIRST_LINE + 2 * LIST_ROWS + 2, "A = install / start     B = back");
     text_flip();
 }
 

@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 #define OFS_NAME_MAX      30        /* longest name of one file or folder */
+#define OFS_EXT_KEEP      10        /* a name that is too long keeps its extension (".slave") up to this length */
 #define OFS_MAX_ENTRIES   60000
 #define OFS_ERR_EXISTS    (-2)      /* ofs_add_*: the name is already used (the caller may skip the entry); other errors: -1 */
 
@@ -40,7 +41,8 @@ OfsImage *ofs_new(const char *volume_name);
 void ofs_free(OfsImage *img);
 
 /* Describe the contents. path = components separated by '/', Amiga names as they are in the archive: ':' becomes '_',
-   components longer than OFS_NAME_MAX are cut (counted in *renamed), "." and empty components are ignored, ".." is an
+   components longer than OFS_NAME_MAX are cut in the middle so that an extension of up to OFS_EXT_KEEP characters
+   stays ("LongGameName....slave" -> "LongGame.slave"; counted in *renamed), "." and empty components are ignored, ".." is an
    error. Missing parent folders are created. unix_time 0 = now. Both return the entry id (>= 0) or a negative value (err = message).
    ofs_add_dir returns the existing id when the folder is already there; adding a file twice (or a name that is used by a
    file/folder of the other kind) returns OFS_ERR_EXISTS. */

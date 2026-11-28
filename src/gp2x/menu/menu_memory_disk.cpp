@@ -310,7 +310,7 @@ static void draw_memDiskMenu(int c)
 	else
 		write_text(3, menuLine, "WHDLoad Games (.lha)...");
 
-	menuLine++;
+	menuLine += 2;
 
 	if ((c==MENUDISK_SAVEHDCONF)&&(bb))
 		write_text_inv(3, menuLine, "Save Config for current HD");

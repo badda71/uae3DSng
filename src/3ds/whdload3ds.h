@@ -6,7 +6,8 @@
  *   whdload/C/WHDLoad            the WHDLoad program: yours if you put one there, otherwise the copy from the romfs is
  *                                put there when a game is started (see WHD_BUILTIN_WHDLOAD)
  *   whdload/S/Startup-Sequence   written for every launch (CD into the game, run WHDLoad)
- *   whdload/Devs/Kickstarts/     ROM images / .RTB / .PAT files, copied from the kickstarts folder when missing
+ *   whdload/Devs/Kickstarts/     the .RTB / .PAT tables from the romfs, plus the ROM images (and your own .RTB / .PAT /
+ *                                .key) from the kickstarts folder, copied when missing
  *   whdload/<Game>.hdf           one Amiga disk image (OFS, volume "WHDGame") per installed .lha, mounted as a hard file
  *   whdload/<Game>.whd           its info file: names the .slave inside the image
  *   whdload/<Game>/              (first version) a game extracted into a folder; still listed and started
@@ -32,6 +33,11 @@
    already on the SD card is never replaced. */
 #ifndef WHD_BUILTIN_WHDLOAD
 #define WHD_BUILTIN_WHDLOAD "romfs:/whdload/WHDLoad"
+#endif
+/* The Kickstart relocation / patch tables (.RTB/.PAT) that ship with the app (romfs/whdload/Kickstarts). They are copied
+   to <root>/Devs/Kickstarts when a game is started; a table that is already there is never replaced. */
+#ifndef WHD_BUILTIN_KICKSTARTS
+#define WHD_BUILTIN_KICKSTARTS "romfs:/whdload/Kickstarts"
 #endif
 
 #define WHD_NAME_MAX 128      /* length of one game folder name */
@@ -73,6 +79,7 @@ extern int whd_image_requires_slave;
 
 /* Where the fallback WHDLoad is read from (defaults to WHD_BUILTIN_WHDLOAD; the host test points it elsewhere) */
 extern const char *whd_builtin_whdload;
+extern const char *whd_builtin_kickstarts;
 
 /* Install archive (.lha/.lzh): either into the image <root>/<name of the archive>.hdf or into the folder of that name
    (see whd_install_mode). Returns 1 on success (game_folder = the game's name, as listed by whd_list_games), 0 on

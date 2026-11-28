@@ -170,6 +170,37 @@ static void unit_tests(const std::string &work)
     CHECK(slurp(root + "/S/Startup-Sequence.orig") == "C:SetPatch QUIET\nVersion\n  EndCLI >NIL:\n");
     CHECK(whd_prepare_launch(root.c_str(), "alpha", kdir.c_str(), nullptr, nullptr, err, sizeof err));   /* idempotent */
     CHECK(slurp(root + "/S/Startup-Sequence") == "C:SetPatch QUIET\nVersion\n; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"SYS:alpha\"\nC:WHDLoad \"Other.slave\" PRELOAD\n  EndCLI >NIL:\n");
+
+    /* the relocation tables that ship with the app (romfs on the 3DS): copied when missing, never replacing a file */
+    static std::string bk;                                  /* whd_builtin_kickstarts points to it while this runs */
+    bk = work + "/builtin_kicks";
+    mkdir(bk.c_str(), 0777);
+    write_file(bk + "/kick34005.A500.RTB", "builtin-rtb-13");
+    write_file(bk + "/kick33180.A500.PAT", "builtin-pat-12");
+    whd_builtin_kickstarts = bk.c_str();
+    std::string root2 = work + "/fake2";
+    mkdir(root2.c_str(), 0777);
+    mkdir((root2 + "/g").c_str(), 0777);
+    write_file(root2 + "/g/G.slave", "s");
+    CHECK(whd_prepare_launch(root2.c_str(), "g", nullptr, nullptr, nullptr, err, sizeof err));       /* no kickstart folder at all */
+    CHECK(slurp(root2 + "/Devs/Kickstarts/kick34005.A500.RTB") == "builtin-rtb-13");
+    CHECK(slurp(root2 + "/Devs/Kickstarts/kick33180.A500.PAT") == "builtin-pat-12");
+    write_file(root2 + "/Devs/Kickstarts/kick34005.A500.RTB", "mine");
+    CHECK(whd_prepare_launch(root2.c_str(), "g", "/nonexistent-kick-dir", nullptr, nullptr, err, sizeof err));
+    CHECK(slurp(root2 + "/Devs/Kickstarts/kick34005.A500.RTB") == "mine");                           /* never replaced */
+    std::string root3 = work + "/fake3";
+    mkdir(root3.c_str(), 0777);
+    mkdir((root3 + "/g").c_str(), 0777);
+    write_file(root3 + "/g/G.slave", "s");
+    std::string kd3 = work + "/kicks3";
+    mkdir(kd3.c_str(), 0777);
+    write_file(kd3 + "/kick34005.A500.RTB", "the-users-own-table");
+    CHECK(whd_prepare_launch(root3.c_str(), "g", kd3.c_str(), nullptr, nullptr, err, sizeof err));
+    CHECK(slurp(root3 + "/Devs/Kickstarts/kick34005.A500.RTB") == "the-users-own-table");           /* the user's file wins */
+    CHECK(slurp(root3 + "/Devs/Kickstarts/kick33180.A500.PAT") == "builtin-pat-12");
+    CHECK(whd_prepare_launch(root3.c_str(), "g", kd3.c_str(), nullptr, nullptr, err, sizeof err));  /* idempotent */
+    CHECK(slurp(root3 + "/Devs/Kickstarts/kick34005.A500.RTB") == "the-users-own-table");
+    whd_builtin_kickstarts = nullptr;
     printf("  unit tests done, %d failure(s) so far\n", g_fail);
 }
 
@@ -321,7 +352,7 @@ static void image_tests(const std::string &work)
     CHECK(content("TestGame/data/level1.dat") == big);
     CHECK(content("TestGame/TestGame.slave") == pseudo(5000, 1));
     CHECK(content("TestGame/data/empty.bin") == "");
-    CHECK(content("TestGame/A_very_long_file_name_that_exc") == "long");       /* cut to 30 characters */
+    CHECK(content("TestGame/A_very_long_file_name_that.txt") == "long");        /* cut to 30 characters, ".txt" stays */
     CHECK(content("TestGame/Caf\xe9_x") == "latin1 and a colon");                  /* bytes kept, ':' replaced */
     std::string info = slurp(root + "/Test Game.whd");
     CHECK(info.find("slave=TestGame/TestGame.slave\n") != std::string::npos);
@@ -367,6 +398,15 @@ static void image_tests(const std::string &work)
     CHECK(whd_install_lha(root.c_str(), (work + "/Quotes.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     launch_ok(root.c_str(), "Quotes", kdir.c_str(), nullptr, &li);
     CHECK(slurp(root + "/S/Startup-Sequence") == "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:Q*\"d**\"\nC:WHDLoad \"We*\"ird**.slave\" PRELOAD\n");
+
+    /* a slave whose name is 31 characters long: cut to 30, but it must stay a .slave file that WHDLoad is started with */
+    make_lha(work + "/Fate.lha", { { "Fate/", "", true }, { "Fate/FateGatesOfDawnUncensored.slave", "x" }, { "Fate/FateGatesOfDawnUncensored.info", "i" } });
+    CHECK(whd_install_lha(root.c_str(), (work + "/Fate.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(st.has_slave && st.renamed == 1);
+    launch_ok(root.c_str(), "Fate", kdir.c_str(), nullptr, &li);
+    CHECK(slurp(root + "/S/Startup-Sequence") == "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:Fate\"\nC:WHDLoad \"FateGatesOfDawnUncensore.slave\" PRELOAD\n");
+    CHECK(slurp(root + "/Fate.whd").find("slave=Fate/FateGatesOfDawnUncensore.slave\n") != std::string::npos);
+    CHECK((rd = OfsRead(), chk.run(root + "/Fate.hdf", rd, cerr)) && rd.files.count("Fate/FateGatesOfDawnUncensore.slave") && rd.files.count("Fate/FateGatesOfDawnUncensored.info"));
 
     /* 3. failures leave nothing behind */
     auto nothing_left = [&](const char *base) {

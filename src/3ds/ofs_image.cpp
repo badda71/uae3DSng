@@ -320,13 +320,29 @@ static int add_entry(OfsImage *img, const char *path, int is_dir, uint32_t size,
         }
         char name[OFS_NAME_MAX + 1];
         size_t len = n;
+        size_t skip_from = n, skip_to = n;       /* the part of the name that is dropped (none) */
         if (len > OFS_NAME_MAX) {
+            /* Too long for an Amiga file system: cut the name, but keep a short extension, so that "<long>.slave" is
+               still a .slave file (WHDLoad starts it by this very name). */
+            size_t dot = n;
+            while (dot > 0 && p[dot - 1] != '.')
+                dot--;
+            size_t ext = (dot > 1) ? n - (dot - 1) : 0;          /* length of ".ext" */
+            if (ext > 0 && ext <= OFS_EXT_KEEP) {
+                skip_from = OFS_NAME_MAX - ext;
+                skip_to = n - ext;
+            } else {
+                skip_from = OFS_NAME_MAX;
+            }
             len = OFS_NAME_MAX;
             if (renamed)
                 (*renamed)++;
         }
-        for (size_t i = 0; i < len; i++)
-            name[i] = (p[i] == ':') ? '_' : p[i];
+        for (size_t i = 0, o = 0; i < n && o < len; i++) {
+            if (i >= skip_from && i < skip_to)
+                continue;
+            name[o++] = (p[i] == ':') ? '_' : p[i];
+        }
         name[len] = '\0';
 
         int id = find_child(img, parent, name, len);

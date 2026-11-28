@@ -325,8 +325,9 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
   parameter packet), so OFS is what has to be written. Geometry 32 sectors/1 surface/2 reserved/512 bytes, size = multiple of 32 blocks (what `make_hard_file_cfg_line` and
   `parse_hardfile_spec` produce), root block in the middle, ≥ 2 GB refused. Two phases: all entries are added first (`ofs_add_dir/file`), `ofs_layout` then fixes every
   block number (metadata - root, bitmap, bitmap extensions, folder and file headers, file extension blocks - is kept in RAM and emitted at the root position; data blocks
-  are numbered from block 2 and jump over that hole), so the image is written strictly front to back with no seeking. Names: `:` → `_`, cut to 30 characters,
-  bytes kept as they are (Latin-1). A name used twice is skipped (first wins).
+  are numbered from block 2 and jump over that hole), so the image is written strictly front to back with no seeking. Names: `:` → `_`, longer than 30 characters: cut in
+  the middle so that an extension of up to 10 characters stays (`OFS_EXT_KEEP`; a plain cut turned a 31-character `<name>.slave` into `<name>.slav`, and the install of
+  "Fate: Gates of Dawn Uncensored" was refused as "not a WHDLoad game"), bytes kept as they are (Latin-1). A name used twice is skipped (first wins).
 * **Image install**: pass 1 reads the lha headers (unsupported method / no `.slave` = fail before anything is written), pass 2 decodes into `<name>.hdf.tmp`, the
   tmp file is renamed over the old image only when everything was written (a failed or cancelled install leaves the old one untouched), then `<name>.whd` (the
   slave path, chosen from the entry list with the same rule as before: depth ≤ 4, closest to the top, shortest name, alphabetical) is written. Launch needs no scan of the image.
@@ -345,13 +346,19 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
   181 install as folder and as image and every file is identical in both (names that had to be cut are compared by count and size), the 17 failures are the expected ones (corrupt by
   design, methods Lhasa lacks, name clashes, MacBinary), the 4.7 GB file of `h2_huge.lzh` cannot go into an image, every `gpl-2` inside is byte-identical (57 archives).
   The menu code passes `tools/hostcheck/check.sh`. **Not done:** running amitools itself on a sample image (it was not run here; `xdftool <image> info` / `fsck` on a PC would be a good extra check).
-* **Not verified**: anything on a 3DS: that the CI build links, install and load speed of the image version, that the emulator mounts the image as `WHDGame:` with Kickstart 1.3/3.1,
-  and whether WHDLoad boots with the Kickstart/chipset the user has selected.
+* **Verified on hardware (user, New 3DS)**: CI build links, install takes seconds, the image is mounted as `WHDGame:`, a game loads and runs at 50 fps. **Not verified**: every Kickstart/chipset combination (Elvira 2 needed the relocation tables, see below).
 * **Built-in WHDLoad** (`romfs/whdload/WHDLoad`, fallback only): when `whdload/C/WHDLoad` is missing on the SD card, `whd_prepare_launch` copies it from the romfs; an existing file is never
   replaced (`whd_builtin_whdload`, tested on the PC). The file is WHDLoad 20.0 build 7051 (27.03.2026), byte-identical to the one in the Vita fork's `psp2data/data/whdload_base/C`
   (sha256 `5e66d140…adb5`); it was **not** compared against the official USR package. **Licence:** WHDLoad is © Bert Jahn, all rights reserved, "commercial use only with explicit, written
   permission" (https://www.whdload.de/docs/en/copy.html); the page says nothing about redistribution by others, so asking the author before a public release is advisable.
   The binary is its own commit and `romfs/whdload/` can simply be deleted: the code then shows the "WHDLoad is missing" message as before.
+* **Built-in Kickstart tables** (`romfs/whdload/Kickstarts`, 35 `.RTB`/`.PAT` files, 98 KB, copied from the Vita fork's `psp2data/data/whdload_base/Devs/Kickstarts`):
+  hardware test of Elvira 2 failed with "DOS Error #205 on reading devs:kickstarts/kick34005.a500.rtb" - WHDLoad's Kickstart emulation needs the ROM *and* its relocation table.
+  `deploy_kickstarts` copies each built-in file to `<root>/Devs/Kickstarts` when it is not there yet (`whd_builtin_kickstarts`, tested on the PC), then the user's
+  `kickstarts/` folder is processed as before (ROM aliases; own `.rtb/.pat/.key` replace the built-in files when their size differs). Same author and notice as WHDLoad itself.
+  The ROM images are not included and cannot be: Kickstart is Cloanto's/Amiga Inc.'s.
+* **Menu spacing**: items are always two text lines apart (the separator may be in the line between): the game list is drawn at lines 5, 7, 9, ... (12 rows), the
+  WHDLoad row in Memory and Disk Options has one empty line before "Save Config for current HD". Paragraph text in message boxes is not a list of items and stays on consecutive lines.
 
 ## Known gaps / risks
 

@@ -43,6 +43,7 @@ extern "C" {
 /* ---------------------------------------------------------------------------------------------------------------- */
 
 const char *whd_builtin_whdload = WHD_BUILTIN_WHDLOAD;
+const char *whd_builtin_kickstarts = WHD_BUILTIN_KICKSTARTS;
 
 static void set_err(char *err, size_t err_size, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
 static void set_err(char *err, size_t err_size, const char *fmt, ...)
@@ -902,14 +903,43 @@ static void deploy_if_missing(const char *src, const char *dst)
         WHD_LOG("whdload: could not copy %s -> %s", src, dst);
 }
 
+/* Copies the relocation / patch tables that ship with the app (WHDLoad cannot start a game that uses its Kickstart
+   emulation without <kick>.RTB) into DEVS:Kickstarts. A file that is already there is never replaced. */
+static void deploy_builtin_kickstarts(const char *dst_dir)
+{
+    if (!whd_builtin_kickstarts)
+        return;
+    DIR *d = opendir(whd_builtin_kickstarts);
+    if (!d)
+        return;
+    struct dirent *e;
+    while ((e = readdir(d)) != NULL) {
+        if (e->d_name[0] == '.')
+            continue;
+        char src[MAX_PATH_LEN], dst[MAX_PATH_LEN];
+        snprintf(src, sizeof(src), "%s/%s", whd_builtin_kickstarts, e->d_name);
+        snprintf(dst, sizeof(dst), "%s/%s", dst_dir, e->d_name);
+        if (file_size(dst) > 0 || file_size(src) <= 0)
+            continue;
+        if (copy_file(src, dst))
+            WHD_LOG("whdload: installed built-in %s", e->d_name);
+        else
+            WHD_LOG("whdload: could not copy built-in %s -> %s", src, dst);
+    }
+    closedir(d);
+}
+
 static void deploy_kickstarts(const char *root, const char *kick_dir)
 {
-    if (!kick_dir || !is_dir(kick_dir))
-        return;
     char dst_dir[MAX_PATH_LEN];
     snprintf(dst_dir, sizeof(dst_dir), "%s/Devs/Kickstarts", root);
     mkdir_p(dst_dir);
 
+    deploy_builtin_kickstarts(dst_dir);
+
+    /* what the user keeps in the Kickstart folder wins over the built-in tables */
+    if (!kick_dir || !is_dir(kick_dir))
+        return;
     for (int i = 0; kick_aliases[i].dest; i++) {
         char dst[MAX_PATH_LEN];
         snprintf(dst, sizeof(dst), "%s/%s", dst_dir, kick_aliases[i].dest);
