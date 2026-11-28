@@ -408,6 +408,37 @@ static void image_tests(const std::string &work)
     CHECK(slurp(root + "/Fate.whd").find("slave=Fate/FateGatesOfDawnUncensore.slave\n") != std::string::npos);
     CHECK((rd = OfsRead(), chk.run(root + "/Fate.hdf", rd, cerr)) && rd.files.count("Fate/FateGatesOfDawnUncensore.slave") && rd.files.count("Fate/FateGatesOfDawnUncensored.info"));
 
+    /* uninstall: an image game (with a left-over .tmp), then a game that exists as old-style folder and as image */
+    {
+        auto count_cb = [](void *u, unsigned n) { *(unsigned *)u = n; };
+        unsigned calls = 0;
+        CHECK(exists(root + "/Fate.hdf") && exists(root + "/Fate.whd"));
+        write_file(root + "/Fate.hdf.tmp", "left over");
+        CHECK(whd_uninstall(root.c_str(), "Fate", count_cb, &calls, err, sizeof err));
+        CHECK(calls == 3 && !exists(root + "/Fate.hdf") && !exists(root + "/Fate.whd") && !exists(root + "/Fate.hdf.tmp"));
+        n = whd_list_games(root.c_str(), names, 16);
+        bool fate_listed = false; for (int i = 0; i < n; i++) if (!strcmp(names[i], "Fate")) fate_listed = true;
+        CHECK(!fate_listed);
+        CHECK(!whd_uninstall(root.c_str(), "Fate", nullptr, nullptr, err, sizeof err) && strstr(err, "not found"));
+        CHECK(exists(root + "/Test Game.hdf"));                                           /* other games are untouched */
+
+        make_lha(work + "/Folder Game.lha", { { "Fgame/", "", true }, { "Fgame/Fgame.slave", "x" }, { "Fgame/data/a.bin", "aaa" },
+                                              { "Fgame/data/deeper/b.bin", "bbb" }, { "Fgame/empty/", "", true } });
+        CHECK(whd_install_lha(root.c_str(), (work + "/Folder Game.lha").c_str(), WHD_INSTALL_FOLDER, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+        CHECK(exists(root + "/Folder Game/Fgame/data/deeper/b.bin"));
+        CHECK(whd_install_lha(root.c_str(), (work + "/Folder Game.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+        calls = 0;
+        CHECK(whd_uninstall(root.c_str(), "Folder Game", count_cb, &calls, err, sizeof err));
+        CHECK(!exists(root + "/Folder Game") && !exists(root + "/Folder Game.hdf") && !exists(root + "/Folder Game.whd"));
+        CHECK(calls == 9);                                                               /* .whd + .hdf + 7 entries of the folder tree */
+        printf("  uninstall: %u entries deleted\n", calls);
+
+        for (const char *bad : { "", "..", ".", ".hidden", "a/b", "a\\b", "C", "devs", "x:y" })
+            CHECK(!whd_uninstall(root.c_str(), bad, nullptr, nullptr, err, sizeof err) && strstr(err, "Invalid"));
+        CHECK(!whd_uninstall(root.c_str(), nullptr, nullptr, nullptr, err, sizeof err));
+        CHECK(exists(root + "/C/WHDLoad") && exists(root + "/S/Startup-Sequence"));        /* system folders are never touched */
+    }
+
     /* 3. failures leave nothing behind */
     auto nothing_left = [&](const char *base) {
         return !exists(root + "/" + base + ".hdf") && !exists(root + "/" + base + ".hdf.tmp") && !exists(root + "/" + base + ".whd");

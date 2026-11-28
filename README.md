@@ -35,6 +35,9 @@ One big file is written at full speed and opened once. On the SD card, under `3d
   Games installed by the first version (a folder `whdload/<name>/`) are still listed and start as before; an image of the same name wins.
   Amiga file names are at most 30 characters long: a longer name inside an archive is shortened in the middle and keeps its extension
   (`FateGatesOfDawnUncensored.slave` → `FateGatesOfDawnUncensore.slave`).
+* To uninstall a game, select it in the *WHDLoad Games* list and press **X** (asked first): its `.hdf` and `.whd` are deleted, and the `whdload/<name>/` folder
+  of an old folder install with everything in it. A game that is loaded in the running emulator cannot be deleted: start another game or eject the hard
+  disk and reset first. Saved games inside the image go with it.
 * Starting a game sets "HD Dir" to the `whdload` folder (boots from it) and hard file 0 to the game's image, ejects the floppies and resets. Your current
   CPU/chipset/memory/Kickstart settings are kept, so pick the machine the game needs before you start it. Hard file 0 is overwritten by this.
 

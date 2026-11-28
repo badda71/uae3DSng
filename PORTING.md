@@ -357,6 +357,11 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
   `deploy_kickstarts` copies each built-in file to `<root>/Devs/Kickstarts` when it is not there yet (`whd_builtin_kickstarts`, tested on the PC), then the user's
   `kickstarts/` folder is processed as before (ROM aliases; own `.rtb/.pat/.key` replace the built-in files when their size differs). Same author and notice as WHDLoad itself.
   The ROM images are not included and cannot be: Kickstart is Cloanto's/Amiga Inc.'s.
+* **Uninstall** (`whd_uninstall`, X in the game list, with a yes/no box): deletes `<name>.whd` first (so a half-deleted game is no longer listed), then `<name>.hdf.tmp`, `<name>.hdf` and
+  the old-style folder, recursively without a `stat()` per entry (that is the slow call on the SD card: an entry is tried as a file with `remove()`, and entered as a folder when that fails; a
+  folder is read again until a pass deletes nothing, because deleting while reading can make `readdir` skip entries). Names with `/ \\ :`, a leading dot or a system folder name are refused,
+  so only games can be deleted. The menu refuses while a hard file setting points to the image and the emulator is running (it has the file open); otherwise the setting is cleared after the delete.
+  Not verified on hardware: uninstall as a whole, and deleting an image that the emulator still has open after the hard disk was ejected without a reset (the menu cannot tell; the delete is attempted).
 * **Menu spacing**: items are always two text lines apart (the separator may be in the line between): the game list is drawn at lines 5, 7, 9, ... (12 rows), the
   WHDLoad row in Memory and Disk Options has one empty line before "Save Config for current HD". Paragraph text in message boxes is not a list of items and stays on consecutive lines.
 

@@ -92,6 +92,14 @@ int whd_install_lha(const char *root, const char *archive, whd_install_mode mode
    sorted, each name once. Returns the count. */
 int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names);
 
+/* Uninstall a game as listed by whd_list_games: deletes <game>.whd, <game>.hdf (and a left-over <game>.hdf.tmp) and, for a
+   game installed the old way, the folder <game> with everything in it. progress (may be NULL) is called after every deleted
+   file with the number of files deleted so far. Returns 1 when nothing of the game is left, 0 on failure (err = message
+   for the user; a game that could only be deleted in part is no longer listed as soon as its .whd is gone). */
+typedef void (*whd_delete_progress_fn)(void *user, unsigned files_deleted);
+int whd_uninstall(const char *root, const char *game, whd_delete_progress_fn progress, void *user, char *err,
+                  size_t err_size);
+
 /* Make the game start: makes sure C/WHDLoad exists (copies the built-in one if the SD card has none), copies Kickstart images (from kick_dir, may be NULL) into
    Devs/Kickstarts, finds the .slave and writes S/Startup-Sequence. extra_args may be NULL (default "PRELOAD").
    info may be NULL. Returns 1 on success, 0 on failure (err = message for the user). */

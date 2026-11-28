@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 extern "C" {
 #include "public/lha_decoder.h"
@@ -836,6 +837,125 @@ int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names)
         count = out;
     }
     return count;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------- */
+/* uninstall                                                                                                        */
+/* ---------------------------------------------------------------------------------------------------------------- */
+
+typedef struct {
+    whd_delete_progress_fn progress;
+    void *user;
+    unsigned deleted;
+    int failed;
+} DeleteState;
+
+static int path_exists(const char *path)
+{
+    struct stat st;
+    return stat(path, &st) == 0;
+}
+
+/* Deletes everything below dir (the folder itself stays). No stat() per entry: that is the slow call on the 3DS SD
+   card. An entry is deleted as a file first and, when that does not work, entered as a folder. Deleting while reading
+   a directory can make readdir skip entries, so the folder is read again until a pass finds nothing to delete. */
+static void remove_contents(const char *dir, int depth, DeleteState *ds)
+{
+    if (depth > 24) {
+        ds->failed = 1;
+        return;
+    }
+    for (;;) {
+        DIR *d = opendir(dir);
+        if (!d)
+            return;
+        unsigned removed_here = 0;
+        struct dirent *e;
+        while ((e = readdir(d)) != NULL) {
+            if (strcmp(e->d_name, ".") == 0 || strcmp(e->d_name, "..") == 0)
+                continue;
+            char path[MAX_PATH_LEN];
+            if (snprintf(path, sizeof(path), "%s/%s", dir, e->d_name) >= (int)sizeof(path)) {
+                ds->failed = 1;
+                continue;
+            }
+            if (remove(path) == 0) {
+                /* a file; (glibc's remove() also takes an empty folder, which counts as well) */
+            } else {
+                DIR *sub = opendir(path);
+                if (!sub) {
+                    WHD_LOG("whdload: cannot delete %s (errno %d)", path, errno);
+                    ds->failed = 1;
+                    continue;
+                }
+                closedir(sub);
+                remove_contents(path, depth + 1, ds);
+                if (rmdir(path) != 0) {
+                    WHD_LOG("whdload: cannot delete folder %s (errno %d)", path, errno);
+                    ds->failed = 1;
+                    continue;
+                }
+            }
+            removed_here++;
+            ds->deleted++;
+            if (ds->progress)
+                ds->progress(ds->user, ds->deleted);
+        }
+        closedir(d);
+        if (removed_here == 0)
+            return;
+    }
+}
+
+int whd_uninstall(const char *root, const char *game, whd_delete_progress_fn progress, void *user, char *err,
+                  size_t err_size)
+{
+    if (!game || !game[0] || game[0] == '.' || strchr(game, '/') || strchr(game, '\\') || strchr(game, ':') ||
+        is_system_folder(game) || strlen(game) >= WHD_NAME_MAX) {
+        set_err(err, err_size, "Invalid game name");
+        return 0;
+    }
+    char hdf[MAX_PATH_LEN], tmp[MAX_PATH_LEN], info[MAX_PATH_LEN], dir[MAX_PATH_LEN];
+    snprintf(hdf, sizeof(hdf), "%s/%s.hdf", root, game);
+    snprintf(tmp, sizeof(tmp), "%s/%s.hdf.tmp", root, game);
+    snprintf(info, sizeof(info), "%s/%s.whd", root, game);
+    snprintf(dir, sizeof(dir), "%s/%s", root, game);
+    int have_dir = is_dir(dir);
+    if (!path_exists(hdf) && !path_exists(tmp) && !path_exists(info) && !have_dir) {
+        set_err(err, err_size, "Game not found: %s", game);
+        return 0;
+    }
+    WHD_LOG("whdload: uninstalling '%s'", game);
+
+    DeleteState ds;
+    memset(&ds, 0, sizeof(ds));
+    ds.progress = progress;
+    ds.user = user;
+    /* the info file first: without it an image is no longer listed or started, whatever happens next */
+    const char *files[3] = { info, tmp, hdf };
+    for (int i = 0; i < 3; i++) {
+        if (!path_exists(files[i]))
+            continue;
+        if (remove(files[i]) != 0 && path_exists(files[i])) {
+            const char *base = strrchr(files[i], '/');
+            set_err(err, err_size, "Cannot delete %s (errno %d)", base ? base + 1 : files[i], errno);
+            WHD_LOG("whdload: cannot delete %s (errno %d)", files[i], errno);
+            return 0;
+        }
+        ds.deleted++;
+        if (progress)
+            progress(user, ds.deleted);
+    }
+    if (have_dir) {
+        remove_contents(dir, 0, &ds);
+        if (ds.failed || rmdir(dir) != 0) {
+            set_err(err, err_size, "Cannot delete all files of the folder %s", game);
+            WHD_LOG("whdload: the folder %s could not be deleted completely", dir);
+            return 0;
+        }
+    }
+    WHD_LOG("whdload: uninstalled '%s' (%u files)", game, ds.deleted);
+    return 1;
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */

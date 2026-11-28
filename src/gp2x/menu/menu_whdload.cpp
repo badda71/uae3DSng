@@ -7,6 +7,7 @@
  *   - <game>                              : write S/Startup-Sequence, mount the whdload folder as the boot "HD Dir"
  *                                           and the image as a hard file behind it, eject the floppies and reset
  *                                           (the main menu does the reset)
+ *   - X on a <game>                       : uninstall it (asks first): deletes the image and its info file
  *
  * The work itself is in src/3ds/whdload3ds.cpp (tested on a PC), this file is only the user interface.
  */
@@ -68,8 +69,8 @@ static int find_game(const char *name)
 /* messages                                                                                                         */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
-/* Wrapped text in a box; waits for A or B. */
-static void whd_message_box(const char *title, const char *text)
+/* Wrapped text in a box. A message waits for A or B. A question (ask = 1) returns 1 for A (yes) and 0 for B (no). */
+static int whd_box(const char *title, const char *text, int ask)
 {
     const int width = 34;
     char lines[10][48];
@@ -98,6 +99,7 @@ static void whd_message_box(const char *title, const char *text)
             p++;
     }
 
+    int answer = 0;
     SDL_Event ev;
     while (SDL_PollEvent(&ev))
         SDL_Delay(5);
@@ -106,7 +108,7 @@ static void whd_message_box(const char *title, const char *text)
         text_draw_window(2, 4, 40, n + 7, title);
         for (int i = 0; i < n; i++)
             write_text(4, 6 + i, lines[i]);
-        write_text(4, 7 + n, "Press A or B to continue");
+        write_text(4, 7 + n, ask ? "A = yes     B = no" : "Press A or B to continue");
         text_flip();
         SDL_Delay(30);
         int done = 0;
@@ -114,14 +116,28 @@ static void whd_message_box(const char *title, const char *text)
             if (ev.type == SDL_QUIT)
                 exit(1);
             if (ev.type == SDL_KEYDOWN &&
-                (ev.key.keysym.sym == SDLK_PAGEDOWN || ev.key.keysym.sym == SDLK_END || ev.key.keysym.sym == SDLK_LCTRL))
+                (ev.key.keysym.sym == SDLK_PAGEDOWN || ev.key.keysym.sym == SDLK_END || ev.key.keysym.sym == SDLK_LCTRL)) {
+                if (!done)
+                    answer = ev.key.keysym.sym == SDLK_PAGEDOWN;
                 done = 1;
+            }
         }
         if (done)
             break;
     }
     while (SDL_PollEvent(&ev))
         SDL_Delay(5);
+    return ask ? answer : 0;
+}
+
+static void whd_message_box(const char *title, const char *text)
+{
+    whd_box(title, text, 0);
+}
+
+static int whd_confirm_box(const char *title, const char *text)
+{
+    return whd_box(title, text, 1);
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
@@ -245,6 +261,86 @@ static int launch_game(const char *game)
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
+/* uninstall                                                                                                        */
+/* ---------------------------------------------------------------------------------------------------------------- */
+
+typedef struct {
+    Uint32 last_draw;
+    char game[WHD_NAME_MAX];
+} DeleteUi;
+
+static void draw_delete(const DeleteUi *ui, unsigned files)
+{
+    char line[64];
+    text_draw_background();
+    text_draw_window(2, 2, 40, 10, "Deleting WHDLoad game");
+    write_text(3, 4, ui->game);
+    snprintf(line, sizeof(line), "%u files deleted", files);
+    write_text(3, 6, line);
+    text_flip();
+}
+
+static void delete_progress(void *user, unsigned files)
+{
+    DeleteUi *ui = (DeleteUi *)user;
+    SDL_Event ev;
+    while (SDL_PollEvent(&ev))                      /* keep the event queue from filling up; nothing to cancel here */
+        ;
+    Uint32 now = SDL_GetTicks();
+    if (now - ui->last_draw >= 150) {
+        ui->last_draw = now;
+        draw_delete(ui, files);
+    }
+}
+
+/* is the image of this game one of the hard files (of a running emulator, or of the saved settings)? */
+static int hard_file_is_game(const char *spec, const char *hdf_path)
+{
+    return spec[0] && strstr(spec, hdf_path) != NULL;
+}
+
+/* returns 1 when the game is gone */
+static int uninstall_game(const char *game)
+{
+    char hdf_path[300];
+    snprintf(hdf_path, sizeof(hdf_path), "%s/%s.hdf", WHD_ROOT, game);
+    char *const specs[4] = { uae4all_hard_file0, uae4all_hard_file1, uae4all_hard_file2, uae4all_hard_file3 };
+    int mounted = 0;
+    for (int i = 0; i < 4; i++)
+        if (hard_file_is_game(specs[i], hdf_path))
+            mounted = 1;
+    if (mounted && emulating) {                     /* the emulator has the file open: deleting it under its feet is not safe */
+        whd_message_box("Cannot delete",
+                        "This game is loaded in the running emulator.\nStart another game (or eject the hard disk and "
+                        "reset the emulator), then delete it.");
+        return 0;
+    }
+
+    char text[200];
+    snprintf(text, sizeof(text), "Delete \"%s\"?\nThe game and everything saved inside its disk image is removed.", game);
+    if (!whd_confirm_box("Uninstall", text))
+        return 0;
+
+    DeleteUi ui;
+    ui.last_draw = 0;
+    snprintf(ui.game, sizeof(ui.game), "%s", game);
+    draw_delete(&ui, 0);
+    char err[200];
+    int ok = whd_uninstall(WHD_ROOT, game, delete_progress, &ui, err, sizeof(err));
+    refresh_games();
+    if (!ok) {
+        char msg[300];
+        snprintf(msg, sizeof(msg), "Not deleted: %s", err);
+        whd_message_box("WHDLoad", msg);
+        return 0;
+    }
+    for (int i = 0; i < 4; i++)                     /* a hard file setting that points to the deleted image would not mount */
+        if (hard_file_is_game(specs[i], hdf_path))
+            specs[i][0] = '\0';
+    return 1;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------- */
 /* the list                                                                                                         */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
@@ -291,7 +387,8 @@ static void draw_list(int sel, int top)
         snprintf(info, sizeof(info), "%d game%s", n_games, n_games == 1 ? "" : "s");
         write_text(3, line, info);
     }
-    write_text(3, LIST_FIRST_LINE + 2 * LIST_ROWS + 2, "A = install / start     B = back");
+    write_text(3, LIST_FIRST_LINE + 2 * LIST_ROWS + 2,
+               (sel == 0 || n_games == 0) ? "A = install              B = back" : "A = start    X = delete    B = back");
     text_flip();
 }
 
@@ -315,7 +412,7 @@ int run_menuWhdload(void)
 
     for (;;) {
         draw_list(sel, top);
-        int hit0 = 0, hit1 = 0, hit2 = 0, up = 0, down = 0, left = 0, right = 0;
+        int hit0 = 0, hit1 = 0, hit2 = 0, del = 0, up = 0, down = 0, left = 0, right = 0;
         while (SDL_PollEvent(&ev) > 0) {
             if (ev.type == SDL_QUIT)
                 hit1 = 1;
@@ -329,6 +426,7 @@ int run_menuWhdload(void)
                 case SDLK_PAGEDOWN: hit0 = 1; break;
                 case SDLK_END:      hit1 = 1; break;
                 case SDLK_LCTRL:    hit2 = 1; break;
+                case SDLK_DELETE: case SDLK_BACKSPACE: case SDLK_ESCAPE: case SDLK_PAGEUP: del = 1; break;     /* X, as for "eject HD" */
                 default: break;
                 }
             }
@@ -352,6 +450,16 @@ int run_menuWhdload(void)
             top = 0;
         }
 
+        if (del && sel >= 1 && sel - 1 < n_games) {
+            if (uninstall_game(games[sel - 1])) {
+                int items_now = n_games + 1;
+                if (sel >= items_now)
+                    sel = items_now - 1;
+                if (top > 0 && top + LIST_ROWS > n_games)
+                    top = n_games > LIST_ROWS ? n_games - LIST_ROWS : 0;
+            }
+            continue;                               /* the key events of this round are used up */
+        }
         if (hit2 && emulating) {
             quit_pressed_in_submenu = 1;
             result = -1;
