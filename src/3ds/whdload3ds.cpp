@@ -194,7 +194,7 @@ static int write_text_file(const char *path, const char *text)
 /* names                                                                                                            */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
-void whd_folder_name_from_archive(const char *archive_path, char *folder, size_t folder_size)
+void whd_game_name_from_archive(const char *archive_path, char *folder, size_t folder_size)
 {
     if (folder_size == 0)
         return;
@@ -231,57 +231,10 @@ void whd_folder_name_from_archive(const char *archive_path, char *folder, size_t
         snprintf(folder, folder_size, "%s", start);
 }
 
-int whd_safe_relative_path(const char *in, char *out, size_t out_size, unsigned *renamed)
-{
-    if (!in || out_size < 2)
-        return 0;
-    size_t used = 0;
-    out[0] = '\0';
-    const char *p = in;
-    while (*p) {
-        while (*p == '/' || *p == '\\')
-            p++;
-        if (!*p)
-            break;
-        char comp[260];
-        size_t n = 0;
-        while (*p && *p != '/' && *p != '\\') {
-            unsigned char c = (unsigned char)*p++;
-            if (n >= sizeof(comp) - 1)
-                continue;                                   /* absurdly long name: cut it */
-            if (c < 0x20 || c >= 0x7f || strchr(":*?\"<>|", c)) {   /* not storable on FAT (also Latin-1 umlauts) */
-                c = '_';
-                if (renamed)
-                    (*renamed)++;
-            }
-            comp[n++] = (char)c;
-        }
-        comp[n] = '\0';
-        if (strcmp(comp, ".") == 0)
-            continue;
-        if (strcmp(comp, "..") == 0)
-            return 0;                                       /* would leave the install folder */
-        if (n > 0 && (comp[n - 1] == '.' || comp[n - 1] == ' ')) {      /* FAT drops a trailing dot/space */
-            comp[n - 1] = '_';
-            if (renamed)
-                (*renamed)++;
-        }
-        if (used + n + 2 > out_size)
-            return 0;
-        if (used > 0)
-            out[used++] = '/';
-        memcpy(out + used, comp, n + 1);
-        used += n;
-    }
-    return used > 0;
-}
-
 typedef struct {
-    char rel[MAX_PATH_LEN];   /* relative to the game folder */
+    char rel[MAX_PATH_LEN];   /* path inside the game image */
     int depth;
 } Slave;
-
-#define MAX_SLAVES 32
 
 /* the one closest to the top, then the shortest name, then alphabetical (Game.slave wins over GameCD.slave) */
 static int better_slave(const Slave *a, const Slave *b)
@@ -293,7 +246,7 @@ static int better_slave(const Slave *a, const Slave *b)
     return strcasecmp(a->rel, b->rel) < 0;
 }
 
-/* A .slave file found while installing: keep the best one (same rule as for a game folder). rel = path inside the game,
+/* A .slave file found while installing: keep the best one. rel = path inside the game,
    depth > 4 and names with control characters are not considered (the name goes into a script and the info file). */
 static void consider_slave(Slave *best, int *have, const char *rel)
 {
@@ -317,188 +270,13 @@ static void consider_slave(Slave *best, int *have, const char *rel)
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
-/* install = extract                                                                                                */
+/* install = decode the archive into a disk image                                                                   */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
 static int is_dir_entry(const LHAFileHeader *h)
 {
     return strcmp(h->compress_method, LHA_COMPRESS_TYPE_DIR) == 0;
 }
-
-static int install_folder(const char *root, const char *archive, const char *folder, whd_progress_fn progress,
-                          void *user, whd_install_stats *stats, char *err, size_t err_size)
-{
-    whd_install_stats st;
-    memset(&st, 0, sizeof(st));
-    unsigned t0 = now_ms();
-
-    char base[MAX_PATH_LEN];
-    snprintf(base, sizeof(base), "%s/%s", root, folder);
-    if (!mkdir_p(base)) {
-        set_err(err, err_size, "Cannot create %s", base);
-        return 0;
-    }
-
-    /* pass 1: how much is there? (headers only, the packed data is skipped) */
-    unsigned files_total = 0, entries = 0;
-    uint64_t bytes_total = 0;
-    {
-        LHAInputStream *stream = lha_input_stream_from((char *)archive);
-        if (!stream) {
-            set_err(err, err_size, "Cannot open the archive");
-            return 0;
-        }
-        LHAReader *reader = lha_reader_new(stream);
-        if (!reader) {
-            lha_input_stream_free(stream);
-            set_err(err, err_size, "Out of memory");
-            return 0;
-        }
-        lha_reader_set_dir_policy(reader, LHA_READER_DIR_PLAIN);
-        LHAFileHeader *h;
-        while ((h = lha_reader_next_file(reader)) != NULL) {
-            entries++;
-            if (!is_dir_entry(h)) {
-                files_total++;
-                bytes_total += h->length;
-            }
-        }
-        lha_reader_free(reader);
-        lha_input_stream_free(stream);
-    }
-    if (entries == 0) {
-        set_err(err, err_size, "Not an LHA archive (or empty)");
-        return 0;
-    }
-    WHD_LOG("whdload: installing '%s' -> %s : %u files, %u bytes", archive, base, files_total, (unsigned)bytes_total);
-
-    /* pass 2: extract */
-    LHAInputStream *stream = lha_input_stream_from((char *)archive);
-    LHAReader *reader = stream ? lha_reader_new(stream) : NULL;
-    uint8_t *buf = (uint8_t *)malloc(IO_BUFFER_SIZE);
-    if (!reader || !buf) {
-        if (reader)
-            lha_reader_free(reader);
-        if (stream)
-            lha_input_stream_free(stream);
-        free(buf);
-        set_err(err, err_size, "Out of memory");
-        return 0;
-    }
-    lha_reader_set_dir_policy(reader, LHA_READER_DIR_PLAIN);
-
-    int ok = 1;
-    uint64_t bytes_done = 0;
-    LHAFileHeader *h;
-    while (ok && (h = lha_reader_next_file(reader)) != NULL) {
-        if (is_dir_entry(h) && h->symlink_target)
-            continue;                                       /* symbolic links do not exist on the Amiga */
-
-        char *full = lha_file_header_full_path(h);
-        char rel[MAX_PATH_LEN];
-        unsigned renamed_before = st.renamed;
-        if (!full || !whd_safe_relative_path(full, rel, sizeof(rel), &st.renamed)) {
-            WHD_LOG("whdload: skipped an entry with an unusable path (%u bytes)", full ? (unsigned)strlen(full) : 0u);
-            free(full);
-            continue;
-        }
-        if (st.renamed != renamed_before) {
-            WHD_LOG("whdload: entry stored as '%s' (the name in the archive has characters that FAT cannot hold)", rel);
-            st.renamed = renamed_before + 1;               /* count entries, not characters */
-        }
-        free(full);
-
-        char out_path[MAX_PATH_LEN];
-        snprintf(out_path, sizeof(out_path), "%s/%s", base, rel);
-
-        if (is_dir_entry(h)) {
-            if (!mkdir_p(out_path)) {
-                set_err(err, err_size, "Cannot create folder %s", rel);
-                ok = 0;
-            }
-            continue;
-        }
-
-        if (!lha_decoder_for_name(h->compress_method)) {
-            set_err(err, err_size, "%s: unsupported compression method %s", rel, h->compress_method);
-            ok = 0;
-            break;
-        }
-        if (!mkdir_parent(out_path)) {
-            set_err(err, err_size, "Cannot create folder for %s", rel);
-            ok = 0;
-            break;
-        }
-        FILE *out = fopen(out_path, "wb");
-        if (!out) {
-            set_err(err, err_size, "Cannot create %s (%s)", rel, strerror(errno));
-            ok = 0;
-            break;
-        }
-
-        uint16_t crc = 0;
-        uint64_t written = 0;
-        int write_ok = 1, cancelled = 0;
-        for (;;) {
-            size_t n = lha_reader_read(reader, buf, IO_BUFFER_SIZE);
-            if (n == 0)
-                break;
-            lha_crc16_buf(&crc, buf, n);
-            if (fwrite(buf, 1, n, out) != n) {
-                write_ok = 0;
-                break;
-            }
-            written += n;
-            bytes_done += n;
-            if (progress && progress(user, rel, st.files, files_total, bytes_done, bytes_total)) {
-                cancelled = 1;
-                break;
-            }
-        }
-        if (fclose(out) != 0)
-            write_ok = 0;
-
-        if (cancelled) {
-            remove(out_path);
-            set_err(err, err_size, "Cancelled");
-            ok = 0;
-        } else if (!write_ok) {
-            remove(out_path);
-            set_err(err, err_size, "Write error on %s (SD card full?)", rel);
-            ok = 0;
-        } else if (written != h->length || crc != h->crc) {
-            remove(out_path);
-            set_err(err, err_size, "%s is damaged (%s)", rel, written != h->length ? "wrong length" : "CRC error");
-            ok = 0;
-        } else {
-            st.files++;
-            st.bytes += written;
-            if (progress && progress(user, rel, st.files, files_total, bytes_done, bytes_total)) {
-                set_err(err, err_size, "Cancelled");
-                ok = 0;
-            }
-        }
-    }
-
-    free(buf);
-    lha_reader_free(reader);
-    lha_input_stream_free(stream);
-
-    st.elapsed_ms = now_ms() - t0;
-    if (stats)
-        *stats = st;
-    if (!ok) {
-        WHD_LOG("whdload: install failed after %u files: %s", st.files, err ? err : "");
-        return 0;
-    }
-    WHD_LOG("whdload: installed %u files, %u bytes, %u renamed in %u ms", st.files, (unsigned)st.bytes, st.renamed,
-            st.elapsed_ms);
-    return 1;
-}
-
-/* ---------------------------------------------------------------------------------------------------------------- */
-/* install = one disk image                                                                                         */
-/* ---------------------------------------------------------------------------------------------------------------- */
 
 int whd_image_requires_slave = 1;
 
@@ -607,7 +385,7 @@ static int install_image(const char *root, const char *archive, const char *name
                 unsigned renamed_before = st.renamed;
                 id = ofs_add_file(img, full, (uint32_t)h->length, (long)h->timestamp, &st.renamed, err, err_size);
                 if (id == OFS_ERR_EXISTS) {
-                    /* the same name twice in one archive: the first one is kept (the folder install keeps the last) */
+                    /* the same name twice in one archive: the first one is kept (the later ones are skipped) */
                     WHD_LOG("whdload: skipped '%s' (the name is already used)", full);
                     if (err && err_size)
                         err[0] = '\0';
@@ -769,26 +547,21 @@ static int install_image(const char *root, const char *archive, const char *name
     return 1;
 }
 
-int whd_install_lha(const char *root, const char *archive, whd_install_mode mode, whd_progress_fn progress, void *user,
-                    char *game_folder, size_t game_folder_size, whd_install_stats *stats,
-                    char *err, size_t err_size)
+int whd_install_lha(const char *root, const char *archive, whd_progress_fn progress, void *user, char *game_name,
+                    size_t game_name_size, whd_install_stats *stats, char *err, size_t err_size)
 {
-    if (game_folder && game_folder_size)
-        game_folder[0] = '\0';
+    if (game_name && game_name_size)
+        game_name[0] = '\0';
     if (err && err_size)
         err[0] = '\0';
     if (stats)
         memset(stats, 0, sizeof(*stats));
 
     char name[WHD_NAME_MAX];
-    whd_folder_name_from_archive(archive, name, sizeof(name));
-    int ok;
-    if (mode == WHD_INSTALL_FOLDER)
-        ok = install_folder(root, archive, name, progress, user, stats, err, err_size);
-    else
-        ok = install_image(root, archive, name, progress, user, stats, err, err_size);
-    if (ok && game_folder && game_folder_size)
-        snprintf(game_folder, game_folder_size, "%s", name);
+    whd_game_name_from_archive(archive, name, sizeof(name));
+    int ok = install_image(root, archive, name, progress, user, stats, err, err_size);
+    if (ok && game_name && game_name_size)
+        snprintf(game_name, game_name_size, "%s", name);
     return ok;
 }
 
@@ -809,25 +582,21 @@ int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names)
     int count = 0;
     struct dirent *e;
     while (count < max_names && (e = readdir(d)) != NULL) {
-        if (e->d_name[0] == '.' || is_system_folder(e->d_name) || strlen(e->d_name) >= WHD_NAME_MAX)
+        if (e->d_name[0] == '.' || !has_ext(e->d_name, ".hdf") || strlen(e->d_name) >= WHD_NAME_MAX)
             continue;
-        char path[MAX_PATH_LEN];
+        /* a game is <name>.hdf together with <name>.whd */
+        char name[WHD_NAME_MAX], path[MAX_PATH_LEN], info[MAX_PATH_LEN];
+        snprintf(name, sizeof(name), "%s", e->d_name);
+        name[strlen(name) - 4] = '\0';
         snprintf(path, sizeof(path), "%s/%s", root, e->d_name);
-        if (has_ext(e->d_name, ".hdf")) {                   /* an image game: <name>.hdf together with <name>.whd */
-            char name[WHD_NAME_MAX], info[MAX_PATH_LEN];
-            snprintf(name, sizeof(name), "%s", e->d_name);
-            name[strlen(name) - 4] = '\0';
-            snprintf(info, sizeof(info), "%s/%s.whd", root, name);
-            if (name[0] && file_size(path) > 0 && file_size(info) > 0)
-                snprintf(names[count++], WHD_NAME_MAX, "%s", name);
-        } else if (is_dir(path)) {                          /* a game extracted into a folder (the old way) */
-            snprintf(names[count++], WHD_NAME_MAX, "%s", e->d_name);
-        }
+        snprintf(info, sizeof(info), "%s/%s.whd", root, name);
+        if (name[0] && file_size(path) > 0 && file_size(info) > 0)
+            snprintf(names[count++], WHD_NAME_MAX, "%s", name);
     }
     closedir(d);
     if (count > 1) {
         qsort(names, (size_t)count, WHD_NAME_MAX, name_cmp);
-        int out = 1;                                        /* a game that exists as image and as folder: once */
+        int out = 1;                                        /* names that differ in case only (FAT): once */
         for (int i = 1; i < count; i++)
             if (strcasecmp(names[i], names[out - 1]) != 0) {
                 if (out != i)
@@ -843,95 +612,30 @@ int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names)
 /* uninstall                                                                                                        */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
-typedef struct {
-    whd_delete_progress_fn progress;
-    void *user;
-    unsigned deleted;
-    int failed;
-} DeleteState;
-
 static int path_exists(const char *path)
 {
     struct stat st;
     return stat(path, &st) == 0;
 }
 
-/* Deletes everything below dir (the folder itself stays). No stat() per entry: that is the slow call on the 3DS SD
-   card. An entry is deleted as a file first and, when that does not work, entered as a folder. Deleting while reading
-   a directory can make readdir skip entries, so the folder is read again until a pass finds nothing to delete. */
-static void remove_contents(const char *dir, int depth, DeleteState *ds)
-{
-    if (depth > 24) {
-        ds->failed = 1;
-        return;
-    }
-    for (;;) {
-        DIR *d = opendir(dir);
-        if (!d)
-            return;
-        unsigned removed_here = 0;
-        struct dirent *e;
-        while ((e = readdir(d)) != NULL) {
-            if (strcmp(e->d_name, ".") == 0 || strcmp(e->d_name, "..") == 0)
-                continue;
-            char path[MAX_PATH_LEN];
-            if (snprintf(path, sizeof(path), "%s/%s", dir, e->d_name) >= (int)sizeof(path)) {
-                ds->failed = 1;
-                continue;
-            }
-            if (remove(path) == 0) {
-                /* a file; (glibc's remove() also takes an empty folder, which counts as well) */
-            } else {
-                DIR *sub = opendir(path);
-                if (!sub) {
-                    WHD_LOG("whdload: cannot delete %s (errno %d)", path, errno);
-                    ds->failed = 1;
-                    continue;
-                }
-                closedir(sub);
-                remove_contents(path, depth + 1, ds);
-                if (rmdir(path) != 0) {
-                    WHD_LOG("whdload: cannot delete folder %s (errno %d)", path, errno);
-                    ds->failed = 1;
-                    continue;
-                }
-            }
-            removed_here++;
-            ds->deleted++;
-            if (ds->progress)
-                ds->progress(ds->user, ds->deleted);
-        }
-        closedir(d);
-        if (removed_here == 0)
-            return;
-    }
-}
-
-int whd_uninstall(const char *root, const char *game, whd_delete_progress_fn progress, void *user, char *err,
-                  size_t err_size)
+int whd_uninstall(const char *root, const char *game, char *err, size_t err_size)
 {
     if (!game || !game[0] || game[0] == '.' || strchr(game, '/') || strchr(game, '\\') || strchr(game, ':') ||
         is_system_folder(game) || strlen(game) >= WHD_NAME_MAX) {
         set_err(err, err_size, "Invalid game name");
         return 0;
     }
-    char hdf[MAX_PATH_LEN], tmp[MAX_PATH_LEN], info[MAX_PATH_LEN], dir[MAX_PATH_LEN];
+    char hdf[MAX_PATH_LEN], tmp[MAX_PATH_LEN], info[MAX_PATH_LEN];
     snprintf(hdf, sizeof(hdf), "%s/%s.hdf", root, game);
     snprintf(tmp, sizeof(tmp), "%s/%s.hdf.tmp", root, game);
     snprintf(info, sizeof(info), "%s/%s.whd", root, game);
-    snprintf(dir, sizeof(dir), "%s/%s", root, game);
-    int have_dir = is_dir(dir);
-    if (!path_exists(hdf) && !path_exists(tmp) && !path_exists(info) && !have_dir) {
+    if (!path_exists(hdf) && !path_exists(tmp) && !path_exists(info)) {
         set_err(err, err_size, "Game not found: %s", game);
         return 0;
     }
     WHD_LOG("whdload: uninstalling '%s'", game);
 
-    DeleteState ds;
-    memset(&ds, 0, sizeof(ds));
-    ds.progress = progress;
-    ds.user = user;
-    /* the info file first: without it an image is no longer listed or started, whatever happens next */
+    /* the info file first: without it the image is no longer listed or started, whatever happens next */
     const char *files[3] = { info, tmp, hdf };
     for (int i = 0; i < 3; i++) {
         if (!path_exists(files[i]))
@@ -942,53 +646,14 @@ int whd_uninstall(const char *root, const char *game, whd_delete_progress_fn pro
             WHD_LOG("whdload: cannot delete %s (errno %d)", files[i], errno);
             return 0;
         }
-        ds.deleted++;
-        if (progress)
-            progress(user, ds.deleted);
     }
-    if (have_dir) {
-        remove_contents(dir, 0, &ds);
-        if (ds.failed || rmdir(dir) != 0) {
-            set_err(err, err_size, "Cannot delete all files of the folder %s", game);
-            WHD_LOG("whdload: the folder %s could not be deleted completely", dir);
-            return 0;
-        }
-    }
-    WHD_LOG("whdload: uninstalled '%s' (%u files)", game, ds.deleted);
+    WHD_LOG("whdload: uninstalled '%s'", game);
     return 1;
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
 /* launch                                                                                                           */
 /* ---------------------------------------------------------------------------------------------------------------- */
-
-static void find_slaves(const char *dir, const char *rel, int depth, Slave *list, int *count)
-{
-    if (depth > 4 || *count >= MAX_SLAVES)
-        return;
-    DIR *d = opendir(dir);
-    if (!d)
-        return;
-    struct dirent *e;
-    while (*count < MAX_SLAVES && (e = readdir(d)) != NULL) {
-        if (e->d_name[0] == '.')
-            continue;
-        char path[MAX_PATH_LEN], sub[MAX_PATH_LEN];
-        snprintf(path, sizeof(path), "%s/%s", dir, e->d_name);
-        if (rel[0])
-            snprintf(sub, sizeof(sub), "%s/%s", rel, e->d_name);
-        else
-            snprintf(sub, sizeof(sub), "%s", e->d_name);
-        if (is_dir(path)) {
-            find_slaves(path, sub, depth + 1, list, count);
-        } else if (has_ext(e->d_name, ".slave")) {
-            snprintf(list[*count].rel, sizeof(list[*count].rel), "%s", sub);
-            list[*count].depth = depth;
-            (*count)++;
-        }
-    }
-    closedir(d);
-}
 
 /* WHDLoad looks for its Kickstart images under these names; the candidates are what people call the files. */
 typedef struct {
@@ -1131,12 +796,10 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
         set_err(err, err_size, "Invalid game name");
         return 0;
     }
-    char game_dir[MAX_PATH_LEN], hdf_path[MAX_PATH_LEN], info_path[MAX_PATH_LEN];
-    snprintf(game_dir, sizeof(game_dir), "%s/%s", root, game);
+    char hdf_path[MAX_PATH_LEN], info_path[MAX_PATH_LEN];
     snprintf(hdf_path, sizeof(hdf_path), "%s/%s.hdf", root, game);
     snprintf(info_path, sizeof(info_path), "%s/%s.whd", root, game);
-    int image = file_size(hdf_path) > 0 && file_size(info_path) > 0;     /* an image wins over an old folder */
-    if (!image && !is_dir(game_dir)) {
+    if (file_size(hdf_path) <= 0 || file_size(info_path) <= 0) {
         set_err(err, err_size, "Game not found: %s", game);
         return 0;
     }
@@ -1158,10 +821,10 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
 
     deploy_kickstarts(root, kick_dir);
 
+    /* the info file written by the installer names the slave: no scan of the image */
     char slave_rel[MAX_PATH_LEN];
     slave_rel[0] = '\0';
-    if (image) {
-        /* the info file written by the installer names the slave: no slow scan of the image */
+    {
         char *text = read_text_file(info_path, 4000);
         const char *line = text ? strstr(text, "slave=") : NULL;
         if (line) {
@@ -1178,31 +841,10 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
             return 0;
         }
         WHD_LOG("whdload: image %s, slave %s", hdf_path, slave_rel);
-    } else {
-        Slave *slaves = (Slave *)calloc(MAX_SLAVES, sizeof(Slave));
-        if (!slaves) {
-            set_err(err, err_size, "Out of memory");
-            return 0;
-        }
-        int n_slaves = 0;
-        find_slaves(game_dir, "", 0, slaves, &n_slaves);
-        if (n_slaves == 0) {
-            free(slaves);
-            set_err(err, err_size, "No .slave file found in %s", game);
-            return 0;
-        }
-        int best = 0;
-        for (int i = 0; i < n_slaves; i++) {
-            WHD_LOG("whdload: slave candidate %s", slaves[i].rel);
-            if (better_slave(&slaves[i], &slaves[best]))
-                best = i;
-        }
-        snprintf(slave_rel, sizeof(slave_rel), "%s", slaves[best].rel);
-        free(slaves);
     }
 
     /* split into the directory (relative to the volume) and the slave file name */
-    const char *volume = image ? WHD_VOLUME_NAME ":" : "SYS:";
+    const char *volume = WHD_VOLUME_NAME ":";
     char amiga_dir[MAX_PATH_LEN], slave_file[256];
     const char *slash = strrchr(slave_rel, '/');
     char dir_part[MAX_PATH_LEN];
@@ -1213,10 +855,7 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
     } else {
         snprintf(slave_file, sizeof(slave_file), "%s", slave_rel);
     }
-    if (image)
-        snprintf(amiga_dir, sizeof(amiga_dir), "%s%s", volume, dir_part);
-    else
-        snprintf(amiga_dir, sizeof(amiga_dir), "%s%s%s%s", volume, game, dir_part[0] ? "/" : "", dir_part);
+    snprintf(amiga_dir, sizeof(amiga_dir), "%s%s", volume, dir_part);
 
     char args[256];
     snprintf(args, sizeof(args), "%s", (extra_args && extra_args[0]) ? extra_args : "PRELOAD");
@@ -1270,7 +909,7 @@ int whd_prepare_launch(const char *root, const char *game, const char *kick_dir,
         set_err(err, err_size, "Cannot write %s", startup);
         return 0;
     }
-    if (info && image)
+    if (info)
         snprintf(info->hdf_path, sizeof(info->hdf_path), "%s", hdf_path);
     WHD_LOG("whdload: launch %s: CD \"%s\", slave %s, args '%s'", game, amiga_dir, slave_file, args);
     return 1;

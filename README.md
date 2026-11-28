@@ -32,11 +32,11 @@ One big file is written at full speed and opened once. On the SD card, under `3d
   The Kickstart ROMs themselves are not included, you have to supply them.
 * A game lands in `whdload/<archive name>.hdf` (an OFS disk image, 2 MB + 3 % larger than the game so savegames fit) with a small `<archive name>.whd` next to it that
   names the `.slave`. Both files belong together; delete both to remove a game. The image is also a normal hard file: it can be opened with Amiga tools (volume `WHDGame`).
-  Games installed by the first version (a folder `whdload/<name>/`) are still listed and start as before; an image of the same name wins.
+  Folders `whdload/<name>/` from the first version (games extracted into a folder) are no longer used: install the game again and delete the folder.
   Amiga file names are at most 30 characters long: a longer name inside an archive is shortened in the middle and keeps its extension
   (`FateGatesOfDawnUncensored.slave` → `FateGatesOfDawnUncensore.slave`).
-* To uninstall a game, select it in the *WHDLoad Games* list and press **X** (asked first): its `.hdf` and `.whd` are deleted, and the `whdload/<name>/` folder
-  of an old folder install with everything in it. A game that is loaded in the running emulator cannot be deleted: start another game or eject the hard
+* To uninstall a game, select it in the *WHDLoad Games* list and press **X** (asked first): its `.hdf` and its `.whd` are deleted.
+  A game that is loaded in the running emulator cannot be deleted: start another game or eject the hard
   disk and reset first. Saved games inside the image go with it.
 * Starting a game sets "HD Dir" to the `whdload` folder (boots from it) and hard file 0 to the game's image, ejects the floppies and resets. Your current
   CPU/chipset/memory/Kickstart settings are kept, so pick the machine the game needs before you start it. Hard file 0 is overwritten by this.

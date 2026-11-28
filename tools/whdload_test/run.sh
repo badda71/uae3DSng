@@ -18,7 +18,7 @@ WARN="-Wall -Wextra -Wno-unused-parameter -Wno-format-truncation"
 g++ -std=gnu++14 -O1 -g -fsanitize=address,undefined $WARN -I"$top/src/3ds" -I"$here" \
     "$here/ofs_host_test.cpp" "$top/src/3ds/ofs_image.cpp" -o "$out/ofs_host_test"
 "$out/ofs_host_test"
-# ... and the installer: hand made archives + every archive of the Lhasa suite, as folder and as image
+# ... and the installer: hand made archives + every archive of the Lhasa suite, installed as images
 g++ -std=gnu++14 -O1 -g -fsanitize=address,undefined $WARN \
     -I"$top/src/3ds" -I"$top/src/3ds/lhasa" -I"$here" "$here/whdload_host_test.cpp" "$top/src/3ds/whdload3ds.cpp" \
     "$top/src/3ds/ofs_image.cpp" "${objs[@]}" -o "$out/whdload_host_test"

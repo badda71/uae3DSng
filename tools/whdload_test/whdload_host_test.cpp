@@ -3,11 +3,12 @@
  *
  *   whdload_host_test <dir with .lzh/.lha files, searched recursively> <empty work dir>
  *
- * 1. unit tests of the name/path helpers, game list, launch preparation
- * 2. installs every archive found into its own root and prints OK/FAIL. Every successful extraction has been verified
- *    against the CRC-16 and the length stored in the archive. All files named "gpl-2" (the same text, packed by
- *    ~40 different LHA programs and methods) must additionally be byte-identical, and "gpl-2.gz" (stored) must
- *    gunzip to the very same bytes.
+ * 1. unit tests of the name helper, game list, launch preparation, built-in Kickstart tables
+ * 2. hand made archives installed as disk images (and started / uninstalled)
+ * 3. installs every archive found as a disk image into its own root and prints OK/FAIL. Every successful install has
+ *    been verified against the CRC-16 and the length stored in the archive, and the image against an independent OFS
+ *    checker. All files named "gpl-2" (the same text, packed by ~40 different LHA programs and methods) must
+ *    additionally be byte-identical, and "gpl-2.gz" (stored) must gunzip to the very same bytes.
  */
 #include "../../src/3ds/whdload3ds.h"
 #include "ofs_reader.h"
@@ -47,19 +48,6 @@ static void walk(const std::string &dir, std::vector<std::string> &out)
     }
 }
 
-static unsigned long long fnv_file(const std::string &path, long *size = nullptr)
-{
-    FILE *f = fopen(path.c_str(), "rb");
-    if (!f) return 0;
-    unsigned long long h = 1469598103934665603ULL;
-    long n = 0;
-    int c;
-    while ((c = fgetc(f)) != EOF) { h = (h ^ (unsigned char)c) * 1099511628211ULL; n++; }
-    fclose(f);
-    if (size) *size = n;
-    return h;
-}
-
 static unsigned long long fnv_gunzip(const std::string &path)
 {
     std::string cmd = "gzip -dc '" + path + "' 2>/dev/null";
@@ -86,66 +74,59 @@ static std::string slurp(const std::string &p)
 static void unit_tests(const std::string &work)
 {
     printf("== unit tests\n");
-    char out[300]; unsigned ren;
-
-    ren = 0;
-    CHECK(whd_safe_relative_path("a/b/c.txt", out, sizeof out, &ren) && !strcmp(out, "a/b/c.txt") && ren == 0);
-    CHECK(whd_safe_relative_path("/abs/x", out, sizeof out, &ren) && !strcmp(out, "abs/x"));
-    CHECK(whd_safe_relative_path("./a//b/", out, sizeof out, &ren) && !strcmp(out, "a/b"));
-    CHECK(whd_safe_relative_path("a\\b", out, sizeof out, &ren) && !strcmp(out, "a/b"));
-    CHECK(!whd_safe_relative_path("../x", out, sizeof out, &ren));
-    CHECK(!whd_safe_relative_path("a/../../x", out, sizeof out, &ren));
-    CHECK(!whd_safe_relative_path("", out, sizeof out, &ren));
-    CHECK(!whd_safe_relative_path("/", out, sizeof out, &ren));
-    ren = 0;
-    CHECK(whd_safe_relative_path("Game:Data/Lev?l*1", out, sizeof out, &ren) && !strcmp(out, "Game_Data/Lev_l_1") && ren == 3);
-    ren = 0;
-    CHECK(whd_safe_relative_path("dir./file ", out, sizeof out, &ren) && !strcmp(out, "dir_/file_") && ren == 2);
-    CHECK(whd_safe_relative_path("caf\xe9", out, sizeof out, &ren) && !strcmp(out, "caf_"));
-    CHECK(!whd_safe_relative_path("a/b/c/d/e", out, 6, &ren));   /* does not fit */
-
     char f[128];
-    whd_folder_name_from_archive("sdmc:/roms/ShadowOfTheBeast_v1.2.lha", f, sizeof f); CHECK(!strcmp(f, "ShadowOfTheBeast_v1.2"));
-    whd_folder_name_from_archive("C:\\x\\Game One.LZH", f, sizeof f);                   CHECK(!strcmp(f, "Game One"));
-    whd_folder_name_from_archive("/a/C.lha", f, sizeof f);                              CHECK(!strcmp(f, "C_game"));
-    whd_folder_name_from_archive("/a/..lha", f, sizeof f);                              CHECK(!strcmp(f, "game"));
-    whd_folder_name_from_archive("/a/we?ird:name.lha", f, sizeof f);                    CHECK(!strcmp(f, "we_ird_name") || !strcmp(f, "name"));
+    whd_game_name_from_archive("sdmc:/roms/ShadowOfTheBeast_v1.2.lha", f, sizeof f); CHECK(!strcmp(f, "ShadowOfTheBeast_v1.2"));
+    whd_game_name_from_archive("C:\\x\\Game One.LZH", f, sizeof f);                   CHECK(!strcmp(f, "Game One"));
+    whd_game_name_from_archive("/a/C.lha", f, sizeof f);                              CHECK(!strcmp(f, "C_game"));
+    whd_game_name_from_archive("/a/..lha", f, sizeof f);                              CHECK(!strcmp(f, "game"));
+    whd_game_name_from_archive("/a/we?ird:name.lha", f, sizeof f);                    CHECK(!strcmp(f, "we_ird_name") || !strcmp(f, "name"));
 
-    /* game list + launch preparation on a fake tree */
+    /* game list + launch preparation on a fake tree: images need the .hdf and the .whd, nothing else is a game */
     std::string root = work + "/fake";
     mkdir(root.c_str(), 0777);
-    for (const char *d : { "/Zebra", "/alpha", "/S", "/C", "/Devs", "/.hidden", "/Beta" }) mkdir((root + d).c_str(), 0777);
+    for (const char *d : { "/Zebra", "/S", "/C", "/Devs", "/.hidden", "/Beta", "/Oldstyle" }) mkdir((root + d).c_str(), 0777);   /* folders are no games */
     write_file(root + "/notadir", "x");
+    write_file(root + "/Zebra.hdf", "img");
+    write_file(root + "/Zebra.whd", "slave=Zebra/Zebra.slave\n");
+    write_file(root + "/alpha.hdf", "img");
+    write_file(root + "/alpha.whd", "; uae3DSng WHDLoad game image\nslave=alpha/Game/Other.slave\n");
+    write_file(root + "/Beta.hdf", "img");
+    write_file(root + "/Beta.whd", "slave=Beta.slave\n");
+    write_file(root + "/NoInfo.hdf", "img");                      /* image without info file */
+    write_file(root + "/OnlyInfo.whd", "slave=x.slave\n");       /* info without image */
+    write_file(root + "/Empty.hdf", "");
+    write_file(root + "/Empty.whd", "slave=x.slave\n");          /* empty image */
+    write_file(root + "/.hid.hdf", "img");
+    write_file(root + "/.hid.whd", "slave=x.slave\n");
     char names[16][WHD_NAME_MAX];
     int n = whd_list_games(root.c_str(), names, 16);
     CHECK(n == 3 && !strcmp(names[0], "alpha") && !strcmp(names[1], "Beta") && !strcmp(names[2], "Zebra"));
 
     char err[200];
     CHECK(!whd_prepare_launch(root.c_str(), "nogame", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "not found"));
+    CHECK(!whd_prepare_launch(root.c_str(), "Oldstyle", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "not found"));   /* a folder is no game */
+    CHECK(!whd_prepare_launch(root.c_str(), "NoInfo", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "not found"));
     CHECK(!whd_prepare_launch(root.c_str(), "../x", nullptr, nullptr, nullptr, err, sizeof err));
     CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "WHDLoad is missing"));
     /* built-in WHDLoad (romfs on the 3DS): used when the SD card has none, never replaces a file that is there */
+    write_file(root + "/Damaged.hdf", "img");
+    write_file(root + "/Damaged.whd", "; nothing useful\n");                  /* a game whose launch fails after the WHDLoad check */
     static std::string builtin;                                                   /* whd_builtin_whdload points to it for the rest of the run */
     builtin = work + "/builtin_WHDLoad";
     write_file(builtin, "BUILTIN-WHDLOAD");
     whd_builtin_whdload = builtin.c_str();
-    CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));  /* got past the check */
+    CHECK(!whd_prepare_launch(root.c_str(), "Damaged", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "damaged"));  /* got past the check */
     CHECK(slurp(root + "/C/WHDLoad") == "BUILTIN-WHDLOAD");
     write_file(root + "/C/WHDLoad", "binary");                                    /* the user's own copy */
     write_file(builtin, "OTHER-BUILTIN");
-    CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));
+    CHECK(!whd_prepare_launch(root.c_str(), "Damaged", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "damaged"));
     CHECK(slurp(root + "/C/WHDLoad") == "binary");                                /* untouched */
     remove((root + "/C/WHDLoad").c_str());
     remove((root + "/C").c_str());                                                /* even the C folder is created */
-    CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));
+    CHECK(!whd_prepare_launch(root.c_str(), "Damaged", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "damaged"));
     CHECK(slurp(root + "/C/WHDLoad") == "OTHER-BUILTIN");
     write_file(root + "/C/WHDLoad", "binary");
-    CHECK(!whd_prepare_launch(root.c_str(), "alpha", nullptr, nullptr, nullptr, err, sizeof err) && strstr(err, "No .slave"));
 
-    mkdir((root + "/alpha/Game").c_str(), 0777);
-    write_file(root + "/alpha/Game/Game.slave", "s");
-    write_file(root + "/alpha/Game/GameCD.slave", "s");
-    write_file(root + "/alpha/Other.slave", "s");
     std::string kdir = work + "/kicks";
     mkdir(kdir.c_str(), 0777);
     write_file(kdir + "/kick13.rom", "ROM13");
@@ -154,7 +135,7 @@ static void unit_tests(const std::string &work)
     CHECK(whd_prepare_launch(root.c_str(), "alpha", kdir.c_str(), nullptr, nullptr, err, sizeof err));
     std::string ss = slurp(root + "/S/Startup-Sequence");
     printf("  Startup-Sequence:\n%s", ss.c_str());
-    CHECK(ss.find("CD \"SYS:alpha\"\n") != std::string::npos);        /* Other.slave is closest to the top */
+    CHECK(ss.find("CD \"WHDGame:alpha/Game\"\n") != std::string::npos);
     CHECK(ss.compare(0, 27, "; uae3DSng WHDLoad launcher") == 0);
     CHECK(ss.find("C:WHDLoad \"Other.slave\" PRELOAD\n") != std::string::npos);
     CHECK(slurp(root + "/Devs/Kickstarts/kick34005.A500") == "ROM13");
@@ -166,10 +147,10 @@ static void unit_tests(const std::string &work)
     write_file(root + "/S/Startup-Sequence", "C:SetPatch QUIET\nVersion\n  EndCLI >NIL:\n");
     CHECK(whd_prepare_launch(root.c_str(), "alpha", kdir.c_str(), "NOVBRMOVE", nullptr, err, sizeof err));
     ss = slurp(root + "/S/Startup-Sequence");
-    CHECK(ss == "C:SetPatch QUIET\nVersion\n; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"SYS:alpha\"\nC:WHDLoad \"Other.slave\" NOVBRMOVE\n  EndCLI >NIL:\n");
+    CHECK(ss == "C:SetPatch QUIET\nVersion\n; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:alpha/Game\"\nC:WHDLoad \"Other.slave\" NOVBRMOVE\n  EndCLI >NIL:\n");
     CHECK(slurp(root + "/S/Startup-Sequence.orig") == "C:SetPatch QUIET\nVersion\n  EndCLI >NIL:\n");
     CHECK(whd_prepare_launch(root.c_str(), "alpha", kdir.c_str(), nullptr, nullptr, err, sizeof err));   /* idempotent */
-    CHECK(slurp(root + "/S/Startup-Sequence") == "C:SetPatch QUIET\nVersion\n; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"SYS:alpha\"\nC:WHDLoad \"Other.slave\" PRELOAD\n  EndCLI >NIL:\n");
+    CHECK(slurp(root + "/S/Startup-Sequence") == "C:SetPatch QUIET\nVersion\n; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:alpha/Game\"\nC:WHDLoad \"Other.slave\" PRELOAD\n  EndCLI >NIL:\n");
 
     /* the relocation tables that ship with the app (romfs on the 3DS): copied when missing, never replacing a file */
     static std::string bk;                                  /* whd_builtin_kickstarts points to it while this runs */
@@ -180,8 +161,8 @@ static void unit_tests(const std::string &work)
     whd_builtin_kickstarts = bk.c_str();
     std::string root2 = work + "/fake2";
     mkdir(root2.c_str(), 0777);
-    mkdir((root2 + "/g").c_str(), 0777);
-    write_file(root2 + "/g/G.slave", "s");
+    write_file(root2 + "/g.hdf", "img");
+    write_file(root2 + "/g.whd", "slave=G.slave\n");
     CHECK(whd_prepare_launch(root2.c_str(), "g", nullptr, nullptr, nullptr, err, sizeof err));       /* no kickstart folder at all */
     CHECK(slurp(root2 + "/Devs/Kickstarts/kick34005.A500.RTB") == "builtin-rtb-13");
     CHECK(slurp(root2 + "/Devs/Kickstarts/kick33180.A500.PAT") == "builtin-pat-12");
@@ -190,8 +171,8 @@ static void unit_tests(const std::string &work)
     CHECK(slurp(root2 + "/Devs/Kickstarts/kick34005.A500.RTB") == "mine");                           /* never replaced */
     std::string root3 = work + "/fake3";
     mkdir(root3.c_str(), 0777);
-    mkdir((root3 + "/g").c_str(), 0777);
-    write_file(root3 + "/g/G.slave", "s");
+    write_file(root3 + "/g.hdf", "img");
+    write_file(root3 + "/g.whd", "slave=G.slave\n");
     std::string kd3 = work + "/kicks3";
     mkdir(kd3.c_str(), 0777);
     write_file(kd3 + "/kick34005.A500.RTB", "the-users-own-table");
@@ -210,7 +191,6 @@ static const char *expected_failure(const std::string &rel)
 {
     if (rel.find("/regression/") == 0)                 return "corrupt by design";
     if (rel == "/unlha32/lh2.lzh" || rel == "/unlha32/lh3.lzh") return "method not supported by Lhasa (never used on the Amiga)";
-    if (rel == "/lh2_222/easubdir.lzh")                return "OS/2 extended-attribute file clashes with a folder name";
     if (rel == "/lha_osk_201/h0_subdir.lzh" || rel == "/lha_unix114i/h0_subdir.lzh")
                                                        return "nameless folder entries: Lhasa's reader returns no files";
     if (rel.find("/maclha_224/") == 0)                 return "MacBinary wrapped (Macintosh), not used on the Amiga";
@@ -291,19 +271,6 @@ static bool launch_ok(const char *root, const char *game, const char *kdir, cons
     return ok;
 }
 
-static void collect_files(const std::string &dir, const std::string &rel, std::map<std::string, std::string> &out)
-{
-    DIR *d = opendir(dir.c_str());
-    if (!d) return;
-    while (dirent *e = readdir(d)) {
-        if (e->d_name[0] == '.') continue;
-        std::string p = dir + "/" + e->d_name, r = rel.empty() ? e->d_name : rel + "/" + e->d_name;
-        if (is_dir(p)) { out[r + "/"] = ""; collect_files(p, r, out); }
-        else out[r] = slurp(p);
-    }
-    closedir(d);
-}
-
 static void image_tests(const std::string &work)
 {
     printf("== image installs (hand made archives)\n");
@@ -328,7 +295,7 @@ static void image_tests(const std::string &work)
     make_lha(work + "/Test Game.lha", game);
     Progress pr;
     whd_image_requires_slave = 1;
-    CHECK(whd_install_lha(root.c_str(), (work + "/Test Game.lha").c_str(), WHD_INSTALL_IMAGE, progress_cb, &pr, folder,
+    CHECK(whd_install_lha(root.c_str(), (work + "/Test Game.lha").c_str(), progress_cb, &pr, folder,
                           sizeof folder, &st, err, sizeof err));
     printf("  installed '%s': %u files, %llu bytes, image %llu bytes, renamed %u, progress calls %u\n", folder, st.files,
            (unsigned long long)st.bytes, (unsigned long long)st.image_bytes, st.renamed, pr.calls);
@@ -369,73 +336,72 @@ static void image_tests(const std::string &work)
     CHECK(ss == "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:TestGame\"\nC:WHDLoad \"TestGame.slave\" PRELOAD\n");
 
     /* installing again replaces the image (no leftovers) */
-    CHECK(whd_install_lha(root.c_str(), (work + "/Test Game.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder,
+    CHECK(whd_install_lha(root.c_str(), (work + "/Test Game.lha").c_str(), nullptr, nullptr, folder,
                           sizeof folder, &st, err, sizeof err));
     CHECK((rd = OfsRead(), chk.run(hdf, rd, cerr)) && rd.files.size() == 6);
 
-    /* an old folder install of the same name does not show up twice, the image wins */
+    /* folders in the root (e.g. the first version's folder installs) are no games */
     mkdir((root + "/Test Game").c_str(), 0777);
     mkdir((root + "/Old Folder Game").c_str(), 0777);
     n = whd_list_games(root.c_str(), names, 16);
-    CHECK(n == 2 && !strcmp(names[0], "Old Folder Game") && !strcmp(names[1], "Test Game"));
+    CHECK(n == 1 && !strcmp(names[0], "Test Game"));
+    CHECK(!whd_prepare_launch(root.c_str(), "Old Folder Game", kdir.c_str(), nullptr, &li, err, sizeof err) && strstr(err, "not found"));
     CHECK(launch_ok(root.c_str(), "Test Game", kdir.c_str(), nullptr, &li) && li.hdf_path[0]);
     rmdir((root + "/Test Game").c_str());
     rmdir((root + "/Old Folder Game").c_str());
 
     /* 2. the choice of the slave: closest to the top, nothing deeper than 4 folders, then the shortest name */
     make_lha(work + "/Deep.lha", { { "g/a/b/c/d/Deep.slave", "x" }, { "g/a/Mid.slave", "x" }, { "g/Z.slave", "x" }, { "g/Zz.slave", "x" } });
-    CHECK(whd_install_lha(root.c_str(), (work + "/Deep.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(whd_install_lha(root.c_str(), (work + "/Deep.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     launch_ok(root.c_str(), "Deep", kdir.c_str(), "NOVBRMOVE", &li);
     CHECK(slurp(root + "/S/Startup-Sequence") == "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:g\"\nC:WHDLoad \"Z.slave\" NOVBRMOVE\n");
 
     make_lha(work + "/Rootslave.lha", { { "Root.slave", "x" }, { "Dir/Sub.slave", "x" } });
-    CHECK(whd_install_lha(root.c_str(), (work + "/Rootslave.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(whd_install_lha(root.c_str(), (work + "/Rootslave.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     launch_ok(root.c_str(), "Rootslave", kdir.c_str(), nullptr, &li);
     CHECK(slurp(root + "/S/Startup-Sequence") == "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:\"\nC:WHDLoad \"Root.slave\" PRELOAD\n");
 
     /* names with the characters that are special in an AmigaDOS command line */
     make_lha(work + "/Quotes.lha", { { "Q\"d*/We\"ird*.slave", "x" } });
-    CHECK(whd_install_lha(root.c_str(), (work + "/Quotes.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(whd_install_lha(root.c_str(), (work + "/Quotes.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     launch_ok(root.c_str(), "Quotes", kdir.c_str(), nullptr, &li);
     CHECK(slurp(root + "/S/Startup-Sequence") == "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:Q*\"d**\"\nC:WHDLoad \"We*\"ird**.slave\" PRELOAD\n");
 
     /* a slave whose name is 31 characters long: cut to 30, but it must stay a .slave file that WHDLoad is started with */
     make_lha(work + "/Fate.lha", { { "Fate/", "", true }, { "Fate/FateGatesOfDawnUncensored.slave", "x" }, { "Fate/FateGatesOfDawnUncensored.info", "i" } });
-    CHECK(whd_install_lha(root.c_str(), (work + "/Fate.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(whd_install_lha(root.c_str(), (work + "/Fate.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     CHECK(st.has_slave && st.renamed == 1);
     launch_ok(root.c_str(), "Fate", kdir.c_str(), nullptr, &li);
     CHECK(slurp(root + "/S/Startup-Sequence") == "; uae3DSng WHDLoad launcher (rewritten for every start)\nCD \"WHDGame:Fate\"\nC:WHDLoad \"FateGatesOfDawnUncensore.slave\" PRELOAD\n");
     CHECK(slurp(root + "/Fate.whd").find("slave=Fate/FateGatesOfDawnUncensore.slave\n") != std::string::npos);
     CHECK((rd = OfsRead(), chk.run(root + "/Fate.hdf", rd, cerr)) && rd.files.count("Fate/FateGatesOfDawnUncensore.slave") && rd.files.count("Fate/FateGatesOfDawnUncensored.info"));
 
-    /* uninstall: an image game (with a left-over .tmp), then a game that exists as old-style folder and as image */
+    /* uninstall: an image game (with a left-over .tmp) */
     {
-        auto count_cb = [](void *u, unsigned n) { *(unsigned *)u = n; };
-        unsigned calls = 0;
         CHECK(exists(root + "/Fate.hdf") && exists(root + "/Fate.whd"));
         write_file(root + "/Fate.hdf.tmp", "left over");
-        CHECK(whd_uninstall(root.c_str(), "Fate", count_cb, &calls, err, sizeof err));
-        CHECK(calls == 3 && !exists(root + "/Fate.hdf") && !exists(root + "/Fate.whd") && !exists(root + "/Fate.hdf.tmp"));
+        CHECK(whd_uninstall(root.c_str(), "Fate", err, sizeof err));
+        CHECK(!exists(root + "/Fate.hdf") && !exists(root + "/Fate.whd") && !exists(root + "/Fate.hdf.tmp"));
         n = whd_list_games(root.c_str(), names, 16);
         bool fate_listed = false; for (int i = 0; i < n; i++) if (!strcmp(names[i], "Fate")) fate_listed = true;
         CHECK(!fate_listed);
-        CHECK(!whd_uninstall(root.c_str(), "Fate", nullptr, nullptr, err, sizeof err) && strstr(err, "not found"));
+        CHECK(!whd_uninstall(root.c_str(), "Fate", err, sizeof err) && strstr(err, "not found"));
         CHECK(exists(root + "/Test Game.hdf"));                                           /* other games are untouched */
 
-        make_lha(work + "/Folder Game.lha", { { "Fgame/", "", true }, { "Fgame/Fgame.slave", "x" }, { "Fgame/data/a.bin", "aaa" },
-                                              { "Fgame/data/deeper/b.bin", "bbb" }, { "Fgame/empty/", "", true } });
-        CHECK(whd_install_lha(root.c_str(), (work + "/Folder Game.lha").c_str(), WHD_INSTALL_FOLDER, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
-        CHECK(exists(root + "/Folder Game/Fgame/data/deeper/b.bin"));
-        CHECK(whd_install_lha(root.c_str(), (work + "/Folder Game.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
-        calls = 0;
-        CHECK(whd_uninstall(root.c_str(), "Folder Game", count_cb, &calls, err, sizeof err));
-        CHECK(!exists(root + "/Folder Game") && !exists(root + "/Folder Game.hdf") && !exists(root + "/Folder Game.whd"));
-        CHECK(calls == 9);                                                               /* .whd + .hdf + 7 entries of the folder tree */
-        printf("  uninstall: %u entries deleted\n", calls);
+        /* a game that cannot be started or deleted any more because the info file is gone: the image is still removed */
+        make_lha(work + "/Half.lha", { { "Half/Half.slave", "x" } });
+        CHECK(whd_install_lha(root.c_str(), (work + "/Half.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+        remove((root + "/Half.whd").c_str());
+        CHECK(whd_uninstall(root.c_str(), "Half", err, sizeof err) && !exists(root + "/Half.hdf"));
+
+        /* a folder of that name is never touched (no game of that name exists) */
+        mkdir((root + "/Plain Folder").c_str(), 0777);
+        write_file(root + "/Plain Folder/keep.txt", "keep");
+        CHECK(!whd_uninstall(root.c_str(), "Plain Folder", err, sizeof err) && exists(root + "/Plain Folder/keep.txt"));
 
         for (const char *bad : { "", "..", ".", ".hidden", "a/b", "a\\b", "C", "devs", "x:y" })
-            CHECK(!whd_uninstall(root.c_str(), bad, nullptr, nullptr, err, sizeof err) && strstr(err, "Invalid"));
-        CHECK(!whd_uninstall(root.c_str(), nullptr, nullptr, nullptr, err, sizeof err));
+            CHECK(!whd_uninstall(root.c_str(), bad, err, sizeof err) && strstr(err, "Invalid"));
+        CHECK(!whd_uninstall(root.c_str(), nullptr, err, sizeof err));
         CHECK(exists(root + "/C/WHDLoad") && exists(root + "/S/Startup-Sequence"));        /* system folders are never touched */
     }
 
@@ -444,25 +410,25 @@ static void image_tests(const std::string &work)
         return !exists(root + "/" + base + ".hdf") && !exists(root + "/" + base + ".hdf.tmp") && !exists(root + "/" + base + ".whd");
     };
     make_lha(work + "/Noslave.lha", { { "G/readme.txt", "hello" } });
-    CHECK(!whd_install_lha(root.c_str(), (work + "/Noslave.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err) && strstr(err, "not a WHDLoad game"));
+    CHECK(!whd_install_lha(root.c_str(), (work + "/Noslave.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err) && strstr(err, "not a WHDLoad game"));
     CHECK(nothing_left("Noslave"));
     make_lha(work + "/Badcrc.lha", { { "G/G.slave", "hello" }, { "G/data", pseudo(70000, 3), false, 1 } });
-    CHECK(!whd_install_lha(root.c_str(), (work + "/Badcrc.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err) && strstr(err, "CRC error"));
+    CHECK(!whd_install_lha(root.c_str(), (work + "/Badcrc.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err) && strstr(err, "CRC error"));
     printf("  bad crc -> '%s'\n", err);
     CHECK(nothing_left("Badcrc"));
-    CHECK(!whd_install_lha(root.c_str(), (work + "/Test Game.lha").c_str(), WHD_INSTALL_IMAGE, cancel_cb, nullptr, folder, sizeof folder, &st, err, sizeof err) && !strcmp(err, "Cancelled"));
+    CHECK(!whd_install_lha(root.c_str(), (work + "/Test Game.lha").c_str(), cancel_cb, nullptr, folder, sizeof folder, &st, err, sizeof err) && !strcmp(err, "Cancelled"));
     CHECK(chk.run(hdf, rd, cerr));                                      /* the cancelled install must not have touched the old image */
     make_lha(work + "/Dots.lha", { { "../evil.slave", "x" }, { "a/../../b.txt", "y" } });   /* Lhasa collapses "..", an image cannot be left anyway */
-    CHECK(whd_install_lha(root.c_str(), (work + "/Dots.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(whd_install_lha(root.c_str(), (work + "/Dots.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     CHECK((rd = OfsRead(), chk.run(root + "/Dots.hdf", rd, cerr)) && rd.files.size() == 2 && rd.files.count("evil.slave") && rd.files.count("b.txt"));
     /* the same name twice: the first one is kept, the install does not fail */
     make_lha(work + "/Twice.lha", { { "T/T.slave", "first" }, { "T/data", "one" }, { "T/data", "two" }, { "T/T.slave", "third" } });
-    CHECK(whd_install_lha(root.c_str(), (work + "/Twice.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(whd_install_lha(root.c_str(), (work + "/Twice.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     CHECK(st.files == 2 && st.skipped == 2);
     CHECK((rd = OfsRead(), chk.run(root + "/Twice.hdf", rd, cerr)) && rd.files.size() == 2 && content("T/data") == "one" && content("T/T.slave") == "first");
-    CHECK(!whd_install_lha(root.c_str(), (work + "/garbage.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(!whd_install_lha(root.c_str(), (work + "/garbage.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     CHECK(nothing_left("garbage"));
-    CHECK(!whd_install_lha(root.c_str(), (work + "/missing.lha").c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
+    CHECK(!whd_install_lha(root.c_str(), (work + "/missing.lha").c_str(), nullptr, nullptr, folder, sizeof folder, &st, err, sizeof err));
     printf("  missing -> '%s'\n", err);
 
     /* a damaged info file */
@@ -476,66 +442,29 @@ static void image_tests(const std::string &work)
     printf("  image tests done, %d failure(s) so far\n", g_fail);
 }
 
-/* Install an archive of the Lhasa test suite as image and as folder: the same files with the same contents? */
-static void compare_image_and_folder(const std::string &rel, const std::string &folder_root, const std::string &folder,
-                                     const whd_install_stats &fst, const std::string &image_root, const std::string &archive)
+/* Install an archive of the Lhasa test suite as an image: the image must be a valid OFS volume with the files of the
+   archive (every file has been CRC-checked while decoding). Returns the files of the image in rd; false = failed. */
+static bool install_suite_archive(const std::string &rel, const std::string &image_root, const std::string &archive,
+                                  OfsRead &rd, whd_install_stats &ist, std::string &name_out, std::string &error)
 {
     char name[WHD_NAME_MAX], err[256];
-    whd_install_stats ist;
-    int r = whd_install_lha(image_root.c_str(), archive.c_str(), WHD_INSTALL_IMAGE, nullptr, nullptr, name, sizeof name, &ist, err, sizeof err);
-    if (!r) {
-        if (strstr(err, "too big")) {                  /* a file of more than 4 GB cannot be put into an image */
-            printf("  IMAGE XFAIL %-43s %s\n", rel.c_str(), err);
-            return;
-        }
-        printf("  IMAGE FAIL %-44s %s\n", rel.c_str(), err);
-        g_fail++;
-        return;
-    }
-    OfsRead rd; OfsChecker chk; std::string cerr;
+    Progress pr;
+    int r = whd_install_lha(image_root.c_str(), archive.c_str(), progress_cb, &pr, name, sizeof name, &ist, err, sizeof err);
+    if (!r) { error = err; return false; }
+    name_out = name;
+    if (!pr.monotonic) { printf("  PROGRESS-NOT-MONOTONIC %s\n", rel.c_str()); g_fail++; }
+    OfsChecker chk; std::string cerr;
+    rd = OfsRead();
     if (!chk.run(image_root + "/" + name + ".hdf", rd, cerr)) {
         printf("  IMAGE INVALID %-41s %s\n", rel.c_str(), cerr.c_str());
         g_fail++;
-        return;
+        return true;
     }
-    if (ist.skipped) {                                 /* names used twice: the folder install keeps the last, the image the first */
-        if (ist.files + ist.skipped != fst.files || rd.files.size() != ist.files) {
-            printf("  IMAGE MISMATCH %-40s files %u+%u skipped / %u\n", rel.c_str(), ist.files, ist.skipped, fst.files);
-            g_fail++;
-        }
-        return;
-    }
-    if (ist.files != fst.files || ist.bytes != fst.bytes || rd.files.size() != fst.files) {
-        printf("  IMAGE MISMATCH %-40s files %u/%u bytes %llu/%llu in image %zu\n", rel.c_str(), ist.files, fst.files,
-               (unsigned long long)ist.bytes, (unsigned long long)fst.bytes, rd.files.size());
+    if (rd.files.size() != ist.files) {
+        printf("  IMAGE MISMATCH %-40s files %u in the image %zu\n", rel.c_str(), ist.files, rd.files.size());
         g_fail++;
-        return;
     }
-    if (ist.renamed) return;                           /* names were cut: only the totals are comparable */
-    std::map<std::string, std::string> disk;
-    collect_files(folder_root + "/" + folder, "", disk);
-    std::map<std::string, std::string> img;
-    for (auto &kv : rd.files) {
-        char fat[600];
-        if (!whd_safe_relative_path(kv.first.c_str(), fat, sizeof fat, nullptr)) { printf("  IMAGE BAD NAME %s\n", rel.c_str()); g_fail++; return; }
-        img[fat] = std::string(kv.second.begin(), kv.second.end());
-    }
-    for (auto &kv : disk) {
-        if (!kv.first.empty() && kv.first.back() == '/') continue;     /* folders: compared below */
-        auto it = img.find(kv.first);
-        if (it == img.end() || it->second != kv.second) {
-            printf("  IMAGE CONTENT DIFFERS %-34s %s\n", rel.c_str(), kv.first.c_str());
-            g_fail++;
-            return;
-        }
-    }
-    for (auto &kv : disk)
-        if (!kv.first.empty() && kv.first.back() == '/') {
-            std::string d = kv.first.substr(0, kv.first.size() - 1);
-            bool found = false;
-            for (auto &x : rd.dirs) { char fat[600]; if (whd_safe_relative_path(x.c_str(), fat, sizeof fat, nullptr) && d == fat) found = true; }
-            if (!found) { printf("  IMAGE MISSING FOLDER %-35s %s\n", rel.c_str(), d.c_str()); g_fail++; return; }
-        }
+    return true;
 }
 
 int main(int argc, char **argv)
@@ -553,42 +482,49 @@ int main(int argc, char **argv)
     std::map<unsigned long long, std::vector<std::string>> gpl;    /* hash of gpl-2 -> archives */
     std::vector<std::string> gz_mismatch;
     long gpl_size = 0;
+    mkdir((work + "/gz").c_str(), 0777);
+    whd_image_requires_slave = 0;                            /* the Lhasa test archives are no WHDLoad games */
     for (auto &a : archives) {
         std::string root = work + "/r" + std::to_string(idx++);
         mkdir(root.c_str(), 0777);
-        char folder[WHD_NAME_MAX], err[256];
-        whd_install_stats st;
-        Progress pr;
-        int r = whd_install_lha(root.c_str(), a.c_str(), WHD_INSTALL_FOLDER, progress_cb, &pr, folder, sizeof folder, &st, err, sizeof err);
+        OfsRead rd; whd_install_stats st; std::string name, error;
+        bool r = install_suite_archive(a.substr(strlen(argv[1])), root, a, rd, st, name, error);
         std::string rel = a.substr(strlen(argv[1]));
         if (r) {
             ok++;
-            printf("OK   %-52s files=%u bytes=%llu renamed=%u calls=%u%s\n", rel.c_str(), st.files,
-                   (unsigned long long)st.bytes, st.renamed, pr.calls, pr.monotonic ? "" : " PROGRESS-NOT-MONOTONIC");
-            if (!pr.monotonic) g_fail++;
-            whd_image_requires_slave = 0;                    /* the Lhasa test archives are no WHDLoad games */
-            compare_image_and_folder(rel, root, folder, st, work + "/image" + std::to_string(idx), a);
-            whd_image_requires_slave = 1;
-            std::string g = root + "/" + folder + "/gpl-2";
-            long sz;
-            if (!expected_failure(rel))      /* (Mac archives wrap the data in MacBinary: other bytes) */
-                if (unsigned long long h = fnv_file(g, &sz)) { gpl[h].push_back(rel); gpl_size = sz; }
-            std::string gz = root + "/" + folder + "/gpl-2.gz";
-            if (!expected_failure(rel) && access(gz.c_str(), 0) == 0) {
-                std::string gp = root + "/gz_" ; (void)gp;
-                gz_mismatch.push_back(gz);            /* compared below, after the reference hash is known */
+            printf("OK   %-52s files=%u bytes=%llu renamed=%u skipped=%u\n", rel.c_str(), st.files,
+                   (unsigned long long)st.bytes, st.renamed, st.skipped);
+            auto g = rd.files.find("gpl-2");
+            if (!expected_failure(rel) && g != rd.files.end()) {     /* (Mac archives wrap the data in MacBinary: other bytes) */
+                unsigned long long h = 1469598103934665603ULL;
+                for (unsigned char c : g->second) h = (h ^ c) * 1099511628211ULL;
+                gpl[h].push_back(rel);
+                gpl_size = (long)g->second.size();
             }
+            auto z = rd.files.find("gpl-2.gz");
+            if (!expected_failure(rel) && z != rd.files.end()) {
+                std::string gp = work + "/gz/" + std::to_string(idx) + ".gz";
+                FILE *f = fopen(gp.c_str(), "wb");
+                if (f) { fwrite(z->second.data(), 1, z->second.size(), f); fclose(f); }
+                gz_mismatch.push_back(gp);                    /* compared below, after the reference hash is known */
+            }
+            remove((root + "/" + name + ".hdf").c_str());      /* the images are big: not needed any more */
+            remove((root + "/" + name + ".whd").c_str());
         } else {
             fail++;
-            if (const char *why = expected_failure(rel)) {
+            const char *why = expected_failure(rel);
+            if (!why && error.find("too big") != std::string::npos)
+                why = "a file of more than 4 GB cannot go into an image";
+            if (why) {
                 xfail++;
-                printf("XFAIL %-51s %s  [%s]\n", rel.c_str(), err, why);
+                printf("XFAIL %-51s %s  [%s]\n", rel.c_str(), error.c_str(), why);
             } else {
-                printf("FAIL %-52s %s\n", rel.c_str(), err);
+                printf("FAIL %-52s %s\n", rel.c_str(), error.c_str());
                 g_fail++;
             }
         }
     }
+    whd_image_requires_slave = 1;
     printf("== %d installed, %d failed (%d of them expected)\n", ok, fail, xfail);
 
     printf("== cross-check of gpl-2\n");
@@ -607,7 +543,9 @@ int main(int argc, char **argv)
     if (!archives.empty()) {
         std::string root = work + "/cancel"; mkdir(root.c_str(), 0777);
         char folder[WHD_NAME_MAX], err[256];
-        int r = whd_install_lha(root.c_str(), archives[0].c_str(), WHD_INSTALL_FOLDER, cancel_cb, nullptr, folder, sizeof folder, nullptr, err, sizeof err);
+        whd_image_requires_slave = 0;
+        int r = whd_install_lha(root.c_str(), archives[0].c_str(), cancel_cb, nullptr, folder, sizeof folder, nullptr, err, sizeof err);
+        whd_image_requires_slave = 1;
         CHECK(!r && !strcmp(err, "Cancelled"));
     }
     /* not an archive / missing */
@@ -615,9 +553,9 @@ int main(int argc, char **argv)
         std::string root = work + "/bad"; mkdir(root.c_str(), 0777);
         char folder[WHD_NAME_MAX], err[256];
         write_file(work + "/garbage.lha", "this is not an lha archive, just text. ......................................");
-        CHECK(!whd_install_lha(root.c_str(), (work + "/garbage.lha").c_str(), WHD_INSTALL_FOLDER, nullptr, nullptr, folder, sizeof folder, nullptr, err, sizeof err));
+        CHECK(!whd_install_lha(root.c_str(), (work + "/garbage.lha").c_str(), nullptr, nullptr, folder, sizeof folder, nullptr, err, sizeof err));
         printf("  garbage -> '%s'\n", err);
-        CHECK(!whd_install_lha(root.c_str(), (work + "/missing.lha").c_str(), WHD_INSTALL_FOLDER, nullptr, nullptr, folder, sizeof folder, nullptr, err, sizeof err));
+        CHECK(!whd_install_lha(root.c_str(), (work + "/missing.lha").c_str(), nullptr, nullptr, folder, sizeof folder, nullptr, err, sizeof err));
         printf("  missing -> '%s'\n", err);
     }
     printf("== result: %s (%d check failure(s))\n", g_fail ? "FAILED" : "all checks passed", g_fail);

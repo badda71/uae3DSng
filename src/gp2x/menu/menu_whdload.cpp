@@ -9,6 +9,9 @@
  *                                           (the main menu does the reset)
  *   - X on a <game>                       : uninstall it (asks first): deletes the image and its info file
  *
+ * Every line of text (items, message boxes, help texts) is two text lines apart from the next one; only a separator
+ * line may sit in between.
+ *
  * The work itself is in src/3ds/whdload3ds.cpp (tested on a PC), this file is only the user interface.
  */
 #include <stdio.h>
@@ -105,10 +108,10 @@ static int whd_box(const char *title, const char *text, int ask)
         SDL_Delay(5);
     for (;;) {
         text_draw_background();
-        text_draw_window(2, 4, 40, n + 7, title);
+        text_draw_window(2, 4, 40, 2 * n + 7, title);
         for (int i = 0; i < n; i++)
-            write_text(4, 6 + i, lines[i]);
-        write_text(4, 7 + n, ask ? "A = yes     B = no" : "Press A or B to continue");
+            write_text(4, 6 + 2 * i, lines[i]);                 /* all text lines are two lines apart */
+        write_text(4, 6 + 2 * n, ask ? "A = yes     B = no" : "Press A or B to continue");
         text_flip();
         SDL_Delay(30);
         int done = 0;
@@ -162,7 +165,7 @@ static void draw_progress(const InstallUi *ui, const char *item, unsigned done, 
     if (max < 1)
         max = 1;
     text_draw_barra(MENU_X0 + 3 * MENU_CW, 10 * MENU_RH, 34 * MENU_CW, 8, (int)(bd >> 10), max);
-    write_text(3, 13, "B = cancel");
+    write_text(3, 12, "B = cancel");
     text_flip();
 }
 
@@ -194,10 +197,9 @@ static int install_from_archive(const char *archive)
     snprintf(ui.archive, sizeof(ui.archive), "%s", base ? base + 1 : archive);
     draw_progress(&ui, "reading the archive...", 0, 0, 0, 0);
 
-    char folder[WHD_NAME_MAX], err[200];
+    char game[WHD_NAME_MAX], err[200];
     whd_install_stats st;
-    int ok = whd_install_lha(WHD_ROOT, archive, WHD_INSTALL_IMAGE, install_progress, &ui, folder, sizeof(folder), &st,
-                             err, sizeof(err));
+    int ok = whd_install_lha(WHD_ROOT, archive, install_progress, &ui, game, sizeof(game), &st, err, sizeof(err));
     refresh_games();
     if (!ok) {
         char msg[300];
@@ -207,10 +209,10 @@ static int install_from_archive(const char *archive)
     }
     char msg[300];
     double secs = st.elapsed_ms / 1000.0;
-    snprintf(msg, sizeof(msg), "Installed \"%s\"\n%u files, %.1f MB in %.1f s%s", folder, st.files,
+    snprintf(msg, sizeof(msg), "Installed \"%s\"\n%u files, %.1f MB in %.1f s%s", game, st.files,
              st.bytes / 1048576.0, secs, st.renamed ? "\nSome long names were shortened (see log)" : "");
     whd_message_box("WHDLoad", msg);
-    return find_game(folder);
+    return find_game(game);
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
@@ -264,33 +266,13 @@ static int launch_game(const char *game)
 /* uninstall                                                                                                        */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
-typedef struct {
-    Uint32 last_draw;
-    char game[WHD_NAME_MAX];
-} DeleteUi;
-
-static void draw_delete(const DeleteUi *ui, unsigned files)
+static void draw_delete(const char *game)
 {
-    char line[64];
     text_draw_background();
     text_draw_window(2, 2, 40, 10, "Deleting WHDLoad game");
-    write_text(3, 4, ui->game);
-    snprintf(line, sizeof(line), "%u files deleted", files);
-    write_text(3, 6, line);
+    write_text(3, 4, game);
+    write_text(3, 6, "Please wait...");
     text_flip();
-}
-
-static void delete_progress(void *user, unsigned files)
-{
-    DeleteUi *ui = (DeleteUi *)user;
-    SDL_Event ev;
-    while (SDL_PollEvent(&ev))                      /* keep the event queue from filling up; nothing to cancel here */
-        ;
-    Uint32 now = SDL_GetTicks();
-    if (now - ui->last_draw >= 150) {
-        ui->last_draw = now;
-        draw_delete(ui, files);
-    }
 }
 
 /* is the image of this game one of the hard files (of a running emulator, or of the saved settings)? */
@@ -321,12 +303,9 @@ static int uninstall_game(const char *game)
     if (!whd_confirm_box("Uninstall", text))
         return 0;
 
-    DeleteUi ui;
-    ui.last_draw = 0;
-    snprintf(ui.game, sizeof(ui.game), "%s", game);
-    draw_delete(&ui, 0);
+    draw_delete(game);
     char err[200];
-    int ok = whd_uninstall(WHD_ROOT, game, delete_progress, &ui, err, sizeof(err));
+    int ok = whd_uninstall(WHD_ROOT, game, err, sizeof(err));
     refresh_games();
     if (!ok) {
         char msg[300];
@@ -366,12 +345,12 @@ static void draw_list(int sel, int top)
         write_text(3, line, "No games installed yet.");
         if (have_builtin_whdload) {
             write_text(3, line + 2, "A WHDLoad is built in. To use your");
-            write_text(3, line + 3, "own, put it into whdload/C/WHDLoad");
-            write_text(3, line + 4, "on the SD card (3ds/uae3DSng).");
+            write_text(3, line + 4, "own, put it into whdload/C/WHDLoad");
+            write_text(3, line + 6, "on the SD card (3ds/uae3DSng).");
         } else {
             write_text(3, line + 2, "WHDLoad itself is not included:");
-            write_text(3, line + 3, "put it into whdload/C/WHDLoad");
-            write_text(3, line + 4, "on the SD card (3ds/uae3DSng).");
+            write_text(3, line + 4, "put it into whdload/C/WHDLoad");
+            write_text(3, line + 6, "on the SD card (3ds/uae3DSng).");
         }
     } else {
         for (int i = 0; i < LIST_ROWS && top + i < n_games; i++) {

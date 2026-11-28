@@ -10,7 +10,6 @@
  *                                .key) from the kickstarts folder, copied when missing
  *   whdload/<Game>.hdf           one Amiga disk image (OFS, volume "WHDGame") per installed .lha, mounted as a hard file
  *   whdload/<Game>.whd           its info file: names the .slave inside the image
- *   whdload/<Game>/              (first version) a game extracted into a folder; still listed and started
  *
  * Installing = decoding the .lha (with the vendored Lhasa library, every file is CRC-checked) straight into the image
  * with large buffered writes (src/3ds/ofs_image.cpp). One big file, because hundreds of small files are very slow on the
@@ -40,7 +39,7 @@
 #define WHD_BUILTIN_KICKSTARTS "romfs:/whdload/Kickstarts"
 #endif
 
-#define WHD_NAME_MAX 128      /* length of one game folder name */
+#define WHD_NAME_MAX 128      /* length of a game name (the archive's name without .lha) */
 
 /* Called while extracting: item = name of the current file inside the archive. Return non-zero to cancel. */
 typedef int (*whd_progress_fn)(void *user, const char *item, unsigned files_done, unsigned files_total,
@@ -48,32 +47,27 @@ typedef int (*whd_progress_fn)(void *user, const char *item, unsigned files_done
 
 typedef struct {
     unsigned files;        /* regular files written */
-    unsigned renamed;      /* entries whose name had to be changed (image: cut to 30 characters; folder: FAT) */
+    unsigned renamed;      /* entries whose name had to be cut to 30 characters */
     uint64_t bytes;        /* bytes of file data */
     unsigned elapsed_ms;
-    unsigned skipped;      /* image installs: entries not stored because an earlier entry has the same name */
-    unsigned has_slave;    /* image installs: a .slave file was found (otherwise the archive is not a WHDLoad game) */
-    uint64_t image_bytes;  /* image installs: size of the .hdf file */
+    unsigned skipped;      /* entries not stored because an earlier entry has the same name */
+    unsigned has_slave;    /* a .slave file was found (otherwise the archive is not a WHDLoad game) */
+    uint64_t image_bytes;  /* size of the .hdf file */
 } whd_install_stats;
-
-typedef enum {
-    WHD_INSTALL_IMAGE = 0, /* one Amiga disk image <root>/<name>.hdf (+ <name>.whd): fast, this is what the app uses */
-    WHD_INSTALL_FOLDER = 1 /* files in <root>/<name>/: very slow on the 3DS with hundreds of files, kept for tests */
-} whd_install_mode;
 
 /* The volume name of a game image on the Amiga ("WHDGame:") */
 #define WHD_VOLUME_NAME "WHDGame"
 
 /* Filled by whd_prepare_launch */
 typedef struct {
-    char hdf_path[300];    /* image games: the file to mount as a hardfile (geometry 32/1/2/512); empty for folder games */
+    char hdf_path[300];    /* the game's image: the file to mount as a hardfile (geometry 32/1/2/512) */
 } whd_launch_info;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Image installs fail when the archive has no .slave file (it is not a WHDLoad game). The host test clears this to
+/* An install fails when the archive has no .slave file (it is not a WHDLoad game). The host test clears this to
    exercise the image writer with any archive. */
 extern int whd_image_requires_slave;
 
@@ -81,36 +75,28 @@ extern int whd_image_requires_slave;
 extern const char *whd_builtin_whdload;
 extern const char *whd_builtin_kickstarts;
 
-/* Install archive (.lha/.lzh): either into the image <root>/<name of the archive>.hdf or into the folder of that name
-   (see whd_install_mode). Returns 1 on success (game_folder = the game's name, as listed by whd_list_games), 0 on
-   failure (err = message for the user, nothing is left behind). An earlier install of the same name is replaced. */
-int whd_install_lha(const char *root, const char *archive, whd_install_mode mode, whd_progress_fn progress, void *user,
-                    char *game_folder, size_t game_folder_size, whd_install_stats *stats,
-                    char *err, size_t err_size);
+/* Install archive (.lha/.lzh) into the image <root>/<name of the archive>.hdf with its info file <name>.whd. Returns 1 on
+   success (game_name = the game's name, as listed by whd_list_games), 0 on failure (err = message for the user, nothing is
+   left behind). An earlier install of the same name is replaced. */
+int whd_install_lha(const char *root, const char *archive, whd_progress_fn progress, void *user, char *game_name,
+                    size_t game_name_size, whd_install_stats *stats, char *err, size_t err_size);
 
-/* Names of the installed games (images <name>.hdf with their <name>.whd, and sub folders except the system folders),
-   sorted, each name once. Returns the count. */
+/* Names of the installed games (images <name>.hdf together with <name>.whd), sorted, each name once. Returns the count. */
 int whd_list_games(const char *root, char names[][WHD_NAME_MAX], int max_names);
 
-/* Uninstall a game as listed by whd_list_games: deletes <game>.whd, <game>.hdf (and a left-over <game>.hdf.tmp) and, for a
-   game installed the old way, the folder <game> with everything in it. progress (may be NULL) is called after every deleted
-   file with the number of files deleted so far. Returns 1 when nothing of the game is left, 0 on failure (err = message
-   for the user; a game that could only be deleted in part is no longer listed as soon as its .whd is gone). */
-typedef void (*whd_delete_progress_fn)(void *user, unsigned files_deleted);
-int whd_uninstall(const char *root, const char *game, whd_delete_progress_fn progress, void *user, char *err,
-                  size_t err_size);
+/* Uninstall a game as listed by whd_list_games: deletes <game>.whd, <game>.hdf and a left-over <game>.hdf.tmp. Returns 1
+   when nothing of the game is left, 0 on failure (err = message for the user; a game whose image could not be deleted is
+   no longer listed as soon as its .whd is gone). */
+int whd_uninstall(const char *root, const char *game, char *err, size_t err_size);
 
 /* Make the game start: makes sure C/WHDLoad exists (copies the built-in one if the SD card has none), copies Kickstart images (from kick_dir, may be NULL) into
-   Devs/Kickstarts, finds the .slave and writes S/Startup-Sequence. extra_args may be NULL (default "PRELOAD").
+   Devs/Kickstarts, reads the .slave's name from <game>.whd and writes S/Startup-Sequence. extra_args may be NULL (default "PRELOAD").
    info may be NULL. Returns 1 on success, 0 on failure (err = message for the user). */
 int whd_prepare_launch(const char *root, const char *game, const char *kick_dir, const char *extra_args,
                        whd_launch_info *info, char *err, size_t err_size);
 
-/* Pure helpers, exposed for the tests */
-void whd_folder_name_from_archive(const char *archive_path, char *folder, size_t folder_size);
-/* Turn a path from an archive into a safe relative path below the install folder (components separated by '/').
-   Returns 1 ok, 0 not usable (empty, or ".." inside). *renamed is increased when characters had to be replaced. */
-int whd_safe_relative_path(const char *in, char *out, size_t out_size, unsigned *renamed);
+/* Pure helper, exposed for the tests: the game name for an archive path ("sdmc:/x/Game_v1.2.lha" -> "Game_v1.2") */
+void whd_game_name_from_archive(const char *archive_path, char *name, size_t name_size);
 
 #ifdef __cplusplus
 }

@@ -310,8 +310,9 @@ Runtime risks I already know of are listed below; expect more once it runs on ha
 ## WHDLoad .lha installation (branch `whdload-lha`, experimental)
 
 Goal: install a WHDLoad `.lha` on the SD card and boot it without leaving the emulator (the Vita fork has this; its code is not reusable as it
-depends on its own file layer, so only its design was taken: a shared `DH0:`-style root with `C/WHDLoad`, `S/Startup-Sequence`, `Devs/Kickstarts` and one
-folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>" PRELOAD`).
+depends on its own file layer, so only its design was taken: a shared `DH0:`-style root with `C/WHDLoad`, `S/Startup-Sequence` and `Devs/Kickstarts`, and a
+generated startup sequence that runs `C:WHDLoad "<slave>" PRELOAD`). The first version put every game into a folder on the SD card; that was far too slow
+(see "Why" below) and has been **removed**: only disk images are installed, listed and started now (old `whdload/<name>/` folders are ignored and can be deleted).
 
 * **Extractor**: [Lhasa](https://github.com/fragglet/lhasa) (ISC licence) is vendored in `src/3ds/lhasa` (37 files; provenance, the two files left out and
   the one platform file we wrote, `lha_arch_3ds.c`, are in `README-3DS.txt`; the licence is `COPYING.md`). Writing a decoder of our own was the first plan;
@@ -319,8 +320,8 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
   `Makefile`: `src/3ds/lhasa` is a source/include dir, `lh_new_decoder.c bit_stream_reader.c tree_decode.c pma_common.c` are `#include`d by other files and excluded.
 * **`src/3ds/whdload3ds.cpp`** (plain stdio/POSIX, no libctru): `whd_install_lha` (two passes: headers, then decode with 64 KB buffers, CRC-16 and length checked
   against the header), `whd_list_games`, `whd_prepare_launch` (copies Kickstarts under their WHDLoad names, picks the `.slave`, writes `S/Startup-Sequence`; a
-  user's own Workbench-style startup file is backed up to `Startup-Sequence.orig` and gets the launch lines before its `EndCLI`). Two install modes:
-  `WHD_INSTALL_IMAGE` (what the app uses, see below) and `WHD_INSTALL_FOLDER` (the first version: files in `whdload/<name>/`, kept for old installs and tests).
+  user's own Workbench-style startup file is backed up to `Startup-Sequence.orig` and gets the launch lines before its `EndCLI`). The slave's name comes from
+  `<name>.whd`, written by the installer.
 * **`src/3ds/ofs_image.cpp`** (no emulator/3DS dependencies): writer for Amiga **OFS** (`DOS\0`) images. The emulator announces its hard files as `DOS\0` (`filesys.cpp`
   parameter packet), so OFS is what has to be written. Geometry 32 sectors/1 surface/2 reserved/512 bytes, size = multiple of 32 blocks (what `make_hard_file_cfg_line` and
   `parse_hardfile_spec` produce), root block in the middle, ≥ 2 GB refused. Two phases: all entries are added first (`ofs_add_dir/file`), `ofs_layout` then fixes every
@@ -339,12 +340,13 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
 * **Why**: measured on a New 3DS with the folder version (`uae3DSng.log`): 639 files / 3.8 MB installed in 182 s (285 ms per file), finding the `.slave` (opendir/readdir/stat) 54 s
   (85 ms per stat), 6.5 min until WHDLoad had opened all the files through the emulated filesystem (3870 `filesys_handler` traps), then 50 fps. The three numbers fit
   "the FAT service scans a large flat directory for every create/stat/open"; this was not measured directly. The image removes that per-file cost.
-* **Verified on a PC** (`tools/whdload_test/run.sh <lhasa>/test/archives`, ASan/UBSan): the OFS writer (`ofs_host_test.cpp`, 852 checks: sizes at every block/extension boundary,
+* **Verified on a PC** (`tools/whdload_test/run.sh <lhasa>/test/archives`, ASan/UBSan): the OFS writer (`ofs_host_test.cpp`, 855 checks: sizes at every block/extension boundary,
   nested folders, 700 files in one folder with forced hash collisions, 56 MB and 330 MB images with bitmap extension blocks) against `ofs_reader.h`, an **independent checker**
   that follows the layout rules of amitools' validator (checksums, types, own keys, parents, hash placement, data chains, bitmap vs. used blocks, no block twice);
-  hand-made archives (slave choice, escaping, bad CRC, cancel, duplicates, "no leftovers on failure"); 198 archives from Lhasa's test suite (Amiga LHA 1.22/2.12, Unix, OS-9, Mac):
-  181 install as folder and as image and every file is identical in both (names that had to be cut are compared by count and size), the 17 failures are the expected ones (corrupt by
-  design, methods Lhasa lacks, name clashes, MacBinary), the 4.7 GB file of `h2_huge.lzh` cannot go into an image, every `gpl-2` inside is byte-identical (57 archives).
+  hand-made archives (slave choice, escaping, bad CRC, cancel, duplicates, long names, uninstall, "no leftovers on failure"); 198 archives from Lhasa's test suite (Amiga LHA 1.22/2.12, Unix, OS-9, Mac):
+  181 install as an image that the independent checker accepts with the right number of files, the 17 failures are the expected ones (corrupt by
+  design, methods Lhasa lacks, nameless folder entries, MacBinary, the 4.7 GB file of `h2_huge.lzh` that cannot go into an image), every `gpl-2` inside is byte-identical (57 archives).
+  (Until the folder install was removed, each of these archives was also extracted into a folder and compared file by file with the image: same files, same contents.)
   The menu code passes `tools/hostcheck/check.sh`. **Not done:** running amitools itself on a sample image (it was not run here; `xdftool <image> info` / `fsck` on a PC would be a good extra check).
 * **Verified on hardware (user, New 3DS)**: CI build links, install takes seconds, the image is mounted as `WHDGame:`, a game loads and runs at 50 fps. **Not verified**: every Kickstart/chipset combination (Elvira 2 needed the relocation tables, see below).
 * **Built-in WHDLoad** (`romfs/whdload/WHDLoad`, fallback only): when `whdload/C/WHDLoad` is missing on the SD card, `whd_prepare_launch` copies it from the romfs; an existing file is never
@@ -357,13 +359,12 @@ folder per game, and a generated startup sequence that runs `C:WHDLoad "<slave>"
   `deploy_kickstarts` copies each built-in file to `<root>/Devs/Kickstarts` when it is not there yet (`whd_builtin_kickstarts`, tested on the PC), then the user's
   `kickstarts/` folder is processed as before (ROM aliases; own `.rtb/.pat/.key` replace the built-in files when their size differs). Same author and notice as WHDLoad itself.
   The ROM images are not included and cannot be: Kickstart is Cloanto's/Amiga Inc.'s.
-* **Uninstall** (`whd_uninstall`, X in the game list, with a yes/no box): deletes `<name>.whd` first (so a half-deleted game is no longer listed), then `<name>.hdf.tmp`, `<name>.hdf` and
-  the old-style folder, recursively without a `stat()` per entry (that is the slow call on the SD card: an entry is tried as a file with `remove()`, and entered as a folder when that fails; a
-  folder is read again until a pass deletes nothing, because deleting while reading can make `readdir` skip entries). Names with `/ \\ :`, a leading dot or a system folder name are refused,
-  so only games can be deleted. The menu refuses while a hard file setting points to the image and the emulator is running (it has the file open); otherwise the setting is cleared after the delete.
+* **Uninstall** (`whd_uninstall`, X in the game list, with a yes/no box): deletes `<name>.whd` first (so a half-deleted game is no longer listed), then `<name>.hdf.tmp` and `<name>.hdf`.
+  Names with `/ \\ :`, a leading dot or a system folder name are refused, and a folder is never deleted, so only games can be removed. The menu refuses while a hard file setting points to the image and the emulator is running (it has the file open); otherwise the setting is cleared after the delete.
   Not verified on hardware: uninstall as a whole, and deleting an image that the emulator still has open after the hard disk was ejected without a reset (the menu cannot tell; the delete is attempted).
-* **Menu spacing**: items are always two text lines apart (the separator may be in the line between): the game list is drawn at lines 5, 7, 9, ... (12 rows), the
-  WHDLoad row in Memory and Disk Options has one empty line before "Save Config for current HD". Paragraph text in message boxes is not a list of items and stays on consecutive lines.
+* **Menu spacing**: every line of text in the WHDLoad screens is two text lines apart from the next one (only a separator line may sit in between): the game list is drawn
+  at lines 5, 7, 9, ... (12 rows), the help text of the empty list, the lines of the message / question boxes ("Installed ...", "Delete ...?") and the progress screens likewise;
+  the WHDLoad row in Memory and Disk Options has one empty line before "Save Config for current HD".
 
 ## Known gaps / risks
 
